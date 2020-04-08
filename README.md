@@ -41,7 +41,7 @@ matic-cli setup bor
 **To generate genesis file**
 
 ```bash
-matic-cli setup bor
+matic-cli setup genesis
 ```
 
 ## License

@@ -55,7 +55,7 @@ export async function getAccountPrivateKey(options = {}) {
     cwd: repoPath,
   }).then(output => {
     try {
-      return JSON.parse(output.stdout)
+      return JSON.parse(output.stdout).priv_key
     } catch (e) {
       throw e
     }
@@ -113,6 +113,13 @@ export async function getHeimdallTasks(options = {}) {
           // store address
           options.genesisAddresses = options.genesisAddresses || []
           options.genesisAddresses.push(address)
+        })
+      },
+      {
+        title: 'Load private key details',
+        task: () => getAccountPrivateKey(options).then(pk => {
+          // store private key
+          options.privateKey = pk
         })
       }
     ],
