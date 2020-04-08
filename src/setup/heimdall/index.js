@@ -32,6 +32,10 @@ export async function printHeimdallPaths(options = {}) {
   console.log(chalk.gray('Heimdall home') + ': ' + chalk.bold.green(heimdallHomePath))
   console.log(chalk.gray('Heimdall genesis') + ': ' + chalk.bold.green(heimdallGenesisPath))
   console.log(chalk.gray('Heimdall repo') + ': ' + chalk.bold.green(repoPath))
+  console.log(chalk.gray('Run Heimdall') + ': ' + chalk.bold.green(`cd ${REPOSITORY_NAME} && make run-heimdall`))
+  console.log(chalk.gray('Run Heimdall rest server') + ': ' + chalk.bold.green(`cd ${REPOSITORY_NAME} && make run-server`))
+  console.log(chalk.gray('Run Heimdall bridge') + ': ' + chalk.bold.green(`cd ${REPOSITORY_NAME} && make run-bridge`))
+  console.log(chalk.gray('Clean Heimdall data') + ': ' + chalk.bold.green(`cd ${REPOSITORY_NAME} && make reset-heimdall`))
 }
 
 // returns heimdall account details
