@@ -1,0 +1,38 @@
+{
+  "name": "@maticnetwork/matic-cli",
+  "version": "0.0.1",
+  "description": "A CLI to setup and manage Matic validator nodes",
+  "main": "src/index.js",
+  "bin": "bin/matic-cli",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "cli",
+    "matic-cli"
+  ],
+  "author": "Matic Tech Team <info@matic.network> (https://matic.network)",
+  "license": "MIT",
+  "dependencies": {
+    "boxen": "^4.2.0",
+    "chalk": "^2.4.2",
+    "commander": "^5.0.0",
+    "covgen": "^3.1.0",
+    "esm": "^3.2.18",
+    "ethereumjs-util": "^6.2.0",
+    "execa": "^1.0.0",
+    "fs-extra": "^9.0.0",
+    "inquirer": "^6.2.2",
+    "listr": "^0.14.3",
+    "pkg-install": "^0.2.0",
+    "web3": "^1.2.6"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "templates/"
+  ]
+}
