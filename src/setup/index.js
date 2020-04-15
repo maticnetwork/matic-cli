@@ -4,6 +4,7 @@ import heimdall from './heimdall'
 import genesis from './genesis'
 import bor from './bor'
 import localnet from './localnet'
+import ganache from './ganache'
 
 
 //
@@ -21,5 +22,8 @@ borCmd.action(bor)
 const localnetCmd = new Command("localnet");
 localnetCmd.action(localnet)
 
+const ganacheCmd = new Command("ganache");
+ganacheCmd.action(ganache)
 
-export default [heimdallCmd, genesisCmd, borCmd, localnetCmd]
+
+export default [heimdallCmd, genesisCmd, borCmd, ganacheCmd, localnetCmd] 

@@ -4,7 +4,7 @@ import chalk from 'chalk';
 import { getNewPrivateKey } from '../utils'
 
 export async function printDependencyInstructions() {
-  console.log(chalk.bold(`
+  console.log(chalk.bold.yellow(`
 Please make sure you have installed following dependencies:
 
 * Git
