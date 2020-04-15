@@ -6,7 +6,7 @@ import os from 'os';
 import fs from 'fs-extra';
 
 import { cloneRepository, getKeystoreFile, getWalletFromPrivateKey } from '../../utils'
-import { getChainIds, getKeystoreDetails } from '../helper'
+import { getChainIds, getKeystoreDetails, printDependencyInstructions } from '../helper'
 import { getGenesisContractTasks, printGenesisPath } from '../genesis'
 
 // repository name
@@ -148,6 +148,8 @@ async function setupBor(options) {
 }
 
 export default async function () {
+  await printDependencyInstructions()
+
   // get answers
   const answers = await getChainIds()
 

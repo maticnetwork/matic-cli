@@ -7,7 +7,7 @@ import os from 'os';
 import { isValidAddress } from 'ethereumjs-util'
 
 import { cloneRepository } from '../../utils'
-import { getChainIds } from '../helper'
+import { getChainIds, printDependencyInstructions } from '../helper'
 
 // repository name
 export const REPOSITORY_NAME = 'heimdall'
@@ -148,6 +148,8 @@ async function setupHeimdall(options) {
 }
 
 export default async function () {
+  await printDependencyInstructions()
+
   // get answers
   const answers = await getChainIds()
 

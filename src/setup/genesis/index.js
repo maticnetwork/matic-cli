@@ -8,7 +8,7 @@ import { projectInstall } from 'pkg-install';
 import { isValidAddress } from 'ethereumjs-util'
 
 import { cloneRepository } from '../../utils'
-import { getChainIds } from '../helper'
+import { getChainIds, printDependencyInstructions } from '../helper'
 import { exec } from 'child_process';
 
 // repostiory name
@@ -170,6 +170,8 @@ async function setupGenesis(options) {
 }
 
 export default async function () {
+  await printDependencyInstructions()
+
   // get answers
   const answers = await getChainIds()
 

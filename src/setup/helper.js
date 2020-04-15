@@ -1,6 +1,20 @@
 import inquirer from 'inquirer';
+import chalk from 'chalk';
 
-import { getNewPrivateKey, getWalletFromPrivateKey } from '../utils'
+import { getNewPrivateKey } from '../utils'
+
+export async function printDependencyInstructions() {
+  console.log(chalk.bold(`
+Please make sure you have installed following dependencies:
+
+* Git
+* Node/npm v10.17.0 (or higher)
+* Go 1.13+
+* Rabbitmq (Latest stable version)
+* Solc v0.5.11 (https://solidity.readthedocs.io/en/v0.5.3/installing-solidity.html#binary-packages)
+* Ganache CLI (https://www.npmjs.com/package/ganache-cli)
+`))
+}
 
 export async function getChainIds(options = {}) {
   const questions = [];

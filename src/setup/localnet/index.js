@@ -5,7 +5,7 @@ import chalk from 'chalk';
 import { getGenesisContractTasks, printGenesisPath } from '../genesis'
 import { getHeimdallTasks, printHeimdallPaths, printAccount } from '../heimdall'
 import { getBorTasks, printBorDetails } from '../bor'
-import { getChainIds } from '../helper'
+import { getChainIds, printDependencyInstructions } from '../helper'
 
 async function setupLocalnet(options) {
   const tasks = new Listr(
@@ -47,6 +47,8 @@ async function setupLocalnet(options) {
 }
 
 export default async function () {
+  await printDependencyInstructions()
+
   // get answers
   const answers = await getChainIds()
 
