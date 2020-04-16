@@ -4,12 +4,19 @@ import chalk from 'chalk';
 // get genesis related tasks
 import { getGenesisContractTasks, printGenesisPath } from '../genesis'
 import { getHeimdallTasks, printHeimdallPaths, printAccount } from '../heimdall'
+import { getGanacheTasks, printGanacheDBPaths } from '../ganache'
 import { getBorTasks, printBorDetails } from '../bor'
 import { getChainIds, printDependencyInstructions } from '../helper'
 
 async function setupLocalnet(options) {
   const tasks = new Listr(
     [
+      {
+        title: 'Setup contracts',
+        task: () => {
+          return getGanacheTasks(options)
+        }
+      },
       {
         title: 'Setup Heimdall',
         task: () => {
@@ -39,6 +46,7 @@ async function setupLocalnet(options) {
 
   // print details
   await printAccount(options)
+  await printGanacheDBPaths(options)
   await printHeimdallPaths(options)
   await printGenesisPath(options)
   await printBorDetails(options)

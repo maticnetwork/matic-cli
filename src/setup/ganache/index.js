@@ -31,9 +31,7 @@ export async function printGanacheDBPaths(options = {}) {
 }
 
 // stake and become validator
-export async function getStakeTask(options = {}) {
-  const maticContractPath = path.join(options.targetDirectory, CONTRACTS_REPOSITORY_NAME)
-
+export async function getStakeTasks(options = {}) {
   // get public key
   options.publicKey = bufferToHex(privateToPublic(toBuffer(options.privateKey)))
 
@@ -53,6 +51,7 @@ export async function getStakeTask(options = {}) {
 // start deployment
 export async function getContractDeploymenTasks(options = {}) {
   const maticContractPath = path.join(options.targetDirectory, CONTRACTS_REPOSITORY_NAME)
+  const contractAddressesPath = path.join(options.targetDirectory, CONTRACTS_REPOSITORY_NAME, 'contractAddresses.json')
 
   // server
   let server = null
@@ -96,8 +95,8 @@ export async function getContractDeploymenTasks(options = {}) {
       })
     },
     {
-      title: 'Becoming validator',
-      task: () => getStakeTask(options)
+      title: 'Setup validators',
+      task: () => getStakeTasks(options)
     },
     {
       title: 'Stop ganache',
@@ -115,6 +114,13 @@ export async function getContractDeploymenTasks(options = {}) {
             }
           })
         })
+      }
+    },
+    {
+      title: 'Load contract addresses',
+      task: () => {
+        const contractAddresses = require(contractAddressesPath)
+        options.contractAddresses = contractAddresses
       }
     }
   ], {
@@ -198,16 +204,6 @@ export async function getGanacheTasks(options = {}) {
 }
 
 async function setupGanache(options) {
-  // get private key, keystore password and wallet
-  const keystoreDetails = await getKeystoreDetails()
-  options = Object.assign(options, keystoreDetails)
-
-  // wallet
-  const wallet = await getWalletFromPrivateKey(options.privateKey)
-
-  // set genesis addresses
-  options.genesisAddresses = [wallet.address]
-
   // get ganache tasks
   const tasks = await getGanacheTasks(options);
 
@@ -224,14 +220,24 @@ async function setupGanache(options) {
 export default async function () {
   await printDependencyInstructions()
 
-  // get answers
-  const answers = await getChainIds()
-
   // options
   let options = {
-    ...answers,
     targetDirectory: process.cwd(),
   };
+
+  // get answers
+  const answers = await getChainIds(options)
+  options = Object.assign(options, answers)
+
+  // get private key, keystore password and wallet
+  const keystoreDetails = await getKeystoreDetails()
+  options = Object.assign(options, keystoreDetails)
+
+  // wallet
+  const wallet = await getWalletFromPrivateKey(options.privateKey)
+
+  // set genesis addresses
+  options.genesisAddresses = [wallet.address]
 
   // start ganache
   await setupGanache(options)
