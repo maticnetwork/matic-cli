@@ -8,7 +8,7 @@ import { projectInstall } from 'pkg-install'
 import { isValidAddress } from 'ethereumjs-util'
 
 import { loadConfig } from '../config'
-import { cloneRepository } from '../../utils'
+import { cloneRepository } from '../../lib/utils'
 import { printDependencyInstructions } from '../helper'
 
 // default stake and balance

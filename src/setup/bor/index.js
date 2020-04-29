@@ -5,9 +5,10 @@ import path from 'path'
 import fs from 'fs-extra'
 
 import { loadConfig } from '../config'
-import { cloneRepository, getKeystoreFile } from '../../utils'
+import { cloneRepository, getKeystoreFile } from '../../lib/utils'
 import { printDependencyInstructions } from '../helper'
 import { Genesis } from '../genesis'
+import fileReplacer from '../../lib/file-replacer'
 
 // default password
 export const KEYSTORE_PASSWORD = 'hello'
@@ -84,13 +85,10 @@ export class Bor {
           title: 'Process template scripts',
           task: () => {
             const startScriptFile = path.join(this.config.targetDirectory, 'bor-start.sh')
-            return fs.readFile(startScriptFile, 'utf8').then(data => {
-              return data.
-                replace(/ADDRESS=.+/gi, `ADDRESS=${this.config.genesisAddresses[0]}`).
-                replace(/BOR_CHAIN_ID=.+/gi, `BOR_CHAIN_ID=${this.config.borChainId}`)
-            }).then(data => {
-              return fs.writeFile(startScriptFile, data, { mode: 0o755 });
-            })
+            return fileReplacer(startScriptFile).
+              replace(/ADDRESS=.+/gi, `ADDRESS=${this.config.genesisAddresses[0]}`).
+              replace(/BOR_CHAIN_ID=.+/gi, `BOR_CHAIN_ID=${this.config.borChainId}`).
+              save()
           }
         }
       ],

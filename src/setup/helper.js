@@ -1,7 +1,7 @@
 import inquirer from 'inquirer'
 import chalk from 'chalk'
 
-import { getNewPrivateKey } from '../utils'
+import { getNewPrivateKey } from '../lib/utils'
 
 export async function printDependencyInstructions() {
   console.log(chalk.bold.yellow(`

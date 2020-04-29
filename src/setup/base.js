@@ -1,7 +1,8 @@
-class Base {
-  constructor() { }
+export default class Base {
+  constructor(config) {
+    this.config = config
+  }
 
-  get tasks() {
-    // 
+  get getTasks() {
   }
 }

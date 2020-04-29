@@ -6,7 +6,7 @@ import chalk from 'chalk'
 import { toBuffer, privateToPublic, bufferToHex } from 'ethereumjs-util'
 
 import { getKeystoreDetails, getChainIds } from './helper'
-import { getWalletFromPrivateKey } from '../utils'
+import { getWalletFromPrivateKey } from '../lib/utils'
 
 const defaultConfigFileName = 'config.json'
 

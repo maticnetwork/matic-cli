@@ -6,9 +6,9 @@ import fs from 'fs-extra';
 import ganacheCli from 'ganache-cli';
 import { projectInstall } from 'pkg-install';
 
-// get genesis related tasks
+import fileReplacer from '../../lib/file-replacer'
 import { loadConfig } from '../config'
-import { cloneRepository } from '../../utils'
+import { cloneRepository } from '../../lib/utils'
 import { printDependencyInstructions } from '../helper'
 
 export class Ganache {
@@ -179,19 +179,19 @@ export class Ganache {
             const deploymentScriptFile = path.join(this.config.targetDirectory, 'ganache-deployment.sh')
             const ganacheStakeFile = path.join(this.config.targetDirectory, 'ganache-stake.sh')
 
-            let data = fs.readFileSync(startScriptFile, 'utf8')
-            data = data.replace(/PRIVATE_KEY=.+/gi, `PRIVATE_KEY=${this.config.privateKey}`)
-            fs.writeFileSync(startScriptFile, data, { mode: 0o755 })
+            fileReplacer(startScriptFile).
+              replace(/PRIVATE_KEY=.+/gi, `PRIVATE_KEY=${this.config.privateKey}`).
+              save()
 
-            data = fs.readFileSync(deploymentScriptFile, 'utf8')
-            data = data.replace(/PRIVATE_KEY=.+/gi, `PRIVATE_KEY=${this.config.privateKey}`).
-              replace(/HEIMDALL_ID=.+/gi, `HEIMDALL_ID=${this.config.heimdallChainId}`)
-            fs.writeFileSync(deploymentScriptFile, data, { mode: 0o755 })
+            fileReplacer(deploymentScriptFile).
+              replace(/PRIVATE_KEY=.+/gi, `PRIVATE_KEY=${this.config.privateKey}`).
+              replace(/HEIMDALL_ID=.+/gi, `HEIMDALL_ID=${this.config.heimdallChainId}`).
+              save()
 
-            data = fs.readFileSync(ganacheStakeFile, 'utf8')
-            data = data.replace(/ADDRESS=.+/gi, `ADDRESS=${this.config.address}`).
-              replace(/PUB_KEY=.+/gi, `PUB_KEY=${this.config.publicKey}`)
-            fs.writeFileSync(ganacheStakeFile, data, { mode: 0o755 })
+            fileReplacer(ganacheStakeFile).
+              replace(/ADDRESS=.+/gi, `ADDRESS=${this.config.address}`).
+              replace(/PUB_KEY=.+/gi, `PUB_KEY=${this.config.publicKey}`).
+              save()
           }
         },
         {
