@@ -3,242 +3,231 @@ import chalk from 'chalk';
 import path from 'path';
 import execa from 'execa';
 import fs from 'fs-extra';
-import ganache from 'ganache-cli';
+import ganacheCli from 'ganache-cli';
 import { projectInstall } from 'pkg-install';
-import { toBuffer, privateToPublic, bufferToHex } from 'ethereumjs-util';
 
 // get genesis related tasks
-import { cloneRepository, getWalletFromPrivateKey } from '../../utils'
-import { getChainIds, getKeystoreDetails, printDependencyInstructions } from '../helper'
+import { loadConfig } from '../config'
+import { cloneRepository } from '../../utils'
+import { printDependencyInstructions } from '../helper'
 
-// repository name
-export const CONTRACTS_REPOSITORY_NAME = 'matic-contracts'
-export const GANACHE_DB_PATH = 'ganache-db'
-export const GANACHE_SERVER_PORT = 9545
+export class Ganache {
+  constructor(config) {
+    this.config = config
 
-function getDbPath(options = {}) {
-  return path.join(options.targetDirectory, GANACHE_DB_PATH)
-}
+    this.dbName = 'ganache-db'
+    this.serverPort = 9545
+    this.maticContractsRepository = 'matic-contracts'
+    this.maticContractsRepositoryUrl = 'https://github.com/maticnetwork/contracts'
+  }
 
-// print account details
-export async function printAccountDetails(options = {}) {
-  console.log(chalk.gray('Address') + ': ' + chalk.bold.green(options.genesisAddresses))
-}
+  get name() {
+    return 'ganache'
+  }
 
-// print ganache db paths
-export async function printGanacheDBPaths(options = {}) {
-  console.log(chalk.gray('Ganache db path') + ': ' + chalk.bold.green(getDbPath(options)))
-}
+  get taskTitle() {
+    return 'Setup contracts'
+  }
 
-// stake and become validator
-export async function getStakeTasks(options = {}) {
-  // get public key
-  options.publicKey = bufferToHex(privateToPublic(toBuffer(options.privateKey)))
+  get dbDir() {
+    return path.join(this.config.dataDir, this.dbName)
+  }
 
-  // stake
-  return new Listr([
-    {
-      title: 'Stake',
-      task: () => execa('bash', ['ganache-stake.sh', options.genesisAddresses[0], options.publicKey], {
-        cwd: options.targetDirectory,
-      })
-    }
-  ], {
-    exitOnError: true,
-  })
-}
+  get maticContractDir() {
+    return path.join(this.config.codeDir, this.maticContractsRepository)
+  }
 
-// start deployment
-export async function getContractDeploymenTasks(options = {}) {
-  const maticContractPath = path.join(options.targetDirectory, CONTRACTS_REPOSITORY_NAME)
-  const contractAddressesPath = path.join(options.targetDirectory, CONTRACTS_REPOSITORY_NAME, 'contractAddresses.json')
+  get contractAddressesPath() {
+    return path.join(this.config.codeDir, this.maticContractsRepository, 'contractAddresses.json')
+  }
 
-  // server
-  let server = null
+  async print() {
+    console.log(chalk.gray('Ganache db path') + ': ' + chalk.bold.green(this.dbDir))
+  }
 
-  return new Listr([
-    {
-      title: 'Reset ganache',
-      task: () => {
-        return fs.remove(getDbPath(options))
-      }
-    },
-    {
-      title: 'Start ganache',
-      task: () => {
-        server = ganache.server({
-          accounts: [{
-            balance: '0xfffffffffffffffffffffffffffffffffffffffffffff',
-            secretKey: options.privateKey
-          }],
-          port: GANACHE_SERVER_PORT,
-          db_path: getDbPath(options),
-          gasPrice: '0x1',
-          gasLimit: '0xfffffffff',
-        });
-
-        return new Promise((resolve, reject) => {
-          server.listen(GANACHE_SERVER_PORT, (err, blockchain) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(blockchain)
-            }
-          })
+  async getStakeTasks() {
+    // stake
+    return new Listr([
+      {
+        title: 'Stake',
+        task: () => execa('bash', ['ganache-stake.sh', this.config.address, this.config.publicKey], {
+          cwd: this.config.targetDirectory,
         })
       }
-    },
-    {
-      title: 'Deploy contracts',
-      task: () => execa('bash', ['ganache-deployment.sh', options.privateKey, options.heimdallChainId], {
-        cwd: options.targetDirectory,
-      })
-    },
-    {
-      title: 'Setup validators',
-      task: () => getStakeTasks(options)
-    },
-    {
-      title: 'Stop ganache',
-      task: () => {
-        if (!server) {
-          return
-        }
+    ], {
+      exitOnError: true,
+    })
+  }
 
-        return new Promise((resolve, reject) => {
-          server.close((err) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve()
-            }
-          })
-        })
-      }
-    },
-    {
-      title: 'Load contract addresses',
-      task: () => {
-        const contractAddresses = require(contractAddressesPath)
-        options.contractAddresses = contractAddresses
-      }
-    }
-  ], {
-    exitOnError: true,
-  })
-}
+  async getContractDeploymenTasks() {
+    // server
+    let server = null
 
-// get ganache tasks
-export async function getGanacheTasks(options = {}) {
-  const maticContractPath = path.join(options.targetDirectory, CONTRACTS_REPOSITORY_NAME)
-
-  return new Listr(
-    [
+    return new Listr([
       {
-        title: 'Clone matic contracts repository',
-        task: () => cloneRepository(CONTRACTS_REPOSITORY_NAME, 'https://github.com/maticnetwork/contracts', options)
-      },
-      {
-        title: 'Install dependencies for matic contracts',
-        task: () => projectInstall({
-          cwd: maticContractPath,
-        })
-      },
-      {
-        title: 'Process templates',
-        task: () => execa('node', ['scripts/process-templates.js', '--bor-chain-id', options.borChainId], {
-          cwd: maticContractPath,
-        })
-      },
-      {
-        title: 'Compile matic contracts',
-        task: () => execa('npm', ['run', 'truffle:compile'], {
-          cwd: maticContractPath,
-        })
-      },
-      {
-        title: 'Copy template scripts',
+        title: 'Reset ganache',
         task: () => {
-          const templateDir = path.resolve(
-            new URL(import.meta.url).pathname,
-            '../templates'
-          );
-
-          return fs.copy(templateDir, options.targetDirectory)
+          return fs.remove(this.dbDir)
         }
       },
       {
-        title: 'Process template scripts',
+        title: 'Start ganache',
         task: () => {
-          // get public key
-          options.publicKey = bufferToHex(privateToPublic(toBuffer(options.privateKey)))
+          server = ganacheCli.server({
+            accounts: [{
+              balance: '0xfffffffffffffffffffffffffffffffffffffffffffff',
+              secretKey: this.config.privateKey
+            }],
+            port: this.serverPort,
+            db_path: this.dbDir,
+            gasPrice: '0x1',
+            gasLimit: '0xfffffffff',
+          });
 
-          const startScriptFile = path.join(options.targetDirectory, 'ganache-start.sh')
-          const deploymentScriptFile = path.join(options.targetDirectory, 'ganache-deployment.sh')
-          const ganacheStakeFile = path.join(options.targetDirectory, 'ganache-stake.sh')
-
-          let data = fs.readFileSync(startScriptFile, 'utf8')
-          data = data.replace(/PRIVATE_KEY=.+/gi, `PRIVATE_KEY=${options.privateKey}`)
-          fs.writeFileSync(startScriptFile, data, { mode: 0o755 })
-
-          data = fs.readFileSync(deploymentScriptFile, 'utf8')
-          data = data.replace(/PRIVATE_KEY=.+/gi, `PRIVATE_KEY=${options.privateKey}`).
-            replace(/HEIMDALL_ID=.+/gi, `HEIMDALL_ID=${options.heimdallChainId}`)
-          fs.writeFileSync(deploymentScriptFile, data, { mode: 0o755 })
-
-          data = fs.readFileSync(ganacheStakeFile, 'utf8')
-          data = data.replace(/ADDRESS=.+/gi, `ADDRESS=${options.genesisAddresses[0]}`).
-            replace(/PUB_KEY=.+/gi, `PUB_KEY=${options.publicKey}`)
-          fs.writeFileSync(ganacheStakeFile, data, { mode: 0o755 })
+          return new Promise((resolve, reject) => {
+            server.listen(this.serverPort, (err, blockchain) => {
+              if (err) {
+                reject(err)
+              } else {
+                resolve(blockchain)
+              }
+            })
+          })
         }
       },
       {
         title: 'Deploy contracts',
-        task: () => getContractDeploymenTasks(options) // get contact deployment tasks
+        task: () => execa('bash', ['ganache-deployment.sh', this.config.privateKey, this.config.heimdallChainId], {
+          cwd: this.config.targetDirectory,
+        })
+      },
+      {
+        title: 'Setup validators',
+        task: () => {
+          return this.getStakeTasks()
+        }
+      },
+      {
+        title: 'Stop ganache',
+        task: () => {
+          if (!server) {
+            return
+          }
+
+          return new Promise((resolve, reject) => {
+            server.close((err) => {
+              if (err) {
+                reject(err)
+              } else {
+                resolve()
+              }
+            })
+          })
+        }
+      },
+      {
+        title: 'Load contract addresses',
+        task: () => {
+          this.config.contractAddresses = require(this.contractAddressesPath)
+        }
       }
-    ],
-    {
+    ], {
       exitOnError: true,
-    }
-  );
+    })
+  }
+
+  async getTasks() {
+    return new Listr(
+      [
+        {
+          title: 'Clone matic contracts repository',
+          task: () => cloneRepository(this.maticContractsRepository, this.maticContractsRepositoryUrl, this.config.codeDir)
+        },
+        {
+          title: 'Install dependencies for matic contracts',
+          task: () => projectInstall({
+            cwd: this.maticContractDir,
+          })
+        },
+        {
+          title: 'Process templates',
+          task: () => execa('node', ['scripts/process-templates.js', '--bor-chain-id', this.config.borChainId], {
+            cwd: this.maticContractDir,
+          })
+        },
+        {
+          title: 'Compile matic contracts',
+          task: () => execa('npm', ['run', 'truffle:compile'], {
+            cwd: this.maticContractDir,
+          })
+        },
+        {
+          title: 'Copy template scripts',
+          task: () => {
+            const templateDir = path.resolve(
+              new URL(import.meta.url).pathname,
+              '../templates'
+            );
+
+            return fs.copy(templateDir, this.config.targetDirectory)
+          }
+        },
+        {
+          title: 'Process template scripts',
+          task: () => {
+            const startScriptFile = path.join(this.config.targetDirectory, 'ganache-start.sh')
+            const deploymentScriptFile = path.join(this.config.targetDirectory, 'ganache-deployment.sh')
+            const ganacheStakeFile = path.join(this.config.targetDirectory, 'ganache-stake.sh')
+
+            let data = fs.readFileSync(startScriptFile, 'utf8')
+            data = data.replace(/PRIVATE_KEY=.+/gi, `PRIVATE_KEY=${this.config.privateKey}`)
+            fs.writeFileSync(startScriptFile, data, { mode: 0o755 })
+
+            data = fs.readFileSync(deploymentScriptFile, 'utf8')
+            data = data.replace(/PRIVATE_KEY=.+/gi, `PRIVATE_KEY=${this.config.privateKey}`).
+              replace(/HEIMDALL_ID=.+/gi, `HEIMDALL_ID=${this.config.heimdallChainId}`)
+            fs.writeFileSync(deploymentScriptFile, data, { mode: 0o755 })
+
+            data = fs.readFileSync(ganacheStakeFile, 'utf8')
+            data = data.replace(/ADDRESS=.+/gi, `ADDRESS=${this.config.address}`).
+              replace(/PUB_KEY=.+/gi, `PUB_KEY=${this.config.publicKey}`)
+            fs.writeFileSync(ganacheStakeFile, data, { mode: 0o755 })
+          }
+        },
+        {
+          title: 'Deploy contracts',
+          task: () => this.getContractDeploymenTasks() // get contact deployment tasks
+        }
+      ],
+      {
+        exitOnError: true,
+      }
+    );
+  }
 }
 
-async function setupGanache(options) {
+async function setupGanache(config) {
+  const ganache = new Ganache(config)
+
   // get ganache tasks
-  const tasks = await getGanacheTasks(options);
+  const tasks = await ganache.getTasks();
 
   await tasks.run();
   console.log('%s Ganache snapshot is ready', chalk.green.bold('DONE'));
 
   // print details
-  await printAccountDetails(options)
-  await printGanacheDBPaths(options)
-
-  return true;
+  await config.print()
+  await ganache.print()
 }
 
 export default async function () {
   await printDependencyInstructions()
 
-  // options
-  let options = {
-    targetDirectory: process.cwd(),
-  };
-
-  // get answers
-  const answers = await getChainIds(options)
-  options = Object.assign(options, answers)
-
-  // get private key, keystore password and wallet
-  const keystoreDetails = await getKeystoreDetails()
-  options = Object.assign(options, keystoreDetails)
-
-  // wallet
-  const wallet = await getWalletFromPrivateKey(options.privateKey)
-
-  // set genesis addresses
-  options.genesisAddresses = [wallet.address]
+  // configuration
+  const config = await loadConfig()
+  await config.loadChainIds()
+  await config.loadAccount()
 
   // start ganache
-  await setupGanache(options)
+  await setupGanache(config)
 }

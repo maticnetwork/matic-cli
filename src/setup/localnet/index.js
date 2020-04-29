@@ -1,82 +1,72 @@
-import Listr from 'listr';
-import chalk from 'chalk';
+import Listr from 'listr'
+import chalk from 'chalk'
 
-// get genesis related tasks
-import { getGenesisContractTasks, printGenesisPath } from '../genesis'
-import { getHeimdallTasks, printHeimdallPaths, printAccount } from '../heimdall'
-import { getGanacheTasks, printGanacheDBPaths } from '../ganache'
-import { getBorTasks, printBorDetails } from '../bor'
-import { getChainIds, getKeystoreDetails, printDependencyInstructions } from '../helper'
-import { getWalletFromPrivateKey } from '../../utils'
+import { printDependencyInstructions } from '../helper'
+import { loadConfig } from '../config'
 
-async function setupLocalnet(options) {
+import { Genesis } from '../genesis'
+import { Heimdall } from '../heimdall'
+import { Ganache } from '../ganache'
+import { Bor } from '../bor'
+
+async function setupLocalnet(config) {
+  const ganache = new Ganache(config)
+  const bor = new Bor(config)
+  const heimdall = new Heimdall(config)
+  const genesis = new Genesis(config)
+
   const tasks = new Listr(
     [
       {
-        title: 'Setup contracts',
+        title: ganache.taskTitle,
         task: () => {
-          return getGanacheTasks(options)
+          return ganache.getTasks()
         }
       },
       {
         title: 'Setup Heimdall',
         task: () => {
-          return getHeimdallTasks(options)
+          return heimdall.getTasks()
         }
       },
       {
         title: 'Setup Genesis contracts',
         task: () => {
-          return getGenesisContractTasks(options)
+          return genesis.getTasks()
         }
       },
       {
-        title: 'Setup Bor',
+        title: bor.taskTitle,
         task: () => {
-          return getBorTasks(options)
+          return bor.getTasks()
         }
       }
     ],
     {
-      exitOnError: true,
+      exitOnError: true
     }
-  );
+  )
 
-  await tasks.run();
-  console.log('%s Localnet ready', chalk.green.bold('DONE'));
+  await tasks.run()
+  console.log('%s Localnet ready', chalk.green.bold('DONE'))
 
   // print details
-  await printAccount(options)
-  await printGanacheDBPaths(options)
-  await printHeimdallPaths(options)
-  await printGenesisPath(options)
-  await printBorDetails(options)
+  await config.print()
 
-  return true;
+  await genesis.print()
+  await heimdall.print()
+  await genesis.print()
+  await bor.print()
 }
 
 export default async function () {
   await printDependencyInstructions()
 
-  // options
-  let options = {
-    targetDirectory: process.cwd(),
-  };
-
-  // get answers
-  const answers = await getChainIds(options)
-  options = Object.assign(options, answers)
-
-  // get private key, keystore password and wallet
-  const keystoreDetails = await getKeystoreDetails()
-  options = Object.assign(options, keystoreDetails)
-
-  // wallet
-  const wallet = await getWalletFromPrivateKey(options.privateKey)
-
-  // set genesis addresses
-  options.genesisAddresses = [wallet.address]
+  // configuration
+  const config = await loadConfig()
+  await config.loadChainIds()
+  await config.loadAccount()
 
   // start setup
-  await setupLocalnet(options)
+  await setupLocalnet(config)
 }

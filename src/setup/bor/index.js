@@ -1,133 +1,150 @@
-import Listr from 'listr';
-import execa from 'execa';
-import chalk from 'chalk';
-import path from 'path';
-import os from 'os';
-import fs from 'fs-extra';
+import Listr from 'listr'
+import execa from 'execa'
+import chalk from 'chalk'
+import path from 'path'
+import fs from 'fs-extra'
 
-import { cloneRepository, getKeystoreFile, getWalletFromPrivateKey } from '../../utils'
-import { getChainIds, getKeystoreDetails, printDependencyInstructions } from '../helper'
-import { getGenesisContractTasks, printGenesisPath } from '../genesis'
+import { loadConfig } from '../config'
+import { cloneRepository, getKeystoreFile } from '../../utils'
+import { printDependencyInstructions } from '../helper'
+import { Genesis } from '../genesis'
 
-// repository name
-export const REPOSITORY_NAME = 'bor'
-export const BOR_NAME = REPOSITORY_NAME
-export const BOR_DATA_NAME = 'data'
+// default password
 export const KEYSTORE_PASSWORD = 'hello'
 
-// print bor details
-export async function printBorDetails(options = {}) {
-  const repoPath = path.join(options.targetDirectory, REPOSITORY_NAME)
-  const borHomePath = path.join(os.homedir(), BOR_DATA_NAME, BOR_NAME)
+//
+// Bor setup class
+//
 
-  // print details
-  console.log(chalk.gray('Bor home') + ': ' + chalk.bold.green(borHomePath))
-  console.log(chalk.gray('Bor repo') + ': ' + chalk.bold.green(repoPath))
-  console.log(chalk.gray('Setup bor chain') + ': ' + chalk.bold.green("bash bor-setup.sh"))
-  console.log(chalk.gray('Start bor chain') + ': ' + chalk.bold.green("bash bor-start.sh"))
-  console.log(chalk.gray('Clean bor chain') + ': ' + chalk.bold.green("bash bor-clean.sh"))
-}
+export class Bor {
+  constructor(config) {
+    this.config = config
 
-// print account details
-export async function printAccountDetails(options = {}) {
-  console.log(chalk.gray('Address') + ': ' + chalk.bold.green(options.genesisAddresses))
-}
+    this.respositoryName = 'bor'
+    this.respositoryUrl = 'https://github.com/maticnetwork/bor'
+  }
 
-// returns bor tasks
-export async function getBorTasks(options = {}) {
-  const repoPath = path.join(options.targetDirectory, REPOSITORY_NAME)
-  const dataDir = path.join(options.targetDirectory, BOR_DATA_NAME)
-  const borDataDir = path.join(options.targetDirectory, BOR_DATA_NAME, BOR_NAME)
-  const keystoreDir = path.join(dataDir, 'keystore')
-  const keystorePassword = options.keystorePassword || KEYSTORE_PASSWORD
+  get name() {
+    return 'bor'
+  }
 
-  return new Listr(
-    [
-      {
-        title: 'Clone Bor repository',
-        task: () => cloneRepository(REPOSITORY_NAME, 'https://github.com/maticnetwork/bor', options)
-      },
-      {
-        title: 'Build Bor',
-        task: () => execa('make', ['bor'], {
-          cwd: repoPath,
-        })
-      },
-      {
-        title: 'Prepare data directory',
-        task: () => {
-          return execa('mkdir', ['-p', dataDir, borDataDir, keystoreDir], {
-            cwd: options.targetDirectory,
+  get taskTitle() {
+    return 'Setup Bor'
+  }
+
+  async getTasks() {
+    return new Listr(
+      [
+        {
+          title: 'Clone Bor repository',
+          task: () => cloneRepository(this.respositoryName, this.respositoryUrl, this.config.codeDir)
+        },
+        {
+          title: 'Build Bor',
+          task: () => execa('make', ['bor'], {
+            cwd: this.repositoryDir,
           })
-        }
-      },
-      {
-        title: 'Prepare keystore and password.txt',
-        task: () => {
-          // get keystore file and store on options
-          const keystoreFileObj = getKeystoreFile(options.privateKey, keystorePassword)
+        },
+        {
+          title: 'Prepare data directory',
+          task: () => {
+            return execa('mkdir', ['-p', this.config.dataDir, this.borDataDir, this.keystoreDir], {
+              cwd: this.config.targetDirectory,
+            })
+          }
+        },
+        {
+          title: 'Prepare keystore and password.txt',
+          task: () => {
+            // get keystore file and store in keystore file
+            const keystoreFileObj = getKeystoreFile(this.config.privateKey, this.config.keystorePassword)
 
-          const p = [
-            fs.writeFile(path.join(dataDir, 'password.txt'), `${keystorePassword}\n`),
-            fs.writeFile(path.join(keystoreDir, keystoreFileObj.keystoreFilename), JSON.stringify(keystoreFileObj.keystore, null, 2))
-          ]
-          return Promise.all(p)
-        }
-      },
-      {
-        title: 'Copy template scripts',
-        task: () => {
-          const templateDir = path.resolve(
-            new URL(import.meta.url).pathname,
-            '../templates'
-          );
+            // resolve promise
+            return fs.emptyDir(this.keystoreDir).then(() => {
+              const p = [
+                fs.writeFile(this.passwordFilePath, `${this.config.keystorePassword}\n`),
+                fs.writeFile(path.join(this.keystoreDir, keystoreFileObj.keystoreFilename), JSON.stringify(keystoreFileObj.keystore, null, 2))
+              ]
+              return Promise.all(p)
+            })
+          }
+        },
+        {
+          title: 'Copy template scripts',
+          task: () => {
+            const templateDir = path.resolve(
+              new URL(import.meta.url).pathname,
+              '../templates'
+            );
 
-          return fs.copy(templateDir, options.targetDirectory)
+            return fs.copy(templateDir, this.config.targetDirectory)
+          }
+        },
+        {
+          title: 'Process template scripts',
+          task: () => {
+            const startScriptFile = path.join(this.config.targetDirectory, 'bor-start.sh')
+            return fs.readFile(startScriptFile, 'utf8').then(data => {
+              return data.
+                replace(/ADDRESS=.+/gi, `ADDRESS=${this.config.genesisAddresses[0]}`).
+                replace(/BOR_CHAIN_ID=.+/gi, `BOR_CHAIN_ID=${this.config.borChainId}`)
+            }).then(data => {
+              return fs.writeFile(startScriptFile, data, { mode: 0o755 });
+            })
+          }
         }
-      },
+      ],
       {
-        title: 'Process template scripts',
-        task: () => {
-          const startScriptFile = path.join(options.targetDirectory, 'bor-start.sh')
-          return fs.readFile(startScriptFile, 'utf8').then(data => {
-            return data.
-              replace(/ADDRESS=.+/gi, `ADDRESS=${options.genesisAddresses[0]}`).
-              replace(/BOR_CHAIN_ID=.+/gi, `BOR_CHAIN_ID=${options.borChainId}`)
-          }).then(data => {
-            return fs.writeFile(startScriptFile, data, { mode: 0o755 });
-          })
-        }
+        exitOnError: true,
       }
-    ],
-    {
-      exitOnError: true,
-    }
-  );
+    );
+  }
+
+  get repositoryDir() {
+    return path.join(this.config.codeDir, this.respositoryName)
+  }
+
+  get borDataDir() {
+    return path.join(this.config.dataDir, 'bor')
+  }
+
+  get keystoreDir() {
+    return path.join(this.config.dataDir, 'keystore')
+  }
+
+  get passwordFilePath() {
+    return path.join(this.config.dataDir, 'password.txt')
+  }
+
+  get keystorePassword() {
+    return this.config.keystorePassword || KEYSTORE_PASSWORD
+  }
+
+  async print() {
+    console.log(chalk.gray('Bor data') + ': ' + chalk.bold.green(this.borDataDir))
+    console.log(chalk.gray('Bor repo') + ': ' + chalk.bold.green(this.repositoryDir))
+    console.log(chalk.gray('Setup bor chain') + ': ' + chalk.bold.green("bash bor-setup.sh"))
+    console.log(chalk.gray('Start bor chain') + ': ' + chalk.bold.green("bash bor-start.sh"))
+    console.log(chalk.gray('Clean bor chain') + ': ' + chalk.bold.green("bash bor-clean.sh"))
+  }
 }
 
-async function setupBor(options) {
-  // get private key, keystore password and wallet
-  const keystoreDetails = await getKeystoreDetails()
-  options = Object.assign(options, keystoreDetails)
-
-  // wallet
-  const wallet = await getWalletFromPrivateKey(options.privateKey)
-
-  // set genesis addresses
-  options.genesisAddresses = [wallet.address]
+async function setupBor(config) {
+  const bor = new Bor(config)
+  const genesis = new Genesis(config)
 
   const tasks = new Listr(
     [
       {
-        title: 'Setup genesis-contracts',
+        title: genesis.taskTitle,
         task: () => {
-          return getGenesisContractTasks(options)
+          return genesis.getTasks()
         }
       },
       {
-        title: 'Setup Bor',
+        title: bor.taskTitle,
         task: () => {
-          return getBorTasks(options)
+          return bor.getTasks()
         }
       }
     ],
@@ -139,10 +156,10 @@ async function setupBor(options) {
   await tasks.run();
   console.log('%s Bor is ready', chalk.green.bold('DONE'));
 
-  // print details
-  await printAccountDetails(options)
-  await printGenesisPath(options)
-  await printBorDetails(options)
+  // print config
+  await config.print()
+  await genesis.print(config)
+  await bor.print()
 
   return true;
 }
@@ -150,15 +167,11 @@ async function setupBor(options) {
 export default async function () {
   await printDependencyInstructions()
 
-  // get answers
-  const answers = await getChainIds()
-
-  // options
-  let options = {
-    ...answers,
-    targetDirectory: process.cwd(),
-  };
+  // configuration
+  const config = await loadConfig({ targetDirectory: process.cwd() })
+  await config.loadChainIds()
+  await config.loadAccount()
 
   // start setup
-  await setupBor(options)
+  await setupBor(config)
 }

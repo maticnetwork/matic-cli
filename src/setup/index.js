@@ -25,5 +25,4 @@ localnetCmd.action(localnet)
 const ganacheCmd = new Command("ganache");
 ganacheCmd.action(ganache)
 
-
 export default [heimdallCmd, genesisCmd, borCmd, ganacheCmd, localnetCmd] 

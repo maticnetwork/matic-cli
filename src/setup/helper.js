@@ -1,5 +1,5 @@
-import inquirer from 'inquirer';
-import chalk from 'chalk';
+import inquirer from 'inquirer'
+import chalk from 'chalk'
 
 import { getNewPrivateKey } from '../utils'
 
@@ -17,14 +17,14 @@ Please make sure you have installed following dependencies:
 }
 
 export async function getChainIds(options = {}) {
-  const questions = [];
+  const questions = []
 
   if (!options.borChainId) {
     questions.push({
       type: 'input',
       name: 'borChainId',
       message: 'Please enter Bor chain id',
-      default: '15001',
+      default: '15001'
     })
   }
 
@@ -33,7 +33,7 @@ export async function getChainIds(options = {}) {
       type: 'input',
       name: 'heimdallChainId',
       message: 'Please enter Heimdall chain id',
-      default: 'heimdall-15001',
+      default: 'heimdall-15001'
     })
   }
 
@@ -43,11 +43,11 @@ export async function getChainIds(options = {}) {
   }
 
   // get answers
-  return await inquirer.prompt(questions);
+  return await inquirer.prompt(questions)
 }
 
 export async function getKeystoreDetails(options = {}) {
-  const questions = [];
+  const questions = []
   const result = {}
 
   if (!options.privateKey) {
@@ -55,7 +55,7 @@ export async function getKeystoreDetails(options = {}) {
       type: 'confirm',
       name: 'hasPrivateKey',
       message: 'Do you have private key? (If not, we will generate it for you)'
-    });
+    })
 
     // enter private key
     if (hasPrivateKey) {
@@ -65,7 +65,7 @@ export async function getKeystoreDetails(options = {}) {
         message: 'Please enter private key for keystore',
         validate: (input) => {
           if (!input || input.length !== 66 || !/0x[0-9a-fA-F]{64}/.test(input)) {
-            return "Private key must be valid hex string (with 0x prefix)"
+            return 'Private key must be valid hex string (with 0x prefix)'
           }
 
           return true
@@ -101,7 +101,7 @@ export async function getKeystoreDetails(options = {}) {
   }
 
   // return answers
-  const { privateKey, keystorePassword } = await inquirer.prompt(questions);
+  const { privateKey, keystorePassword } = await inquirer.prompt(questions)
   result.keystorePassword = keystorePassword
   if (!result.privateKey) {
     result.privateKey = privateKey

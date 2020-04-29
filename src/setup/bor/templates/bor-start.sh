@@ -18,12 +18,12 @@ if [ -z "$BOR_CHAIN_ID" ]
 fi
 
 ROOT_DIR=$PWD
+CODE_DIR=$PWD/code
 DATA_DIR=${DATA_DIR:-$ROOT_DIR/data}
 BOR_DATA_DIR=$DATA_DIR/bor/
-BUILD_DIR=$PWD/bor/build/bin
-GENESIS_DIR=${GENESIS_DIR:-genesis-contracts}
+BUILD_DIR=$CODE_DIR/bor/build/bin
 
-mkdir -p $BOR_DIR/logs
+mkdir -p $DATA_DIR/logs
 
 $BUILD_DIR/bor --datadir $BOR_DATA_DIR \
   --port 30303 \

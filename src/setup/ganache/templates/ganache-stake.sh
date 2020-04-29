@@ -23,7 +23,7 @@ fi
 ROOT_DIR=$PWD
 
 # cd matic contracts
-cd $ROOT_DIR/matic-contracts
+cd $ROOT_DIR/code/matic-contracts
 
 # root contracts are deployed on base chain
 npm run truffle exec scripts/stake.js -- --network development $ADDRESS 10000 $PUB_KEY

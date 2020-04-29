@@ -11,6 +11,6 @@ if [ -z "$PRIVATE_KEY" ]
 fi
 
 ROOT_DIR=$PWD
-DATA_DIR=${DATA_DIR:-$ROOT_DIR/ganache-db}
+DATA_DIR=${DATA_DIR:-$ROOT_DIR/data/ganache-db}
 
 ganache-cli --hardfork istanbul --blockTime 1 --db $DATA_DIR --account $PRIVATE_KEY,1000000000000000000000 --gasLimit 8000000 --gasPrice 0 -p 9545

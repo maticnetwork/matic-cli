@@ -1,11 +1,11 @@
-import { program, Command } from 'commander';
+import { program } from 'commander'
 
-import pkg from '../package.json';
-import setupPrograms from './setup';
+import pkg from '../package.json'
+import setupPrograms from './setup'
 
-const setupCmd = program.
-  version(pkg.version).
-  command("setup")
+const setupCmd = program
+  .version(pkg.version)
+  .command('setup')
 
 // add all setup programs as sub commands
 setupPrograms.forEach((p) => {
@@ -14,5 +14,5 @@ setupPrograms.forEach((p) => {
 
 // start CLI
 export async function cli(args) {
-  program.parse(args);
+  program.parse(args)
 }

@@ -24,7 +24,7 @@ fi
 ROOT_DIR=$PWD
 
 # cd matic contracts
-cd $ROOT_DIR/matic-contracts
+cd $ROOT_DIR/code/matic-contracts
 
 # migrations
 mv migrations dev-migrations && cp -r deploy-migrations migrations

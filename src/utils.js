@@ -1,35 +1,37 @@
-import execa from 'execa';
-import fs from 'fs';
-import path from 'path';
-import Web3 from 'web3';
+import execa from 'execa'
+import fs from 'fs'
+import path from 'path'
+import Web3 from 'web3'
 
-const web3 = new Web3();
+const web3 = new Web3()
 
-export async function cloneRepository(name, url, options = {}) {
-  const repoPath = path.join(options.targetDirectory, name)
+export async function cloneRepository(name, url, targetDirectory) {
+  const repoPath = path.join(targetDirectory, name)
 
   let result = null
+
+  // create target directory
+  await execa('mkdir', ['-p', targetDirectory])
 
   // check if directory exists or not
   if (!fs.existsSync(repoPath)) {
     result = await execa('git', ['clone', url, name], {
-      cwd: options.targetDirectory,
-    });
+      cwd: targetDirectory
+    })
   } else {
     result = await execa('git', ['pull'], {
-      cwd: repoPath,
-    });
+      cwd: repoPath
+    })
   }
 
   if (result && result.failed) {
-    return Promise.reject(new Error(`Failed to clone or pull ${name}`));
+    return Promise.reject(new Error(`Failed to clone or pull ${name}`))
   }
-  return;
 }
 
 // returns key store file
 export function getKeystoreFile(privateKeyString, password) {
-  const ts = new Date();
+  const ts = new Date()
   const w = web3.eth.accounts.privateKeyToAccount(privateKeyString)
   return {
     keystore: web3.eth.accounts.encrypt(privateKeyString, password),
@@ -39,7 +41,7 @@ export function getKeystoreFile(privateKeyString, password) {
 
 // return new generated private key
 export async function getNewPrivateKey() {
-  return web3.eth.accounts.create();
+  return web3.eth.accounts.create()
 }
 
 // return new wallet from private key
