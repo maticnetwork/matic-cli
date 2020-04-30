@@ -20,6 +20,8 @@ export default class Config {
     options.dataDirectory = options.dataDirectory || 'data'
     options.configDirectory = options.configDirectory || 'config'
 
+    options.defaultStake = options.defaultStake || 10000
+
     // assign all prop to obj
     this.set(options)
   }

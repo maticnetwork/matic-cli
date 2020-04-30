@@ -20,10 +20,19 @@ if [ -z "$PUB_KEY" ]
   exit 1
 fi
 
+# stake
+STAKE=$3
+
+if [ -z "$STAKE" ]
+  then
+    echo "Stake is required as third argument"
+  exit 1
+fi
+
 ROOT_DIR=$PWD
 
 # cd matic contracts
 cd $ROOT_DIR/code/matic-contracts
 
 # root contracts are deployed on base chain
-npm run truffle exec scripts/stake.js -- --network development $ADDRESS 10000 $PUB_KEY
+npm run truffle exec scripts/stake.js -- --network development $ADDRESS $STAKE $PUB_KEY

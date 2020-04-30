@@ -39,7 +39,7 @@ export class Heimdall {
     return 'priv_validator_key.json'
   }
 
-  get validatorKeyFilePath() {
+  get configValidatorKeyFilePath() {
     return path.join(this.config.configDir, this.validatorKeyFile)
   }
 
@@ -48,30 +48,46 @@ export class Heimdall {
   }
 
   get buildDir() {
-    return path.join(this.config.codeDir, this.respositoryName, 'build')
+    return path.join(this.repositoryDir, 'build')
+  }
+
+  get heimdalldCmd() {
+    return path.join(this.buildDir, 'heimdalld')
+  }
+
+  get heimdallcliCmd() {
+    return path.join(this.buildDir, 'heimdallcli')
   }
 
   get heimdallDataDir() {
     return path.join(this.config.dataDir, this.name)
   }
 
+  get heimdallConfigDir() {
+    return path.join(this.heimdallDataDir, 'config')
+  }
+
   get heimdallGenesisFilePath() {
-    return path.join(this.heimdallDataDir, 'config/genesis.json')
+    return path.join(this.heimdallConfigDir, 'genesis.json')
   }
 
-  get heimdalldCmd() {
-    return path.join(this.repositoryDir, 'build/heimdalld')
+  get heimdallHeimdallConfigFilePath() {
+    return path.join(this.heimdallConfigDir, 'heimdall-config.toml')
   }
 
-  get heimdallcliCmd() {
-    return path.join(this.repositoryDir, 'build/heimdallcli')
+  get heimdallConfigFilePath() {
+    return path.join(this.heimdallConfigDir, 'config.toml')
+  }
+
+  get heimdallValidatorKeyFilePath() {
+    return path.join(this.heimdallConfigDir, this.validatorKeyFile)
   }
 
   async print() {
     // print details
     console.log(chalk.gray('Heimdall home') + ': ' + chalk.bold.green(this.heimdallDataDir))
     console.log(chalk.gray('Heimdall genesis') + ': ' + chalk.bold.green(this.heimdallGenesisFilePath))
-    console.log(chalk.gray('Heimdall validator key') + ': ' + chalk.bold.green(this.validatorKeyFilePath))
+    console.log(chalk.gray('Heimdall validator key') + ': ' + chalk.bold.green(this.heimdallValidatorKeyFilePath))
     console.log(chalk.gray('Heimdall repo') + ': ' + chalk.bold.green(this.repositoryDir))
     console.log(chalk.gray('Setup heimdall') + ': ' + chalk.bold.green("bash heimdall-start.sh"))
     console.log(chalk.gray('Start heimdall rest-server') + ': ' + chalk.bold.green("bash heimdall-server-start.sh"))
@@ -101,7 +117,7 @@ export class Heimdall {
     return execa(this.heimdallcliCmd, ['generate-validatorkey', this.config.privateKey, '--home', this.heimdallDataDir], {
       cwd: this.config.configDir
     }).then(() => {
-      return require(this.validatorKeyFilePath)
+      return require(this.configValidatorKeyFilePath)
     })
   }
 
@@ -111,8 +127,19 @@ export class Heimdall {
         title: 'Process Heimdall and Bor chain ids',
         task: () => {
           fileReplacer(this.heimdallGenesisFilePath).
-            replace(/"chain_id":[ ]+".*"/gi, `"chain_id": "${this.config.heimdallChainId}"`).
-            replace(/"bor_chain_id":[ ]+".*"/gi, `"bor_chain_id": "${this.config.borChainId}"`).
+            replace(/"chain_id":[ ]*".*"/gi, `"chain_id": "${this.config.heimdallChainId}"`).
+            replace(/"bor_chain_id":[ ]*".*"/gi, `"bor_chain_id": "${this.config.borChainId}"`).
+            save()
+        }
+      },
+      {
+        title: 'Process validators',
+        task: () => {
+          fileReplacer(this.heimdallGenesisFilePath).
+            replace(/"address":[ ]*".*"/gi, `"address": "${this.config.address}"`).
+            replace(/"signer":[ ]*".*"/gi, `"signer": "${this.config.address}"`).
+            replace(/"pubKey":[ ]*".*"/gi, `"pubKey": "${this.config.publicKey.replace("0x", "0x04")}"`).
+            replace(/"power":[ ]*".*"/gi, `"power": "${this.config.defaultStake}"`).
             save()
         }
       },
@@ -123,11 +150,11 @@ export class Heimdall {
           const rootContracts = this.config.contractAddresses.root
 
           fileReplacer(this.heimdallGenesisFilePath).
-            replace(/"matic_token_address":[ ]+".*"/gi, `"matic_token_address": "${rootContracts.tokens.TestToken}"`).
-            replace(/"staking_manager_address":[ ]+".*"/gi, `"staking_manager_address": "${rootContracts.StakeManagerProxy}"`).
-            replace(/"root_chain_address":[ ]+".*"/gi, `"root_chain_address": "${rootContracts.RootChainProxy}"`).
-            replace(/"staking_info_address":[ ]+".*"/gi, `"staking_info_address": "${rootContracts.StakingInfo}"`).
-            replace(/"state_sender_address":[ ]+".*"/gi, `"state_sender_address": "${rootContracts.StateSender}"`).
+            replace(/"matic_token_address":[ ]*".*"/gi, `"matic_token_address": "${rootContracts.tokens.TestToken}"`).
+            replace(/"staking_manager_address":[ ]*".*"/gi, `"staking_manager_address": "${rootContracts.StakeManagerProxy}"`).
+            replace(/"root_chain_address":[ ]*".*"/gi, `"root_chain_address": "${rootContracts.RootChainProxy}"`).
+            replace(/"staking_info_address":[ ]*".*"/gi, `"staking_info_address": "${rootContracts.StakingInfo}"`).
+            replace(/"state_sender_address":[ ]*".*"/gi, `"state_sender_address": "${rootContracts.StateSender}"`).
             save()
         },
         enabled: () => {
@@ -163,8 +190,10 @@ export class Heimdall {
         {
           title: 'Create Heimdall account from private key',
           task: () => {
+            // It generates new account for validator 
+            // and replaces it with new validator key
             return this.generateValidatorKey().then(data => {
-              return fs.writeFile(this.validatorKeyFilePath, JSON.stringify(data, null, 2), { mode: 0o755 })
+              return fs.writeFile(this.heimdallValidatorKeyFilePath, JSON.stringify(data, null, 2), { mode: 0o755 })
             })
           }
         },
@@ -172,6 +201,15 @@ export class Heimdall {
           title: 'Process genesis file',
           task: () => {
             return this.getProcessGenesisFileTasks()
+          }
+        },
+        {
+          title: 'Process heimdall config file',
+          task: () => {
+            fileReplacer(this.heimdallHeimdallConfigFilePath).
+              replace(/eth_RPC_URL[ ]*=[ ]*".*"/gi, `eth_RPC_URL = "http://localhost:9545"`).
+              replace(/bor_RPC_URL[ ]*=[ ]*".*"/gi, `bor_RPC_URL = "http://localhost:8545"`).
+              save()
           }
         },
         {

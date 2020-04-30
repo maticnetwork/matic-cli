@@ -11,8 +11,7 @@ import { loadConfig } from '../config'
 import { cloneRepository } from '../../lib/utils'
 import { printDependencyInstructions } from '../helper'
 
-// default stake and balance
-const DEFAULT_STAKE = 10
+// balance
 const DEFAULT_BALANCE = 1000
 
 export class Genesis {
@@ -95,7 +94,7 @@ export class Genesis {
             const validators = this.config.genesisAddresses.map(a => {
               return {
                 address: a,
-                stake: DEFAULT_STAKE, // without 10^18
+                stake: this.config.defaultStake, // without 10^18
                 balance: DEFAULT_BALANCE // without 10^18
               }
             })

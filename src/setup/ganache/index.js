@@ -50,7 +50,7 @@ export class Ganache {
     return new Listr([
       {
         title: 'Stake',
-        task: () => execa('bash', ['ganache-stake.sh', this.config.address, this.config.publicKey], {
+        task: () => execa('bash', ['ganache-stake.sh', this.config.address, this.config.publicKey, this.config.defaultStake], {
           cwd: this.config.targetDirectory,
         })
       }
@@ -181,6 +181,7 @@ export class Ganache {
 
             fileReplacer(startScriptFile).
               replace(/PRIVATE_KEY=.+/gi, `PRIVATE_KEY=${this.config.privateKey}`).
+              replace(/STAKE=.+/gi, `STAKE=${this.config.defaultStake}`).
               save()
 
             fileReplacer(deploymentScriptFile).
