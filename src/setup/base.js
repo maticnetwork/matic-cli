@@ -3,6 +3,6 @@ export default class Base {
     this.config = config
   }
 
-  get getTasks() {
+  getTasks() {
   }
 }

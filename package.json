@@ -28,6 +28,7 @@
     "ganache-cli": "^6.9.1",
     "inquirer": "^6.2.2",
     "listr": "^0.14.3",
+    "nunjucks": "^3.2.1",
     "pkg-install": "^0.2.0",
     "web3": "^1.2.6"
   },

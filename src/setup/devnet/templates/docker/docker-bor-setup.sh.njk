@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+
+set -x #echo on
+
+for i in {0..{{ obj.totalNodes - 1 }}}
+do
+  NODE_DIR=$PWD/mytestnet/node$i/bor
+  DATA_DIR=$NODE_DIR/data
+  $BUILD_DIR/bor --datadir $DATA_DIR init $NODE_DIR/genesis.json
+done
+
+echo "Setup done!"

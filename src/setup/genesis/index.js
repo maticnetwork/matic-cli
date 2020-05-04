@@ -41,8 +41,12 @@ export class Genesis {
     return path.join(this.config.codeDir, this.repositoryName, this.maticContractsRepository)
   }
 
+  get borGenesisFilePath() {
+    return path.join(this.repositoryDir, 'genesis.json')
+  }
+
   async print() {
-    console.log(chalk.gray('Bor genesis path') + ': ' + chalk.bold.green(path.join(this.repositoryDir, 'genesis.json')))
+    console.log(chalk.gray('Bor genesis path') + ': ' + chalk.bold.green(this.borGenesisFilePath))
   }
 
   // get genesis contact tasks
@@ -51,7 +55,7 @@ export class Genesis {
       [
         {
           title: 'Clone genesis-contracts repository',
-          task: () => cloneRepository(this.repositoryName, this.repositoryBranch, this.repositoryUrl, this.config.codeDir)
+          task: () => cloneRepository(this.repositoryName, this.repositoryBranch, this.respositoryUrl, this.config.codeDir)
         },
         {
           title: 'Install dependencies for genesis-contracts',

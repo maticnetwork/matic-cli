@@ -167,19 +167,27 @@ export class Heimdall {
     })
   }
 
+  cloneRepositoryTask() {
+    return {
+      title: 'Clone Heimdall repository',
+      task: () => cloneRepository(this.repositoryName, this.repositoryBranch, this.repositoryUrl, this.config.codeDir)
+    }
+  }
+
+  buildTask() {
+    return {
+      title: 'Build Heimdall',
+      task: () => execa('make', ['build'], {
+        cwd: this.repositoryDir
+      })
+    }
+  }
+
   async getTasks() {
     return new Listr(
       [
-        {
-          title: 'Clone Heimdall repository',
-          task: () => cloneRepository(this.repositoryName, this.repositoryBranch, this.repositoryUrl, this.config.codeDir)
-        },
-        {
-          title: 'Build Heimdall',
-          task: () => execa('make', ['build'], {
-            cwd: this.repositoryDir
-          })
-        },
+        this.cloneRepositoryTask(),
+        this.buildTask(),
         {
           title: 'Init Heimdall',
           task: () => {
