@@ -20,11 +20,12 @@ export function getValidatorKeyPath() {
 }
 
 export class Heimdall {
-  constructor(config) {
+  constructor(config, options = {}) {
     this.config = config
 
-    this.respositoryName = this.name
-    this.respositoryUrl = 'https://github.com/maticnetwork/heimdall'
+    this.repositoryName = this.name
+    this.repositoryBranch = options.repositoryBranch || 'master'
+    this.repositoryUrl = options.repositoryUrl || 'https://github.com/maticnetwork/heimdall'
   }
 
   get name() {
@@ -44,7 +45,7 @@ export class Heimdall {
   }
 
   get repositoryDir() {
-    return path.join(this.config.codeDir, this.respositoryName)
+    return path.join(this.config.codeDir, this.repositoryName)
   }
 
   get buildDir() {
@@ -171,7 +172,7 @@ export class Heimdall {
       [
         {
           title: 'Clone Heimdall repository',
-          task: () => cloneRepository(this.respositoryName, this.respositoryUrl, this.config.codeDir)
+          task: () => cloneRepository(this.repositoryName, this.repositoryBranch, this.repositoryUrl, this.config.codeDir)
         },
         {
           title: 'Build Heimdall',

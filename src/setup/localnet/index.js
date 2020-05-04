@@ -1,7 +1,7 @@
 import Listr from 'listr'
 import chalk from 'chalk'
 
-import { printDependencyInstructions } from '../helper'
+import { printDependencyInstructions, getDefaultBranch } from '../helper'
 import { loadConfig } from '../config'
 
 import { Genesis } from '../genesis'
@@ -10,10 +10,10 @@ import { Ganache } from '../ganache'
 import { Bor } from '../bor'
 
 async function setupLocalnet(config) {
-  const ganache = new Ganache(config)
-  const bor = new Bor(config)
-  const heimdall = new Heimdall(config)
-  const genesis = new Genesis(config)
+  const ganache = new Ganache(config, { repositoryBranch: config.defaultBranch })
+  const bor = new Bor(config, { repositoryBranch: config.defaultBranch })
+  const heimdall = new Heimdall(config, { repositoryBranch: config.defaultBranch })
+  const genesis = new Genesis(config, { repositoryBranch: 'master' })
 
   const tasks = new Listr(
     [
@@ -24,13 +24,13 @@ async function setupLocalnet(config) {
         }
       },
       {
-        title: 'Setup Heimdall',
+        title: heimdall.taskTitle,
         task: () => {
           return heimdall.getTasks()
         }
       },
       {
-        title: 'Setup Genesis contracts',
+        title: genesis.taskTitle,
         task: () => {
           return genesis.getTasks()
         }
@@ -66,6 +66,10 @@ export default async function () {
   const config = await loadConfig()
   await config.loadChainIds()
   await config.loadAccount()
+
+  // load branch
+  const answers = await getDefaultBranch(config)
+  config.set(answers)
 
   // start setup
   await setupLocalnet(config)

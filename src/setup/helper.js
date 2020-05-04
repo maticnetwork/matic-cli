@@ -46,6 +46,27 @@ export async function getChainIds(options = {}) {
   return await inquirer.prompt(questions)
 }
 
+export async function getDefaultBranch(options = {}) {
+  const questions = []
+
+  if (!options.defaultBranch) {
+    questions.push({
+      type: 'input',
+      name: 'defaultBranch',
+      message: 'Please enter branch or tag',
+      default: 'develop'
+    })
+  }
+
+  // return if no questions
+  if (questions.length === 0) {
+    return {}
+  }
+
+  // get answers
+  return await inquirer.prompt(questions)
+}
+
 export async function getKeystoreDetails(options = {}) {
   const questions = []
   const result = {}

@@ -18,11 +18,12 @@ export const KEYSTORE_PASSWORD = 'hello'
 //
 
 export class Bor {
-  constructor(config) {
+  constructor(config, options = {}) {
     this.config = config
 
-    this.respositoryName = 'bor'
-    this.respositoryUrl = 'https://github.com/maticnetwork/bor'
+    this.repositoryName = 'bor'
+    this.repositoryBranch = options.repositoryBranch || 'master'
+    this.repositoryUrl = options.repositoryBranch || 'https://github.com/maticnetwork/bor'
   }
 
   get name() {
@@ -38,7 +39,7 @@ export class Bor {
       [
         {
           title: 'Clone Bor repository',
-          task: () => cloneRepository(this.respositoryName, this.respositoryUrl, this.config.codeDir)
+          task: () => cloneRepository(this.repositoryName, this.repositoryBranch, this.repositoryUrl, this.config.codeDir)
         },
         {
           title: 'Build Bor',
@@ -99,7 +100,7 @@ export class Bor {
   }
 
   get repositoryDir() {
-    return path.join(this.config.codeDir, this.respositoryName)
+    return path.join(this.config.codeDir, this.repositoryName)
   }
 
   get borDataDir() {

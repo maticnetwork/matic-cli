@@ -12,13 +12,14 @@ import { cloneRepository } from '../../lib/utils'
 import { printDependencyInstructions } from '../helper'
 
 export class Ganache {
-  constructor(config) {
+  constructor(config, options = {}) {
     this.config = config
 
     this.dbName = 'ganache-db'
     this.serverPort = 9545
     this.maticContractsRepository = 'matic-contracts'
-    this.maticContractsRepositoryUrl = 'https://github.com/maticnetwork/contracts'
+    this.maticContractsRepositoryBranch = options.repositoryBranch || 'master'
+    this.maticContractsRepositoryUrl = options.repositoryUrl || 'https://github.com/maticnetwork/contracts'
   }
 
   get name() {
@@ -141,7 +142,7 @@ export class Ganache {
       [
         {
           title: 'Clone matic contracts repository',
-          task: () => cloneRepository(this.maticContractsRepository, this.maticContractsRepositoryUrl, this.config.codeDir)
+          task: () => cloneRepository(this.maticContractsRepository, this.maticContractsRepositoryBranch, this.maticContractsRepositoryUrl, this.config.codeDir)
         },
         {
           title: 'Install dependencies for matic contracts',

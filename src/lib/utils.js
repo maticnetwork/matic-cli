@@ -5,7 +5,7 @@ import Web3 from 'web3'
 
 const web3 = new Web3()
 
-export async function cloneRepository(name, url, targetDirectory) {
+export async function cloneRepository(name, branch, url, targetDirectory) {
   const repoPath = path.join(targetDirectory, name)
 
   let result = null
@@ -15,12 +15,16 @@ export async function cloneRepository(name, url, targetDirectory) {
 
   // check if directory exists or not
   if (!fs.existsSync(repoPath)) {
-    result = await execa('git', ['clone', url, name], {
+    result = await execa('git', ['clone', '-b', branch, url, name], {
       cwd: targetDirectory
     })
   } else {
     result = await execa('git', ['pull'], {
       cwd: repoPath
+    }).then(() => {
+      return execa('git', ['checkout', branch], {
+        cwd: repoPath
+      })
     })
   }
 

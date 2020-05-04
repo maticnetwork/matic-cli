@@ -15,11 +15,12 @@ import { printDependencyInstructions } from '../helper'
 const DEFAULT_BALANCE = 1000
 
 export class Genesis {
-  constructor(config) {
+  constructor(config, options = {}) {
     this.config = config
 
-    this.respositoryName = this.name
-    this.respositoryUrl = 'https://github.com/maticnetwork/genesis-contracts'
+    this.repositoryName = this.name
+    this.repositoryBranch = options.repositoryBranch || 'master'
+    this.repositoryUrl = options.repositoryUrl || 'https://github.com/maticnetwork/genesis-contracts'
     this.maticContractsRepository = 'matic-contracts'
     this.maticContractsRepositoryUrl = 'https://github.com/maticnetwork/contracts'
   }
@@ -33,11 +34,11 @@ export class Genesis {
   }
 
   get repositoryDir() {
-    return path.join(this.config.codeDir, this.respositoryName)
+    return path.join(this.config.codeDir, this.repositoryName)
   }
 
   get maticContractDir() {
-    return path.join(this.config.codeDir, this.respositoryName, this.maticContractsRepository)
+    return path.join(this.config.codeDir, this.repositoryName, this.maticContractsRepository)
   }
 
   async print() {
@@ -50,7 +51,7 @@ export class Genesis {
       [
         {
           title: 'Clone genesis-contracts repository',
-          task: () => cloneRepository(this.respositoryName, this.respositoryUrl, this.config.codeDir)
+          task: () => cloneRepository(this.repositoryName, this.repositoryBranch, this.repositoryUrl, this.config.codeDir)
         },
         {
           title: 'Install dependencies for genesis-contracts',
