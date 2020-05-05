@@ -228,8 +228,8 @@ export class Devnet {
 
   async getCreateTestnetTask(heimdall) {
     return [
-      // heimdall.cloneRepositoryTask(),
-      // heimdall.buildTask(),
+      heimdall.cloneRepositoryTask(),
+      heimdall.buildTask(),
       {
         title: 'Create testnet files for Heimdall',
         task: async () => {
@@ -271,24 +271,24 @@ export class Devnet {
     return new Listr(
       [
         ...createTestnetTasks,
-        // {
-        //   title: genesis.taskTitle,
-        //   task: () => {
-        //     // set validator addresses
-        //     const genesisAddresses = []
-        //     const signerDumpData = this.signerDumpData
-        //     for (let i = 0; i < this.numOfValidators; i++) {
-        //       const d = signerDumpData[i]
-        //       genesisAddresses.push(d.address)
-        //     }
+        {
+          title: genesis.taskTitle,
+          task: () => {
+            // set validator addresses
+            const genesisAddresses = []
+            const signerDumpData = this.signerDumpData
+            for (let i = 0; i < this.numOfValidators; i++) {
+              const d = signerDumpData[i]
+              genesisAddresses.push(d.address)
+            }
 
-        //     // set genesis addresses
-        //     this.config.genesisAddresses = genesisAddresses
+            // set genesis addresses
+            this.config.genesisAddresses = genesisAddresses
 
-        //     // get genesis tasks
-        //     return genesis.getTasks()
-        //   }
-        // },
+            // get genesis tasks
+            return genesis.getTasks()
+          }
+        },
         {
           title: 'Setup Bor keystore and genesis files',
           task: async () => {
