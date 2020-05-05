@@ -20,7 +20,7 @@ export class Devnet {
   }
 
   get testnetDir() {
-    return path.join(this.config.targetDirectory, 'mytestnet')
+    return path.join(this.config.targetDirectory, 'devnet')
   }
 
   get signerDumpPath() {
@@ -228,8 +228,8 @@ export class Devnet {
 
   async getCreateTestnetTask(heimdall) {
     return [
-      heimdall.cloneRepositoryTask(),
-      heimdall.buildTask(),
+      // heimdall.cloneRepositoryTask(),
+      // heimdall.buildTask(),
       {
         title: 'Create testnet files for Heimdall',
         task: async () => {
@@ -238,7 +238,8 @@ export class Devnet {
             '--v', this.config.numOfValidators,
             '--n', this.config.numOfNonValidators,
             '--chain-id', this.config.heimdallChainId,
-            '--node-host-prefix', 'heimdall'
+            '--node-host-prefix', 'heimdall',
+            '--output-dir', 'devnet'
           ]
 
           // create testnet
@@ -270,24 +271,24 @@ export class Devnet {
     return new Listr(
       [
         ...createTestnetTasks,
-        {
-          title: genesis.taskTitle,
-          task: () => {
-            // set validator addresses
-            const genesisAddresses = []
-            const signerDumpData = this.signerDumpData
-            for (let i = 0; i < this.numOfValidators; i++) {
-              const d = signerDumpData[i]
-              genesisAddresses.push(d.address)
-            }
+        // {
+        //   title: genesis.taskTitle,
+        //   task: () => {
+        //     // set validator addresses
+        //     const genesisAddresses = []
+        //     const signerDumpData = this.signerDumpData
+        //     for (let i = 0; i < this.numOfValidators; i++) {
+        //       const d = signerDumpData[i]
+        //       genesisAddresses.push(d.address)
+        //     }
 
-            // set genesis addresses
-            this.config.genesisAddresses = genesisAddresses
+        //     // set genesis addresses
+        //     this.config.genesisAddresses = genesisAddresses
 
-            // get genesis tasks
-            return genesis.getTasks()
-          }
-        },
+        //     // get genesis tasks
+        //     return genesis.getTasks()
+        //   }
+        // },
         {
           title: 'Setup Bor keystore and genesis files',
           task: async () => {
@@ -397,13 +398,13 @@ export default async function () {
       type: 'number',
       name: 'numOfValidators',
       message: 'Please enter number of validator nodes',
-      default: 4
+      default: 2
     },
     {
       type: 'number',
       name: 'numOfNonValidators',
       message: 'Please enter number of non-validator nodes',
-      default: 8
+      default: 2
     },
     {
       type: 'input',
@@ -431,7 +432,7 @@ export default async function () {
   let totalValidators = config.numOfValidators + config.numOfNonValidators
   if (config.devnetType === 'docker') {
     [...Array(totalValidators).keys()].forEach((i) => {
-      devnetBorHosts.push(`bor${i}`)
+      devnetBorHosts.push(`172.20.1.${i + 10}`)
       devnetHeimdallHosts.push(`heimdall${i}`)
     })
   } else {

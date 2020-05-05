@@ -13,8 +13,8 @@ docker-compose rm -f
 # clean repo
 for i in {0..{{ obj.totalNodes - 1 }}}
 do
-  NODE_DIR=$PWD/mytestnet/node$i
-  rm -rf $NODE_DIR/heimdalld/config/write-file-* $NODE_DIR/heimdalld/data $NODE_DIR/heimdalld/config/addrbook.json $NODE_DIR/heimdalld/bridge/storage
+  NODE_DIR=$PWD/devnet/node$i
+  rm -rf $NODE_DIR/bor/data $NODE_DIR/heimdalld/config/write-file-* $NODE_DIR/heimdalld/data $NODE_DIR/heimdalld/config/addrbook.json $NODE_DIR/heimdalld/bridge/storage
   mkdir -p $NODE_DIR/heimdalld/data
   echo $PRIV_VALIDATOR_STATE > $NODE_DIR/heimdalld/data/priv_validator_state.json
 done

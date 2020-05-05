@@ -1,0 +1,38 @@
+#!/usr/bin/env sh
+
+set -x #echo on
+
+NODE_DIR=/root/.bor
+DATA_DIR=/root/.bor/data
+
+ADDRESSES=({% for s in obj.signerDumpData %}
+  "{{ s.address }}"{% endfor %}
+)
+
+INDEX=$1;
+ADDRESS=${ADDRESSES[$INDEX]};
+
+NODE_DIR=/root/.bor
+DATA_DIR=/root/.bor/data
+
+docker-compose run --name bor$INDEX bor$INDEX sh -c "
+bor --datadir $DATA_DIR \
+  --port 30303 \
+  --rpc --rpcaddr '0.0.0.0' \
+  --ws --wsport 8586 \
+  --rpcvhosts '*' \
+  --rpccorsdomain '*' \
+  --rpcport 8585 \
+  --ipcpath $DATA_DIR/bor.ipc \
+  --rpcapi 'personal,db,eth,net,web3,txpool,miner,admin' \
+  --syncmode 'full' \
+  --networkid '{{ obj.config.borChainId }}' \
+  --gasprice '0' \
+  --unlock $ADDRESS \
+  --keystore $NODE_DIR/keystore \
+  --password $NODE_DIR/password.txt \
+  --allow-insecure-unlock \
+  --mine > /root/logs/bor.log 2>&1 &
+tail -f /root/logs/bor.log
+"
+

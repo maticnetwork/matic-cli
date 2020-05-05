@@ -3,6 +3,9 @@ version: "3.3"
 networks:
   devnet-network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.1.0/24
 
 services:
 {% for node in range(0, obj.totalNodes) %}
@@ -20,7 +23,9 @@ services:
     networks:
       - devnet-network
     volumes:
-      - ./logs/node{{ node }}:/Users/jdkanani/matic/heimdall/logs
+      - ./devnet/node{{ node }}/heimdalld:/root/.heimdalld
+      - ./devnet/node{{ node }}/heimdallcli:/root/.heimdallcli
+      - ./logs/node{{ node }}/heimdall:/root/heimdall/logs
     {% if node == 0 %}
     ports:
       - "1317:1317"
@@ -30,12 +35,16 @@ services:
   bor{{ node }}:
     image: "maticnetwork/bor:{{ obj.config.defaultBranch }}"
     container_name: bor{{ node }}
-    depends_on:
-      - heimdall{{ node }}
+    # depends_on:
+    #   - heimdall{{ node }}
     networks:
-      - devnet-network
+      devnet-network:
+          ipv4_address: 172.20.1.{{ node + 10 }}
     environment:
       - HEIMDALL_URL=http://heimdall{{ node }}:1317
+    volumes:
+      - ./devnet/node{{ node }}/bor:/root/.bor
+      - ./logs/node{{ node }}/bor:/root/logs
     {% if node == 0 %}
     ports:
       - "8545:8545"
