@@ -7,8 +7,7 @@ PRIV_VALIDATOR_STATE="{
 }"
 
 # stop and remove docker containers
-docker-compose stop
-docker-compose rm -f
+docker-compose down
 
 # clean repo
 for i in {0..{{ obj.totalNodes - 1 }}}

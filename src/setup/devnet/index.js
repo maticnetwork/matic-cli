@@ -277,7 +277,7 @@ export class Devnet {
             // set validator addresses
             const genesisAddresses = []
             const signerDumpData = this.signerDumpData
-            for (let i = 0; i < this.numOfValidators; i++) {
+            for (let i = 0; i < this.config.numOfValidators; i++) {
               const d = signerDumpData[i]
               genesisAddresses.push(d.address)
             }

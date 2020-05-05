@@ -44,6 +44,12 @@ matic-cli setup bor
 matic-cli setup genesis
 ```
 
+**To setup multi-node devnet**
+
+```bash
+matic-cli setup devnet
+```
+
 ## License
 
 MIT
