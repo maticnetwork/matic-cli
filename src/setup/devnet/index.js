@@ -35,8 +35,12 @@ export class Devnet {
     return this.config.numOfValidators + this.config.numOfNonValidators
   }
 
+  nodeDir(index) {
+    return path.join(this.testnetDir, `node${index}`)
+  }
+
   heimdallDir(index) {
-    return path.join(this.testnetDir, `node${index}`, 'heimdalld')
+    return path.join(this.nodeDir(index), 'heimdalld')
   }
 
   heimdallConfigFilePath(index) {
@@ -48,7 +52,7 @@ export class Devnet {
   }
 
   borDir(index) {
-    return path.join(this.testnetDir, `node${index}`, 'bor')
+    return path.join(this.nodeDir(index), 'bor')
   }
 
   borDataDir(index) {
@@ -71,6 +75,10 @@ export class Devnet {
     return path.join(this.borDir(index), 'privatekey.txt')
   }
 
+  borAddressFilePath(index) {
+    return path.join(this.borDir(index), 'address.txt')
+  }
+
   borNodeKeyPath(index) {
     return path.join(this.borDir(index), 'nodekey')
   }
@@ -81,31 +89,6 @@ export class Devnet {
 
   borStaticNodesPath(index) {
     return path.join(this.borDir(index), 'static-nodes.json')
-  }
-
-  async processNunjucksTemplates() {
-    // promises
-    const p = []
-
-    // process njk files
-    fs.readdirSync(this.config.targetDirectory).forEach(file => {
-      if (file.indexOf(".njk") !== -1) {
-        const fp = path.join(this.config.targetDirectory, file)
-        // process all njk files
-        fs.writeFileSync(
-          path.join(this.config.targetDirectory, file.replace(".njk", "")),
-          nunjucks.render(fp, { obj: this }),
-        )
-
-        // remove njk file
-        p.push(execa('rm', ['-rf', fp], {
-          cwd: this.config.targetDirectory
-        }))
-      }
-    });
-
-    // fulfill all promises
-    await Promise.all(p)
   }
 
   async getEnodeTask() {
@@ -184,8 +167,28 @@ export class Devnet {
           // copy docker related templates
           await fs.copy(path.join(templateDir, 'docker'), this.config.targetDirectory)
 
-          // process nunjucks templates
-          await this.processNunjucksTemplates()
+          // promises
+          const p = []
+
+          // process njk files
+          fs.readdirSync(this.config.targetDirectory).forEach(file => {
+            if (file.indexOf(".njk") !== -1) {
+              const fp = path.join(this.config.targetDirectory, file)
+              // process all njk files
+              fs.writeFileSync(
+                path.join(this.config.targetDirectory, file.replace(".njk", "")),
+                nunjucks.render(fp, { obj: this }),
+              )
+
+              // remove njk file
+              p.push(execa('rm', ['-rf', fp], {
+                cwd: this.config.targetDirectory
+              }))
+            }
+          });
+
+          // fulfill all promises
+          await Promise.all(p)
         }
       }
     ]
@@ -219,8 +222,32 @@ export class Devnet {
           // copy remote related templates
           await fs.copy(path.join(templateDir, 'remote'), this.config.targetDirectory)
 
-          // process nunjucks templates
-          await this.processNunjucksTemplates()
+          // promises
+          const p = []
+          const signerDumpData = this.signerDumpData
+
+          // process njk files
+          fs.readdirSync(this.config.targetDirectory).forEach(file => {
+            if (file.indexOf(".njk") !== -1) {
+              const fp = path.join(this.config.targetDirectory, file)
+
+              // process all njk files and copy to each node directory
+              for (let i = 0; i < this.totalNodes; i++) {
+                fs.writeFileSync(
+                  path.join(this.nodeDir(i), file.replace(".njk", "")),
+                  nunjucks.render(fp, { obj: this, node: i, signerData: signerDumpData[i] }),
+                )
+              }
+
+              // remove njk file
+              p.push(execa('rm', ['-rf', fp], {
+                cwd: this.config.targetDirectory
+              }))
+            }
+          });
+
+          // fulfill all promises
+          await Promise.all(p)
         }
       },
     ]
@@ -311,6 +338,11 @@ export class Devnet {
                 fs.writeFile(
                   this.borPrivateKeyFilePath(i),
                   `${signerDumpData[i].priv_key}\n`
+                ),
+                // save address file
+                fs.writeFile(
+                  this.borAddressFilePath(i),
+                  `${signerDumpData[i].address}\n`
                 ),
                 // save keystore file
                 fs.writeFile(

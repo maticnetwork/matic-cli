@@ -1,0 +1,31 @@
+#!/usr/bin/env sh
+
+BOR_HOME=$HOME/.bor
+LOG_HOME=$HOME/logs
+BOR_DATA_DIR=$BOR_HOME/data
+
+# create heimdall file
+mkdir -p $BOR_HOME $LOG_HOME
+
+# get address
+ADDRESS="`cat $BOR_HOME/address.txt`"
+
+# start bor
+bor --datadir $DATA_DIR \
+  --port 30303 \
+  --heimdall http://localhost:1317 \
+  --rpc --rpcaddr '0.0.0.0' \
+  --ws --wsport 8546 \
+  --rpcvhosts '*' \
+  --rpccorsdomain '*' \
+  --rpcport 8545 \
+  --ipcpath $BOR_DATA_DIR/bor.ipc \
+  --rpcapi 'personal,db,eth,net,web3,txpool,miner,admin' \
+  --syncmode 'full' \
+  --networkid '{{ obj.config.borChainId }}' \
+  --gasprice '0' \
+  --unlock $ADDRESS \
+  --keystore $BOR_HOME/keystore \
+  --password $BOR_HOME/password.txt \
+  --allow-insecure-unlock \
+  --mine > $LOG_HOME/bor.log 2>&1

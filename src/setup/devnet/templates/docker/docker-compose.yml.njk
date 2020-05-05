@@ -35,8 +35,8 @@ services:
   bor{{ node }}:
     image: "maticnetwork/bor:{{ obj.config.defaultBranch }}"
     container_name: bor{{ node }}
-    # depends_on:
-    #   - heimdall{{ node }}
+    depends_on:
+      - heimdall{{ node }}
     networks:
       devnet-network:
           ipv4_address: 172.20.1.{{ node + 100 }}

@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+
+NODE_DIR=$HOME/node
+HEIMDALL_HOME=$HOME/.heimdalld
+
+# create heimdall directory
+mkdir -p $HEIMDALL_HOME $LOG_HOME
+
+# copy node directories to home directories
+cp -rf $NODE_DIR/heimdalld/* $HEIMDALL_HOME/

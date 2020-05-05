@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+
+NODE_DIR=$HOME/node
+BOR_HOME=$HOME/.bor
+LOG_HOME=$HOME/logs
+
+# create heimdall file
+mkdir -p $BOR_HOME $LOG_HOME
+
+# copy node directories to home directories
+cp -rf $NODE_DIR/bor/* $BOR_HOME/
+
+# setup bor
+BOR_DATA_DIR=$BOR_HOME/data
+bor --datadir $BOR_DATA_DIR init $BOR_HOME/genesis.json 
+
+# copy bor files
+cp $BOR_HOME/nodekey $BOR_DATA_DIR/bor/
+cp $BOR_HOME/static-nodes.json $BOR_DATA_DIR/
