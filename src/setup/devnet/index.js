@@ -432,7 +432,7 @@ export default async function () {
   let totalValidators = config.numOfValidators + config.numOfNonValidators
   if (config.devnetType === 'docker') {
     [...Array(totalValidators).keys()].forEach((i) => {
-      devnetBorHosts.push(`172.20.1.${i + 10}`)
+      devnetBorHosts.push(`172.20.1.${i + 100}`)
       devnetHeimdallHosts.push(`heimdall${i}`)
     })
   } else {

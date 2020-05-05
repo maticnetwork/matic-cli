@@ -19,11 +19,12 @@ docker-compose run -d --name bor$INDEX bor$INDEX sh -c "
 touch /root/logs/bor.log
 bor --datadir $DATA_DIR \
   --port 30303 \
+  --heimdall http://heimdall$INDEX:1317
   --rpc --rpcaddr '0.0.0.0' \
   --ws --wsport 8586 \
   --rpcvhosts '*' \
   --rpccorsdomain '*' \
-  --rpcport 8585 \
+  --rpcport 8545 \
   --ipcpath $DATA_DIR/bor.ipc \
   --rpcapi 'personal,db,eth,net,web3,txpool,miner,admin' \
   --syncmode 'full' \

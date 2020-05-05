@@ -39,7 +39,7 @@ services:
     #   - heimdall{{ node }}
     networks:
       devnet-network:
-          ipv4_address: 172.20.1.{{ node + 10 }}
+          ipv4_address: 172.20.1.{{ node + 100 }}
     environment:
       - HEIMDALL_URL=http://heimdall{{ node }}:1317
     volumes:
