@@ -47,6 +47,10 @@ export class Devnet {
     return path.join(this.heimdallDir(index), 'config', 'config.toml')
   }
 
+  heimdallGenesisFilePath(index) {
+    return path.join(this.heimdallDir(index), 'config', 'genesis.json')
+  }
+
   heimdallHeimdallConfigFilePath(index) {
     return path.join(this.heimdallDir(index), 'config', 'heimdall-config.toml')
   }
@@ -281,6 +285,10 @@ export class Devnet {
                 return `${this.config.devnetHeimdallHosts[index]}:`
               }).
               replace(/moniker.+=.+/gi, `moniker = "heimdall${i}"`).
+              save()
+
+            fileReplacer(this.heimdallGenesisFilePath(i)).
+              replace(/"bor_chain_id"[ ]*:[ ]*".*"/gi, `"bor_chain_id": "${this.config.borChainId}"`).
               save()
           }
         }
