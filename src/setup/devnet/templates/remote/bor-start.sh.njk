@@ -11,9 +11,9 @@ mkdir -p $BOR_HOME $LOG_HOME
 ADDRESS="`cat $BOR_HOME/address.txt`"
 
 # start bor
-bor --datadir $DATA_DIR \
+bor --datadir $BOR_DATA_DIR \
   --port 30303 \
-  --heimdall http://localhost:1317 \
+  --heimdall "http://localhost:1317" \
   --rpc --rpcaddr '0.0.0.0' \
   --ws --wsport 8546 \
   --rpcvhosts '*' \
