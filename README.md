@@ -14,6 +14,15 @@ npm install -g @maticnetwork/matic-cli
 
 ### Usage
 
+Create new directory for the setup:
+
+```bash
+$ mkdir localnet
+$ cd localnet
+```
+
+**Check commands**
+
 ```bash
 matic-cli
 ```

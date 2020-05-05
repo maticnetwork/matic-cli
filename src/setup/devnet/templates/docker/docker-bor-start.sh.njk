@@ -19,7 +19,7 @@ docker-compose run -d --name bor$INDEX bor$INDEX sh -c "
 touch /root/logs/bor.log
 bor --datadir $DATA_DIR \
   --port 30303 \
-  --heimdall http://heimdall$INDEX:1317
+  --heimdall http://heimdall$INDEX:1317 \
   --rpc --rpcaddr '0.0.0.0' \
   --ws --wsport 8586 \
   --rpcvhosts '*' \
