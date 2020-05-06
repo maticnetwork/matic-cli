@@ -55,7 +55,7 @@ export class Genesis {
       [
         {
           title: 'Clone genesis-contracts repository',
-          task: () => cloneRepository(this.repositoryName, this.repositoryBranch, this.respositoryUrl, this.config.codeDir)
+          task: () => cloneRepository(this.repositoryName, this.repositoryBranch, this.repositoryUrl, this.config.codeDir)
         },
         {
           title: 'Install dependencies for genesis-contracts',
