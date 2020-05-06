@@ -23,7 +23,7 @@ export class Bor {
 
     this.repositoryName = 'bor'
     this.repositoryBranch = options.repositoryBranch || 'master'
-    this.repositoryUrl = options.repositoryBranch || 'https://github.com/maticnetwork/bor'
+    this.repositoryUrl = options.repositoryUrl || 'https://github.com/maticnetwork/bor'
   }
 
   get name() {
