@@ -24,6 +24,7 @@ bor --datadir $BOR_DATA_DIR \
   --syncmode 'full' \
   --networkid '{{ obj.config.borChainId }}' \
   --gasprice '0' \
+  --maxpeers 200 \
   --unlock $ADDRESS \
   --keystore $BOR_HOME/keystore \
   --password $BOR_HOME/password.txt \

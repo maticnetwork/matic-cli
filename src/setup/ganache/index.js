@@ -6,10 +6,10 @@ import fs from 'fs-extra';
 import ganacheCli from 'ganache-cli';
 import { projectInstall } from 'pkg-install';
 
-import fileReplacer from '../../lib/file-replacer'
 import { loadConfig } from '../config'
-import { cloneRepository } from '../../lib/utils'
+import { cloneRepository, processTemplateFiles } from '../../lib/utils'
 import { printDependencyInstructions } from '../helper'
+import { Contracts } from '../contracts'
 
 export class Ganache {
   constructor(config, options = {}) {
@@ -17,9 +17,9 @@ export class Ganache {
 
     this.dbName = 'ganache-db'
     this.serverPort = 9545
-    this.maticContractsRepository = 'matic-contracts'
-    this.maticContractsRepositoryBranch = options.repositoryBranch || 'master'
-    this.maticContractsRepositoryUrl = options.repositoryUrl || 'https://github.com/maticnetwork/contracts'
+
+    // get contracts setup obj
+    this.contracts = new Contracts(config)
   }
 
   get name() {
@@ -27,19 +27,11 @@ export class Ganache {
   }
 
   get taskTitle() {
-    return 'Setup contracts'
+    return 'Setup contracts on Ganache'
   }
 
   get dbDir() {
     return path.join(this.config.dataDir, this.dbName)
-  }
-
-  get maticContractDir() {
-    return path.join(this.config.codeDir, this.maticContractsRepository)
-  }
-
-  get contractAddressesPath() {
-    return path.join(this.config.codeDir, this.maticContractsRepository, 'contractAddresses.json')
   }
 
   async print() {
@@ -51,7 +43,7 @@ export class Ganache {
     return new Listr([
       {
         title: 'Stake',
-        task: () => execa('bash', ['ganache-stake.sh', this.config.address, this.config.publicKey, this.config.defaultStake], {
+        task: () => execa('bash', ['ganache-stake.sh'], {
           cwd: this.config.targetDirectory,
         })
       }
@@ -98,7 +90,7 @@ export class Ganache {
       },
       {
         title: 'Deploy contracts',
-        task: () => execa('bash', ['ganache-deployment.sh', this.config.privateKey, this.config.heimdallChainId], {
+        task: () => execa('bash', ['ganache-deployment.sh'], {
           cwd: this.config.targetDirectory,
         })
       },
@@ -125,12 +117,6 @@ export class Ganache {
             })
           })
         }
-      },
-      {
-        title: 'Load contract addresses',
-        task: () => {
-          this.config.contractAddresses = require(this.contractAddressesPath)
-        }
       }
     ], {
       exitOnError: true,
@@ -140,66 +126,28 @@ export class Ganache {
   async getTasks() {
     return new Listr(
       [
+        ...this.contracts.cloneRepositoryTasks(),
+        ...this.contracts.compileTasks(),
         {
-          title: 'Clone matic contracts repository',
-          task: () => cloneRepository(this.maticContractsRepository, this.maticContractsRepositoryBranch, this.maticContractsRepositoryUrl, this.config.codeDir)
-        },
-        {
-          title: 'Install dependencies for matic contracts',
-          task: () => projectInstall({
-            cwd: this.maticContractDir,
-          })
-        },
-        {
-          title: 'Process templates',
-          task: () => execa('node', ['scripts/process-templates.js', '--bor-chain-id', this.config.borChainId], {
-            cwd: this.maticContractDir,
-          })
-        },
-        {
-          title: 'Compile matic contracts',
-          task: () => execa('npm', ['run', 'truffle:compile'], {
-            cwd: this.maticContractDir,
-          })
-        },
-        {
-          title: 'Copy template scripts',
-          task: () => {
+          title: 'Process scripts',
+          task: async () => {
             const templateDir = path.resolve(
               new URL(import.meta.url).pathname,
               '../templates'
             );
 
-            return fs.copy(templateDir, this.config.targetDirectory)
-          }
-        },
-        {
-          title: 'Process template scripts',
-          task: () => {
-            const startScriptFile = path.join(this.config.targetDirectory, 'ganache-start.sh')
-            const deploymentScriptFile = path.join(this.config.targetDirectory, 'ganache-deployment.sh')
-            const ganacheStakeFile = path.join(this.config.targetDirectory, 'ganache-stake.sh')
+            // copy all templates to target directory
+            await fs.copy(templateDir, this.config.targetDirectory)
 
-            fileReplacer(startScriptFile).
-              replace(/PRIVATE_KEY=.+/gi, `PRIVATE_KEY=${this.config.privateKey}`).
-              replace(/STAKE=.+/gi, `STAKE=${this.config.defaultStake}`).
-              save()
-
-            fileReplacer(deploymentScriptFile).
-              replace(/PRIVATE_KEY=.+/gi, `PRIVATE_KEY=${this.config.privateKey}`).
-              replace(/HEIMDALL_ID=.+/gi, `HEIMDALL_ID=${this.config.heimdallChainId}`).
-              save()
-
-            fileReplacer(ganacheStakeFile).
-              replace(/ADDRESS=.+/gi, `ADDRESS=${this.config.address}`).
-              replace(/PUB_KEY=.+/gi, `PUB_KEY=${this.config.publicKey}`).
-              save()
+            // process all njk templates
+            await processTemplateFiles(this.config.targetDirectory, { obj: this })
           }
         },
         {
           title: 'Deploy contracts',
           task: () => this.getContractDeploymenTasks() // get contact deployment tasks
-        }
+        },
+        ...this.contracts.prepareContractAddressesTasks(), // prepare contract addresses and load in config
       ],
       {
         exitOnError: true,

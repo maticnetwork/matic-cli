@@ -1,7 +1,8 @@
 import execa from 'execa'
-import fs from 'fs'
+import fs from 'fs-extra'
 import path from 'path'
 import Web3 from 'web3'
+import nunjucks from 'nunjucks'
 
 const web3 = new Web3()
 
@@ -31,6 +32,31 @@ export async function cloneRepository(name, branch, url, targetDirectory) {
   if (result && result.failed) {
     return Promise.reject(new Error(`Failed to clone or pull ${name}`))
   }
+}
+
+export async function processTemplateFiles(dir, obj = {}) {
+  // promises
+  const p = []
+
+  // process njk files
+  fs.readdirSync(dir).forEach(file => {
+    if (file.indexOf('.njk') !== -1) {
+      const fp = path.join(dir, file)
+      // process all njk files
+      fs.writeFileSync(
+        path.join(dir, file.replace('.njk', '')),
+        nunjucks.render(fp, obj)
+      )
+
+      // remove njk file
+      p.push(execa('rm', ['-rf', fp], {
+        cwd: dir
+      }))
+    }
+  })
+
+  // fulfill all promises
+  return Promise.all(p)
 }
 
 // returns key store file

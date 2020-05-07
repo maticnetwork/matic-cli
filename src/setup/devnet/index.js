@@ -10,7 +10,7 @@ import { toBuffer, privateToPublic, bufferToHex } from 'ethereumjs-util'
 import { Heimdall } from '../heimdall'
 import { Genesis } from '../genesis'
 import { printDependencyInstructions, getDefaultBranch } from '../helper'
-import { getNewPrivateKey, getKeystoreFile } from '../../lib/utils'
+import { getNewPrivateKey, getKeystoreFile, processTemplateFiles } from '../../lib/utils'
 import { loadConfig } from '../config'
 import fileReplacer from '../../lib/file-replacer'
 
@@ -171,28 +171,8 @@ export class Devnet {
           // copy docker related templates
           await fs.copy(path.join(templateDir, 'docker'), this.config.targetDirectory)
 
-          // promises
-          const p = []
-
-          // process njk files
-          fs.readdirSync(this.config.targetDirectory).forEach(file => {
-            if (file.indexOf(".njk") !== -1) {
-              const fp = path.join(this.config.targetDirectory, file)
-              // process all njk files
-              fs.writeFileSync(
-                path.join(this.config.targetDirectory, file.replace(".njk", "")),
-                nunjucks.render(fp, { obj: this }),
-              )
-
-              // remove njk file
-              p.push(execa('rm', ['-rf', fp], {
-                cwd: this.config.targetDirectory
-              }))
-            }
-          });
-
-          // fulfill all promises
-          await Promise.all(p)
+          // process template files
+          await processTemplateFiles(this.config.targetDirectory, { obj: this })
         }
       }
     ]

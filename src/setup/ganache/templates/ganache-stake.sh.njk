@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+
+set -x #echo on
+
+# address
+ADDRESS={{ obj.config.address }}
+
+# public key
+PUB_KEY={{ obj.config.publicKey }}
+
+# stake
+STAKE={{ obj.config.defaultStake }}
+
+# cd matic contracts
+cd {{ obj.contracts.repositoryDir }}
+
+# root contracts are deployed on base chain
+npm run truffle exec scripts/stake.js -- --network development $ADDRESS $STAKE $PUB_KEY
