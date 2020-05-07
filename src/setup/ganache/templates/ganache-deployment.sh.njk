@@ -4,6 +4,7 @@ set -x #echo on
 
 # private key to deploy contracts
 export PRIVATE_KEY={{ obj.config.privateKey }}
+export MNEMONIC={{ obj.config.privateKey }}
 
 # export heimdall id
 export HEIMDALL_ID={{ obj.config.heimdallChainId }}

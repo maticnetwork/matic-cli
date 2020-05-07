@@ -83,7 +83,7 @@ export class Genesis {
         },
         {
           title: 'Process templates',
-          task: () => execa('node', ['scripts/process-templates.js', '--bor-chain-id', this.config.borChainId], {
+          task: () => execa('npm', ['run', 'template:process', '--', '--bor-chain-id', this.config.borChainId], {
             cwd: this.maticContractDir
           })
         },

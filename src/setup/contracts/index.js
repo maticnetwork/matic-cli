@@ -1,11 +1,12 @@
 import Listr from 'listr'
+import inquirer from 'inquirer'
 import chalk from 'chalk'
 import path from 'path'
 import execa from 'execa'
 import fs from 'fs-extra'
 import { projectInstall } from 'pkg-install'
 
-import { printDependencyInstructions } from '../helper'
+import { printDependencyInstructions, getDefaultBranch } from '../helper'
 import { loadConfig } from '../config'
 import { cloneRepository } from '../../lib/utils'
 
@@ -42,6 +43,8 @@ export class Contracts {
     return require(this.contractAddressesPath)
   }
 
+  print() { }
+
   cloneRepositoryTasks() {
     return [
       {
@@ -61,7 +64,7 @@ export class Contracts {
       },
       {
         title: 'Process templates',
-        task: () => execa('node', ['scripts/process-templates.js', '--bor-chain-id', this.config.borChainId], {
+        task: () => execa('npm', ['run', 'template:process', '--', '--bor-chain-id', this.config.borChainId], {
           cwd: this.repositoryDir
         })
       },
@@ -124,6 +127,23 @@ export default async function () {
   // configuration
   const config = await loadConfig()
   await config.loadChainIds()
+
+  // load branch
+  let answers = await getDefaultBranch(config)
+  config.set(answers)
+
+  // take eth url
+  const questions = [
+    {
+      type: 'input',
+      name: 'ethURL',
+      message: 'Please enter ETH url to deploy',
+      default: 'http://localhost:8545'
+    }
+  ]
+
+  answers = await inquirer.prompt(questions)
+  config.set(answers)
 
   // start contracts
   await setupContracts(config)
