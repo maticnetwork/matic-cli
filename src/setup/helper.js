@@ -72,11 +72,19 @@ export async function getKeystoreDetails(options = {}) {
   const result = {}
 
   if (!options.privateKey) {
-    const { hasPrivateKey } = await inquirer.prompt({
-      type: 'confirm',
-      name: 'hasPrivateKey',
-      message: 'Do you have private key? (If not, we will generate it for you)'
-    })
+    let hasPrivateKey = false
+    if (options.forceAsk) {
+      hasPrivateKey = true
+    } else {
+      const { hasPrivateKey: hk } = await inquirer.prompt({
+        type: 'confirm',
+        name: 'hasPrivateKey',
+        message: 'Do you have private key? (If not, we will generate it for you)'
+      })
+
+      // set answer
+      hasPrivateKey = hk
+    }
 
     // enter private key
     if (hasPrivateKey) {

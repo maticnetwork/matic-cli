@@ -72,6 +72,10 @@ export default class Config {
     this.set(answers)
   }
 
+  async forceAskAccount() {
+    this.set({ forceAsk: true })
+  }
+
   async loadAccount() {
     if (!this.privateKey || !this.keystorePassword) {
       await this.loadKeystoreDetails()

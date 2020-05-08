@@ -1,0 +1,27 @@
+const EthDeployer = require('moonwalker').default
+const PrivateKeyProvider = require('truffle-privatekey-provider')
+
+const privateKey = `{{ obj.config.privateKey }}`
+const ethURL = `{{ obj.config.ethURL }}`
+const borURL = `{{ obj.config.borURL }}`
+
+const provider = new PrivateKeyProvider(privateKey.replace('0x', ''), ethURL);
+
+async function consume() {
+  const q = await EthDeployer.getQueue()
+  const worker = new EthDeployer.Worker(
+    provider, 
+    q, 
+    {
+      from: '{{ obj.config.address }}',
+      gas: 7000000,
+      gasPrice: '10000000000' // 10 gwei
+    },
+    `{{ obj.repositoryDir }}/build`,
+    1 // blockConfirmation
+  )
+  await worker.start('default-deposit-q')
+  return 'worker started...'
+}
+
+consume().then(console.log)

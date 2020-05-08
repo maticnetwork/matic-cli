@@ -8,7 +8,7 @@ import { projectInstall } from 'pkg-install'
 
 import { printDependencyInstructions, getDefaultBranch } from '../helper'
 import { loadConfig } from '../config'
-import { cloneRepository } from '../../lib/utils'
+import { cloneRepository, processTemplateFiles } from '../../lib/utils'
 
 export class Contracts {
   constructor(config, options = {}) {
@@ -97,11 +97,42 @@ export class Contracts {
     ]
   }
 
-  async getTasks() {
+  async getRootDeploymentTasks() {
     return new Listr(
       [
-        ...this.cloneRepositoryTasks(),
-        ...this.compileTasks(),
+        // ...this.cloneRepositoryTasks(),
+        // ...this.compileTasks(),
+        {
+          title: 'Process scripts',
+          task: async () => {
+            const templateDir = path.resolve(
+              new URL(import.meta.url).pathname,
+              '../templates'
+            );
+
+            // copy all templates to target directory
+            await fs.copy(templateDir, this.config.targetDirectory)
+
+            // process all njk templates
+            await processTemplateFiles(this.config.targetDirectory, { obj: this })
+
+            // move contracts root deploy sh file
+            await execa('mv', [
+              path.join(this.config.targetDirectory, 'deploy-worker.js'),
+              path.join(this.repositoryDir, 'deploy-worker.js')
+            ])
+          }
+        },
+        {
+          title: 'Deploy root contracts',
+          task: async () => {
+            const obj = await execa('bash', [path.join(this.config.targetDirectory, 'contracts-root-deploy.sh')], {
+              cwd: this.repositoryDir,
+            })
+            console.log(obj)
+            return obj
+          }
+        },
         ...this.prepareContractAddressesTasks() // prepare contract addresses and load in config
       ],
       {
@@ -109,16 +140,21 @@ export class Contracts {
       }
     )
   }
+
+  async getTasks() { }
 }
 
 async function setupContracts(config) {
   const contracts = new Contracts(config)
 
   // get contracts tasks and run them
-  const tasks = await contracts.getTasks()
+  let tasks = []
+  if (config.contractsAction === 'root-deploy') {
+    tasks = await contracts.getRootDeploymentTasks()
+  }
   await tasks.run()
 
-  console.log('%s Contracts are deployed', chalk.green.bold('DONE'))
+  console.log('%s', chalk.green.bold('DONE'))
 }
 
 export default async function () {
@@ -127,18 +163,37 @@ export default async function () {
   // configuration
   const config = await loadConfig()
   await config.loadChainIds()
+  // force ask for account when loading
+  await config.forceAskAccount()
+  await config.loadAccount()
 
   // load branch
   let answers = await getDefaultBranch(config)
   config.set(answers)
 
-  // take eth url
   const questions = [
     {
       type: 'input',
       name: 'ethURL',
-      message: 'Please enter ETH url to deploy',
+      message: 'Please enter ETH url for deploy',
+      default: 'http://localhost:9545'
+    },
+    {
+      type: 'input',
+      name: 'borURL',
+      message: 'Please enter BOR url for deploy',
       default: 'http://localhost:8545'
+    },
+    {
+      type: 'list',
+      name: 'contractsAction',
+      message: 'Please select an action to perform',
+      choices: [
+        { name: 'Rootchain deployment', value: 'root-deploy' },
+        { name: 'Stake', value: 'root-stake' },
+        { name: 'Borchain deployment', value: 'bor-deploy' },
+        { name: 'Sync Bor state to root', value: 'bor-state-sync' }
+      ]
     }
   ]
 

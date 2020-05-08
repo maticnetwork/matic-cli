@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+
+set -x #echo on
+
+# private key to deploy contracts
+export PRIVATE_KEY={{ obj.config.privateKey }}
+export MNEMONIC={{ obj.config.privateKey }}
+
+# export heimdall id
+export HEIMDALL_ID={{ obj.config.heimdallChainId }}
+
+# cd matic contracts repo
+cd {{ obj.repositoryDir }}
+
+# root contracts are deployed on base chain
+node moonwalker-migrations/1_queueJobs.js
+
+# deploy worker
+node {{ obj.repositoryDir }}/deploy-worker.js
