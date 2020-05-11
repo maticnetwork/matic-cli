@@ -1,6 +1,6 @@
 {
   "name": "@maticnetwork/matic-cli",
-  "version": "0.0.2",
+  "version": "0.0.3-beta.1",
   "description": "A CLI to setup and manage Matic validator nodes",
   "main": "src/index.js",
   "bin": "bin/matic-cli",
