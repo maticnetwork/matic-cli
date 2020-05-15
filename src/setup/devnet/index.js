@@ -153,8 +153,8 @@ export class Devnet {
           // set heimdall 
           for (let i = 0; i < this.totalNodes; i++) {
             fileReplacer(this.heimdallHeimdallConfigFilePath(i)).
-              replace(/eth_RPC_URL[ ]*=[ ]*".*"/gi, `eth_RPC_URL = "${this.config.ethURL}"`).
-              replace(/bor_RPC_URL[ ]*=[ ]*".*"/gi, `bor_RPC_URL = "http://bor${i}:8545"`).
+              replace(/eth_rpc_url[ ]*=[ ]*".*"/gi, `eth_rpc_url = "${this.config.ethURL}"`).
+              replace(/bor_rpc_url[ ]*=[ ]*".*"/gi, `bor_rpc_url = "http://bor${i}:8545"`).
               replace(/amqp_url[ ]*=[ ]*".*"/gi, `amqp_url = "amqp://guest:guest@rabbit${i}:5672/"`).
               save()
           }
@@ -188,8 +188,8 @@ export class Devnet {
           // set heimdall 
           for (let i = 0; i < this.totalNodes; i++) {
             fileReplacer(this.heimdallHeimdallConfigFilePath(i)).
-              replace(/eth_RPC_URL[ ]*=[ ]*".*"/gi, `eth_RPC_URL = "${this.config.ethURL}"`).
-              replace(/bor_RPC_URL[ ]*=[ ]*".*"/gi, `bor_RPC_URL = "http://localhost:8545"`).
+              replace(/eth_rpc_url[ ]*=[ ]*".*"/gi, `eth_rpc_url = "${this.config.ethURL}"`).
+              replace(/bor_rpc_url[ ]*=[ ]*".*"/gi, `bor_rpc_url = "http://localhost:8545"`).
               replace(/amqp_url[ ]*=[ ]*".*"/gi, `amqp_url = "amqp://guest:guest@localhost:5672/"`).
               save()
           }

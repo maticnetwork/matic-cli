@@ -24,7 +24,7 @@ export class Heimdall {
     this.config = config
 
     this.repositoryName = this.name
-    this.repositoryBranch = options.repositoryBranch || 'master'
+    this.repositoryBranch = 'sidechannel'// options.repositoryBranch || 'master'
     this.repositoryUrl = options.repositoryUrl || 'https://github.com/maticnetwork/heimdall'
   }
 
@@ -216,8 +216,8 @@ export class Heimdall {
           title: 'Process heimdall config file',
           task: () => {
             fileReplacer(this.heimdallHeimdallConfigFilePath).
-              replace(/eth_RPC_URL[ ]*=[ ]*".*"/gi, `eth_RPC_URL = "http://localhost:9545"`).
-              replace(/bor_RPC_URL[ ]*=[ ]*".*"/gi, `bor_RPC_URL = "http://localhost:8545"`).
+              replace(/eth_rpc_url[ ]*=[ ]*".*"/gi, `eth_rpc_url = "http://localhost:9545"`).
+              replace(/bor_rpc_url[ ]*=[ ]*".*"/gi, `bor_rpc_url = "http://localhost:8545"`).
               save()
           }
         },
