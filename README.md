@@ -5,10 +5,6 @@
 ### Installation
 
 ```bash
-npm init @maticnetwork/matic-cli
-# or
-npx @maticnetwork/matic-cli
-# or
 npm install -g @maticnetwork/matic-cli
 ```
 
