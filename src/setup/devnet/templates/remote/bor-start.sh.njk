@@ -23,7 +23,11 @@ bor --datadir $BOR_DATA_DIR \
   --rpcapi 'personal,db,eth,net,web3,txpool,miner,admin,bor' \
   --syncmode 'full' \
   --networkid '{{ obj.config.borChainId }}' \
-  --gasprice '0' \
+  --miner.gaslimit '2000000000' \
+  --txpool.nolocals \
+  --txpool.accountslots '128' \
+  --txpool.globalslots '20000'  \
+  --txpool.lifetime '0h16m0s' \
   --maxpeers 200 \
   --unlock $ADDRESS \
   --keystore $BOR_HOME/keystore \
