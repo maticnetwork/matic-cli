@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+
+set -x #echo on
+
+BUILD_DIR={{ obj.buildDir }}/bin
+DATA_DIR={{ obj.config.dataDir }}
+BOR_DATA_DIR={{ obj.borDataDir }}
+GENESIS_PATH={{ obj.genesis.borGenesisFilePath }}
+
+# create bor, logs and keystore directory
+mkdir -p $DATA_DIR/logs
+
+# init bor
+$BUILD_DIR/bor --datadir $BOR_DATA_DIR init $GENESIS_PATH
+
+echo "Setup done!"

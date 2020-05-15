@@ -5,10 +5,9 @@ import path from 'path'
 import fs from 'fs-extra'
 
 import { loadConfig } from '../config'
-import { cloneRepository, getKeystoreFile } from '../../lib/utils'
+import { cloneRepository, getKeystoreFile, processTemplateFiles } from '../../lib/utils'
 import { printDependencyInstructions } from '../helper'
 import { Genesis } from '../genesis'
-import fileReplacer from '../../lib/file-replacer'
 
 // default password
 export const KEYSTORE_PASSWORD = 'hello'
@@ -24,6 +23,8 @@ export class Bor {
     this.repositoryName = 'bor'
     this.repositoryBranch = options.repositoryBranch || 'master'
     this.repositoryUrl = options.repositoryUrl || 'https://github.com/maticnetwork/bor'
+
+    this.genesis = new Genesis(config)
   }
 
   get name() {
@@ -32,6 +33,38 @@ export class Bor {
 
   get taskTitle() {
     return 'Setup Bor'
+  }
+
+  get repositoryDir() {
+    return path.join(this.config.codeDir, this.repositoryName)
+  }
+
+  get buildDir() {
+    return path.join(this.repositoryDir, 'build')
+  }
+
+  get borDataDir() {
+    return path.join(this.config.dataDir, 'bor')
+  }
+
+  get keystoreDir() {
+    return path.join(this.config.dataDir, 'keystore')
+  }
+
+  get passwordFilePath() {
+    return path.join(this.config.dataDir, 'password.txt')
+  }
+
+  get keystorePassword() {
+    return this.config.keystorePassword || KEYSTORE_PASSWORD
+  }
+
+  async print() {
+    console.log(chalk.gray('Bor data') + ': ' + chalk.bold.green(this.borDataDir))
+    console.log(chalk.gray('Bor repo') + ': ' + chalk.bold.green(this.repositoryDir))
+    console.log(chalk.gray('Setup bor chain') + ': ' + chalk.bold.green("bash bor-setup.sh"))
+    console.log(chalk.gray('Start bor chain') + ': ' + chalk.bold.green("bash bor-start.sh"))
+    console.log(chalk.gray('Clean bor chain') + ': ' + chalk.bold.green("bash bor-clean.sh"))
   }
 
   async getTasks() {
@@ -72,24 +105,18 @@ export class Bor {
           }
         },
         {
-          title: 'Copy template scripts',
-          task: () => {
+          title: 'Process template scripts',
+          task: async () => {
             const templateDir = path.resolve(
               new URL(import.meta.url).pathname,
               '../templates'
             );
 
-            return fs.copy(templateDir, this.config.targetDirectory)
-          }
-        },
-        {
-          title: 'Process template scripts',
-          task: () => {
-            const startScriptFile = path.join(this.config.targetDirectory, 'bor-start.sh')
-            return fileReplacer(startScriptFile).
-              replace(/ADDRESS=.+/gi, `ADDRESS=${this.config.genesisAddresses[0]}`).
-              replace(/BOR_CHAIN_ID=.+/gi, `BOR_CHAIN_ID=${this.config.borChainId}`).
-              save()
+            // copy all templates to target directory
+            await fs.copy(templateDir, this.config.targetDirectory)
+
+            // process all njk templates
+            await processTemplateFiles(this.config.targetDirectory, { obj: this })
           }
         }
       ],
@@ -98,46 +125,17 @@ export class Bor {
       }
     );
   }
-
-  get repositoryDir() {
-    return path.join(this.config.codeDir, this.repositoryName)
-  }
-
-  get borDataDir() {
-    return path.join(this.config.dataDir, 'bor')
-  }
-
-  get keystoreDir() {
-    return path.join(this.config.dataDir, 'keystore')
-  }
-
-  get passwordFilePath() {
-    return path.join(this.config.dataDir, 'password.txt')
-  }
-
-  get keystorePassword() {
-    return this.config.keystorePassword || KEYSTORE_PASSWORD
-  }
-
-  async print() {
-    console.log(chalk.gray('Bor data') + ': ' + chalk.bold.green(this.borDataDir))
-    console.log(chalk.gray('Bor repo') + ': ' + chalk.bold.green(this.repositoryDir))
-    console.log(chalk.gray('Setup bor chain') + ': ' + chalk.bold.green("bash bor-setup.sh"))
-    console.log(chalk.gray('Start bor chain') + ': ' + chalk.bold.green("bash bor-start.sh"))
-    console.log(chalk.gray('Clean bor chain') + ': ' + chalk.bold.green("bash bor-clean.sh"))
-  }
 }
 
 async function setupBor(config) {
   const bor = new Bor(config)
-  const genesis = new Genesis(config)
 
   const tasks = new Listr(
     [
       {
-        title: genesis.taskTitle,
+        title: bor.genesis.taskTitle,
         task: () => {
-          return genesis.getTasks()
+          return bor.genesis.getTasks()
         }
       },
       {
@@ -157,7 +155,7 @@ async function setupBor(config) {
 
   // print config
   await config.print()
-  await genesis.print(config)
+  await bor.genesis.print(config)
   await bor.print()
 
   return true;

@@ -8,6 +8,7 @@ import { Genesis } from '../genesis'
 import { Heimdall } from '../heimdall'
 import { Ganache } from '../ganache'
 import { Bor } from '../bor'
+import { processTemplateFiles } from '../../lib/utils'
 
 async function setupLocalnet(config) {
   const ganache = new Ganache(config, { repositoryBranch: config.defaultBranch })
@@ -39,6 +40,21 @@ async function setupLocalnet(config) {
         title: bor.taskTitle,
         task: () => {
           return bor.getTasks()
+        }
+      },
+      {
+        title: 'Process scripts',
+        task: async () => {
+          const templateDir = path.resolve(
+            new URL(import.meta.url).pathname,
+            '../templates'
+          );
+
+          // copy all templates to target directory
+          await fs.copy(templateDir, this.config.targetDirectory)
+
+          // process all njk templates
+          await processTemplateFiles(this.config.targetDirectory, { obj: this })
         }
       }
     ],

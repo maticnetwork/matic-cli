@@ -2,8 +2,8 @@
 
 set -x #echo on
 
-ADDRESS=$1
-BOR_CHAIN_ID=$2
+ADDRESS={{ obj.config.address }}
+BOR_CHAIN_ID={{ obj.config.borChainId }}
 
 if [ -z "$ADDRESS" ]
   then
@@ -17,11 +17,10 @@ if [ -z "$BOR_CHAIN_ID" ]
   exit 1
 fi
 
-ROOT_DIR=$PWD
-CODE_DIR=$PWD/code
-DATA_DIR=${DATA_DIR:-$ROOT_DIR/data}
-BOR_DATA_DIR=$DATA_DIR/bor/
-BUILD_DIR=$CODE_DIR/bor/build/bin
+BUILD_DIR={{ obj.buildDir }}/bin
+DATA_DIR={{ obj.config.dataDir }}
+BOR_DATA_DIR={{ obj.borDataDir }}
+GENESIS_PATH={{ obj.genesis.borGenesisFilePath }}
 
 mkdir -p $DATA_DIR/logs
 

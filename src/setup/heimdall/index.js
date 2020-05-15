@@ -7,7 +7,7 @@ import os from 'os'
 
 import fileReplacer from '../../lib/file-replacer'
 import { loadConfig } from '../config'
-import { cloneRepository } from '../../lib/utils'
+import { cloneRepository, processTemplateFiles } from '../../lib/utils'
 import { printDependencyInstructions } from '../helper'
 import { Ganache } from '../ganache'
 
@@ -223,13 +223,17 @@ export class Heimdall {
         },
         {
           title: 'Copy template scripts',
-          task: () => {
+          task: async () => {
             const templateDir = path.resolve(
               new URL(import.meta.url).pathname,
               '../templates'
             );
 
-            return fs.copy(templateDir, this.config.targetDirectory)
+            // copy all templates to target directory
+            await fs.copy(templateDir, this.config.targetDirectory)
+
+            // process all njk templates
+            await processTemplateFiles(this.config.targetDirectory, { obj: this })
           }
         }
       ],
