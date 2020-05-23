@@ -19,15 +19,17 @@ bor --datadir $BOR_DATA_DIR \
   --rpccorsdomain '*' \
   --rpcport 8545 \
   --ipcpath $BOR_DATA_DIR/bor.ipc \
-  --rpcapi 'personal,db,eth,net,web3,txpool,miner,admin,bor' \
+  --rpcapi 'db,eth,net,web3,txpool,bor' \
   --syncmode 'full' \
   --networkid '{{ obj.config.borChainId }}' \
-  --miner.gaslimit '2000000000' \
+  --miner.gaslimit '20000000' \
   --txpool.nolocals \
   --txpool.accountslots '128' \
   --txpool.globalslots '20000'  \
   --txpool.lifetime '0h16m0s' \
   --maxpeers 200 \
+  --metrics \
+  --pprof --pprofport 7071 --pprofaddr '0.0.0.0' \
   --unlock $ADDRESS \
   --keystore $BOR_HOME/keystore \
   --password $BOR_HOME/password.txt \
