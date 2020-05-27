@@ -1,6 +1,7 @@
 import Listr from 'listr'
 import chalk from 'chalk'
 import path from 'path'
+import fs from 'fs-extra'
 
 import { printDependencyInstructions, getDefaultBranch } from '../helper'
 import { loadConfig } from '../config'
@@ -52,10 +53,10 @@ async function setupLocalnet(config) {
           );
 
           // copy all templates to target directory
-          await fs.copy(templateDir, this.config.targetDirectory)
+          await fs.copy(templateDir, config.targetDirectory)
 
           // process all njk templates
-          await processTemplateFiles(this.config.targetDirectory, { obj: this })
+          await processTemplateFiles(config.targetDirectory, { obj: this })
         }
       }
     ],
