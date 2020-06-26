@@ -11,8 +11,11 @@ PUB_KEY={{ obj.config.publicKey }}
 # stake
 STAKE={{ obj.config.defaultStake }}
 
+# fee
+FEE={{ obj.config.defaultFee }}
+
 # cd matic contracts
 cd {{ obj.contracts.repositoryDir }}
 
 # root contracts are deployed on base chain
-npm run truffle exec scripts/stake.js -- --network development $ADDRESS $STAKE $PUB_KEY
+npm run truffle exec scripts/stake.js -- --network development $ADDRESS $PUB_KEY $STAKE $FEE
