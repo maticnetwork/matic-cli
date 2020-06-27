@@ -21,6 +21,7 @@ export default class Config {
     options.configDirectory = options.configDirectory || 'config'
 
     options.defaultStake = options.defaultStake || 10000
+    options.defaultFee = options.defaultFee || 2000
 
     // assign all prop to obj
     this.set(options)
