@@ -12,7 +12,7 @@ import { Genesis } from '../genesis'
 import { Ganache } from '../ganache'
 import { printDependencyInstructions, getDefaultBranch } from '../helper'
 import { getNewPrivateKey, getKeystoreFile, processTemplateFiles } from '../../lib/utils'
-import { loadConfig } from '../config'
+import { loadConfig, saveConfig } from '../config'
 import fileReplacer from '../../lib/file-replacer'
 
 export class Devnet {
@@ -485,4 +485,7 @@ export default async function () {
 
   // start setup
   await setupDevnet(config)
+
+  // save config
+  await saveConfig(config, config.configDir )
 }
