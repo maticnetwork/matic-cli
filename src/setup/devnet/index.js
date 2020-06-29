@@ -9,6 +9,7 @@ import { toBuffer, privateToPublic, bufferToHex } from 'ethereumjs-util'
 
 import { Heimdall } from '../heimdall'
 import { Genesis } from '../genesis'
+import { Ganache } from '../ganache'
 import { printDependencyInstructions, getDefaultBranch } from '../helper'
 import { getNewPrivateKey, getKeystoreFile, processTemplateFiles } from '../../lib/utils'
 import { loadConfig } from '../config'
@@ -258,6 +259,9 @@ export class Devnet {
             cwd: this.config.targetDirectory
           })
 
+          // get root contracts
+          const rootContracts = this.config.contractAddresses.root
+
           // set heimdall peers with devnet heimdall hosts
           for (let i = 0; i < this.totalNodes; i++) {
             fileReplacer(this.heimdallConfigFilePath(i)).
@@ -270,6 +274,15 @@ export class Devnet {
             fileReplacer(this.heimdallGenesisFilePath(i)).
               replace(/"bor_chain_id"[ ]*:[ ]*".*"/gi, `"bor_chain_id": "${this.config.borChainId}"`).
               save()
+
+            fileReplacer(this.heimdallGenesisFilePath(i)).
+            replace(/"matic_token_address":[ ]*".*"/gi, `"matic_token_address": "${rootContracts.tokens.TestToken}"`).
+            replace(/"staking_manager_address":[ ]*".*"/gi, `"staking_manager_address": "${rootContracts.StakeManagerProxy}"`).
+            replace(/"root_chain_address":[ ]*".*"/gi, `"root_chain_address": "${rootContracts.RootChainProxy}"`).
+            replace(/"staking_info_address":[ ]*".*"/gi, `"staking_info_address": "${rootContracts.StakingInfo}"`).
+            replace(/"state_sender_address":[ ]*".*"/gi, `"state_sender_address": "${rootContracts.StateSender}"`).
+            save()
+
           }
         }
       }
@@ -277,6 +290,7 @@ export class Devnet {
   }
 
   async getTasks() {
+    const ganache = new Ganache(this.config, { repositoryBranch: this.config.defaultBranch })
     const heimdall = new Heimdall(this.config, { repositoryBranch: this.config.defaultBranch })
     const genesis = new Genesis(this.config, { repositoryBranch: 'master' })
 
@@ -285,6 +299,12 @@ export class Devnet {
 
     return new Listr(
       [
+        {
+          title: ganache.taskTitle,
+          task: () => {
+            return ganache.getTasks()
+          }
+        },
         ...createTestnetTasks,
         {
           title: genesis.taskTitle,
@@ -408,6 +428,7 @@ export default async function () {
   // configuration
   const config = await loadConfig()
   await config.loadChainIds()
+  await config.loadAccount()
 
   // load branch
   let answers = await getDefaultBranch(config)
