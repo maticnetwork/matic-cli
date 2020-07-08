@@ -11,7 +11,7 @@ import { Heimdall } from '../heimdall'
 import { Genesis } from '../genesis'
 import { printDependencyInstructions, getDefaultBranch } from '../helper'
 import { getNewPrivateKey, getKeystoreFile, processTemplateFiles } from '../../lib/utils'
-import { loadConfig } from '../config'
+import { loadConfig, saveConfig } from '../config'
 import fileReplacer from '../../lib/file-replacer'
 
 export class Devnet {
@@ -413,26 +413,36 @@ export default async function () {
   let answers = await getDefaultBranch(config)
   config.set(answers)
 
-  const questions = [
-    {
+  const questions = []
+  if (!('numOfValidators' in config)) {
+    questions.push({
       type: 'number',
       name: 'numOfValidators',
       message: 'Please enter number of validator nodes',
       default: 2
-    },
-    {
+    })
+  }
+
+  if (!('numOfNonValidators' in config)) {
+    questions.push({
       type: 'number',
       name: 'numOfNonValidators',
       message: 'Please enter number of non-validator nodes',
       default: 2
-    },
-    {
+    })
+  }
+
+  if (!('ethURL' in config)) {
+    questions.push({
       type: 'input',
       name: 'ethURL',
       message: 'Please enter ETH url',
       default: 'http://host.docker.internal:9545'
-    },
-    {
+    })
+  }
+
+  if (!('devnetType' in config)) {
+    questions.push({
       type: 'list',
       name: 'devnetType',
       message: 'Please select devnet type',
@@ -440,8 +450,8 @@ export default async function () {
         'docker',
         'remote'
       ]
-    }
-  ]
+    })
+  }
 
   answers = await inquirer.prompt(questions)
   config.set(answers)

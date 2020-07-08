@@ -32,7 +32,7 @@ export default class Config {
       if (options.hasOwnProperty(prop)) {
         Object.defineProperty(this, prop, {
           value: options[prop],
-          writable: false,
+          writable: true,
           enumerable: true
         })
       }
@@ -110,20 +110,13 @@ export async function loadConfig(options = {}) {
 
   const hasConfigFile = await fs.exists(configFile)
   if (hasConfigFile) {
-    const { override } = await inquirer.prompt({
-      type: 'confirm',
-      name: 'override',
-      message: 'Configuration found in this directory. Do you want to override?'
-    })
-
-    if (override) {
-      await fs.remove(configFile)
-    } else {
-      process.exit(0) // exit from the process
+    const _options = require(configFile) // get options from config
+    options = {
+      ...options,
+      ..._options
     }
   }
 
-  // create new config
   const config = new Config({
     fileName: fileName,
     targetDirectory: targetDirectory,
@@ -137,8 +130,8 @@ export async function loadConfig(options = {}) {
   return config
 }
 
-export async function saveConfig(config, targetDirectory) {
-  const configFile = path.join(targetDirectory, config.fileName || defaultConfigFileName)
+export async function saveConfig(config) {
+  const configFile = path.join(config.targetDirectory, config.fileName || defaultConfigFileName)
   const data = JSON.stringify(config, null, 2)
   return fs.writeFileSync(configFile, data, { mode: 0o755 })
 }
