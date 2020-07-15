@@ -4,7 +4,7 @@ import path from 'path'
 import fs from 'fs-extra'
 
 import { printDependencyInstructions, getDefaultBranch } from '../helper'
-import { loadConfig } from '../config'
+import { loadConfig, saveConfig } from '../config'
 
 import { Genesis } from '../genesis'
 import { Heimdall } from '../heimdall'
@@ -91,4 +91,8 @@ export default async function () {
 
   // start setup
   await setupLocalnet(config)
+
+  // save config
+  await saveConfig(config )
+
 }

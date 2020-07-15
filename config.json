@@ -1,0 +1,50 @@
+{
+  "fileName": "config.json",
+  "targetDirectory": "/Users/venkateshmankena/matic/cicd/matic-cli",
+  "codeDirectory": "code",
+  "dataDirectory": "data",
+  "configDirectory": "config",
+  "defaultStake": 10000,
+  "defaultFee": 2000,
+  "borChainId": "15001",
+  "heimdallChainId": "heimdall-15001",
+  "privateKey": "0xe0947c06e5dfc469740d2a4e7ae8f4e96661777584e64aa363696770aec942ab",
+  "keystorePassword": "hrl",
+  "address": "0x056d81939Ac2A8eDd2D878f0810E9D7Ce7f4e870",
+  "genesisAddresses": [
+    "0x056d81939Ac2A8eDd2D878f0810E9D7Ce7f4e870"
+  ],
+  "defaultBranch": "develop",
+  "contractAddresses": {
+    "root": {
+      "Registry": "0x14c3cbD111B291e0Eff8f75D4a3a1043f27af2D6",
+      "RootChain": "0xE29e615FC4E23E6192dE50282371f14dC6E08DaE",
+      "Governance": "0x18D7810Cf8b9dc8d5c20E8542e7D0AE74f077DD9",
+      "GovernanceProxy": "0xcF93eC59f9C095Abd8222C7Bdc9DA6027708F320",
+      "RootChainProxy": "0x8A76956F4Ad4dDb5E69e0E6c5e27934B0e7a6629",
+      "DepositManager": "0xE3532E877F36288237F561BBb380bE8CCE53ebfc",
+      "DepositManagerProxy": "0x3F7E5BCdE6Fa54239Cd28e6b5399Fecc37c1459c",
+      "WithdrawManager": "0x6566a9ae1615f5EF7e07873284c08f385669D7e0",
+      "WithdrawManagerProxy": "0xC07F911977bB6F1dD622eD7E839B9710e964ed6e",
+      "StakeManager": "0x5095d8Ab2EC30EC2e9E44F0F3a5afE9a28e3095e",
+      "StakeManagerProxy": "0xc34c846ae923a67F8605b7BA3b51c4F0EeAf14D6",
+      "ValidatorShare": "0x38E5c3F58E67C55d18DdCF3368c01ff17c841BB3",
+      "SlashingManager": "0x1CfD87BfD18ed3469727a5C3570c9e9685791C1f",
+      "StakingInfo": "0x2EaB05Cb5Db61B2D521CAAC34a2E7397cdC1aACc",
+      "ExitNFT": "0x03D74612825712693353A81D5ABfE976403301e8",
+      "StateSender": "0xF2F4D0dF96e0550Eaf4606217f9e7A3B9F00aDAc",
+      "predicates": {
+        "ERC20Predicate": "0xfF6Abe5b0813660648A5616ADf0D97F1239B3CBf",
+        "ERC721Predicate": "0x6C16c59aBfE671322841f7265142d4f8601A006D",
+        "MarketplacePredicate": "0xe95617C860839ECE4D8612E02B7523A8e543004E",
+        "TransferWithSigPredicate": "0x23f544C66eF6a09D94dE0083C620e5FF05Bacfd7"
+      },
+      "tokens": {
+        "MaticWeth": "0xc6B9b60e6854BF103285837FdE61d36842A9922c",
+        "MaticToken": "0xd8e056A5036ecB4966a53937D50019fb72DAB74E",
+        "TestToken": "0xe7dE0D4Ba730Ca19357939469835BC04273EbE81",
+        "RootERC721": "0x8FFC2783da19616503f48108C81BccABf6281aD3"
+      }
+    }
+  }
+}

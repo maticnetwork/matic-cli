@@ -64,6 +64,12 @@ export class Ganache {
         }
       },
       {
+        title: 'Create dbdir',
+        task : () => {
+          return fs.mkdirp(this.dbDir)
+        }
+      },
+      {
         title: 'Start ganache',
         task: () => {
           server = ganacheCli.server({
@@ -157,8 +163,7 @@ export class Ganache {
 }
 
 async function setupGanache(config) {
-  const ganache = new Ganache(config)
-
+  const ganache = new Ganache(config)  
   // get ganache tasks
   const tasks = await ganache.getTasks();
 
