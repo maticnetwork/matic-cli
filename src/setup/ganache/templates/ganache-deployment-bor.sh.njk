@@ -12,5 +12,5 @@ export HEIMDALL_ID={{ obj.config.heimdallChainId }}
 # cd matic contracts repo
 cd {{ obj.contracts.repositoryDir }}
 
-# root contracts are deployed on base chain
-npm run truffle:migrate:dev -- --reset --to 4
+# bor contracts are deployed on child chain
+npm run truffle:migrate:dev:bor -- --reset -f 5 --to 5

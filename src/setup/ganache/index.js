@@ -1,10 +1,10 @@
-import Listr from 'listr';
-import chalk from 'chalk';
-import path from 'path';
-import execa from 'execa';
-import fs from 'fs-extra';
-import ganacheCli from 'ganache-cli';
-import { projectInstall } from 'pkg-install';
+import Listr from 'listr'
+import chalk from 'chalk'
+import path from 'path'
+import execa from 'execa'
+import fs from 'fs-extra'
+import ganacheCli from 'ganache-cli'
+import { projectInstall } from 'pkg-install'
 
 import { loadConfig } from '../config'
 import { cloneRepository, processTemplateFiles } from '../../lib/utils'
@@ -15,8 +15,9 @@ export class Ganache {
   constructor(config, options = {}) {
     this.config = config
 
-    this.dbName = 'ganache-db'
-    this.serverPort = 9545
+    this.dbName = options.dbName || 'ganache-db'
+    this.serverPort = options.serverPort || 9545
+    this.isBorAvailable = !!options.isBorAvailable
 
     // get contracts setup obj
     this.contracts = new Contracts(config, { repositoryBranch: options.contractsBranch })
@@ -44,11 +45,11 @@ export class Ganache {
       {
         title: 'Stake',
         task: () => execa('bash', ['ganache-stake.sh'], {
-          cwd: this.config.targetDirectory,
+          cwd: this.config.targetDirectory
         })
       }
     ], {
-      exitOnError: true,
+      exitOnError: true
     })
   }
 
@@ -74,8 +75,8 @@ export class Ganache {
             port: this.serverPort,
             db_path: this.dbDir,
             gasPrice: '0x1',
-            gasLimit: '0xfffffffff',
-          });
+            gasLimit: '0xfffffffff'
+          })
 
           return new Promise((resolve, reject) => {
             server.listen(this.serverPort, (err, blockchain) => {
@@ -89,10 +90,28 @@ export class Ganache {
         }
       },
       {
-        title: 'Deploy contracts',
+        title: 'Deploy contracts on Main chain',
         task: () => execa('bash', ['ganache-deployment.sh'], {
-          cwd: this.config.targetDirectory,
+          cwd: this.config.targetDirectory
         })
+      },
+      {
+        title: 'Deploy contracts on Child chain',
+        task: () => execa('bash', ['ganache-deployment-bor.sh'], {
+          cwd: this.config.targetDirectory
+        }),
+        enabled: () => {
+          return this.config.isBorAvailable
+        }
+      },
+      {
+        title: 'Map contracts to Main chain',
+        task: () => execa('bash', ['ganache-deployment-map.sh'], {
+          cwd: this.config.targetDirectory
+        }),
+        enabled: () => {
+          return this.config.isBorAvailable
+        }
       },
       {
         title: 'Setup validators',
@@ -119,7 +138,7 @@ export class Ganache {
         }
       }
     ], {
-      exitOnError: true,
+      exitOnError: true
     })
   }
 
@@ -134,7 +153,7 @@ export class Ganache {
             const templateDir = path.resolve(
               new URL(import.meta.url).pathname,
               '../templates'
-            );
+            )
 
             // copy all templates to target directory
             await fs.copy(templateDir, this.config.targetDirectory)
@@ -147,12 +166,12 @@ export class Ganache {
           title: 'Deploy contracts',
           task: () => this.getContractDeploymenTasks() // get contact deployment tasks
         },
-        ...this.contracts.prepareContractAddressesTasks(), // prepare contract addresses and load in config
+        ...this.contracts.prepareContractAddressesTasks() // prepare contract addresses and load in config
       ],
       {
-        exitOnError: true,
+        exitOnError: true
       }
-    );
+    )
   }
 }
 
@@ -160,10 +179,10 @@ async function setupGanache(config) {
   const ganache = new Ganache(config, { contractsBranch: config.contractsBranch })
 
   // get ganache tasks
-  const tasks = await ganache.getTasks();
+  const tasks = await ganache.getTasks()
 
-  await tasks.run();
-  console.log('%s Ganache snapshot is ready', chalk.green.bold('DONE'));
+  await tasks.run()
+  console.log('%s Ganache snapshot is ready', chalk.green.bold('DONE'))
 
   // print details
   await config.print()
