@@ -4,10 +4,9 @@ import path from 'path'
 import execa from 'execa'
 import fs from 'fs-extra'
 import ganacheCli from 'ganache-cli'
-import { projectInstall } from 'pkg-install'
 
 import { loadConfig } from '../config'
-import { cloneRepository, processTemplateFiles } from '../../lib/utils'
+import { processTemplateFiles } from '../../lib/utils'
 import { printDependencyInstructions } from '../helper'
 import { Contracts } from '../contracts'
 
@@ -17,7 +16,6 @@ export class Ganache {
 
     this.dbName = options.dbName || 'ganache-db'
     this.serverPort = options.serverPort || 9545
-    this.isBorAvailable = !!options.isBorAvailable
 
     // get contracts setup obj
     this.contracts = new Contracts(config, { repositoryBranch: options.contractsBranch })
@@ -53,7 +51,7 @@ export class Ganache {
     })
   }
 
-  async getContractDeploymenTasks() {
+  async getContractDeploymentTasks() {
     // server
     let server = null
 
@@ -96,24 +94,6 @@ export class Ganache {
         })
       },
       {
-        title: 'Deploy contracts on Child chain',
-        task: () => execa('bash', ['ganache-deployment-bor.sh'], {
-          cwd: this.config.targetDirectory
-        }),
-        enabled: () => {
-          return this.config.isBorAvailable
-        }
-      },
-      {
-        title: 'Map contracts to Main chain',
-        task: () => execa('bash', ['ganache-deployment-map.sh'], {
-          cwd: this.config.targetDirectory
-        }),
-        enabled: () => {
-          return this.config.isBorAvailable
-        }
-      },
-      {
         title: 'Setup validators',
         task: () => {
           return this.getStakeTasks()
@@ -142,6 +122,23 @@ export class Ganache {
     })
   }
 
+  async getBorContractDeploymentTask() {
+    return [
+      {
+        title: 'Deploy contracts on Child chain',
+        task: () => execa('bash', ['ganache-deployment-bor.sh'], {
+          cwd: this.config.targetDirectory
+        })
+      },
+      {
+        title: 'Sync contract addresses to Main chain',
+        task: () => execa('bash', ['ganache-deployment-sync.sh'], {
+          cwd: this.config.targetDirectory
+        })
+      }
+    ]
+  }
+
   async getTasks() {
     return new Listr(
       [
@@ -164,7 +161,7 @@ export class Ganache {
         },
         {
           title: 'Deploy contracts',
-          task: () => this.getContractDeploymenTasks() // get contact deployment tasks
+          task: () => this.getContractDeploymentTasks() // get contact deployment tasks
         },
         ...this.contracts.prepareContractAddressesTasks() // prepare contract addresses and load in config
       ],
