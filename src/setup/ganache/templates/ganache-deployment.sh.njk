@@ -16,4 +16,5 @@ cd {{ obj.contracts.repositoryDir }}
 mv migrations dev-migrations && cp -r deploy-migrations migrations
 
 # root contracts are deployed on base chain
-truffle migrate --reset --to 3 --network development
+# npm run truffle migrate --reset --to 3 --network development
+npm run truffle:migrate

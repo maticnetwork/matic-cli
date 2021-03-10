@@ -8,7 +8,7 @@ import os from 'os'
 import fileReplacer from '../../lib/file-replacer'
 import { loadConfig } from '../config'
 import { cloneRepository, processTemplateFiles } from '../../lib/utils'
-import { printDependencyInstructions } from '../helper'
+import { printDependencyInstructions, getDefaultBranch } from '../helper'
 import { Ganache } from '../ganache'
 
 // repository name
@@ -90,10 +90,10 @@ export class Heimdall {
     console.log(chalk.gray('Heimdall genesis') + ': ' + chalk.bold.green(this.heimdallGenesisFilePath))
     console.log(chalk.gray('Heimdall validator key') + ': ' + chalk.bold.green(this.heimdallValidatorKeyFilePath))
     console.log(chalk.gray('Heimdall repo') + ': ' + chalk.bold.green(this.repositoryDir))
-    console.log(chalk.gray('Setup heimdall') + ': ' + chalk.bold.green("bash heimdall-start.sh"))
-    console.log(chalk.gray('Start heimdall rest-server') + ': ' + chalk.bold.green("bash heimdall-server-start.sh"))
-    console.log(chalk.gray('Start heimdall bridge') + ': ' + chalk.bold.green("bash heimdall-bridge-start.sh"))
-    console.log(chalk.gray('Reset heimdall') + ': ' + chalk.bold.green("bash heimdall-clean.sh"))
+    console.log(chalk.gray('Setup heimdall') + ': ' + chalk.bold.green('bash heimdall-start.sh'))
+    console.log(chalk.gray('Start heimdall rest-server') + ': ' + chalk.bold.green('bash heimdall-server-start.sh'))
+    console.log(chalk.gray('Start heimdall bridge') + ': ' + chalk.bold.green('bash heimdall-bridge-start.sh'))
+    console.log(chalk.gray('Reset heimdall') + ': ' + chalk.bold.green('bash heimdall-clean.sh'))
   }
 
   async account() {
@@ -127,21 +127,21 @@ export class Heimdall {
       {
         title: 'Process Heimdall and Bor chain ids',
         task: () => {
-          fileReplacer(this.heimdallGenesisFilePath).
-            replace(/"chain_id":[ ]*".*"/gi, `"chain_id": "${this.config.heimdallChainId}"`).
-            replace(/"bor_chain_id":[ ]*".*"/gi, `"bor_chain_id": "${this.config.borChainId}"`).
-            save()
+          fileReplacer(this.heimdallGenesisFilePath)
+            .replace(/"chain_id":[ ]*".*"/gi, `"chain_id": "${this.config.heimdallChainId}"`)
+            .replace(/"bor_chain_id":[ ]*".*"/gi, `"bor_chain_id": "${this.config.borChainId}"`)
+            .save()
         }
       },
       {
         title: 'Process validators',
         task: () => {
-          fileReplacer(this.heimdallGenesisFilePath).
-            replace(/"address":[ ]*".*"/gi, `"address": "${this.config.address}"`).
-            replace(/"signer":[ ]*".*"/gi, `"signer": "${this.config.address}"`).
-            replace(/"pubKey":[ ]*".*"/gi, `"pubKey": "${this.config.publicKey.replace("0x", "0x04")}"`).
-            replace(/"power":[ ]*".*"/gi, `"power": "${this.config.defaultStake}"`).
-            save()
+          fileReplacer(this.heimdallGenesisFilePath)
+            .replace(/"address":[ ]*".*"/gi, `"address": "${this.config.address}"`)
+            .replace(/"signer":[ ]*".*"/gi, `"signer": "${this.config.address}"`)
+            .replace(/"pubKey":[ ]*".*"/gi, `"pubKey": "${this.config.publicKey.replace('0x', '0x04')}"`)
+            .replace(/"power":[ ]*".*"/gi, `"power": "${this.config.defaultStake}"`)
+            .save()
         }
       },
       {
@@ -150,13 +150,13 @@ export class Heimdall {
           // get root contracts
           const rootContracts = this.config.contractAddresses.root
 
-          fileReplacer(this.heimdallGenesisFilePath).
-            replace(/"matic_token_address":[ ]*".*"/gi, `"matic_token_address": "${rootContracts.tokens.TestToken}"`).
-            replace(/"staking_manager_address":[ ]*".*"/gi, `"staking_manager_address": "${rootContracts.StakeManagerProxy}"`).
-            replace(/"root_chain_address":[ ]*".*"/gi, `"root_chain_address": "${rootContracts.RootChainProxy}"`).
-            replace(/"staking_info_address":[ ]*".*"/gi, `"staking_info_address": "${rootContracts.StakingInfo}"`).
-            replace(/"state_sender_address":[ ]*".*"/gi, `"state_sender_address": "${rootContracts.StateSender}"`).
-            save()
+          fileReplacer(this.heimdallGenesisFilePath)
+            .replace(/"matic_token_address":[ ]*".*"/gi, `"matic_token_address": "${rootContracts.tokens.TestToken}"`)
+            .replace(/"staking_manager_address":[ ]*".*"/gi, `"staking_manager_address": "${rootContracts.StakeManagerProxy}"`)
+            .replace(/"root_chain_address":[ ]*".*"/gi, `"root_chain_address": "${rootContracts.RootChainProxy}"`)
+            .replace(/"staking_info_address":[ ]*".*"/gi, `"staking_info_address": "${rootContracts.StakingInfo}"`)
+            .replace(/"state_sender_address":[ ]*".*"/gi, `"state_sender_address": "${rootContracts.StateSender}"`)
+            .save()
         },
         enabled: () => {
           return this.config.contractAddresses
@@ -199,7 +199,7 @@ export class Heimdall {
         {
           title: 'Create Heimdall account from private key',
           task: () => {
-            // It generates new account for validator 
+            // It generates new account for validator
             // and replaces it with new validator key
             return this.generateValidatorKey().then(data => {
               return fs.writeFile(this.heimdallValidatorKeyFilePath, JSON.stringify(data, null, 2), { mode: 0o755 })
@@ -215,10 +215,10 @@ export class Heimdall {
         {
           title: 'Process heimdall config file',
           task: () => {
-            fileReplacer(this.heimdallHeimdallConfigFilePath).
-              replace(/eth_rpc_url[ ]*=[ ]*".*"/gi, `eth_rpc_url = "http://localhost:9545"`).
-              replace(/bor_rpc_url[ ]*=[ ]*".*"/gi, `bor_rpc_url = "http://localhost:8545"`).
-              save()
+            fileReplacer(this.heimdallHeimdallConfigFilePath)
+              .replace(/eth_rpc_url[ ]*=[ ]*".*"/gi, 'eth_rpc_url = "http://localhost:9545"')
+              .replace(/bor_rpc_url[ ]*=[ ]*".*"/gi, 'bor_rpc_url = "http://localhost:8545"')
+              .save()
           }
         },
         {
@@ -227,7 +227,7 @@ export class Heimdall {
             const templateDir = path.resolve(
               new URL(import.meta.url).pathname,
               '../templates'
-            );
+            )
 
             // copy all templates to target directory
             await fs.copy(templateDir, this.config.targetDirectory)
@@ -245,8 +245,8 @@ export class Heimdall {
 }
 
 async function setupHeimdall(config) {
-  const ganache = new Ganache(config)
-  const heimdall = new Heimdall(config)
+  const ganache = new Ganache(config, { contractsBranch: config.contractsBranch })
+  const heimdall = new Heimdall(config, { repositoryBranch: config.heimdallBranch })
 
   // get all heimdall related tasks
   const tasks = new Listr([
@@ -284,6 +284,10 @@ export default async function () {
   const config = await loadConfig()
   await config.loadChainIds()
   await config.loadAccount()
+
+  // load branch
+  const answers = await getDefaultBranch(config)
+  config.set(answers)
 
   // start setup
   await setupHeimdall(config)

@@ -16,7 +16,7 @@ services:
       - devnet-network
 
   heimdall{{ node }}:
-    image: "maticnetwork/heimdall:{{ obj.config.defaultBranch }}"
+    image: "maticnetwork/heimdall:{{ obj.config.heimdallBranch }}"
     container_name: heimdall{{ node }}
     depends_on:
       - rabbit{{ node }}
@@ -33,7 +33,7 @@ services:
     {% endif %}
   
   bor{{ node }}:
-    image: "maticnetwork/bor:{{ obj.config.defaultBranch }}"
+    image: "maticnetwork/bor:{{ obj.config.borBranch }}"
     container_name: bor{{ node }}
     depends_on:
       - heimdall{{ node }}

@@ -19,7 +19,7 @@ export class Ganache {
     this.serverPort = 9545
 
     // get contracts setup obj
-    this.contracts = new Contracts(config)
+    this.contracts = new Contracts(config, { repositoryBranch: options.contractsBranch })
   }
 
   get name() {
@@ -157,7 +157,7 @@ export class Ganache {
 }
 
 async function setupGanache(config) {
-  const ganache = new Ganache(config)
+  const ganache = new Ganache(config, { contractsBranch: config.contractsBranch })
 
   // get ganache tasks
   const tasks = await ganache.getTasks();

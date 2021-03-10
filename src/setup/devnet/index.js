@@ -277,7 +277,7 @@ export class Devnet {
   }
 
   async getTasks() {
-    const heimdall = new Heimdall(this.config, { repositoryBranch: this.config.defaultBranch })
+    const heimdall = new Heimdall(this.config, { repositoryBranch: this.config.heimdallBranch })
     const genesis = new Genesis(this.config, { repositoryBranch: 'master' })
 
     // create testnet tasks

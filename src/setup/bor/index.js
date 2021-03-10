@@ -6,7 +6,7 @@ import fs from 'fs-extra'
 
 import { loadConfig } from '../config'
 import { cloneRepository, getKeystoreFile, processTemplateFiles } from '../../lib/utils'
-import { printDependencyInstructions } from '../helper'
+import { printDependencyInstructions, getDefaultBranch } from '../helper'
 import { Genesis } from '../genesis'
 
 // default password
@@ -62,9 +62,9 @@ export class Bor {
   async print() {
     console.log(chalk.gray('Bor data') + ': ' + chalk.bold.green(this.borDataDir))
     console.log(chalk.gray('Bor repo') + ': ' + chalk.bold.green(this.repositoryDir))
-    console.log(chalk.gray('Setup bor chain') + ': ' + chalk.bold.green("bash bor-setup.sh"))
-    console.log(chalk.gray('Start bor chain') + ': ' + chalk.bold.green("bash bor-start.sh"))
-    console.log(chalk.gray('Clean bor chain') + ': ' + chalk.bold.green("bash bor-clean.sh"))
+    console.log(chalk.gray('Setup bor chain') + ': ' + chalk.bold.green('bash bor-setup.sh'))
+    console.log(chalk.gray('Start bor chain') + ': ' + chalk.bold.green('bash bor-start.sh'))
+    console.log(chalk.gray('Clean bor chain') + ': ' + chalk.bold.green('bash bor-clean.sh'))
   }
 
   async getTasks() {
@@ -76,15 +76,15 @@ export class Bor {
         },
         {
           title: 'Build Bor',
-          task: () => execa('make', ['bor'], {
-            cwd: this.repositoryDir,
+          task: () => execa('make', ['bor-all'], {
+            cwd: this.repositoryDir
           })
         },
         {
           title: 'Prepare data directory',
           task: () => {
             return execa('mkdir', ['-p', this.config.dataDir, this.borDataDir, this.keystoreDir], {
-              cwd: this.config.targetDirectory,
+              cwd: this.config.targetDirectory
             })
           }
         },
@@ -110,7 +110,7 @@ export class Bor {
             const templateDir = path.resolve(
               new URL(import.meta.url).pathname,
               '../templates'
-            );
+            )
 
             // copy all templates to target directory
             await fs.copy(templateDir, this.config.targetDirectory)
@@ -121,9 +121,9 @@ export class Bor {
         }
       ],
       {
-        exitOnError: true,
+        exitOnError: true
       }
-    );
+    )
   }
 }
 
@@ -146,19 +146,19 @@ async function setupBor(config) {
       }
     ],
     {
-      exitOnError: true,
+      exitOnError: true
     }
-  );
+  )
 
-  await tasks.run();
-  console.log('%s Bor is ready', chalk.green.bold('DONE'));
+  await tasks.run()
+  console.log('%s Bor is ready', chalk.green.bold('DONE'))
 
   // print config
   await config.print()
   await bor.genesis.print(config)
   await bor.print()
 
-  return true;
+  return true
 }
 
 export default async function () {
@@ -168,6 +168,10 @@ export default async function () {
   const config = await loadConfig({ targetDirectory: process.cwd() })
   await config.loadChainIds()
   await config.loadAccount()
+
+  // load branch
+  const answers = await getDefaultBranch(config)
+  config.set(answers)
 
   // start setup
   await setupBor(config)
