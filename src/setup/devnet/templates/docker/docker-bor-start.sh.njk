@@ -15,11 +15,11 @@ ADDRESS=${ADDRESSES[$INDEX]};
 NODE_DIR=/root/.bor
 DATA_DIR=/root/.bor/data
 
-docker-compose run -d --name bor$INDEX bor$INDEX sh -c "
+docker-compose run --service-ports -d --name bor$INDEX bor$INDEX sh -c "
 touch /root/logs/bor.log
 bor --datadir $DATA_DIR \
   --port 30303 \
-  --heimdall http://heimdall$INDEX:1317 \
+  --bor.heimdall http://heimdall$INDEX:1317 \
   --http --http.addr '0.0.0.0' \
   --ws --wsport 8546 \
   --http.vhosts '*' \

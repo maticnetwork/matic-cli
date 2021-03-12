@@ -8,9 +8,10 @@ import nunjucks from 'nunjucks'
 import { toBuffer, privateToPublic, bufferToHex } from 'ethereumjs-util'
 
 import { Heimdall } from '../heimdall'
+import { Ganache } from '../ganache'
 import { Genesis } from '../genesis'
 import { printDependencyInstructions, getDefaultBranch } from '../helper'
-import { getNewPrivateKey, getKeystoreFile, processTemplateFiles } from '../../lib/utils'
+import { getNewPrivateKey, getKeystoreFile, processTemplateFiles, getAccountFromPrivateKey } from '../../lib/utils'
 import { loadConfig } from '../config'
 import fileReplacer from '../../lib/file-replacer'
 
@@ -61,6 +62,10 @@ export class Devnet {
 
   borDataDir(index) {
     return path.join(this.borDir(index), 'data')
+  }
+
+  borDataBorDir(index) {
+    return path.join(this.borDir(index), 'data', 'bor')
   }
 
   borKeystoreDir(index) {
@@ -161,6 +166,27 @@ export class Devnet {
         }
       },
       {
+        title: 'Process contract addresses',
+        task: () => {
+          // get root contracts
+          const rootContracts = this.config.contractAddresses.root
+
+          // set heimdall peers with devnet heimdall hosts
+          for (let i = 0; i < this.totalNodes; i++) {
+            fileReplacer(this.heimdallGenesisFilePath(i))
+              .replace(/"matic_token_address":[ ]*".*"/gi, `"matic_token_address": "${rootContracts.tokens.TestToken}"`)
+              .replace(/"staking_manager_address":[ ]*".*"/gi, `"staking_manager_address": "${rootContracts.StakeManagerProxy}"`)
+              .replace(/"root_chain_address":[ ]*".*"/gi, `"root_chain_address": "${rootContracts.RootChainProxy}"`)
+              .replace(/"staking_info_address":[ ]*".*"/gi, `"staking_info_address": "${rootContracts.StakingInfo}"`)
+              .replace(/"state_sender_address":[ ]*".*"/gi, `"state_sender_address": "${rootContracts.StateSender}"`)
+              .save()
+          }
+        },
+        enabled: () => {
+          return this.config.contractAddresses
+        }
+      },
+      {
         title: 'Process templates',
         task: async () => {
           const templateDir = path.resolve(
@@ -172,7 +198,7 @@ export class Devnet {
           await fs.copy(path.join(templateDir, 'docker'), this.config.targetDirectory)
 
           // process template files
-          await processTemplateFiles(this.config.targetDirectory, { obj: this })
+          await processTemplateFiles(this.config.targetDirectory, { obj: this, ganache: this.ganache })
         }
       }
     ]
@@ -277,8 +303,9 @@ export class Devnet {
   }
 
   async getTasks() {
-    const heimdall = new Heimdall(this.config, { repositoryBranch: this.config.heimdallBranch })
-    const genesis = new Genesis(this.config, { repositoryBranch: 'master' })
+    const ganache = this.ganache
+    const heimdall = this.heimdall
+    const genesis = this.genesis
 
     // create testnet tasks
     const createTestnetTasks = await this.getCreateTestnetTask(heimdall)
@@ -287,7 +314,7 @@ export class Devnet {
       [
         ...createTestnetTasks,
         {
-          title: genesis.taskTitle,
+          title: 'Setup accounts',
           task: () => {
             // set validator addresses
             const genesisAddresses = []
@@ -300,6 +327,15 @@ export class Devnet {
             // set genesis addresses
             this.config.genesisAddresses = genesisAddresses
 
+            // setup accounts from signer dump data
+            this.config.accounts = this.signerDumpData.map(s => {
+              return getAccountFromPrivateKey(s.priv_key)
+            })
+          }
+        },
+        {
+          title: genesis.taskTitle,
+          task: () => {
             // get genesis tasks
             return genesis.getTasks()
           }
@@ -345,6 +381,15 @@ export class Devnet {
           }
         },
         {
+          title: ganache.taskTitle,
+          task: () => {
+            return ganache.getTasks()
+          },
+          enabled: () => {
+            return this.config.devnetType === 'docker'
+          }
+        },
+        {
           title: 'Docker',
           task: async () => {
             const tasks = await this.getDockerTasks()
@@ -371,6 +416,9 @@ export class Devnet {
 
 async function setupDevnet(config) {
   const devnet = new Devnet(config)
+  devnet.ganache = new Ganache(config, { contractsBranch: config.contractsBranch })
+  devnet.heimdall = new Heimdall(config, { repositoryBranch: config.heimdallBranch })
+  devnet.genesis = new Genesis(config, { repositoryBranch: 'master' })
 
   const tasks = await devnet.getTasks()
   await tasks.run()
