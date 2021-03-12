@@ -7,7 +7,7 @@ import os from 'os'
 
 import fileReplacer from '../../lib/file-replacer'
 import { loadConfig } from '../config'
-import { cloneRepository, processTemplateFiles } from '../../lib/utils'
+import { cloneRepository, privateKeyToPublicKey, processTemplateFiles } from '../../lib/utils'
 import { printDependencyInstructions, getDefaultBranch } from '../helper'
 import { Ganache } from '../ganache'
 
@@ -115,7 +115,7 @@ export class Heimdall {
 
   // returns content of validator key
   async generateValidatorKey() {
-    return execa(this.heimdallcliCmd, ['generate-validatorkey', this.config.privateKey, '--home', this.heimdallDataDir], {
+    return execa(this.heimdallcliCmd, ['generate-validatorkey', this.config.primaryAccount.privateKey, '--home', this.heimdallDataDir], {
       cwd: this.config.configDir
     }).then(() => {
       return require(this.configValidatorKeyFilePath)
@@ -137,9 +137,9 @@ export class Heimdall {
         title: 'Process validators',
         task: () => {
           fileReplacer(this.heimdallGenesisFilePath)
-            .replace(/"address":[ ]*".*"/gi, `"address": "${this.config.address}"`)
-            .replace(/"signer":[ ]*".*"/gi, `"signer": "${this.config.address}"`)
-            .replace(/"pubKey":[ ]*".*"/gi, `"pubKey": "${this.config.publicKey.replace('0x', '0x04')}"`)
+            .replace(/"address":[ ]*".*"/gi, `"address": "${this.config.primaryAccount.address}"`)
+            .replace(/"signer":[ ]*".*"/gi, `"signer": "${this.config.primaryAccount.address}"`)
+            .replace(/"pubKey":[ ]*".*"/gi, `"pubKey": "${privateKeyToPublicKey(this.config.primaryAccount.privateKey).replace('0x', '0x04')}"`)
             .replace(/"power":[ ]*".*"/gi, `"power": "${this.config.defaultStake}"`)
             .save()
         }
@@ -283,7 +283,7 @@ export default async function () {
   // configuration
   const config = await loadConfig()
   await config.loadChainIds()
-  await config.loadAccount()
+  await config.loadAccounts()
 
   // load branch
   const answers = await getDefaultBranch(config)

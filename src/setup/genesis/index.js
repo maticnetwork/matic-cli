@@ -199,7 +199,6 @@ export default async function () {
   // configuration
   const config = await loadConfig()
   await config.loadChainIds()
-  // await config.loadAccount() // no account load needed
 
   // start setup
   await setupGenesis(config)

@@ -83,7 +83,7 @@ export default async function () {
   // configuration
   const config = await loadConfig()
   await config.loadChainIds()
-  await config.loadAccount()
+  await config.loadAccounts()
 
   // load branch
   const answers = await getDefaultBranch(config)

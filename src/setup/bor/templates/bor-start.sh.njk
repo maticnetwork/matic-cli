@@ -2,7 +2,7 @@
 
 set -x #echo on
 
-ADDRESS={{ obj.config.address }}
+ADDRESS={{ obj.config.primaryAccount.address }}
 BOR_CHAIN_ID={{ obj.config.borChainId }}
 
 if [ -z "$ADDRESS" ]
@@ -30,7 +30,7 @@ $BUILD_DIR/bor --datadir $BOR_DATA_DIR \
   --http.vhosts '*' \
   --http.corsdomain '*' \
   --http.port 8545 \
-  --http.api 'db,eth,net,web3,txpool' \
+  --http.api 'eth,net,web3,txpool' \
   --ipcpath $BOR_DATA_DIR/bor.ipc \
   --networkid $BOR_CHAIN_ID \
   --miner.gasprice '0' \

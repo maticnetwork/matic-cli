@@ -92,7 +92,7 @@ export class Bor {
           title: 'Prepare keystore and password.txt',
           task: () => {
             // get keystore file and store in keystore file
-            const keystoreFileObj = getKeystoreFile(this.config.privateKey, this.config.keystorePassword)
+            const keystoreFileObj = getKeystoreFile(this.config.primaryAccount.privateKey, this.config.keystorePassword)
 
             // resolve promise
             return fs.emptyDir(this.keystoreDir).then(() => {
@@ -167,7 +167,7 @@ export default async function () {
   // configuration
   const config = await loadConfig({ targetDirectory: process.cwd() })
   await config.loadChainIds()
-  await config.loadAccount()
+  await config.loadAccounts()
 
   // load branch
   const answers = await getDefaultBranch(config)

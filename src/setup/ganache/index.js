@@ -7,7 +7,7 @@ import ganacheCli from 'ganache-cli'
 
 import { loadConfig } from '../config'
 import { processTemplateFiles } from '../../lib/utils'
-import { printDependencyInstructions } from '../helper'
+import { printDependencyInstructions, getDefaultBranch } from '../helper'
 import { Contracts } from '../contracts'
 
 export class Ganache {
@@ -68,7 +68,7 @@ export class Ganache {
           server = ganacheCli.server({
             accounts: [{
               balance: '0xfffffffffffffffffffffffffffffffffffffffffffff',
-              secretKey: this.config.privateKey
+              secretKey: this.config.primaryAccount.privateKey
             }],
             port: this.serverPort,
             db_path: this.dbDir,
@@ -192,7 +192,11 @@ export default async function () {
   // configuration
   const config = await loadConfig()
   await config.loadChainIds()
-  await config.loadAccount()
+  await config.loadAccounts()
+
+  // load branch
+  const answers = await getDefaultBranch(config)
+  config.set(answers)
 
   // start ganache
   await setupGanache(config)

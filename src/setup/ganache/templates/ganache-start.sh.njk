@@ -2,7 +2,12 @@
 
 set -x #echo on
 
-PRIVATE_KEY={{ obj.config.privateKey }}
 DATA_DIR={{ obj.dbDir }}
 
-ganache-cli --hardfork istanbul --blockTime 1 --db $DATA_DIR --account $PRIVATE_KEY,1000000000000000000000 --gasLimit 8000000 --gasPrice 0 -p 9545 -h 0.0.0.0
+ganache-cli --hardfork istanbul \
+  --blockTime 1 \
+  --db $DATA_DIR \
+  {% for acc in obj.config.accounts %}--account {{ acc.privateKey }},1000000000000000000000 \{% endfor %}
+  --gasLimit 8000000 \
+  --gasPrice 0 \
+  -p 9545 -h 0.0.0.0
