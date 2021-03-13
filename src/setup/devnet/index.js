@@ -8,10 +8,11 @@ import nunjucks from 'nunjucks'
 import { toBuffer, privateToPublic, bufferToHex } from 'ethereumjs-util'
 
 import { Heimdall } from '../heimdall'
+import { Ganache } from '../ganache'
 import { Genesis } from '../genesis'
 import { printDependencyInstructions, getDefaultBranch } from '../helper'
-import { getNewPrivateKey, getKeystoreFile, processTemplateFiles } from '../../lib/utils'
-import { loadConfig, saveConfig } from '../config'
+import { getNewPrivateKey, getKeystoreFile, processTemplateFiles, getAccountFromPrivateKey } from '../../lib/utils'
+import { loadConfig } from '../config'
 import fileReplacer from '../../lib/file-replacer'
 
 export class Devnet {
@@ -63,6 +64,10 @@ export class Devnet {
     return path.join(this.borDir(index), 'data')
   }
 
+  borDataBorDir(index) {
+    return path.join(this.borDir(index), 'data', 'bor')
+  }
+
   borKeystoreDir(index) {
     return path.join(this.borDir(index), 'keystore')
   }
@@ -101,10 +106,10 @@ export class Devnet {
       task: async () => {
         const staticNodes = []
 
-        // create new enode 
+        // create new enode
         for (let i = 0; i < this.totalNodes; i++) {
           const enodeObj = await getNewPrivateKey()
-          const pubKey = bufferToHex(privateToPublic(toBuffer(enodeObj.privateKey))).replace("0x", "")
+          const pubKey = bufferToHex(privateToPublic(toBuffer(enodeObj.privateKey))).replace('0x', '')
 
           // draft enode
           const enode = `enode://${pubKey}@${this.config.devnetBorHosts[i]}:30303`
@@ -117,7 +122,7 @@ export class Devnet {
             // create nodekey file
             fs.writeFile(
               this.borNodeKeyPath(i),
-              `${enodeObj.privateKey.replace("0x", "")}\n`,
+              `${enodeObj.privateKey.replace('0x', '')}\n`,
               { mode: 0o600 }
             ),
             // create enode file
@@ -125,12 +130,12 @@ export class Devnet {
               this.borEnodeFilePath(i),
               `${enode}\n`,
               { mode: 0o600 }
-            ),
+            )
           ]
           await Promise.all(p)
         }
 
-        // create static-nodes 
+        // create static-nodes
         const data = JSON.stringify(staticNodes, null, 2)
         for (let i = 0; i < this.totalNodes; i++) {
           await fs.writeFile(
@@ -150,14 +155,37 @@ export class Devnet {
       {
         title: 'Process Heimdall configs',
         task: async () => {
-          // set heimdall 
+          // set heimdall
           for (let i = 0; i < this.totalNodes; i++) {
-            fileReplacer(this.heimdallHeimdallConfigFilePath(i)).
-              replace(/eth_rpc_url[ ]*=[ ]*".*"/gi, `eth_rpc_url = "${this.config.ethURL}"`).
-              replace(/bor_rpc_url[ ]*=[ ]*".*"/gi, `bor_rpc_url = "http://bor${i}:8545"`).
-              replace(/amqp_url[ ]*=[ ]*".*"/gi, `amqp_url = "amqp://guest:guest@rabbit${i}:5672/"`).
-              save()
+            fileReplacer(this.heimdallHeimdallConfigFilePath(i))
+              .replace(/eth_rpc_url[ ]*=[ ]*".*"/gi, `eth_rpc_url = "${this.config.ethURL}"`)
+              .replace(/bor_rpc_url[ ]*=[ ]*".*"/gi, `bor_rpc_url = "http://bor${i}:8545"`)
+              .replace(/amqp_url[ ]*=[ ]*".*"/gi, `amqp_url = "amqp://guest:guest@rabbit${i}:5672/"`)
+              .replace(/span_poll_interval[ ]*=[ ]*".*"/gi, 'span_poll_interval = "0m15s"')
+              .replace(/checkpoint_poll_interval[ ]*=[ ]*".*"/gi, 'checkpoint_poll_interval = "1m0s"')
+              .save()
           }
+        }
+      },
+      {
+        title: 'Process contract addresses',
+        task: () => {
+          // get root contracts
+          const rootContracts = this.config.contractAddresses.root
+
+          // set heimdall peers with devnet heimdall hosts
+          for (let i = 0; i < this.totalNodes; i++) {
+            fileReplacer(this.heimdallGenesisFilePath(i))
+              .replace(/"matic_token_address":[ ]*".*"/gi, `"matic_token_address": "${rootContracts.tokens.TestToken}"`)
+              .replace(/"staking_manager_address":[ ]*".*"/gi, `"staking_manager_address": "${rootContracts.StakeManagerProxy}"`)
+              .replace(/"root_chain_address":[ ]*".*"/gi, `"root_chain_address": "${rootContracts.RootChainProxy}"`)
+              .replace(/"staking_info_address":[ ]*".*"/gi, `"staking_info_address": "${rootContracts.StakingInfo}"`)
+              .replace(/"state_sender_address":[ ]*".*"/gi, `"state_sender_address": "${rootContracts.StateSender}"`)
+              .save()
+          }
+        },
+        enabled: () => {
+          return this.config.contractAddresses
         }
       },
       {
@@ -166,13 +194,13 @@ export class Devnet {
           const templateDir = path.resolve(
             new URL(import.meta.url).pathname,
             '../templates'
-          );
+          )
 
           // copy docker related templates
           await fs.copy(path.join(templateDir, 'docker'), this.config.targetDirectory)
 
           // process template files
-          await processTemplateFiles(this.config.targetDirectory, { obj: this })
+          await processTemplateFiles(this.config.targetDirectory, { obj: this, ganache: this.ganache })
         }
       }
     ]
@@ -185,13 +213,13 @@ export class Devnet {
       {
         title: 'Process Heimdall configs',
         task: async () => {
-          // set heimdall 
+          // set heimdall
           for (let i = 0; i < this.totalNodes; i++) {
-            fileReplacer(this.heimdallHeimdallConfigFilePath(i)).
-              replace(/eth_rpc_url[ ]*=[ ]*".*"/gi, `eth_rpc_url = "${this.config.ethURL}"`).
-              replace(/bor_rpc_url[ ]*=[ ]*".*"/gi, `bor_rpc_url = "http://localhost:8545"`).
-              replace(/amqp_url[ ]*=[ ]*".*"/gi, `amqp_url = "amqp://guest:guest@localhost:5672/"`).
-              save()
+            fileReplacer(this.heimdallHeimdallConfigFilePath(i))
+              .replace(/eth_rpc_url[ ]*=[ ]*".*"/gi, `eth_rpc_url = "${this.config.ethURL}"`)
+              .replace(/bor_rpc_url[ ]*=[ ]*".*"/gi, 'bor_rpc_url = "http://localhost:8545"')
+              .replace(/amqp_url[ ]*=[ ]*".*"/gi, 'amqp_url = "amqp://guest:guest@localhost:5672/"')
+              .save()
           }
         }
       },
@@ -201,7 +229,7 @@ export class Devnet {
           const templateDir = path.resolve(
             new URL(import.meta.url).pathname,
             '../templates'
-          );
+          )
 
           // copy remote related templates
           await fs.copy(path.join(templateDir, 'remote'), this.config.targetDirectory)
@@ -212,14 +240,14 @@ export class Devnet {
 
           // process njk files
           fs.readdirSync(this.config.targetDirectory).forEach(file => {
-            if (file.indexOf(".njk") !== -1) {
+            if (file.indexOf('.njk') !== -1) {
               const fp = path.join(this.config.targetDirectory, file)
 
               // process all njk files and copy to each node directory
               for (let i = 0; i < this.totalNodes; i++) {
                 fs.writeFileSync(
-                  path.join(this.nodeDir(i), file.replace(".njk", "")),
-                  nunjucks.render(fp, { obj: this, node: i, signerData: signerDumpData[i] }),
+                  path.join(this.nodeDir(i), file.replace('.njk', '')),
+                  nunjucks.render(fp, { obj: this, node: i, signerData: signerDumpData[i] })
                 )
               }
 
@@ -228,12 +256,12 @@ export class Devnet {
                 cwd: this.config.targetDirectory
               }))
             }
-          });
+          })
 
           // fulfill all promises
           await Promise.all(p)
         }
-      },
+      }
     ]
   }
 
@@ -260,16 +288,16 @@ export class Devnet {
 
           // set heimdall peers with devnet heimdall hosts
           for (let i = 0; i < this.totalNodes; i++) {
-            fileReplacer(this.heimdallConfigFilePath(i)).
-              replace(/heimdall([^:]+):/gi, (d, index) => {
+            fileReplacer(this.heimdallConfigFilePath(i))
+              .replace(/heimdall([^:]+):/gi, (d, index) => {
                 return `${this.config.devnetHeimdallHosts[index]}:`
-              }).
-              replace(/moniker.+=.+/gi, `moniker = "heimdall${i}"`).
-              save()
+              })
+              .replace(/moniker.+=.+/gi, `moniker = "heimdall${i}"`)
+              .save()
 
-            fileReplacer(this.heimdallGenesisFilePath(i)).
-              replace(/"bor_chain_id"[ ]*:[ ]*".*"/gi, `"bor_chain_id": "${this.config.borChainId}"`).
-              save()
+            fileReplacer(this.heimdallGenesisFilePath(i))
+              .replace(/"bor_chain_id"[ ]*:[ ]*".*"/gi, `"bor_chain_id": "${this.config.borChainId}"`)
+              .save()
           }
         }
       }
@@ -277,8 +305,9 @@ export class Devnet {
   }
 
   async getTasks() {
-    const heimdall = new Heimdall(this.config, { repositoryBranch: this.config.defaultBranch })
-    const genesis = new Genesis(this.config, { repositoryBranch: 'master' })
+    const ganache = this.ganache
+    const heimdall = this.heimdall
+    const genesis = this.genesis
 
     // create testnet tasks
     const createTestnetTasks = await this.getCreateTestnetTask(heimdall)
@@ -287,7 +316,7 @@ export class Devnet {
       [
         ...createTestnetTasks,
         {
-          title: genesis.taskTitle,
+          title: 'Setup accounts',
           task: () => {
             // set validator addresses
             const genesisAddresses = []
@@ -300,6 +329,15 @@ export class Devnet {
             // set genesis addresses
             this.config.genesisAddresses = genesisAddresses
 
+            // setup accounts from signer dump data
+            this.config.accounts = this.signerDumpData.map(s => {
+              return getAccountFromPrivateKey(s.priv_key)
+            })
+          }
+        },
+        {
+          title: genesis.taskTitle,
+          task: () => {
             // get genesis tasks
             return genesis.getTasks()
           }
@@ -345,6 +383,15 @@ export class Devnet {
           }
         },
         {
+          title: ganache.taskTitle,
+          task: () => {
+            return ganache.getTasks()
+          },
+          enabled: () => {
+            return this.config.devnetType === 'docker'
+          }
+        },
+        {
           title: 'Docker',
           task: async () => {
             const tasks = await this.getDockerTasks()
@@ -371,6 +418,9 @@ export class Devnet {
 
 async function setupDevnet(config) {
   const devnet = new Devnet(config)
+  devnet.ganache = new Ganache(config, { contractsBranch: config.contractsBranch })
+  devnet.heimdall = new Heimdall(config, { repositoryBranch: config.heimdallBranch })
+  devnet.genesis = new Genesis(config, { repositoryBranch: 'master' })
 
   const tasks = await devnet.getTasks()
   await tasks.run()
@@ -459,7 +509,7 @@ export default async function () {
   // set devent hosts
   let devnetBorHosts = []
   let devnetHeimdallHosts = []
-  let totalValidators = config.numOfValidators + config.numOfNonValidators
+  const totalValidators = config.numOfValidators + config.numOfNonValidators
   if (config.devnetType === 'docker') {
     [...Array(totalValidators).keys()].forEach((i) => {
       devnetBorHosts.push(`172.20.1.${i + 100}`)

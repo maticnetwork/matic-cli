@@ -1,25 +1,24 @@
-import Listr from 'listr';
-import chalk from 'chalk';
-import path from 'path';
-import execa from 'execa';
-import fs from 'fs-extra';
-import ganacheCli from 'ganache-cli';
-import { projectInstall } from 'pkg-install';
+import Listr from 'listr'
+import chalk from 'chalk'
+import path from 'path'
+import execa from 'execa'
+import fs from 'fs-extra'
+import ganacheCli from 'ganache-cli'
 
 import { loadConfig } from '../config'
-import { cloneRepository, processTemplateFiles } from '../../lib/utils'
-import { printDependencyInstructions } from '../helper'
+import { processTemplateFiles } from '../../lib/utils'
+import { printDependencyInstructions, getDefaultBranch } from '../helper'
 import { Contracts } from '../contracts'
 
 export class Ganache {
   constructor(config, options = {}) {
     this.config = config
 
-    this.dbName = 'ganache-db'
-    this.serverPort = 9545
+    this.dbName = options.dbName || 'ganache-db'
+    this.serverPort = options.serverPort || 9545
 
     // get contracts setup obj
-    this.contracts = new Contracts(config)
+    this.contracts = new Contracts(config, { repositoryBranch: options.contractsBranch })
   }
 
   get name() {
@@ -44,15 +43,15 @@ export class Ganache {
       {
         title: 'Stake',
         task: () => execa('bash', ['ganache-stake.sh'], {
-          cwd: this.config.targetDirectory,
+          cwd: this.config.targetDirectory
         })
       }
     ], {
-      exitOnError: true,
+      exitOnError: true
     })
   }
 
-  async getContractDeploymenTasks() {
+  async getContractDeploymentTasks() {
     // server
     let server = null
 
@@ -69,13 +68,13 @@ export class Ganache {
           server = ganacheCli.server({
             accounts: [{
               balance: '0xfffffffffffffffffffffffffffffffffffffffffffff',
-              secretKey: this.config.privateKey
+              secretKey: this.config.primaryAccount.privateKey
             }],
             port: this.serverPort,
             db_path: this.dbDir,
             gasPrice: '0x1',
-            gasLimit: '0xfffffffff',
-          });
+            gasLimit: '0xfffffffff'
+          })
 
           return new Promise((resolve, reject) => {
             server.listen(this.serverPort, (err, blockchain) => {
@@ -89,9 +88,9 @@ export class Ganache {
         }
       },
       {
-        title: 'Deploy contracts',
+        title: 'Deploy contracts on Main chain',
         task: () => execa('bash', ['ganache-deployment.sh'], {
-          cwd: this.config.targetDirectory,
+          cwd: this.config.targetDirectory
         })
       },
       {
@@ -119,8 +118,25 @@ export class Ganache {
         }
       }
     ], {
-      exitOnError: true,
+      exitOnError: true
     })
+  }
+
+  async getBorContractDeploymentTask() {
+    return [
+      {
+        title: 'Deploy contracts on Child chain',
+        task: () => execa('bash', ['ganache-deployment-bor.sh'], {
+          cwd: this.config.targetDirectory
+        })
+      },
+      {
+        title: 'Sync contract addresses to Main chain',
+        task: () => execa('bash', ['ganache-deployment-sync.sh'], {
+          cwd: this.config.targetDirectory
+        })
+      }
+    ]
   }
 
   async getTasks() {
@@ -134,7 +150,7 @@ export class Ganache {
             const templateDir = path.resolve(
               new URL(import.meta.url).pathname,
               '../templates'
-            );
+            )
 
             // copy all templates to target directory
             await fs.copy(templateDir, this.config.targetDirectory)
@@ -145,25 +161,25 @@ export class Ganache {
         },
         {
           title: 'Deploy contracts',
-          task: () => this.getContractDeploymenTasks() // get contact deployment tasks
+          task: () => this.getContractDeploymentTasks() // get contact deployment tasks
         },
-        ...this.contracts.prepareContractAddressesTasks(), // prepare contract addresses and load in config
+        ...this.contracts.prepareContractAddressesTasks() // prepare contract addresses and load in config
       ],
       {
-        exitOnError: true,
+        exitOnError: true
       }
-    );
+    )
   }
 }
 
 async function setupGanache(config) {
-  const ganache = new Ganache(config)
+  const ganache = new Ganache(config, { contractsBranch: config.contractsBranch })
 
   // get ganache tasks
-  const tasks = await ganache.getTasks();
+  const tasks = await ganache.getTasks()
 
-  await tasks.run();
-  console.log('%s Ganache snapshot is ready', chalk.green.bold('DONE'));
+  await tasks.run()
+  console.log('%s Ganache snapshot is ready', chalk.green.bold('DONE'))
 
   // print details
   await config.print()
@@ -176,7 +192,11 @@ export default async function () {
   // configuration
   const config = await loadConfig()
   await config.loadChainIds()
-  await config.loadAccount()
+  await config.loadAccounts()
+
+  // load branch
+  const answers = await getDefaultBranch(config)
+  config.set(answers)
 
   // start ganache
   await setupGanache(config)

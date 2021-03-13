@@ -49,12 +49,30 @@ export async function getChainIds(options = {}) {
 export async function getDefaultBranch(options = {}) {
   const questions = []
 
-  if (!options.defaultBranch) {
+  if (!options.borBranch) {
     questions.push({
       type: 'input',
-      name: 'defaultBranch',
-      message: 'Please enter branch or tag',
-      default: 'develop'
+      name: 'borBranch',
+      message: 'Please enter Bor branch or tag',
+      default: 'master'
+    })
+  }
+
+  if (!options.heimdallBranch) {
+    questions.push({
+      type: 'input',
+      name: 'heimdallBranch',
+      message: 'Please enter Heimdall branch or tag',
+      default: 'master'
+    })
+  }
+
+  if (!options.contractsBranch) {
+    questions.push({
+      type: 'input',
+      name: 'contractsBranch',
+      message: 'Please enter Contracts branch or tag',
+      default: 'v0.3.0-backport'
     })
   }
 

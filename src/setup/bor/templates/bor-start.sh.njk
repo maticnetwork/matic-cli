@@ -2,7 +2,7 @@
 
 set -x #echo on
 
-ADDRESS={{ obj.config.address }}
+ADDRESS={{ obj.config.primaryAccount.address }}
 BOR_CHAIN_ID={{ obj.config.borChainId }}
 
 if [ -z "$ADDRESS" ]
@@ -26,19 +26,19 @@ mkdir -p $DATA_DIR/logs
 
 $BUILD_DIR/bor --datadir $BOR_DATA_DIR \
   --port 30303 \
-  --rpc --rpcaddr '0.0.0.0' \
-  --rpcvhosts '*' \
-  --rpccorsdomain '*' \
-  --rpcport 8545 \
+  --http --http.addr '0.0.0.0' \
+  --http.vhosts '*' \
+  --http.corsdomain '*' \
+  --http.port 8545 \
+  --http.api 'eth,net,web3,txpool' \
   --ipcpath $BOR_DATA_DIR/bor.ipc \
-  --rpcapi 'db,eth,net,web3,txpool' \
   --networkid $BOR_CHAIN_ID \
-  --gasprice '0' \
+  --miner.gasprice '0' \
   --keystore $DATA_DIR/keystore \
   --unlock $ADDRESS \
   --password $DATA_DIR/password.txt \
   --allow-insecure-unlock \
   --maxpeers 200 \
   --metrics \
-  --pprof --pprofport 7071 --pprofaddr '0.0.0.0' \
+  --pprof --pprof.port 7071 --pprof.addr '0.0.0.0' \
   --mine

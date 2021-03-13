@@ -3,6 +3,20 @@ import fs from 'fs-extra'
 import path from 'path'
 import Web3 from 'web3'
 import nunjucks from 'nunjucks'
+import { toBuffer, privateToPublic, bufferToHex } from 'ethereumjs-util'
+
+//
+// Add custom nunjucks filters
+//
+
+const env = nunjucks.configure()
+env.addFilter('publicKey', (privateKey) => {
+  return privateKeyToPublicKey(privateKey)
+})
+
+//
+// other methods
+//
 
 const web3 = new Web3()
 
@@ -45,7 +59,7 @@ export async function processTemplateFiles(dir, obj = {}) {
       // process all njk files
       fs.writeFileSync(
         path.join(dir, file.replace('.njk', '')),
-        nunjucks.render(fp, obj)
+        env.render(fp, obj)
       )
 
       // remove njk file
@@ -70,11 +84,16 @@ export function getKeystoreFile(privateKeyString, password) {
 }
 
 // return new generated private key
-export async function getNewPrivateKey() {
+export function getNewPrivateKey() {
   return web3.eth.accounts.create()
 }
 
-// return new wallet from private key
-export async function getWalletFromPrivateKey(pk) {
+// return new account from private key
+export function getAccountFromPrivateKey(pk) {
   return web3.eth.accounts.privateKeyToAccount(pk)
+}
+
+// return public key from private key
+export function privateKeyToPublicKey(pk) {
+  return bufferToHex(privateToPublic(toBuffer(pk)))
 }
