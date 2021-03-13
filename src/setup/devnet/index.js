@@ -161,6 +161,8 @@ export class Devnet {
               .replace(/eth_rpc_url[ ]*=[ ]*".*"/gi, `eth_rpc_url = "${this.config.ethURL}"`)
               .replace(/bor_rpc_url[ ]*=[ ]*".*"/gi, `bor_rpc_url = "http://bor${i}:8545"`)
               .replace(/amqp_url[ ]*=[ ]*".*"/gi, `amqp_url = "amqp://guest:guest@rabbit${i}:5672/"`)
+              .replace(/span_poll_interval[ ]*=[ ]*".*"/gi, 'span_poll_interval = "0m15s"')
+              .replace(/checkpoint_poll_interval[ ]*=[ ]*".*"/gi, 'checkpoint_poll_interval = "1m0s"')
               .save()
           }
         }
