@@ -329,8 +329,8 @@ export class Devnet {
             // set genesis addresses
             this.config.genesisAddresses = genesisAddresses
 
-            // setup accounts from signer dump data
-            this.config.accounts = this.signerDumpData.map(s => {
+            // setup accounts from signer dump data (based on number of validators)
+            this.config.accounts = this.signerDumpData.slice(0, this.config.numOfValidators).map(s => {
               return getAccountFromPrivateKey(s.priv_key)
             })
           }
