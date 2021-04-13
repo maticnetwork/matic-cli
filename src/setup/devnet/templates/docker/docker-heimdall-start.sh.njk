@@ -3,7 +3,8 @@
 INDEX=$1
 
 docker-compose run -d --service-ports --name heimdall$INDEX heimdall$INDEX bash -c "
-heimdalld start > ./logs/heimdalld.log 2>&1 &
-sleep 60 && bridge start --all > ./logs/bridge.log 2>&1 &
-tail -f ./logs/heimdalld.log ./logs/bridge.log
+touch /root/heimdall/logs/heimdalld.log & touch /root/heimdall/logs/bridge.log &
+heimdalld start > /root/heimdall/logs/heimdalld.log 2>&1 &
+sleep 60 && bridge start --all > /root/heimdall/logs/bridge.log 2>&1 &
+tail -f /root/heimdall/logs/heimdalld.log /root/heimdall/logs/bridge.log
 "
