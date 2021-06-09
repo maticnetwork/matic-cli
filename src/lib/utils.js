@@ -34,7 +34,7 @@ export async function cloneRepository(name, branch, url, targetDirectory) {
       cwd: targetDirectory
     })
   } else {
-    result = await execa('git', ['pull'], {
+    result = await execa('git', ['fetch'], {
       cwd: repoPath
     }).then(() => {
       return execa('git', ['checkout', branch], {
