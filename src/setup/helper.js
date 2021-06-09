@@ -54,7 +54,7 @@ export async function getDefaultBranch(options = {}) {
       type: 'input',
       name: 'borBranch',
       message: 'Please enter Bor branch or tag',
-      default: 'master'
+      default: 'v0.2.5'
     })
   }
 
@@ -63,7 +63,7 @@ export async function getDefaultBranch(options = {}) {
       type: 'input',
       name: 'heimdallBranch',
       message: 'Please enter Heimdall branch or tag',
-      default: 'master'
+      default: 'v0.2.1-mumbai'
     })
   }
 

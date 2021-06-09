@@ -487,7 +487,7 @@ export default async function () {
       type: 'input',
       name: 'ethURL',
       message: 'Please enter ETH url',
-      default: 'http://host.docker.internal:9545'
+      default: 'http://ganache:9545'
     })
   }
 
