@@ -64,6 +64,9 @@ matic-cli setup genesis
 matic-cli setup devnet
 ```
 
+**Notion Doc Link**
+https://www.notion.so/maticnetwork/matic-cli-setup-db16151b25d440e98d922e6b7b3962d7
+
 ## License
 
 MIT
