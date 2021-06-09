@@ -12,7 +12,7 @@ Please make sure you have installed following dependencies:
 
 * Git
 * Node/npm v10.17.0 (or higher)
-* Go 1.13+
+* Go 1.15+
 * Rabbitmq (Latest stable version)
 * Solc v0.5.11 (https://solidity.readthedocs.io/en/v0.5.3/installing-solidity.html#binary-packages)
 * Ganache CLI (https://www.npmjs.com/package/ganache-cli)
@@ -32,7 +32,7 @@ $ cd localnet
 matic-cli
 ```
 
-**To setup local testnet**
+**To setup 1 node local network**
 
 This will setup Heimdall and Bor.
 
@@ -40,25 +40,14 @@ This will setup Heimdall and Bor.
 matic-cli setup localnet
 ```
 
-**To setup Heimdall**
+It will ask you several questions:
+Please enter Bor chain id - You can keep the default one (15001) or change it to any numeric id
+Please enter Heimdall chain id - You can keep the default one (heimdall-15001) or change it to a regex (heimdall-<numeric id>)
+Please enter Bor branch or tag - v0.2.5
+Please enter Heimdall branch or tag - v0.2.1-mumbai
+Please enter Contracts branch or tag - Keep the default branch (v0.3.0-backport)
 
-```bash
-matic-cli setup heimdall
-```
-
-**To setup Bor**
-
-```bash
-matic-cli setup bor
-```
-
-**To generate genesis file**
-
-```bash
-matic-cli setup genesis
-```
-
-**To setup multi-node devnet**
+**To setup multi-node local network**
 
 ```bash
 matic-cli setup devnet

@@ -56,6 +56,10 @@ export class Heimdall {
     return path.join(this.buildDir, 'heimdalld')
   }
 
+  get heimdallcliCmd() {
+    return path.join(this.buildDir, 'heimdallcli')
+  }
+
   get heimdallDataDir() {
     return path.join(this.config.dataDir, this.name)
   }
@@ -111,7 +115,7 @@ export class Heimdall {
 
   // returns content of validator key
   async generateValidatorKey() {
-    return execa(this.heimdalldCmd, ['generate-validatorkey', this.config.primaryAccount.privateKey, '--home', this.heimdallDataDir], {
+    return execa(this.heimdallcliCmd, ['generate-validatorkey', this.config.primaryAccount.privateKey, '--home', this.heimdallDataDir], {
       cwd: this.config.configDir
     }).then(() => {
       return require(this.configValidatorKeyFilePath)
@@ -188,7 +192,7 @@ export class Heimdall {
         {
           title: 'Init Heimdall',
           task: () => {
-            return execa(this.heimdalldCmd, ['init', '--home', this.heimdallDataDir, '--chain-id', this.heimdallChainId, 'heimdall-test'], {
+            return execa(this.heimdalldCmd, ['init', '--home', this.heimdallDataDir, '--chain-id', this.heimdallChainId], {
               cwd: this.repositoryDir
             })
           }
