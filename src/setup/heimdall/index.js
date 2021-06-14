@@ -7,7 +7,7 @@ import os from 'os'
 
 import fileReplacer from '../../lib/file-replacer'
 import { loadConfig } from '../config'
-import { cloneRepository, privateKeyToPublicKey, processTemplateFiles } from '../../lib/utils'
+import { cloneRepository, privateKeyToPublicKey, compressedPublicKey, processTemplateFiles } from '../../lib/utils'
 import { printDependencyInstructions, getDefaultBranch } from '../helper'
 import { Ganache } from '../ganache'
 
@@ -54,10 +54,6 @@ export class Heimdall {
 
   get heimdalldCmd() {
     return path.join(this.buildDir, 'heimdalld')
-  }
-
-  get heimdallcliCmd() {
-    return path.join(this.buildDir, 'heimdallcli')
   }
 
   get heimdallDataDir() {
@@ -115,7 +111,7 @@ export class Heimdall {
 
   // returns content of validator key
   async generateValidatorKey() {
-    return execa(this.heimdallcliCmd, ['generate-validatorkey', this.config.primaryAccount.privateKey, '--home', this.heimdallDataDir], {
+    return execa(this.heimdalldCmd, ['generate-validatorkey', this.config.primaryAccount.privateKey, '--home', this.heimdallDataDir], {
       cwd: this.config.configDir
     }).then(() => {
       return require(this.configValidatorKeyFilePath)
@@ -139,8 +135,9 @@ export class Heimdall {
           fileReplacer(this.heimdallGenesisFilePath)
             .replace(/"address":[ ]*".*"/gi, `"address": "${this.config.primaryAccount.address}"`)
             .replace(/"signer":[ ]*".*"/gi, `"signer": "${this.config.primaryAccount.address}"`)
-            .replace(/"pubKey":[ ]*".*"/gi, `"pubKey": "${privateKeyToPublicKey(this.config.primaryAccount.privateKey).replace('0x', '0x04')}"`)
+            .replace(/"pub_key":[ ]*".*"/gi, `"pub_key": "${compressedPublicKey(privateKeyToPublicKey(this.config.primaryAccount.privateKey).replace('0x', '0x04'))}"`)
             .replace(/"power":[ ]*".*"/gi, `"power": "${this.config.defaultStake}"`)
+            .replace(/"user":[ ]*".*"/gi, `"user": "${this.config.primaryAccount.address}"`)
             .save()
         }
       },
@@ -191,7 +188,7 @@ export class Heimdall {
         {
           title: 'Init Heimdall',
           task: () => {
-            return execa(this.heimdalldCmd, ['init', '--home', this.heimdallDataDir], {
+            return execa(this.heimdalldCmd, ['init', '--home', this.heimdallDataDir, '--chain-id', this.heimdallChainId, 'heimdall-test'], {
               cwd: this.repositoryDir
             })
           }
