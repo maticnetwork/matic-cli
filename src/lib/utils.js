@@ -3,7 +3,6 @@ import fs from 'fs-extra'
 import path from 'path'
 import Web3 from 'web3'
 import nunjucks from 'nunjucks'
-import ethCrypto from 'eth-crypto'
 import { toBuffer, privateToPublic, bufferToHex } from 'ethereumjs-util'
 
 //
@@ -97,9 +96,4 @@ export function getAccountFromPrivateKey(pk) {
 // return public key from private key
 export function privateKeyToPublicKey(pk) {
   return bufferToHex(privateToPublic(toBuffer(pk)))
-}
-
-// return compressed public key
-export function compressedPublicKey(pk) {
-  return '0x' + ethCrypto.publicKey.compress(pk.replace('0x', ''))
 }

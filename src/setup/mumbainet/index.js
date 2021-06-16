@@ -321,7 +321,9 @@ export default async function () {
   let borBranch = "v0.2.6"
   config.borBranch = borBranch
   let borChainId = "80001"
+  config.borChainId = borChainId
   let heimdallChainId = "heimdall-80001"
+  config.heimdallChainId = heimdallChainId
 
   // set devent hosts
   let mumbainetBorHosts = []

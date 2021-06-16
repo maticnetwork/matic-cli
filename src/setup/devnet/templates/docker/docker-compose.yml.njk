@@ -34,6 +34,7 @@ services:
       - devnet-network
     volumes:
       - ./devnet/node{{ node }}/heimdalld:/root/.heimdalld
+      - ./devnet/node{{ node }}/heimdallcli:/root/.heimdallcli
       - ./logs/node{{ node }}/heimdall:/root/heimdall/logs
     {% if node == 0 %}
     ports:
