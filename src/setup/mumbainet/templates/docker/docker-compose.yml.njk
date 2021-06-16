@@ -1,0 +1,53 @@
+version: "3.3"
+
+networks:
+  devnet-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.1.0/24
+
+services:
+
+{% for node in range(0, obj.totalNodes) %}
+  rabbit{{ node }}:
+    image: "rabbitmq:3-management"
+    container_name: rabbit{{ node }}
+    networks:
+      - devnet-network
+
+  heimdall{{ node }}:
+    image: "maticnetwork/heimdall:{{ obj.config.heimdallBranch }}"
+    container_name: heimdall{{ node }}
+    depends_on:
+      - rabbit{{ node }}
+    networks:
+      - devnet-network
+    volumes:
+      - ./devnet/node{{ node }}/heimdalld:/root/.heimdalld
+      - ./logs/node{{ node }}/heimdall:/root/heimdall/logs
+    {% if node == 0 %}
+    ports:
+      - "1317:1317"
+      - "26657:26657"
+    {% endif %}
+  
+  bor{{ node }}:
+    image: "maticnetwork/bor:{{ obj.config.borBranch }}"
+    container_name: bor{{ node }}
+    # depends_on:
+    #  - heimdall{{ node }}
+    networks:
+      devnet-network:
+          ipv4_address: 172.20.1.{{ node + 100 }}
+    environment:
+      - HEIMDALL_URL=http://heimdall{{ node }}:1317
+    volumes:
+      - ./devnet/node{{ node }}/bor:/root/.bor
+      - ./logs/node{{ node }}/bor:/root/logs
+    {% if node == 0 %}
+    ports:
+      - "8545:8545"
+      - "8546:8546"
+    {% endif %}
+{% endfor %}

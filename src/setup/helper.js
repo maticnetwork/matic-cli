@@ -54,7 +54,7 @@ export async function getDefaultBranch(options = {}) {
       type: 'input',
       name: 'borBranch',
       message: 'Please enter Bor branch or tag',
-      default: 'v0.2.5'
+      default: 'v0.2.6'
     })
   }
 
