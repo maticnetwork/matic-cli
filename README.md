@@ -11,10 +11,10 @@ npm install -g @maticnetwork/matic-cli
 Please make sure you have installed following dependencies:
 
 * Git
-* Node/npm v10.17.0 (or higher)
+* Node v10.x.0 
 * Go 1.13+
 * Rabbitmq (Latest stable version)
-* Solc v0.5.11 (https://solidity.readthedocs.io/en/v0.5.3/installing-solidity.html#binary-packages)
+* Solc v0.5.x (https://docs.soliditylang.org/en/v0.8.6/installing-solidity.html)
 * Ganache CLI (https://www.npmjs.com/package/ganache-cli)
 
 ### Usage
