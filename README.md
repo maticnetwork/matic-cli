@@ -45,8 +45,8 @@ It will ask you several questions:
 ```
 Please enter Bor chain id - You can keep the default one (15001) or change it to any numeric id
 Please enter Heimdall chain id - You can keep the default one (heimdall-15001) or change it to a regex (heimdall-<numeric id>)
-Please enter Bor branch or tag - v0.2.5
-Please enter Heimdall branch or tag - v0.2.1-mumbai
+Please enter Bor branch or tag - v0.2.6
+Please enter Heimdall branch or tag - v0.2.1-mainnet
 Please enter Contracts branch or tag - Keep the default branch (v0.3.0-backport)
 ```
 
@@ -93,8 +93,8 @@ It will ask you several questions:
 ```
 Please enter Bor chain id - You can keep the default one (15001) or change it to any numeric id
 Please enter Heimdall chain id - You can keep the default one (heimdall-15001) or change it to a regex (heimdall-<numeric id>)
-Please enter Bor branch or tag - v0.2.5
-Please enter Heimdall branch or tag - v0.2.1-mumbai
+Please enter Bor branch or tag - v0.2.6
+Please enter Heimdall branch or tag - v0.2.1-mainnet
 Please enter Contracts branch or tag - Keep the default branch (v0.3.0-backport)
 Please enter number of validator nodes - Input the number of validator nodes you want to run
 Please enter number of non-validator nodes - Input the number of sentry nodes you want to run
