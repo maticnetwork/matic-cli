@@ -5,6 +5,7 @@ import chalk from 'chalk'
 import execa from 'execa'
 import fs from 'fs-extra'
 import nunjucks from 'nunjucks'
+import Web3 from 'web3'
 import { toBuffer, privateToPublic, bufferToHex } from 'ethereumjs-util'
 
 import { Heimdall } from '../heimdall'
@@ -14,6 +15,8 @@ import { printDependencyInstructions, getDefaultBranch } from '../helper'
 import { getNewPrivateKey, getKeystoreFile, processTemplateFiles, getAccountFromPrivateKey } from '../../lib/utils'
 import { loadConfig } from '../config'
 import fileReplacer from '../../lib/file-replacer'
+
+const web3 = new Web3("http://localhost:9545");
 
 export class Devnet {
   constructor(config, options = {}) {
@@ -317,13 +320,23 @@ export class Devnet {
         ...createTestnetTasks,
         {
           title: 'Setup accounts',
-          task: () => {
+          task: async () => {
             // set validator addresses
             const genesisAddresses = []
             const signerDumpData = this.signerDumpData
             for (let i = 0; i < this.config.numOfValidators; i++) {
               const d = signerDumpData[i]
               genesisAddresses.push(d.address)
+
+              await web3.eth.personal.importRawKey(d.priv_key.substring(2), '');
+              await web3.eth.personal.unlockAccount(d.address, '', 6000000);
+
+              var account = await web3.eth.personal.getAccounts();
+              web3.eth.sendTransaction({
+                from: account[0],
+                to: '0x9eca25ee04fdcc9d9cdff377aa8da019dba38437',
+                value: '10000000000000000000'
+              })
             }
 
             // set genesis addresses
@@ -469,7 +482,7 @@ export default async function () {
       type: 'number',
       name: 'numOfValidators',
       message: 'Please enter number of validator nodes',
-      default: 2
+      default: 1
     })
   }
 
@@ -478,7 +491,7 @@ export default async function () {
       type: 'number',
       name: 'numOfNonValidators',
       message: 'Please enter number of non-validator nodes',
-      default: 2
+      default: 0
     })
   }
 
@@ -487,7 +500,7 @@ export default async function () {
       type: 'input',
       name: 'ethURL',
       message: 'Please enter ETH url',
-      default: 'http://ganache:9545'
+      default: 'http://geth:8545'
     })
   }
 

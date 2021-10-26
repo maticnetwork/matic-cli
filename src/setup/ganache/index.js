@@ -57,37 +57,6 @@ export class Ganache {
 
     return new Listr([
       {
-        title: 'Reset ganache',
-        task: () => {
-          return fs.remove(this.dbDir)
-        }
-      },
-      {
-        title: 'Start ganache',
-        task: () => {
-          server = ganacheCli.server({
-            accounts: [{
-              balance: '0xfffffffffffffffffffffffffffffffffffffffffffff',
-              secretKey: this.config.primaryAccount.privateKey
-            }],
-            port: this.serverPort,
-            db_path: this.dbDir,
-            gasPrice: '0x1',
-            gasLimit: '0xfffffffff'
-          })
-
-          return new Promise((resolve, reject) => {
-            server.listen(this.serverPort, (err, blockchain) => {
-              if (err) {
-                reject(err)
-              } else {
-                resolve(blockchain)
-              }
-            })
-          })
-        }
-      },
-      {
         title: 'Deploy contracts on Main chain',
         task: () => execa('bash', ['ganache-deployment.sh'], {
           cwd: this.config.targetDirectory
