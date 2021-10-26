@@ -334,7 +334,7 @@ export class Devnet {
               var account = await web3.eth.personal.getAccounts();
               web3.eth.sendTransaction({
                 from: account[0],
-                to: '0x9eca25ee04fdcc9d9cdff377aa8da019dba38437',
+                to: d.address,
                 value: '10000000000000000000'
               })
             }
