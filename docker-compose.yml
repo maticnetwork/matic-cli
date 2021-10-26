@@ -1,0 +1,34 @@
+version: "3.3"
+
+services:
+
+  geth:
+    image: ethereum/client-go:v1.10.6
+    command:
+      --http
+      --datadir "/gethdata"
+      --dev
+      --dev.period 0
+      --rpc.txfeecap 0
+      --rpc.gascap 0
+      --rpc
+      --miner.gaslimit 8000000000000
+      --miner.gasprice 0
+      --gpo.ignoreprice 0
+      --verbosity 5
+      --rpcaddr "0.0.0.0"
+      --rpc.txfeecap 0
+      --gpo.maxprice 500000000000000
+      --gpo.percentile 99
+      --txpool.pricelimit 0
+      --rpc.allow-unprotected-txs
+      --allow-insecure-unlock
+      --rpcapi eth,net,web3,personal
+      --rpcvhosts *
+    ports:
+      - "30303:30303"
+      - "30303:30303/udp"
+      - "9545:8545"
+      - "9546:8546"
+    volumes:
+      - ./gethdata:/gethdata
