@@ -26,7 +26,7 @@ services:
       - devnet-network
 
   heimdall{{ node }}:
-    image: "maticnetwork/heimdall:{{ obj.config.heimdallBranch }}"
+    image: "0xpolygon/heimdall:latest"
     container_name: heimdall{{ node }}
     depends_on:
       - rabbit{{ node }}
@@ -40,9 +40,9 @@ services:
       - "1317:1317"
       - "26657:26657"
     {% endif %}
-  
+
   bor{{ node }}:
-    image: "maticnetwork/bor:{{ obj.config.borBranch }}"
+    image: "0xpolygon/bor:latest"
     container_name: bor{{ node }}
     # depends_on:
     #  - heimdall{{ node }}

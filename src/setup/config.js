@@ -60,7 +60,10 @@ export default class Config {
   }
 
   async loadChainIds() {
-    const answers = await getChainIds(this)
+    const answers = {
+      borChainId: '15001',
+      heimdallChainId: 'heimdall-15001'
+    }
     this.set(answers)
   }
 
