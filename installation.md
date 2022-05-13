@@ -32,5 +32,15 @@ You'll require following dependencies in order to run matic-cli on a docker base
 4. Docker:</br>
   Refer [this](https://docs.docker.com/get-docker/) link for platform specific installation steps. 
 
-
 Please note that the rabbit mq, solidity compiler (solc) and ganache-cli is not required to be installed on the machine used for setup, as they'll be installed on docker itself.
+
+Incase the tools fail to install, you can install them using the following commands on docker.
+
+5. Rabbitmq:</br>
+    ```bash
+    docker pull rabbitmq:3-management
+    ```
+6. Solc:</br>
+    ```bash
+    docker pull ethereum/solc:0.5.11
+    ```
