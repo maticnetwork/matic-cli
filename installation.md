@@ -29,10 +29,8 @@ You'll require following dependencies in order to run matic-cli on a docker base
     # Should return something like this
     # go version go1.18.1 linux/amd64
     ```
-4. Rabbitmq (Latest stable version):</br>
-  Refer [this](https://www.rabbitmq.com/download.html) link for platform specific installation steps.
-5. Docker:</br>
+4. Docker:</br>
   Refer [this](https://docs.docker.com/get-docker/) link for platform specific installation steps. 
 
 
-Please note that the solidity compiler (solc) and ganache-cli is not required to be installed on the machine used for setup, as they'll be installed on docker itself.
+Please note that the rabbit mq, solidity compiler (solc) and ganache-cli is not required to be installed on the machine used for setup, as they'll be installed on docker itself.
