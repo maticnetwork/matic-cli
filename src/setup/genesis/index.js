@@ -19,7 +19,7 @@ export class Genesis {
     this.config = config
 
     this.repositoryName = this.name
-    this.repositoryBranch = options.repositoryBranch || 'shivam/POS-385'
+    this.repositoryBranch = options.repositoryBranch || 'master'
     this.repositoryUrl = options.repositoryUrl || 'https://github.com/maticnetwork/genesis-contracts'
     this.maticContractsRepository = 'matic-contracts'
     this.maticContractsRepositoryUrl = 'https://github.com/maticnetwork/contracts'
