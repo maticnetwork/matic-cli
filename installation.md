@@ -44,3 +44,7 @@ Incase the tools fail to install, you can install them using the following comma
     ```bash
     docker pull ethereum/solc:0.5.11
     ```
+7. Ganache-cli:</br>
+    ```bash
+    docker pull trufflesuite/ganache-cli:latest
+    ```
