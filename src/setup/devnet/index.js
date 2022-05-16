@@ -289,7 +289,7 @@ export class Devnet {
           for(let i=0; i<this.totalNodes; i++) {
             
             // copy files to remote servers
-            await execa('scp', [ `-r`,`${this.testnetDir}/node${i}/`,`ubuntu@${this.config.devnetBorHosts[i]}:~/node-test/`])
+            await execa('scp', [ `-r`,`${this.testnetDir}/node${i}/`,`ubuntu@${this.config.devnetBorHosts[i]}:~/node/`])
             
           }
         }
