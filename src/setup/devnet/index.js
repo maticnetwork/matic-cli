@@ -15,6 +15,23 @@ import { getNewPrivateKey, getKeystoreFile, processTemplateFiles, getAccountFrom
 import { loadConfig } from '../config'
 import fileReplacer from '../../lib/file-replacer'
 
+const getAllFiles = function(dirPath, arrayOfFiles) {
+  var files = fs.readdirSync(dirPath)
+
+  arrayOfFiles = arrayOfFiles || []
+
+  files.forEach(function(file) {
+    if (fs.statSync(dirPath + "/" + file).isDirectory()) {
+      if(file==="bor" || file==="heimdall"){
+        arrayOfFiles = getAllFiles(dirPath + "/" + file, arrayOfFiles)
+      }
+    } else {
+      arrayOfFiles.push(path.join(dirPath, "/", file))
+    }
+  })
+
+  return arrayOfFiles
+}
 export class Devnet {
   constructor(config, options = {}) {
     this.config = config
@@ -237,17 +254,18 @@ export class Devnet {
           // promises
           const p = []
           const signerDumpData = this.signerDumpData
-
           // process njk files
-          fs.readdirSync(this.config.targetDirectory).forEach(file => {
+          getAllFiles(this.config.targetDirectory,[]).forEach(async(file) => {
             if (file.indexOf('.njk') !== -1) {
               const fp = path.join(this.config.targetDirectory, file)
 
               // process all njk files and copy to each node directory
               for (let i = 0; i < this.totalNodes; i++) {
+                var file2array = file.split("/")
+                let file2 = file2array[file2array.length-1]
                 fs.writeFileSync(
-                  path.join(this.nodeDir(i), file.replace('.njk', '')),
-                  nunjucks.render(fp, { obj: this, node: i, signerData: signerDumpData[i] })
+                  path.join(this.nodeDir(i), file2.replace('.njk', '')),
+                  nunjucks.render(file, { obj: this, node: i, signerData: signerDumpData[i] })
                 )
               }
 
@@ -260,6 +278,20 @@ export class Devnet {
 
           // fulfill all promises
           await Promise.all(p)
+        }
+      },
+      {
+        title: 'Copy files to remote servers',
+        task: async () => {
+          if(this.config.devnetBorHosts===undefined){
+              return
+          }
+          for(let i=0; i<this.totalNodes; i++) {
+            
+            // copy files to remote servers
+            await execa('scp', [ `-r`,`${this.testnetDir}/node${i}/`,`ubuntu@${this.config.devnetBorHosts[i]}:~/node-test/`])
+            
+          }
         }
       }
     ]
