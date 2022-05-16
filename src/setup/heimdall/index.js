@@ -174,7 +174,7 @@ export class Heimdall {
   buildTask() {
     return {
       title: 'Build Heimdall',
-      task: () => execa('make', ['build'], {
+      task: () => execa('make', ['build', 'network=local'], {
         cwd: this.repositoryDir
       })
     }

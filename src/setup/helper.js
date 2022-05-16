@@ -54,7 +54,7 @@ export async function getChainIds(options = {}) {
 export async function getDefaultBranch(options = {}) {
   return {
     borBranch: 'v0.2.16',
-    heimdallBranch: 'v0.2.1-mumbai',
+    heimdallBranch: 'v0.2.9',
     contractsBranch: 'v0.3.0-backport'
   }
   // const questions = []
