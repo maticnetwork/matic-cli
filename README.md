@@ -9,9 +9,12 @@ Please make sure you have installed following dependencies:
 * Git
 * Node/npm v10.17.0 (or higher)
 * Go 1.18+
-* Rabbitmq (Latest stable version)
-* Solc v0.5.11 (https://solidity.readthedocs.io/en/v0.5.3/installing-solidity.html#binary-packages)
-* Ganache CLI (https://www.npmjs.com/package/ganache-cli)
+* Docker (only if running on a docker based setup)
+* Rabbitmq (Latest stable version, https://www.rabbitmq.com/download.html) (Not required for docker based setup)
+* Solc v0.5.11 (https://solidity.readthedocs.io/en/v0.5.3/installing-solidity.html#binary-packages) (Not required for docker based setup)
+* Ganache CLI (https://www.npmjs.com/package/ganache-cli) (Not required for docker based setup)
+
+Please refer to [this](./installation.md) document for more information. 
 
 ### Usage
 
