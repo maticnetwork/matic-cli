@@ -14,31 +14,40 @@ Please make sure you have installed following dependencies:
 * Solc v0.5.11 (https://solidity.readthedocs.io/en/v0.5.3/installing-solidity.html#binary-packages) (Not required for docker based setup)
 * Ganache CLI (https://www.npmjs.com/package/ganache-cli) (Not required for docker based setup)
 
-Please refer to [this](./installation.md) document for more information. 
+Please refer to [this](./installation.md) document for more information.
 
 ### Usage
+
+
+
+**To setup multi-node network**
 
 Create new directory for the setup:
 
 ```bash
-$ mkdir devnet
-$ cd devnet
+mkdir devnet
+cd devnet
 ```
-
-**To setup multi-node local network**
 
 ```bash
 ../bin/matic-cli setup devnet
 ```
 
-It will ask you several questions:
+It will ask you several questions (default values are provided):
 
 ```
+Please enter Bor chain id - Input the bor chain id you want
+Please enter Heimdall chain id - Input the heimdall chain id you want
+Please enter Bor docker tag - Input the bor tag you want to deploy
+Please enter Heimdall docker tag - Input the heimdall tag you want to deploy
+Please enter Contracts branch - Input the contracts branch
 Please enter number of validator nodes - Input the number of validator nodes you want to run
 Please enter number of non-validator nodes - Input the number of sentry nodes you want to run
+Please enter ETH url - Input the eth url to use
+Please select devnet type - Select deployment to be done locally via docker or to remote machines
 ```
 
-After the setup is done, follow these steps:
+**After the setup is done, follow these steps for local docker deployment:**
 
 Start ganache
 ```bash
