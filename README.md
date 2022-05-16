@@ -33,8 +33,6 @@ It will ask you several questions:
 ```
 Please enter number of validator nodes - Input the number of validator nodes you want to run
 Please enter number of non-validator nodes - Input the number of sentry nodes you want to run
-Please enter ETH url - http://ganache:9545
-Please select devnet type - docker (for docker setup)
 ```
 
 After the setup is done, follow these steps:
