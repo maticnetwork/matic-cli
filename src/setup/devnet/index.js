@@ -482,28 +482,30 @@ export default async function () {
     })
   }
 
-  if (!('ethURL' in config)) {
-    questions.push({
-      type: 'input',
-      name: 'ethURL',
-      message: 'Please enter ETH url',
-      default: 'http://ganache:9545'
-    })
-  }
+  // if (!('ethURL' in config)) {
+  //   questions.push({
+  //     type: 'input',
+  //     name: 'ethURL',
+  //     message: 'Please enter ETH url',
+  //     default: 'http://ganache:9545'
+  //   })
+  // }
 
-  if (!('devnetType' in config)) {
-    questions.push({
-      type: 'list',
-      name: 'devnetType',
-      message: 'Please select devnet type',
-      choices: [
-        'docker',
-        'remote'
-      ]
-    })
-  }
+  // if (!('devnetType' in config)) {
+  //   questions.push({
+  //     type: 'list',
+  //     name: 'devnetType',
+  //     message: 'Please select devnet type',
+  //     choices: [
+  //       'docker',
+  //       'remote'
+  //     ]
+  //   })
+  // }
 
   answers = await inquirer.prompt(questions)
+  answers['devnetType'] = 'docker'
+  answers['ethURL'] = 'http://ganache:9545'
   config.set(answers)
 
   // set devent hosts

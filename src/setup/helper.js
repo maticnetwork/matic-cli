@@ -9,7 +9,7 @@ Please make sure you have installed following dependencies:
 
 * Git
 * Node/npm v10.17.0 (or higher)
-* Go 1.13+
+* Go 1.18+
 * Rabbitmq (Latest stable version)
 * Solc v0.5.11 (https://solidity.readthedocs.io/en/v0.5.3/installing-solidity.html#binary-packages)
 * Ganache CLI (https://www.npmjs.com/package/ganache-cli)
@@ -17,72 +17,82 @@ Please make sure you have installed following dependencies:
 }
 
 export async function getChainIds(options = {}) {
-  const questions = []
+  // const questions = []
 
-  if (!options.borChainId) {
-    questions.push({
-      type: 'input',
-      name: 'borChainId',
-      message: 'Please enter Bor chain id',
-      default: '15001'
-    })
+  return {
+    borChainId: '15001',
+    heimdallChainId: 'heimdall-15001'
   }
 
-  if (!options.heimdallChainId) {
-    questions.push({
-      type: 'input',
-      name: 'heimdallChainId',
-      message: 'Please enter Heimdall chain id',
-      default: 'heimdall-15001'
-    })
-  }
+  // if (!options.borChainId) {
+  //   questions.push({
+  //     type: 'input',
+  //     name: 'borChainId',
+  //     message: 'Please enter Bor chain id',
+  //     default: '15001'
+  //   })
+  // }
 
-  // return if no questions
-  if (questions.length === 0) {
-    return {}
-  }
+  // if (!options.heimdallChainId) {
+  //   questions.push({
+  //     type: 'input',
+  //     name: 'heimdallChainId',
+  //     message: 'Please enter Heimdall chain id',
+  //     default: 'heimdall-15001'
+  //   })
+  // }
 
-  // get answers
-  return await inquirer.prompt(questions)
+  // // return if no questions
+  // if (questions.length === 0) {
+  //   return {}
+  // }
+
+  // // get answers
+  // return await inquirer.prompt(questions)
 }
 
 export async function getDefaultBranch(options = {}) {
-  const questions = []
-
-  if (!options.borBranch) {
-    questions.push({
-      type: 'input',
-      name: 'borBranch',
-      message: 'Please enter Bor branch or tag',
-      default: 'v0.2.5'
-    })
+  return {
+    borBranch: 'v0.2.16',
+    heimdallBranch: 'v0.2.1-mumbai',
+    contractsBranch: 'v0.3.0-backport'
   }
+  // const questions = []
 
-  if (!options.heimdallBranch) {
-    questions.push({
-      type: 'input',
-      name: 'heimdallBranch',
-      message: 'Please enter Heimdall branch or tag',
-      default: 'v0.2.1-mumbai'
-    })
-  }
+  // if (!options.borBranch) {
+  //   questions.push({
+  //     type: 'input',
+  //     name: 'borBranch',
+  //     message: 'Please enter Bor branch or tag',
+  //     default: 'v0.2.5'
+  //   })
+  // }
 
-  if (!options.contractsBranch) {
-    questions.push({
-      type: 'input',
-      name: 'contractsBranch',
-      message: 'Please enter Contracts branch or tag',
-      default: 'v0.3.0-backport'
-    })
-  }
+  // if (!options.heimdallBranch) {
+  //   questions.push({
+  //     type: 'input',
+  //     name: 'heimdallBranch',
+  //     message: 'Please enter Heimdall branch or tag',
+  //     default: 'v0.2.1-mumbai'
+  //   })
+  // }
 
-  // return if no questions
-  if (questions.length === 0) {
-    return {}
-  }
+  // if (!options.contractsBranch) {
+  //   questions.push({
+  //     type: 'input',
+  //     name: 'contractsBranch',
+  //     message: 'Please enter Contracts branch or tag',
+  //     default: 'v0.3.0-backport'
+  //   })
+  // }
 
-  // get answers
-  return await inquirer.prompt(questions)
+  // // return if no questions
+  // if (questions.length === 0) {
+  //   return {}
+  // }
+
+  // // get answers
+  // return await inquirer.prompt(questions)
 }
 
 export async function getKeystoreDetails(options = {}) {
