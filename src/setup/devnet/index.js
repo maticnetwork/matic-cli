@@ -8,6 +8,7 @@ import nunjucks from 'nunjucks'
 import { toBuffer, privateToPublic, bufferToHex } from 'ethereumjs-util'
 
 import { Heimdall } from '../heimdall'
+import { Bor } from '../bor'
 import { Ganache } from '../ganache'
 import { Genesis } from '../genesis'
 import { printDependencyInstructions, getDefaultBranch } from '../helper'
@@ -289,9 +290,19 @@ export class Devnet {
           for(let i=0; i<this.totalNodes; i++) {
             
             // copy files to remote servers
+            
+            await execa('scp', [`${this.config.targetDirectory}/code/bor/build/bin/bor`,`ubuntu@${this.config.devnetBorHosts[i]}:/home/ubuntu/go/bin/bor`])
+            await execa('scp', [`${this.config.targetDirectory}/code/heimdall/build/heimdalld`,`ubuntu@${this.config.devnetBorHosts[i]}:/home/ubuntu/go/bin/heimdalld`])
+            await execa('scp', [`${this.config.targetDirectory}/code/heimdall/build/heimdallcli`,`ubuntu@${this.config.devnetBorHosts[i]}:/home/ubuntu/go/bin/heimdallcli`])
+            await execa('scp', [`${this.config.targetDirectory}/code/heimdall/build/bridge`,`ubuntu@${this.config.devnetBorHosts[i]}:/home/ubuntu/go/bin/bridge`])
+            
             await execa('scp', [ `-r`,`${this.testnetDir}/node${i}/`,`ubuntu@${this.config.devnetBorHosts[i]}:~/node/`])
             
           }
+
+          // copy the Ganache files to the first node
+          await execa('scp', [`${this.config.targetDirectory}/ganache-start-remote.sh`,`ubuntu@${this.config.devnetBorHosts[0]}:~/ganache-start-remote.sh`])
+          await execa('scp', [`-r`,`${this.config.targetDirectory}/data`,`ubuntu@${this.config.devnetBorHosts[0]}:~/data`])
         }
       }
     ]
@@ -339,6 +350,7 @@ export class Devnet {
   async getTasks() {
     const ganache = this.ganache
     const heimdall = this.heimdall
+    const bor = this.bor
     const genesis = this.genesis
 
     // create testnet tasks
@@ -365,6 +377,12 @@ export class Devnet {
             this.config.accounts = this.signerDumpData.slice(0, this.config.numOfValidators).map(s => {
               return getAccountFromPrivateKey(s.priv_key)
             })
+          }
+        },
+        {
+          title: bor.taskTitle,
+          task: () => {
+            return bor.getTasks()
           }
         },
         {
@@ -420,7 +438,7 @@ export class Devnet {
             return ganache.getTasks()
           },
           enabled: () => {
-            return this.config.devnetType === 'docker'
+            return this.config.devnetType === 'docker' || 'remote'
           }
         },
         {
@@ -451,6 +469,7 @@ export class Devnet {
 async function setupDevnet(config) {
   const devnet = new Devnet(config)
   devnet.ganache = new Ganache(config, { contractsBranch: config.contractsBranch })
+  devnet.bor = new Bor(config, { repositoryBranch: config.borBranch })
   devnet.heimdall = new Heimdall(config, { repositoryBranch: config.heimdallBranch })
   devnet.genesis = new Genesis(config, { repositoryBranch: 'master' })
 
@@ -514,30 +533,28 @@ export default async function () {
     })
   }
 
-  // if (!('ethURL' in config)) {
-  //   questions.push({
-  //     type: 'input',
-  //     name: 'ethURL',
-  //     message: 'Please enter ETH url',
-  //     default: 'http://ganache:9545'
-  //   })
-  // }
+  if (!('ethURL' in config)) {
+    questions.push({
+      type: 'input',
+      name: 'ethURL',
+      message: 'Please enter ETH url',
+      default: 'http://ganache:9545'
+    })
+  }
 
-  // if (!('devnetType' in config)) {
-  //   questions.push({
-  //     type: 'list',
-  //     name: 'devnetType',
-  //     message: 'Please select devnet type',
-  //     choices: [
-  //       'docker',
-  //       'remote'
-  //     ]
-  //   })
-  // }
+  if (!('devnetType' in config)) {
+    questions.push({
+      type: 'list',
+      name: 'devnetType',
+      message: 'Please select devnet type',
+      choices: [
+        'docker',
+        'remote'
+      ]
+    })
+  }
 
   answers = await inquirer.prompt(questions)
-  answers['devnetType'] = 'docker'
-  answers['ethURL'] = 'http://ganache:9545'
   config.set(answers)
 
   // set devent hosts

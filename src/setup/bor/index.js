@@ -91,6 +91,9 @@ export class Bor {
         {
           title: 'Prepare keystore and password.txt',
           task: () => {
+            if(this.config.devnetType === 'remote') {
+              return
+            }
             // get keystore file and store in keystore file
             const keystoreFileObj = getKeystoreFile(this.config.primaryAccount.privateKey, this.config.keystorePassword)
 
@@ -107,6 +110,9 @@ export class Bor {
         {
           title: 'Process template scripts',
           task: async () => {
+            if(this.config.devnetType === 'remote') {
+              return
+            }
             const templateDir = path.resolve(
               new URL(import.meta.url).pathname,
               '../templates'
