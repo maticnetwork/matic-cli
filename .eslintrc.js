@@ -4,7 +4,8 @@ module.exports = {
         "space-before-function-paren": ["error", {
             "anonymous": "always",
             "named": "never",
-            "asyncArrow": "always"
+            "asyncArrow": "always",
+            "parser": "@babel/eslint-parser"
         }],
     }
 };
