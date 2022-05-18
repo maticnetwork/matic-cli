@@ -242,6 +242,27 @@ export class Devnet {
         }
       },
       {
+        title: 'Process contract addresses',
+        task: () => {
+          // get root contracts
+          const rootContracts = this.config.contractAddresses.root
+
+          // set heimdall peers with devnet heimdall hosts
+          for (let i = 0; i < this.totalNodes; i++) {
+            fileReplacer(this.heimdallGenesisFilePath(i))
+              .replace(/"matic_token_address":[ ]*".*"/gi, `"matic_token_address": "${rootContracts.tokens.TestToken}"`)
+              .replace(/"staking_manager_address":[ ]*".*"/gi, `"staking_manager_address": "${rootContracts.StakeManagerProxy}"`)
+              .replace(/"root_chain_address":[ ]*".*"/gi, `"root_chain_address": "${rootContracts.RootChainProxy}"`)
+              .replace(/"staking_info_address":[ ]*".*"/gi, `"staking_info_address": "${rootContracts.StakingInfo}"`)
+              .replace(/"state_sender_address":[ ]*".*"/gi, `"state_sender_address": "${rootContracts.StateSender}"`)
+              .save()
+          }
+        },
+        enabled: () => {
+          return this.config.contractAddresses
+        }
+      },
+      {
         title: 'Process templates',
         task: async () => {
           const templateDir = path.resolve(
@@ -288,16 +309,16 @@ export class Devnet {
               return
           }
           for(let i=0; i<this.totalNodes; i++) {
-            
+
             // copy files to remote servers
-            
+
             await execa('scp', [`${this.config.targetDirectory}/code/bor/build/bin/bor`,`ubuntu@${this.config.devnetBorHosts[i]}:/home/ubuntu/go/bin/bor`])
             await execa('scp', [`${this.config.targetDirectory}/code/heimdall/build/heimdalld`,`ubuntu@${this.config.devnetBorHosts[i]}:/home/ubuntu/go/bin/heimdalld`])
             await execa('scp', [`${this.config.targetDirectory}/code/heimdall/build/heimdallcli`,`ubuntu@${this.config.devnetBorHosts[i]}:/home/ubuntu/go/bin/heimdallcli`])
             await execa('scp', [`${this.config.targetDirectory}/code/heimdall/build/bridge`,`ubuntu@${this.config.devnetBorHosts[i]}:/home/ubuntu/go/bin/bridge`])
-            
+
             await execa('scp', [ `-r`,`${this.testnetDir}/node${i}/`,`ubuntu@${this.config.devnetBorHosts[i]}:~/node/`])
-            
+
           }
 
           // copy the Ganache files to the first node
