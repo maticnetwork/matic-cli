@@ -14,6 +14,7 @@ Please make sure you have installed following dependencies:
 * Rabbitmq
 * Ganache CLI
 * Solc v0.5.11
+* Python 2
 `))
 }
 

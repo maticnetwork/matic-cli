@@ -13,6 +13,7 @@ Please make sure you have installed following dependencies:
 * Rabbitmq
 * Ganache CLI
 * Solc v0.5.11
+* Python 2
 
 ### Installation (Remote Machine)
 
@@ -51,6 +52,9 @@ Please enter number of non-validator nodes - Input the number of sentry nodes yo
 Please enter ETH url - Input the eth url to use
 Please select devnet type - docker
 ```
+
+Notes:
+1. We have provided the default values where ever so to ensure smooth functioning of the process
 
 **After the setup is done, follow these steps for local docker deployment:**
 
@@ -111,6 +115,7 @@ Notes:
 1. We have assumed the host machine and remote machine to be an linux machine with ubuntu as user
 2. We have assumed the first machine is being used for ganache as well so enter the ETH url as - http://<1st machine IP>:<PORT>
 3. Make sure that the host machines has access to remote machines for transferring the data
+4. We have provided the default values where ever so to ensure smooth functioning of the process
 
 After the setup is done, follow these steps:
 1. Log into first machine and run ganache
