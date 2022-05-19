@@ -38,14 +38,21 @@ cd devnet
 ../bin/matic-cli setup devnet
 ```
 
-It will ask you several questions:
+It will ask you several questions (default values are provided):
 
 ```
+Please enter Bor chain id - Input the bor chain id you want
+Please enter Heimdall chain id - Input the heimdall chain id you want
+Please enter Bor docker tag - Input the bor tag you want to deploy
+Please enter Heimdall docker tag - Input the heimdall tag you want to deploy
+Please enter Contracts branch - Input the contracts branch
 Please enter number of validator nodes - Input the number of validator nodes you want to run
 Please enter number of non-validator nodes - Input the number of sentry nodes you want to run
+Please enter ETH url - Input the eth url to use
+Please select devnet type - docker
 ```
 
-After the setup is done, follow these steps:
+**After the setup is done, follow these steps for local docker deployment:**
 
 Start ganache
 ```bash
@@ -88,9 +95,21 @@ cd devnet
 It will ask you several questions:
 
 ```
+Please enter Bor chain id - Input the bor chain id you want
+Please enter Heimdall chain id - Input the heimdall chain id you want
+Please enter Bor docker tag - Input the bor tag you want to deploy
+Please enter Heimdall docker tag - Input the heimdall tag you want to deploy
+Please enter Contracts branch - Input the contracts branch
 Please enter number of validator nodes - Input the number of validator nodes you want to run
 Please enter number of non-validator nodes - Input the number of sentry nodes you want to run
+Please enter ETH url - Input the eth url to use
+Please select devnet type - remote
+Please enter comma separated hosts/IPs - Enter the IPs
 ```
+
+Notes:
+1. We have assumed the host machine and remote machine to be an ubuntu machine
+2. We have assumed the first machine is being used for ganache so enter the ETH url as - http://<1st machine IP>:<PORT>
 
 After the setup is done, follow these steps:
 1. Log into first machine and run ganache
