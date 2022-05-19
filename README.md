@@ -7,26 +7,24 @@
 Please make sure you have installed following dependencies:
 
 * Git
-* Node/npm v10.17.0 (use nvm to install older npm versions, https://nvm.sh/)
+* Node v10.17.0
 * Go 1.18+
-* Docker (https://docs.docker.com/engine/install/ubuntu/)
-* Rabbitmq (Latest stable version, https://www.rabbitmq.com/download.html) (Not required for docker based setup)
-* Ganache CLI (https://www.npmjs.com/package/ganache-cli) (Not required for docker based setup)
-
-Please refer to [this](./installation.md) document for more information. 
+* Docker
+* Rabbitmq
+* Ganache CLI
+* Solc v0.5.11
 
 ### Usage
+
+
+
+**To setup multi-node local network (via docker)**
 
 Create new directory for the setup:
 
 ```bash
-$ mkdir devnet
-$ cd devnet
-```
-
-**To setup multi-node local network**
-
-```bash
+mkdir devnet
+cd devnet
 ../bin/matic-cli setup devnet
 ```
 
@@ -59,7 +57,7 @@ Start bor
 bash docker-bor-start-all.sh
 ```
 
-**Logs**
+Logs
 
 Logs will be at `logs/` folder
 
