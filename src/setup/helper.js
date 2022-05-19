@@ -8,11 +8,12 @@ export async function printDependencyInstructions() {
 Please make sure you have installed following dependencies:
 
 * Git
-* Node/npm v10.17.0 (or higher)
+* Node/npm v10.17.0
 * Go 1.18+
-* Rabbitmq (Latest stable version)
-* Solc v0.5.11 (https://solidity.readthedocs.io/en/v0.5.3/installing-solidity.html#binary-packages)
-* Ganache CLI (https://www.npmjs.com/package/ganache-cli)
+* Docker
+* Rabbitmq
+* Ganache CLI
+* Solc v0.5.11
 `))
 }
 
@@ -47,6 +48,7 @@ export async function getChainIds(options = {}) {
 }
 
 export async function getDefaultBranch(options = {}) {
+
   const questions = []
 
   if (!options.borBranch) {
