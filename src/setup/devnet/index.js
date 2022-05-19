@@ -553,7 +553,7 @@ export default async function () {
       type: 'number',
       name: 'numOfNonValidators',
       message: 'Please enter number of non-validator nodes',
-      default: 2
+      default: 0
     })
   }
 
