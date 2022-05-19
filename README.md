@@ -8,7 +8,13 @@ Please make sure you have installed following dependencies:
 
 * Git
 * Node v10.17.0
-* Go 1.18+
+* Go 1.18+ (
+    ```bash
+    wget https://raw.githubusercontent.com/maticnetwork/node-ansible/master/go-install.sh
+    bash go-install.sh --remove
+    bash go-install.sh
+    ```
+)
 * Docker
 * Rabbitmq
 * Ganache CLI
