@@ -404,6 +404,9 @@ export class Devnet {
           title: bor.taskTitle,
           task: () => {
             return bor.getTasks()
+          },
+          enabled: () => {
+            return this.config.devnetType === 'remote'
           }
         },
         {
