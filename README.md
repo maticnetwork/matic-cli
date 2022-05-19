@@ -108,8 +108,9 @@ Please enter comma separated hosts/IPs - Enter the IPs
 ```
 
 Notes:
-1. We have assumed the host machine and remote machine to be an ubuntu machine
-2. We have assumed the first machine is being used for ganache so enter the ETH url as - http://<1st machine IP>:<PORT>
+1. We have assumed the host machine and remote machine to be an linux machine with ubuntu as user
+2. We have assumed the first machine is being used for ganache as well so enter the ETH url as - http://<1st machine IP>:<PORT>
+3. Make sure that the host machines has access to remote machines for transferring the data
 
 After the setup is done, follow these steps:
 1. Log into first machine and run ganache
