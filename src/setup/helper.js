@@ -4,18 +4,6 @@ import chalk from 'chalk'
 import { getNewPrivateKey } from '../lib/utils'
 
 export async function printDependencyInstructions() {
-  console.log(chalk.bold.yellow(`
-Please make sure you have installed following dependencies:
-
-* Git
-* Node/npm v10.17.0
-* Go 1.18+
-* Docker
-* Rabbitmq
-* Ganache CLI
-* Solc v0.5.11
-* Python 2
-`))
 }
 
 export async function getChainIds(options = {}) {

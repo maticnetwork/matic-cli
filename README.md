@@ -6,44 +6,64 @@
 
 Please make sure you have installed following dependencies:
 
-* Git
+* Build Essentials
+    ```bash
+    sudo apt install build-essential
+    ```
 * Node v10.17.0
-* Go 1.18+ (
+    ```bash
+    curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+    nvm install 10.17.0
+    ```
+* Go 1.18+
     ```bash
     wget https://raw.githubusercontent.com/maticnetwork/node-ansible/master/go-install.sh
     bash go-install.sh --remove
     bash go-install.sh
     ```
-)
-* Docker
-* Rabbitmq
-* Ganache CLI
-* Solc v0.5.11
+* Docker (https://docs.docker.com/engine/install/linux-postinstall/)
+* Solc v0.5.16
+    ```bash
+    sudo snap install solc
+    ```
 * Python 2
+    ```bash
+    sudo apt install python2
+    alias python="/usr/bin/python2"
+    ```
 
 ### Installation (Remote Machine)
 
 Please make sure you have installed following dependencies:
 
+* Npm
+    ```bash
+    sudo apt update
+    sudo apt install nodejs npm
+    ```
 * Go 1.18+
 * Rabbitmq
-* Ganache CLI
+    ```bash
+    sudo apt install rabbitmq-server
+    ```
+* Ganache CLI (Only required on ganache remote machine)
+    ```bash
+    sudo npm install -g ganache-cli
+    ```
 
 ### Usage
 
-**----------------------------------------------**
-
-**To setup multi-node local network (via docker)**
-
-**----------------------------------------------**
-
-Create new directory for the setup:
-
 ```bash
+git clone https://github.com/maticnetwork/matic-cli.git
+npm i
 mkdir devnet
 cd devnet
 ../bin/matic-cli setup devnet
 ```
+
+**-----**
+**To setup multi-node local network (via docker)**
+**-----**
 
 It will ask you several questions (default values are provided):
 
@@ -88,19 +108,9 @@ Logs
 
 Logs will be at `logs/` folder
 
-**----------------------------------**
-
+**-----**
 **To setup multi-node remote network**
-
-**----------------------------------**
-
-Create new directory for the setup:
-
-```bash
-mkdir devnet
-cd devnet
-../bin/matic-cli setup devnet
-```
+**-----**
 
 It will ask you several questions:
 
@@ -118,18 +128,20 @@ Please enter comma separated hosts/IPs - Enter the IPs
 ```
 
 Notes:
-1. We have assumed the host machine and remote machine to be an linux machine with ubuntu as user
-2. We have assumed the first machine is being used for ganache as well so enter the ETH url as - http://<1st machine IP>:<PORT>
+1. The host machine and remote machine has to be an linux machine with ubuntu as user
+2. The first machine will be used for ganache as well so enter the ETH url as - http://<1st machine IP>:<PORT>
 3. Make sure that the host machines has access to remote machines for transferring the data
 4. We have provided the default values where ever so to ensure smooth functioning of the process
 
-After the setup is done, follow these steps:
-1. Log into first machine and run ganache
+**After the setup is done, follow these steps for local docker deployment:**
+
+1. Log into first machine and run ganache:
 ```bash
+cd ~/
 bash ganache-start-remote.sh
 ```
 
-2. Log into the remote machines and on each machine run the following steps in different terminals
+2. Log into the remote machines and on each machine run the following steps in different terminals:
 ```bash
 cd ~/node
 bash heimdalld-setup.sh
@@ -146,16 +158,13 @@ bridge start --all
 
 ```bash
 cd ~/node
-bash bor-clean.sh
 bash bor-setup.sh
 bash bor-start.sh
 ```
 
-**-----------**
-
+**-----**
 **Clean Setup**
-
-**-----------**
+**-----**
 
 Remove the devnet folder and you can start the process once again
 
