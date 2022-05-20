@@ -4,7 +4,7 @@
 
 ```bash
 # start heimdall0
-$ docker-compose up -d heimdall0
+$ docker compose up -d heimdall0
 
 # exec bash into heimdall0
 $ docker exec -i -t heimdall0 bash
