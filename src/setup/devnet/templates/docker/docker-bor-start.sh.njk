@@ -15,7 +15,7 @@ ADDRESS=${ADDRESSES[$INDEX]};
 NODE_DIR=/root/.bor
 DATA_DIR=/root/.bor/data
 
-docker-compose run --service-ports -d --name bor$INDEX bor$INDEX sh -c "
+docker compose run --service-ports -d --name bor$INDEX bor$INDEX sh -c "
 touch /root/logs/bor.log
 bor --datadir $DATA_DIR \
   --port 30303 \
