@@ -36,15 +36,15 @@ Please make sure you have installed following dependencies:
 
 Please make sure you have installed following dependencies:
 
-* Npm
-    ```bash
-    sudo apt update
-    sudo apt install nodejs npm
-    ```
 * Go 1.18+
 * Rabbitmq
     ```bash
     sudo apt install rabbitmq-server
+    ```
+* Npm (Only required on ganache remote machine)
+    ```bash
+    sudo apt update
+    sudo apt install nodejs npm
     ```
 * Ganache CLI (Only required on ganache remote machine)
     ```bash
