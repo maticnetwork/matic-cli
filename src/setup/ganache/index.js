@@ -33,6 +33,10 @@ export class Ganache {
     return path.join(this.config.dataDir, this.dbName)
   }
 
+  get dbDirRemote() {
+    return path.join('./data', this.dbName)
+  }
+
   async print() {
     console.log(chalk.gray('Ganache db path') + ': ' + chalk.bold.green(this.dbDir))
   }
@@ -154,7 +158,7 @@ export class Ganache {
 
             // copy all templates to target directory
             await fs.copy(templateDir, this.config.targetDirectory)
-
+            
             // process all njk templates
             await processTemplateFiles(this.config.targetDirectory, { obj: this })
           }

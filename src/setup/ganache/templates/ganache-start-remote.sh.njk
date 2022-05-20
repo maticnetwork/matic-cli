@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+
+set -x #echo on
+
+DATA_DIR={{ obj.dbDirRemote }}
+
+ganache-cli --hardfork istanbul \
+  --blockTime 1 \
+  --db $DATA_DIR \
+  {% for acc in obj.config.accounts %}--account {{ acc.privateKey }},1000000000000000000000 {% endfor %}\
+  --gasLimit 8000000 \
+  --gasPrice 0 \
+  -p 9545 -h 0.0.0.0

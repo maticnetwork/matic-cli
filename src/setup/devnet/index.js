@@ -8,6 +8,7 @@ import nunjucks from 'nunjucks'
 import { toBuffer, privateToPublic, bufferToHex } from 'ethereumjs-util'
 
 import { Heimdall } from '../heimdall'
+import { Bor } from '../bor'
 import { Ganache } from '../ganache'
 import { Genesis } from '../genesis'
 import { printDependencyInstructions, getDefaultBranch } from '../helper'
@@ -15,6 +16,23 @@ import { getNewPrivateKey, getKeystoreFile, processTemplateFiles, getAccountFrom
 import { loadConfig } from '../config'
 import fileReplacer from '../../lib/file-replacer'
 
+const getAllFiles = function(dirPath, arrayOfFiles) {
+  var files = fs.readdirSync(dirPath)
+
+  arrayOfFiles = arrayOfFiles || []
+
+  files.forEach(function(file) {
+    if (fs.statSync(dirPath + "/" + file).isDirectory()) {
+      if(file==="bor" || file==="heimdall"){
+        arrayOfFiles = getAllFiles(dirPath + "/" + file, arrayOfFiles)
+      }
+    } else {
+      arrayOfFiles.push(path.join(dirPath, "/", file))
+    }
+  })
+
+  return arrayOfFiles
+}
 export class Devnet {
   constructor(config, options = {}) {
     this.config = config
@@ -224,6 +242,27 @@ export class Devnet {
         }
       },
       {
+        title: 'Process contract addresses',
+        task: () => {
+          // get root contracts
+          const rootContracts = this.config.contractAddresses.root
+
+          // set heimdall peers with devnet heimdall hosts
+          for (let i = 0; i < this.totalNodes; i++) {
+            fileReplacer(this.heimdallGenesisFilePath(i))
+              .replace(/"matic_token_address":[ ]*".*"/gi, `"matic_token_address": "${rootContracts.tokens.TestToken}"`)
+              .replace(/"staking_manager_address":[ ]*".*"/gi, `"staking_manager_address": "${rootContracts.StakeManagerProxy}"`)
+              .replace(/"root_chain_address":[ ]*".*"/gi, `"root_chain_address": "${rootContracts.RootChainProxy}"`)
+              .replace(/"staking_info_address":[ ]*".*"/gi, `"staking_info_address": "${rootContracts.StakingInfo}"`)
+              .replace(/"state_sender_address":[ ]*".*"/gi, `"state_sender_address": "${rootContracts.StateSender}"`)
+              .save()
+          }
+        },
+        enabled: () => {
+          return this.config.contractAddresses
+        }
+      },
+      {
         title: 'Process templates',
         task: async () => {
           const templateDir = path.resolve(
@@ -237,17 +276,18 @@ export class Devnet {
           // promises
           const p = []
           const signerDumpData = this.signerDumpData
-
           // process njk files
-          fs.readdirSync(this.config.targetDirectory).forEach(file => {
+          getAllFiles(this.config.targetDirectory,[]).forEach(async(file) => {
             if (file.indexOf('.njk') !== -1) {
               const fp = path.join(this.config.targetDirectory, file)
 
               // process all njk files and copy to each node directory
               for (let i = 0; i < this.totalNodes; i++) {
+                var file2array = file.split("/")
+                let file2 = file2array[file2array.length-1]
                 fs.writeFileSync(
-                  path.join(this.nodeDir(i), file.replace('.njk', '')),
-                  nunjucks.render(fp, { obj: this, node: i, signerData: signerDumpData[i] })
+                  path.join(this.nodeDir(i), file2.replace('.njk', '')),
+                  nunjucks.render(file, { obj: this, node: i, signerData: signerDumpData[i] })
                 )
               }
 
@@ -260,6 +300,30 @@ export class Devnet {
 
           // fulfill all promises
           await Promise.all(p)
+        }
+      },
+      {
+        title: 'Copy files to remote servers',
+        task: async () => {
+          if(this.config.devnetBorHosts===undefined){
+              return
+          }
+          for(let i=0; i<this.totalNodes; i++) {
+
+            // copy files to remote servers
+
+            await execa('scp', [`${this.config.targetDirectory}/code/bor/build/bin/bor`,`ubuntu@${this.config.devnetBorHosts[i]}:/home/ubuntu/go/bin/bor`])
+            await execa('scp', [`${this.config.targetDirectory}/code/heimdall/build/heimdalld`,`ubuntu@${this.config.devnetBorHosts[i]}:/home/ubuntu/go/bin/heimdalld`])
+            await execa('scp', [`${this.config.targetDirectory}/code/heimdall/build/heimdallcli`,`ubuntu@${this.config.devnetBorHosts[i]}:/home/ubuntu/go/bin/heimdallcli`])
+            await execa('scp', [`${this.config.targetDirectory}/code/heimdall/build/bridge`,`ubuntu@${this.config.devnetBorHosts[i]}:/home/ubuntu/go/bin/bridge`])
+
+            await execa('scp', [ `-r`,`${this.testnetDir}/node${i}/`,`ubuntu@${this.config.devnetBorHosts[i]}:~/node/`])
+
+          }
+
+          // copy the Ganache files to the first node
+          await execa('scp', [`${this.config.targetDirectory}/ganache-start-remote.sh`,`ubuntu@${this.config.devnetBorHosts[0]}:~/ganache-start-remote.sh`])
+          await execa('scp', [`-r`,`${this.config.targetDirectory}/data`,`ubuntu@${this.config.devnetBorHosts[0]}:~/data`])
         }
       }
     ]
@@ -307,6 +371,7 @@ export class Devnet {
   async getTasks() {
     const ganache = this.ganache
     const heimdall = this.heimdall
+    const bor = this.bor
     const genesis = this.genesis
 
     // create testnet tasks
@@ -333,6 +398,15 @@ export class Devnet {
             this.config.accounts = this.signerDumpData.slice(0, this.config.numOfValidators).map(s => {
               return getAccountFromPrivateKey(s.priv_key)
             })
+          }
+        },
+        {
+          title: bor.taskTitle,
+          task: () => {
+            return bor.getTasks()
+          },
+          enabled: () => {
+            return this.config.devnetType === 'remote'
           }
         },
         {
@@ -388,7 +462,7 @@ export class Devnet {
             return ganache.getTasks()
           },
           enabled: () => {
-            return this.config.devnetType === 'docker'
+            return this.config.devnetType === 'docker' || 'remote'
           }
         },
         {
@@ -419,6 +493,7 @@ export class Devnet {
 async function setupDevnet(config) {
   const devnet = new Devnet(config)
   devnet.ganache = new Ganache(config, { contractsBranch: config.contractsBranch })
+  devnet.bor = new Bor(config, { repositoryBranch: config.borBranch })
   devnet.heimdall = new Heimdall(config, { repositoryBranch: config.heimdallBranch })
   devnet.genesis = new Genesis(config, { repositoryBranch: 'master' })
 
@@ -478,34 +553,32 @@ export default async function () {
       type: 'number',
       name: 'numOfNonValidators',
       message: 'Please enter number of non-validator nodes',
-      default: 2
+      default: 0
     })
   }
 
-  // if (!('ethURL' in config)) {
-  //   questions.push({
-  //     type: 'input',
-  //     name: 'ethURL',
-  //     message: 'Please enter ETH url',
-  //     default: 'http://ganache:9545'
-  //   })
-  // }
+  if (!('ethURL' in config)) {
+    questions.push({
+      type: 'input',
+      name: 'ethURL',
+      message: 'Please enter ETH url',
+      default: 'http://ganache:9545'
+    })
+  }
 
-  // if (!('devnetType' in config)) {
-  //   questions.push({
-  //     type: 'list',
-  //     name: 'devnetType',
-  //     message: 'Please select devnet type',
-  //     choices: [
-  //       'docker',
-  //       'remote'
-  //     ]
-  //   })
-  // }
+  if (!('devnetType' in config)) {
+    questions.push({
+      type: 'list',
+      name: 'devnetType',
+      message: 'Please select devnet type',
+      choices: [
+        'docker',
+        'remote'
+      ]
+    })
+  }
 
   answers = await inquirer.prompt(questions)
-  answers['devnetType'] = 'docker'
-  answers['ethURL'] = 'http://ganache:9545'
   config.set(answers)
 
   // set devent hosts
