@@ -338,6 +338,7 @@ export class Devnet {
         task: async () => {
           const args = [
             'create-testnet',
+            '--home', 'devnet',
             '--v', this.config.numOfValidators,
             '--n', this.config.numOfNonValidators,
             '--chain-id', this.config.heimdallChainId,
@@ -494,7 +495,7 @@ async function setupDevnet(config) {
   const devnet = new Devnet(config)
   devnet.ganache = new Ganache(config, { contractsBranch: config.contractsBranch })
   devnet.bor = new Bor(config, { repositoryBranch: config.borBranch })
-  devnet.heimdall = new Heimdall(config, { repositoryBranch: config.heimdallBranch })
+  devnet.heimdall = new Heimdall(config, { repositoryBranch: config.heimdallBranch, dockerContext: config.heimdallDockerBuildContext })
   devnet.genesis = new Genesis(config, { repositoryBranch: 'master' })
 
   const tasks = await devnet.getTasks()

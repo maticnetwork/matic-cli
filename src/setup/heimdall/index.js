@@ -24,8 +24,9 @@ export class Heimdall {
     this.config = config
 
     this.repositoryName = this.name
-    this.repositoryBranch = options.repositoryBranch || 'master'
+    this.repositoryBranch = options.repositoryBranch || 'v0.3.0-dev'
     this.repositoryUrl = options.repositoryUrl || 'https://github.com/maticnetwork/heimdall'
+    this.dockerContext = options.dockerContext
   }
 
   get name() {
@@ -45,7 +46,11 @@ export class Heimdall {
   }
 
   get repositoryDir() {
-    return path.join(this.config.codeDir, this.repositoryName)
+    if (this.dockerContext !== undefined && !this.dockerContext.startsWith("http")) {
+      return this.dockerContext
+    } else {
+      return path.join(this.config.codeDir, this.repositoryName)
+    }
   }
 
   get buildDir() {
@@ -174,7 +179,7 @@ export class Heimdall {
   buildTask() {
     return {
       title: 'Build Heimdall',
-      task: () => execa('make', ['build', 'network=local'], {
+      task: () => execa('make', ['build'], {
         cwd: this.repositoryDir
       })
     }
@@ -243,7 +248,7 @@ export class Heimdall {
 
 async function setupHeimdall(config) {
   const ganache = new Ganache(config, { contractsBranch: config.contractsBranch })
-  const heimdall = new Heimdall(config, { repositoryBranch: config.heimdallBranch })
+  const heimdall = new Heimdall(config, { repositoryBranch: config.heimdallBranch, dockerContext: config.heimdallDockerBuildContext })
 
   // get all heimdall related tasks
   const tasks = new Listr([

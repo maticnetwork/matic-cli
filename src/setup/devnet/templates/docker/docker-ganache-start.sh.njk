@@ -4,7 +4,7 @@ set -x #echo on
 
 DATA_DIR={{ ganache.dbName }}
 
-docker compose run --rm --service-ports --name ganache ganache --hardfork istanbul \
+docker compose run -d --service-ports --name ganache ganache --hardfork istanbul \
   --blockTime 1 \
   --db /root/data/$DATA_DIR \
   {% for acc in obj.config.accounts %}--account {{ acc.privateKey }},1000000000000000000000 {% endfor %}\
