@@ -26,7 +26,18 @@ services:
       - devnet-network
 
   heimdall{{ node }}:
+    {% if obj.config.heimdallDockerBuildContext|length %}
+      {% if node == 0 %}
+    build:
+      context: {{ obj.config.heimdallDockerBuildContext }}j
+      dockerfile: Dockerfile
+    image: local/heimdall
+      {% else %}
+    image: local/heimdall
+      {% endif %}
+    {% else %}
     image: "maticnetwork/heimdall:{{ obj.config.heimdallBranch }}"
+    {% endif %}
     container_name: heimdall{{ node }}
     depends_on:
       - rabbit{{ node }}
@@ -42,7 +53,19 @@ services:
     {% endif %}
   
   bor{{ node }}:
+    {% if obj.config.borDockerBuildContext|length %}
+      {% if node == 0 %}
+    build:
+      context: {{ obj.config.borDockerBuildContext }}
+      dockerfile: Dockerfile
+    image: local/bor
+      {% else %}
+    image: local/bor
+      {% endif %}
+    {% else %}
     image: "maticnetwork/bor:{{ obj.config.borBranch }}"
+    {% endif %}
+
     container_name: bor{{ node }}
     # depends_on:
     #  - heimdall{{ node }}
