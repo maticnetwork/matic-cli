@@ -21,7 +21,7 @@ Please make sure you have installed following dependencies:
     bash go-install.sh --remove
     bash go-install.sh
     ```
-* Docker (https://docs.docker.com/engine/install/linux-postinstall/)
+* Docker (https://docs.docker.com/engine/install/ubuntu/, https://docs.docker.com/engine/install/linux-postinstall/)
 * Solc v0.5.16
     ```bash
     sudo snap install solc
