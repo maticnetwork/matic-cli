@@ -63,7 +63,7 @@ export async function getDefaultBranch(options = {}) {
       type: 'input',
       name: 'contractsBranch',
       message: 'Please enter Contracts branch',
-      default: 'v0.3.0-backport'
+      default: 'arpit/v0.3.1-backport'
     })
   }
 
