@@ -190,11 +190,15 @@ async function setupGanache(config) {
   await ganache.print()
 }
 
-export default async function () {
+export default async function (command) {
   await printDependencyInstructions()
 
   // configuration
-  const config = await loadConfig()
+  await loadConfig({
+    targetDirectory: command.parent.directory, 
+    fileName: command.parent.config,
+    interactive: command.parent.interactive
+  })
   await config.loadChainIds()
   await config.loadAccounts()
 

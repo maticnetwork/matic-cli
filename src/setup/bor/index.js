@@ -167,11 +167,15 @@ async function setupBor(config) {
   return true
 }
 
-export default async function () {
+export default async function (command) {
   await printDependencyInstructions()
 
   // configuration
-  const config = await loadConfig({ targetDirectory: process.cwd() })
+  await loadConfig({
+    targetDirectory: command.parent.directory, 
+    fileName: command.parent.config,
+    interactive: command.parent.interactive
+  })
   await config.loadChainIds()
   await config.loadAccounts()
 
