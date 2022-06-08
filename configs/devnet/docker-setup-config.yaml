@@ -1,0 +1,11 @@
+defaultStake: 10000
+defaultFee: 2000
+borChainId: "15001"
+heimdallChainId: heimdall-15001
+borBranch: v0.2.16
+heimdallBranch: v0.2.9
+contractsBranch: arpit/v0.3.1-backport
+numOfValidators: 2
+numOfNonValidators: 0
+ethURL: http://ganache:9545
+devnetType: docker

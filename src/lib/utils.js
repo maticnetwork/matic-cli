@@ -103,3 +103,13 @@ export function privateKeyToPublicKey(pk) {
 export function compressedPublicKey(pk) {
   return '0x' + ethCrypto.publicKey.compress(pk.replace('0x', ''))
 }
+
+export function errorMissingConfigs(configNames) {
+  if (configNames && configNames.length > 0) {
+    console.error('Missing the following config attributes: \n')
+    configNames.forEach((name) => {
+      console.error(name)
+    })
+    process.exit(1)
+  }
+}

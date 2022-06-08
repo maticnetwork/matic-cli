@@ -8,7 +8,7 @@ import { projectInstall } from 'pkg-install'
 import { isValidAddress } from 'ethereumjs-util'
 
 import { loadConfig } from '../config'
-import { cloneRepository } from '../../lib/utils'
+import { cloneRepository, errorMissingConfigs } from '../../lib/utils'
 import { printDependencyInstructions } from '../helper'
 
 // balance
@@ -144,9 +144,11 @@ export class Genesis {
   }
 }
 
-export async function getGenesisAddresses() {
-  const answers = await inquirer.prompt([
-    {
+export async function getGenesisAddresses(config) {
+  const questions = []
+
+  if (!config.genesisAddresses) {
+    questions.push({
       type: 'input',
       name: 'genesisAddresses',
       message: 'Please enter comma separated validator addresses',
@@ -165,8 +167,14 @@ export async function getGenesisAddresses() {
 
         return true
       }
-    }
-  ])
+    })
+  }
+
+  if (!config.interactive) {
+    errorMissingConfigs(questions.map((q) => {return q.name}))
+  }
+
+  const answers = await inquirer.prompt(questions)
 
   // set genesis addresses
   return answers.genesisAddresses.split(',').map(a => {
@@ -178,7 +186,7 @@ async function setupGenesis(config) {
   const genesis = new Genesis(config)
 
   // load genesis addresses
-  config.genesisAddresses = await getGenesisAddresses()
+  config.genesisAddresses = await getGenesisAddresses(config)
 
   // get all genesis related tasks
   const tasks = await genesis.getTasks()
@@ -193,11 +201,15 @@ async function setupGenesis(config) {
   return true
 }
 
-export default async function () {
+export default async function (command) {
   await printDependencyInstructions()
 
   // configuration
-  const config = await loadConfig()
+  await loadConfig({
+    targetDirectory: command.parent.directory, 
+    fileName: command.parent.config,
+    interactive: command.parent.interactive
+  })
   await config.loadChainIds()
 
   // start setup

@@ -3,6 +3,7 @@ import path from 'path'
 import execa from 'execa'
 import chalk from 'chalk'
 import { toBuffer, privateToPublic, bufferToHex } from 'ethereumjs-util'
+import YAML from 'yaml'
 
 import { getKeystoreDetails, getChainIds } from './helper'
 import { getAccountFromPrivateKey } from '../lib/utils'
@@ -102,8 +103,17 @@ export async function loadConfig(options = {}) {
   const configFile = path.join(targetDirectory, fileName)
 
   const hasConfigFile = await fs.exists(configFile)
+  let _options = {}
   if (hasConfigFile) {
-    const _options = require(configFile) // get options from config
+    if (configFile.endsWith('.json')) {
+      _options = require(configFile) // get options from config
+    } else if (configFile.endsWith('.yaml') || configFile.endsWith('.yml')) {
+      const file = fs.readFileSync(configFile, 'utf8')
+      _options = YAML.parse(file)
+    } else {
+      console.error('Unable to recognize file format for file: ', configFile)
+      process.exit(1)
+    }
     options = {
       ...options,
       ..._options
@@ -125,6 +135,14 @@ export async function loadConfig(options = {}) {
 
 export async function saveConfig(config) {
   const configFile = path.join(config.targetDirectory, config.fileName || defaultConfigFileName)
-  const data = JSON.stringify(config, null, 2)
+  let data = {}
+  if (configFile.endsWith('.json')) {
+    data = JSON.stringify(config, null, 2)
+  } else if (configFile.endsWith('.yml') || configFile.endsWith('.yaml')) {
+    data = YAML.stringify(config)
+  } else {
+    console.error('Unable to recognize file format for file: ', configFile)
+    process.exit(1)
+  }
   return fs.writeFileSync(configFile, data, { mode: 0o755 })
 }

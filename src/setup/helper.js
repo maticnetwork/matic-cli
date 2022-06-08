@@ -1,7 +1,7 @@
 import inquirer from 'inquirer'
 import chalk from 'chalk'
 
-import { getNewPrivateKey } from '../lib/utils'
+import { getNewPrivateKey, errorMissingConfigs } from '../lib/utils'
 
 export async function printDependencyInstructions() {
 }
@@ -31,6 +31,10 @@ export async function getChainIds(options = {}) {
   if (questions.length === 0) {
     return {}
   }
+  
+  if (!options.interactive) {
+    errorMissingConfigs(questions.map((q) => {return q.name}))
+  }
 
   // get answers
   return await inquirer.prompt(questions)
@@ -40,22 +44,26 @@ export async function getDefaultBranch(options = {}) {
 
   const questions = []
 
-  if (!options.borBranch) {
-    questions.push({
-      type: 'input',
-      name: 'borBranch',
-      message: 'Please enter Bor docker tag',
-      default: 'v0.2.16'
-    })
+  if (!options.borDockerBuildContext) {
+    if (!options.borBranch) {
+      questions.push({
+        type: 'input',
+        name: 'borBranch',
+        message: 'Please enter Bor docker tag',
+        default: 'v0.2.16'
+      })
+    }
   }
 
-  if (!options.heimdallBranch) {
-    questions.push({
-      type: 'input',
-      name: 'heimdallBranch',
-      message: 'Please enter Heimdall docker tag',
-      default: 'v0.2.9'
-    })
+  if (!options.heimdallDockerBuildContext) {
+    if (!options.heimdallBranch) {
+      questions.push({
+        type: 'input',
+        name: 'heimdallBranch',
+        message: 'Please enter Heimdall docker tag',
+        default: 'v0.2.9'
+      })
+    }
   }
 
   if (!options.contractsBranch) {
@@ -72,6 +80,10 @@ export async function getDefaultBranch(options = {}) {
     return {}
   }
 
+  if (!options.interactive) {
+    errorMissingConfigs(questions.map((q) => {return q.name}))
+  }
+
   // get answers
   return await inquirer.prompt(questions)
 }
@@ -82,7 +94,7 @@ export async function getKeystoreDetails(options = {}) {
 
   if (!options.privateKey) {
     let hasPrivateKey = false
-    if (options.forceAsk) {
+    if (options.forceAsk && options.interactive) {
       hasPrivateKey = true
     } else {
       const { hasPrivateKey: hk } = await inquirer.prompt({
@@ -136,6 +148,10 @@ export async function getKeystoreDetails(options = {}) {
   // return if no questions
   if (questions.length === 0) {
     return {}
+  }
+
+  if (!options.interactive) {
+    errorMissingConfigs(questions.map((q) => {return q.name}))
   }
 
   // return answers

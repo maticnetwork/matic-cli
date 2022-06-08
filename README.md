@@ -58,12 +58,24 @@ git clone https://github.com/maticnetwork/matic-cli.git
 npm i
 mkdir devnet
 cd devnet
-../bin/matic-cli setup devnet
 ```
 
-**-----**
-**To setup multi-node local network (via docker)**
-**-----**
+Setup a local network interactively
+
+```bash
+../bin/matic-cli setup devnet -i
+```
+
+Alternatively, setup a local network with a template configuration file
+
+```bash
+../bin/matic-cli setup devnet -c ../configs/devnet/docker-setup-config.yaml
+```
+
+You can find more details about configuration options [here](configs/README.md).
+
+
+#### To setup multi-node local network (via docker)
 
 It will ask you several questions (default values are provided):
 
@@ -108,9 +120,8 @@ Logs
 
 Logs will be at `logs/` folder
 
-**-----**
-**To setup multi-node remote network**
-**-----**
+
+#### To setup multi-node remote network
 
 It will ask you several questions:
 
@@ -162,9 +173,7 @@ bash bor-setup.sh
 bash bor-start.sh
 ```
 
-**-----**
-**Clean Setup**
-**-----**
+#### Clean Setup
 
 Remove the devnet folder and you can start the process once again
 

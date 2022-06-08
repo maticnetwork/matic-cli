@@ -12,7 +12,7 @@ import { Bor } from '../bor'
 import { Ganache } from '../ganache'
 import { Genesis } from '../genesis'
 import { printDependencyInstructions, getDefaultBranch } from '../helper'
-import { getNewPrivateKey, getKeystoreFile, processTemplateFiles, getAccountFromPrivateKey } from '../../lib/utils'
+import { getNewPrivateKey, getKeystoreFile, processTemplateFiles, getAccountFromPrivateKey, errorMissingConfigs } from '../../lib/utils'
 import { loadConfig } from '../config'
 import fileReplacer from '../../lib/file-replacer'
 
@@ -527,11 +527,15 @@ export async function getHosts(n) {
   })
 }
 
-export default async function () {
+export default async function (command) {
   await printDependencyInstructions()
 
   // configuration
-  const config = await loadConfig()
+  const config = await loadConfig({
+    targetDirectory: command.parent.directory, 
+    fileName: command.parent.config,
+    interactive: command.parent.interactive
+  })
   await config.loadChainIds()
 
   // load branch
@@ -578,22 +582,41 @@ export default async function () {
     })
   }
 
+  if (!config.interactive) {
+    errorMissingConfigs(questions.map((q) => {return q.name}))
+  }
+
   answers = await inquirer.prompt(questions)
   config.set(answers)
 
   // set devent hosts
-  let devnetBorHosts = []
-  let devnetHeimdallHosts = []
+  let devnetBorHosts = config.devnetBorHosts || []
+  let devnetHeimdallHosts = config.devnetHeimdallHosts || []
   const totalValidators = config.numOfValidators + config.numOfNonValidators
   if (config.devnetType === 'docker') {
     [...Array(totalValidators).keys()].forEach((i) => {
-      devnetBorHosts.push(`172.20.1.${i + 100}`)
-      devnetHeimdallHosts.push(`heimdall${i}`)
+      if (devnetBorHosts.length < totalValidators) {
+        devnetBorHosts.push(`172.20.1.${i + 100}`)
+      }
+      if (devnetHeimdallHosts.length < totalValidators) {
+        devnetHeimdallHosts.push(`heimdall${i}`)
+      }
     })
   } else {
-    const hosts = await getHosts(totalValidators)
-    devnetBorHosts = hosts
-    devnetHeimdallHosts = hosts
+    let missing = ['devnetBorHosts', 'devnetHeimdallHosts'].filter(
+      (c) => {
+        if (c in config && config[c].length != totalValidators && !config.interactive) {
+          console.error(`Wrong number of hosts provided in ${c}, got ${config[c].length}, expect ${totalValidators}.`)
+          process.exit(1)
+        }
+        return !(c in config) || (config[c].length != totalValidators)
+      }
+    )
+    if (missing.length > 0) {
+      const hosts = await getHosts(totalValidators)
+      devnetBorHosts = hosts
+      devnetHeimdallHosts = hosts
+    }
   }
   config.set({ devnetBorHosts, devnetHeimdallHosts })
 
