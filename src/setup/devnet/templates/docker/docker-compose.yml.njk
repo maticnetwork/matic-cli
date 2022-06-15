@@ -29,7 +29,7 @@ services:
     {% if obj.config.heimdallDockerBuildContext|length %}
       {% if node == 0 %}
     build:
-      context: {{ obj.config.heimdallDockerBuildContext }}j
+      context: {{ obj.config.heimdallDockerBuildContext }}
       dockerfile: Dockerfile
     image: local/heimdall
       {% else %}
