@@ -312,18 +312,18 @@ export class Devnet {
 
             // copy files to remote servers
 
-            await execa('scp', [`${this.config.targetDirectory}/code/bor/build/bin/bor`,`ubuntu@${this.config.devnetBorHosts[i]}:/home/ubuntu/go/bin/bor`])
-            await execa('scp', [`${this.config.targetDirectory}/code/heimdall/build/heimdalld`,`ubuntu@${this.config.devnetBorHosts[i]}:/home/ubuntu/go/bin/heimdalld`])
-            await execa('scp', [`${this.config.targetDirectory}/code/heimdall/build/heimdallcli`,`ubuntu@${this.config.devnetBorHosts[i]}:/home/ubuntu/go/bin/heimdallcli`])
-            await execa('scp', [`${this.config.targetDirectory}/code/heimdall/build/bridge`,`ubuntu@${this.config.devnetBorHosts[i]}:/home/ubuntu/go/bin/bridge`])
+            await execa('scp', [`${this.config.targetDirectory}/code/bor/build/bin/bor`,`${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/bor`])
+            await execa('scp', [`${this.config.targetDirectory}/code/heimdall/build/heimdalld`,`${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/heimdalld`])
+            await execa('scp', [`${this.config.targetDirectory}/code/heimdall/build/heimdallcli`,`${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/heimdallcli`])
+            await execa('scp', [`${this.config.targetDirectory}/code/heimdall/build/bridge`,`${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/bridge`])
 
-            await execa('scp', [ `-r`,`${this.testnetDir}/node${i}/`,`ubuntu@${this.config.devnetBorHosts[i]}:~/node/`])
+            await execa('scp', [ `-r`,`${this.testnetDir}/node${i}/`,`${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:~/node/`])
 
           }
 
           // copy the Ganache files to the first node
-          await execa('scp', [`${this.config.targetDirectory}/ganache-start-remote.sh`,`ubuntu@${this.config.devnetBorHosts[0]}:~/ganache-start-remote.sh`])
-          await execa('scp', [`-r`,`${this.config.targetDirectory}/data`,`ubuntu@${this.config.devnetBorHosts[0]}:~/data`])
+          await execa('scp', [`${this.config.targetDirectory}/ganache-start-remote.sh`,`${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[0]}:~/ganache-start-remote.sh`])
+          await execa('scp', [`-r`,`${this.config.targetDirectory}/data`,`${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[0]}:~/data`])
         }
       }
     ]
@@ -527,12 +527,37 @@ export async function getHosts(n) {
   })
 }
 
+export async function getUsers(n) {
+  const answers = await inquirer.prompt([
+    {
+      type: 'input',
+      name: 'devnetUsers',
+      message: 'Please enter comma separated Users',
+      validate: (input) => {
+        const hosts = input.split(',').map(a => {
+          return a.trim().toLowerCase()
+        })
+
+        if (hosts.length === 0 || hosts.length !== n) {
+          return `Enter valid ${n} Users (comma separated)`
+        }
+
+        return true
+      }
+    }
+  ])
+
+  return answers.devnetHosts.split(',').map(a => {
+    return a.trim().toLowerCase()
+  })
+}
+
 export default async function (command) {
   await printDependencyInstructions()
 
   // configuration
   const config = await loadConfig({
-    targetDirectory: command.parent.directory, 
+    targetDirectory: command.parent.directory,
     fileName: command.parent.config,
     interactive: command.parent.interactive
   })
@@ -591,7 +616,9 @@ export default async function (command) {
 
   // set devent hosts
   let devnetBorHosts = config.devnetBorHosts || []
+  let devnetBorUsers = config.devnetBorUsers || []
   let devnetHeimdallHosts = config.devnetHeimdallHosts || []
+  let devnetHeimdallUsers = config.devnetHeimdallUsers || []
   const totalValidators = config.numOfValidators + config.numOfNonValidators
   if (config.devnetType === 'docker') {
     [...Array(totalValidators).keys()].forEach((i) => {
@@ -603,7 +630,7 @@ export default async function (command) {
       }
     })
   } else {
-    let missing = ['devnetBorHosts', 'devnetHeimdallHosts'].filter(
+    let missing = ['devnetBorHosts', 'devnetBorUsers', 'devnetHeimdallHosts', 'devnetHeimdallUsers'].filter(
       (c) => {
         if (c in config && config[c].length != totalValidators && !config.interactive) {
           console.error(`Wrong number of hosts provided in ${c}, got ${config[c].length}, expect ${totalValidators}.`)
@@ -617,8 +644,14 @@ export default async function (command) {
       devnetBorHosts = hosts
       devnetHeimdallHosts = hosts
     }
+
+    if (missing.length > 0) {
+      const users = await getUsers(totalValidators)
+      devnetBorUsers = users
+      devnetHeimdallUsers = users
+    }
   }
-  config.set({ devnetBorHosts, devnetHeimdallHosts })
+  config.set({ devnetBorHosts, devnetBorUsers, devnetHeimdallHosts, devnetHeimdallUsers })
 
   // start setup
   await setupDevnet(config)
