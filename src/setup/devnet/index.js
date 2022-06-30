@@ -312,18 +312,18 @@ export class Devnet {
 
             // copy files to remote servers
 
-            await execa('scp', [`${this.config.targetDirectory}/code/bor/build/bin/bor`,`ubuntu@${this.config.devnetBorHosts[i]}:/home/ubuntu/go/bin/bor`])
-            await execa('scp', [`${this.config.targetDirectory}/code/heimdall/build/heimdalld`,`ubuntu@${this.config.devnetBorHosts[i]}:/home/ubuntu/go/bin/heimdalld`])
-            await execa('scp', [`${this.config.targetDirectory}/code/heimdall/build/heimdallcli`,`ubuntu@${this.config.devnetBorHosts[i]}:/home/ubuntu/go/bin/heimdallcli`])
-            await execa('scp', [`${this.config.targetDirectory}/code/heimdall/build/bridge`,`ubuntu@${this.config.devnetBorHosts[i]}:/home/ubuntu/go/bin/bridge`])
+            await execa('scp', [`-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,`${this.config.targetDirectory}/code/bor/build/bin/bor`,`ubuntu@${this.config.devnetBorHosts[i]}:/home/ubuntu/go/bin/bor`])
+            await execa('scp', [`-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,`${this.config.targetDirectory}/code/heimdall/build/heimdalld`,`ubuntu@${this.config.devnetBorHosts[i]}:/home/ubuntu/go/bin/heimdalld`])
+            await execa('scp', [`-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,`${this.config.targetDirectory}/code/heimdall/build/heimdallcli`,`ubuntu@${this.config.devnetBorHosts[i]}:/home/ubuntu/go/bin/heimdallcli`])
+            await execa('scp', [`-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,`${this.config.targetDirectory}/code/heimdall/build/bridge`,`ubuntu@${this.config.devnetBorHosts[i]}:/home/ubuntu/go/bin/bridge`])
 
-            await execa('scp', [ `-r`,`${this.testnetDir}/node${i}/`,`ubuntu@${this.config.devnetBorHosts[i]}:~/node/`])
+            await execa('scp', [ `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,`-r`,`${this.testnetDir}/node${i}/`,`ubuntu@${this.config.devnetBorHosts[i]}:~/node/`])
 
           }
 
           // copy the Ganache files to the first node
-          await execa('scp', [`${this.config.targetDirectory}/ganache-start-remote.sh`,`ubuntu@${this.config.devnetBorHosts[0]}:~/ganache-start-remote.sh`])
-          await execa('scp', [`-r`,`${this.config.targetDirectory}/data`,`ubuntu@${this.config.devnetBorHosts[0]}:~/data`])
+          await execa('scp', [`-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,`${this.config.targetDirectory}/ganache-start-remote.sh`,`ubuntu@${this.config.devnetBorHosts[0]}:~/ganache-start-remote.sh`])
+          await execa('scp', [`-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,`-r`,`${this.config.targetDirectory}/data`,`ubuntu@${this.config.devnetBorHosts[0]}:~/data`])
         }
       }
     ]
