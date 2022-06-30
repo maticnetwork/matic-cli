@@ -308,10 +308,18 @@ export class Devnet {
           if(this.config.devnetBorHosts===undefined){
               return
           }
+          // copy the Ganache files to the first node
+          await execa('scp', [`-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,`${this.config.targetDirectory}/ganache-start-remote.sh`,`ubuntu@${this.config.devnetBorHosts[0]}:~/ganache-start-remote.sh`])
+          await execa('scp', [`-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,`-r`,`${this.config.targetDirectory}/data`,`ubuntu@${this.config.devnetBorHosts[0]}:~/data`])
+
+          // Run ganache in tmux
+          await execa('ssh', [
+            `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
+            `ubuntu@${this.config.devnetBorHosts[0]}`,
+            `tmux new -d -s matic-cli-ganache; tmux send-keys -t matic-cli-ganache.0 'bash /home/ubuntu/ganache-start-remote.sh' ENTER`])
+
           for(let i=0; i<this.totalNodes; i++) {
-
             // copy files to remote servers
-
             await execa('scp', [`-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,`${this.config.targetDirectory}/code/bor/build/bin/bor`,`ubuntu@${this.config.devnetBorHosts[i]}:/home/ubuntu/go/bin/bor`])
             await execa('scp', [`-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,`${this.config.targetDirectory}/code/heimdall/build/heimdalld`,`ubuntu@${this.config.devnetBorHosts[i]}:/home/ubuntu/go/bin/heimdalld`])
             await execa('scp', [`-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,`${this.config.targetDirectory}/code/heimdall/build/heimdallcli`,`ubuntu@${this.config.devnetBorHosts[i]}:/home/ubuntu/go/bin/heimdallcli`])
@@ -319,11 +327,12 @@ export class Devnet {
 
             await execa('scp', [ `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,`-r`,`${this.testnetDir}/node${i}/`,`ubuntu@${this.config.devnetBorHosts[i]}:~/node/`])
 
+            // Create a tmux session and start bor and heimdall services in it
+            await execa('ssh', [
+              `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
+              `ubuntu@${this.config.devnetBorHosts[i]}`,
+              `tmux new -d -s matic-cli; tmux send-keys -t matic-cli.0 'bash /home/ubuntu/node/heimdalld-setup.sh' ENTER; tmux send-keys -t matic-cli.1 'heimdalld start' ENTER; tmux send-keys -t matic-cli.2 'heimdalld rest-server' ENTER; tmux send-keys -t matic-cli.3 'bridge start --all' ENTER; tmux send-keys -t matic-cli.4 'bash /home/ubuntu/node/bor-setup.sh' ENTER; tmux send-keys -t matic-cli.5 'bash /home/ubuntu/node/bor-start.sh' ENTER`])
           }
-
-          // copy the Ganache files to the first node
-          await execa('scp', [`-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,`${this.config.targetDirectory}/ganache-start-remote.sh`,`ubuntu@${this.config.devnetBorHosts[0]}:~/ganache-start-remote.sh`])
-          await execa('scp', [`-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,`-r`,`${this.config.targetDirectory}/data`,`ubuntu@${this.config.devnetBorHosts[0]}:~/data`])
         }
       }
     ]
