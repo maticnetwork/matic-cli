@@ -316,7 +316,7 @@ export class Devnet {
           await execa('ssh', [
             `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
             `ubuntu@${this.config.devnetBorHosts[0]}`,
-            `tmux new -d -s matic-cli-ganache; tmux send-keys -t matic-cli-ganache.0 'bash /home/ubuntu/ganache-start-remote.sh' ENTER`])
+            `tmux new -d -s matic-cli-ganache; tmux send-keys -t matic-cli-ganache:0 'bash /home/ubuntu/ganache-start-remote.sh' ENTER`])
 
           for(let i=0; i<this.totalNodes; i++) {
             // copy files to remote servers
@@ -331,7 +331,12 @@ export class Devnet {
             await execa('ssh', [
               `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
               `ubuntu@${this.config.devnetBorHosts[i]}`,
-              `tmux new -d -s matic-cli; tmux send-keys -t matic-cli.0 'bash /home/ubuntu/node/heimdalld-setup.sh' ENTER; tmux send-keys -t matic-cli.1 'heimdalld start' ENTER; tmux send-keys -t matic-cli.2 'heimdalld rest-server' ENTER; tmux send-keys -t matic-cli.3 'bridge start --all' ENTER; tmux send-keys -t matic-cli.4 'bash /home/ubuntu/node/bor-setup.sh' ENTER; tmux send-keys -t matic-cli.5 'bash /home/ubuntu/node/bor-start.sh' ENTER`])
+              `tmux new -d -s matic-cli; tmux new-window -t matic-cli; tmux new-window -t matic-cli; tmux new-window -t matic-cli; tmux new-window -t matic-cli; tmux send-keys -t matic-cli:0 'bash /home/ubuntu/node/heimdalld-setup.sh' ENTER; tmux send-keys -t matic-cli:0 'heimdalld start' ENTER; tmux send-keys -t matic-cli:1 'heimdalld rest-server' ENTER; tmux send-keys -t matic-cli:3 'bash /home/ubuntu/node/bor-setup.sh' ENTER; tmux send-keys -t matic-cli:3 'bash /home/ubuntu/node/bor-start.sh' ENTER`])
+
+            await execa('ssh', [
+              `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
+              `ubuntu@${this.config.devnetBorHosts[i]}`,
+              `tmux send-keys -t matic-cli:2 'bridge start --all' ENTER`])
           }
         }
       }
@@ -388,102 +393,102 @@ export class Devnet {
 
     return new Listr(
       [
-        ...createTestnetTasks,
-        {
-          title: 'Setup accounts',
-          task: () => {
-            // set validator addresses
-            const genesisAddresses = []
-            const signerDumpData = this.signerDumpData
-            for (let i = 0; i < this.config.numOfValidators; i++) {
-              const d = signerDumpData[i]
-              genesisAddresses.push(d.address)
-            }
+        // ...createTestnetTasks,
+        // {
+        //   title: 'Setup accounts',
+        //   task: () => {
+        //     // set validator addresses
+        //     const genesisAddresses = []
+        //     const signerDumpData = this.signerDumpData
+        //     for (let i = 0; i < this.config.numOfValidators; i++) {
+        //       const d = signerDumpData[i]
+        //       genesisAddresses.push(d.address)
+        //     }
 
-            // set genesis addresses
-            this.config.genesisAddresses = genesisAddresses
+        //     // set genesis addresses
+        //     this.config.genesisAddresses = genesisAddresses
 
-            // setup accounts from signer dump data (based on number of validators)
-            this.config.accounts = this.signerDumpData.slice(0, this.config.numOfValidators).map(s => {
-              return getAccountFromPrivateKey(s.priv_key)
-            })
-          }
-        },
-        {
-          title: bor.taskTitle,
-          task: () => {
-            return bor.getTasks()
-          },
-          enabled: () => {
-            return this.config.devnetType === 'remote'
-          }
-        },
-        {
-          title: genesis.taskTitle,
-          task: () => {
-            // get genesis tasks
-            return genesis.getTasks()
-          }
-        },
-        {
-          title: 'Setup Bor keystore and genesis files',
-          task: async () => {
-            const signerDumpData = this.signerDumpData
+        //     // setup accounts from signer dump data (based on number of validators)
+        //     this.config.accounts = this.signerDumpData.slice(0, this.config.numOfValidators).map(s => {
+        //       return getAccountFromPrivateKey(s.priv_key)
+        //     })
+        //   }
+        // },
+        // {
+        //   title: bor.taskTitle,
+        //   task: () => {
+        //     return bor.getTasks()
+        //   },
+        //   enabled: () => {
+        //     return this.config.devnetType === 'remote'
+        //   }
+        // },
+        // {
+        //   title: genesis.taskTitle,
+        //   task: () => {
+        //     // get genesis tasks
+        //     return genesis.getTasks()
+        //   }
+        // },
+        // {
+        //   title: 'Setup Bor keystore and genesis files',
+        //   task: async () => {
+        //     const signerDumpData = this.signerDumpData
 
-            for (let i = 0; i < this.totalNodes; i++) {
-              // create directories
-              await execa('mkdir', ['-p', this.borDataDir(i), this.borKeystoreDir(i)])
-              const password = `password${i}`
+        //     for (let i = 0; i < this.totalNodes; i++) {
+        //       // create directories
+        //       await execa('mkdir', ['-p', this.borDataDir(i), this.borKeystoreDir(i)])
+        //       const password = `password${i}`
 
-              // create keystore files
-              const keystoreFileObj = getKeystoreFile(signerDumpData[i].priv_key, password)
-              const p = [
-                // save password file
-                fs.writeFile(
-                  this.borPasswordFilePath(i),
-                  `${password}\n`
-                ),
-                // save private key file
-                fs.writeFile(
-                  this.borPrivateKeyFilePath(i),
-                  `${signerDumpData[i].priv_key}\n`
-                ),
-                // save address file
-                fs.writeFile(
-                  this.borAddressFilePath(i),
-                  `${signerDumpData[i].address}\n`
-                ),
-                // save keystore file
-                fs.writeFile(
-                  path.join(this.borKeystoreDir(i), keystoreFileObj.keystoreFilename),
-                  JSON.stringify(keystoreFileObj.keystore, null, 2)
-                ),
-                // copy genesis file to each node bor directory
-                execa('cp', [genesis.borGenesisFilePath, this.borGenesisFilePath(i)])
-              ]
-              await Promise.all(p)
-            }
-          }
-        },
-        {
-          title: ganache.taskTitle,
-          task: () => {
-            return ganache.getTasks()
-          },
-          enabled: () => {
-            return this.config.devnetType === 'docker' || 'remote'
-          }
-        },
-        {
-          title: 'Docker',
-          task: async () => {
-            const tasks = await this.getDockerTasks()
-            return new Listr(tasks)
-          },
-          enabled: () => {
-            return this.config.devnetType === 'docker'
-          }
-        },
+        //       // create keystore files
+        //       const keystoreFileObj = getKeystoreFile(signerDumpData[i].priv_key, password)
+        //       const p = [
+        //         // save password file
+        //         fs.writeFile(
+        //           this.borPasswordFilePath(i),
+        //           `${password}\n`
+        //         ),
+        //         // save private key file
+        //         fs.writeFile(
+        //           this.borPrivateKeyFilePath(i),
+        //           `${signerDumpData[i].priv_key}\n`
+        //         ),
+        //         // save address file
+        //         fs.writeFile(
+        //           this.borAddressFilePath(i),
+        //           `${signerDumpData[i].address}\n`
+        //         ),
+        //         // save keystore file
+        //         fs.writeFile(
+        //           path.join(this.borKeystoreDir(i), keystoreFileObj.keystoreFilename),
+        //           JSON.stringify(keystoreFileObj.keystore, null, 2)
+        //         ),
+        //         // copy genesis file to each node bor directory
+        //         execa('cp', [genesis.borGenesisFilePath, this.borGenesisFilePath(i)])
+        //       ]
+        //       await Promise.all(p)
+        //     }
+        //   }
+        // },
+        // {
+        //   title: ganache.taskTitle,
+        //   task: () => {
+        //     return ganache.getTasks()
+        //   },
+        //   enabled: () => {
+        //     return this.config.devnetType === 'docker' || 'remote'
+        //   }
+        // },
+        // {
+        //   title: 'Docker',
+        //   task: async () => {
+        //     const tasks = await this.getDockerTasks()
+        //     return new Listr(tasks)
+        //   },
+        //   enabled: () => {
+        //     return this.config.devnetType === 'docker'
+        //   }
+        // },
         {
           title: 'Remote',
           task: async () => {
