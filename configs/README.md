@@ -35,7 +35,7 @@ borBranch: v0.2.16
 borDockerBuildContext: ""
 
 # Branch of Heimdall to use. Repository: https://github.com/maticnetwork/heimdall
-heimdallBranch: v0.2.9
+heimdallBranch: v0.2.10
 
 # Docker build context for heimdall. When specified, heimdallBranch will be ignore.
 # e.g. https://github.com/maticnetwork/heimdall.git#v0.3.0-dev
