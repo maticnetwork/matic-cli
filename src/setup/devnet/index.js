@@ -322,8 +322,8 @@ export class Devnet {
           }
 
           // copy the Ganache files to the first node
-          await execa('scp', [`${this.config.targetDirectory}/ganache-start-remote.sh`,`${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[0]}:~/ganache-start-remote.sh`])
-          await execa('scp', [`-r`,`${this.config.targetDirectory}/data`,`${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[0]}:~/data`])
+          await execa('scp', [`${this.config.targetDirectory}/ganache-start-remote.sh`,`${this.config.devnetBorUsers[0]}@${this.config.devnetBorHosts[0]}:~/ganache-start-remote.sh`])
+          await execa('scp', [`-r`,`${this.config.targetDirectory}/data`,`${this.config.devnetBorUsers[0]}@${this.config.devnetBorHosts[0]}:~/data`])
         }
       }
     ]
