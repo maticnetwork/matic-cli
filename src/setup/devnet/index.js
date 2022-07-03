@@ -321,7 +321,7 @@ export class Devnet {
 
           }
 
-          ganacheURL = new URL(this.config.ethURL)
+          let ganacheURL = new URL(this.config.ethURL)
 
           // copy the Ganache files to the first node
           await execa('scp', [`${this.config.targetDirectory}/ganache-start-remote.sh`,`ubuntu@${ganacheURL.hostname}:~/ganache-start-remote.sh`])
