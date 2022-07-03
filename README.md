@@ -122,8 +122,8 @@ Alternatively, setup a local/remote network interactively
 ```
 
 Notes:
-1. The host machine and remote machine can be any user but path will remain same for installation of binaries
-2. The first machine will be used for ganache as well so enter the ETH url as - http://<1st machine IP>:9545
+1. The host machine and remote machine has to be an linux machine with ubuntu as user
+2. The ganache URL hostname will be used for ganache - http://<1st machine IP>:9545
 3. Make sure that the host machines has access to remote machines for transferring the data
 4. We have provided the default values where ever so to ensure smooth functioning of the process
 

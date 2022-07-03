@@ -406,9 +406,11 @@ export class Devnet {
             ]);
           }
 
+          ganacheURL = new URL(this.config.ethURL)
+
           // copy the Ganache files to the first node
-          await execa('scp', [`${this.config.targetDirectory}/ganache-start-remote.sh`,`${this.config.devnetBorUsers[0]}@${this.config.devnetBorHosts[0]}:~/ganache-start-remote.sh`])
-          await execa('scp', [`-r`,`${this.config.targetDirectory}/data`,`${this.config.devnetBorUsers[0]}@${this.config.devnetBorHosts[0]}:~/data`])
+          await execa('scp', [`${this.config.targetDirectory}/ganache-start-remote.sh`,`ubuntu@${ganacheURL.hostname}:~/ganache-start-remote.sh`])
+          await execa('scp', [`-r`,`${this.config.targetDirectory}/data`,`ubuntu@${ganacheURL.hostname}:~/data`])
         }
       }
     ]
