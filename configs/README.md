@@ -22,10 +22,10 @@ defaultStake: 10000
 defaultFee: 2000
 
 # ChainID of bor
-borChainId: "15001"
+borChainId:
 
 # ChainID of heimdall
-heimdallChainId: heimdall-15001
+heimdallChainId:
 
 # Branch of bor to use. Repository: https://github.com/maticnetwork/bor
 borBranch: v0.2.16
