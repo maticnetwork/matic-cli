@@ -53,6 +53,9 @@ numOfNonValidators: 0
 # URL to Ethereum RPC
 ethURL: http://ganache:9545
 
+# Remote User for Ethereum RPC. Only effective when devnetType is remote.
+ethHostUser: ubuntu
+
 # Devnet type, choose from [docker, remote]
 devnetType: docker
 
