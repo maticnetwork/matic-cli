@@ -63,7 +63,7 @@ export async function getDefaultBranch(options = {}) {
         type: "input",
         name: "heimdallBranch",
         message: "Please enter Heimdall docker tag",
-        default: "v0.2.9",
+        default: "v0.2.10",
       });
     }
   }
