@@ -7,14 +7,15 @@ export async function printDependencyInstructions() {
 }
 
 export async function getChainIds(options = {}) {
-  const questions = []
+  let questions = []
+  let randomBorChainId = Math.floor((Math.random() * 10000) + 1000);
 
   if (!options.borChainId) {
     questions.push({
       type: 'input',
       name: 'borChainId',
       message: 'Please enter Bor chain id',
-      default: '15001'
+      default: randomBorChainId.toString()
     })
   }
 
@@ -23,7 +24,7 @@ export async function getChainIds(options = {}) {
       type: 'input',
       name: 'heimdallChainId',
       message: 'Please enter Heimdall chain id',
-      default: 'heimdall-15001'
+      default: 'heimdall-' + randomBorChainId.toString()
     })
   }
 
@@ -31,9 +32,12 @@ export async function getChainIds(options = {}) {
   if (questions.length === 0) {
     return {}
   }
-  
-  if (!options.interactive) {
-    errorMissingConfigs(questions.map((q) => {return q.name}))
+
+  if (!options.interactive && !options.borChainId && !options.heimdallChainId) {
+    return {
+      "borChainId": randomBorChainId.toString(),
+      "heimdallChainId": 'heimdall-' + randomBorChainId.toString()
+    }
   }
 
   // get answers
