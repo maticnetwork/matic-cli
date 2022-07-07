@@ -28,8 +28,8 @@ Please make sure you have installed following dependencies:
     ```
 * Python 2
     ```bash
-    sudo apt install python2
-    alias python="/usr/bin/python2"
+    sudo apt install python3
+    alias python=python3
     ```
 
 ### Installation (Remote Machine)
