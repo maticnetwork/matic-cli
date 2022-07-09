@@ -1,68 +1,71 @@
 # Matic CLI
 
-🏗 A CLI to setup and manage Matic validator nodes 
+🏗 A CLI to setup and manage Matic validator nodes
 
 ### Installation
-
-```bash
-npm install -g @maticnetwork/matic-cli
-```
 
 Please make sure you have installed following dependencies:
 
 * Git
 * Node/npm v10.17.0 (or higher)
-* Go 1.13+
-* Rabbitmq (Latest stable version)
-* Solc v0.5.11 (https://solidity.readthedocs.io/en/v0.5.3/installing-solidity.html#binary-packages)
-* Ganache CLI (https://www.npmjs.com/package/ganache-cli)
+* Go 1.18+
+* Docker (only if running on a docker based setup)
+* Rabbitmq (Latest stable version, https://www.rabbitmq.com/download.html) (Not required for docker based setup)
+* Solc v0.5.11 (https://solidity.readthedocs.io/en/v0.5.3/installing-solidity.html#binary-packages) (Not required for docker based setup)
+* Ganache CLI (https://www.npmjs.com/package/ganache-cli) (Not required for docker based setup)
+
+Please refer to [this](./installation.md) document for more information. 
 
 ### Usage
 
 Create new directory for the setup:
 
 ```bash
-$ mkdir localnet
-$ cd localnet
+$ mkdir devnet
+$ cd devnet
 ```
 
-**Check commands**
+**To setup multi-node local network**
 
 ```bash
-matic-cli
+../bin/matic-cli setup devnet
 ```
 
-**To setup local testnet**
+It will ask you several questions:
 
-This will setup Heimdall and Bor.
+```
+Please enter number of validator nodes - Input the number of validator nodes you want to run
+Please enter number of non-validator nodes - Input the number of sentry nodes you want to run
+```
 
+After the setup is done, follow these steps:
+
+Start ganache
 ```bash
-matic-cli setup localnet
+bash docker-ganache-start.sh
 ```
 
-**To setup Heimdall**
-
+Start all heimdall instances (it will run all services - rabbitmq, heimdall, bridge, server)
 ```bash
-matic-cli setup heimdall
+bash docker-heimdall-start-all.sh
 ```
 
-**To setup Bor**
-
+Setup bor
 ```bash
-matic-cli setup bor
+bash docker-bor-setup.sh
 ```
 
-**To generate genesis file**
-
+Start bor
 ```bash
-matic-cli setup genesis
+bash docker-bor-start-all.sh
 ```
 
-**To setup multi-node devnet**
+**Logs**
 
-```bash
-matic-cli setup devnet
-```
+Logs will be at `logs/` folder
+
+**Clean Setup**
+Remove the devnet folder and you can start the process once again
 
 ## License
 

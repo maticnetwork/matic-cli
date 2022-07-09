@@ -1,4 +1,3 @@
-import inquirer from 'inquirer'
 import fs from 'fs-extra'
 import path from 'path'
 import execa from 'execa'
@@ -6,7 +5,7 @@ import chalk from 'chalk'
 import { toBuffer, privateToPublic, bufferToHex } from 'ethereumjs-util'
 
 import { getKeystoreDetails, getChainIds } from './helper'
-import { getWalletFromPrivateKey } from '../lib/utils'
+import { getAccountFromPrivateKey } from '../lib/utils'
 
 const defaultConfigFileName = 'config.json'
 
@@ -22,6 +21,7 @@ export default class Config {
 
     options.defaultStake = options.defaultStake || 10000
     options.defaultFee = options.defaultFee || 2000
+    options.accounts = []
 
     // assign all prop to obj
     this.set(options)
@@ -32,7 +32,7 @@ export default class Config {
       if (options.hasOwnProperty(prop)) {
         Object.defineProperty(this, prop, {
           value: options[prop],
-          writable: false,
+          writable: true,
           enumerable: true
         })
       }
@@ -55,17 +55,8 @@ export default class Config {
     return path.join(this.targetDirectory, this.configDirectory)
   }
 
-  get publicKey() {
-    return bufferToHex(privateToPublic(toBuffer(this.privateKey)))
-  }
-
-  async getWallet() {
-    return getWalletFromPrivateKey(this.privateKey)
-  }
-
-  async loadKeystoreDetails() {
-    const keystoreDetails = await getKeystoreDetails(this)
-    this.set(keystoreDetails)
+  get primaryAccount() {
+    return this.accounts[0]
   }
 
   async loadChainIds() {
@@ -77,24 +68,26 @@ export default class Config {
     this.set({ forceAsk: true })
   }
 
-  async loadAccount() {
+  async loadAccounts() {
     if (!this.privateKey || !this.keystorePassword) {
-      await this.loadKeystoreDetails()
+      const keystoreDetails = await getKeystoreDetails(this)
+      this.accounts.push(getAccountFromPrivateKey(keystoreDetails.privateKey))
+      this.set({ keystorePassword: keystoreDetails.keystorePassword })
     }
 
-    // fetch wallet
-    const wallet = await this.getWallet()
+    // set genesis address
+    this.genesisAddresses = [this.primaryAccount.address]
+  }
 
-    // set genesis addresses and address
-    this.address = wallet.address
-    this.genesisAddresses = [wallet.address]
+  async saveConfig() {
+    await saveConfig(this)
   }
 
   print() {
     console.log(chalk.gray('Config json file') + ': ' + chalk.bold.green(this.configFilePath))
     console.log(chalk.gray('Code directory') + ': ' + chalk.bold.green(this.codeDir))
     console.log(chalk.gray('Data directory') + ': ' + chalk.bold.green(this.dataDir))
-    console.log(chalk.gray('Address') + ': ' + chalk.bold.green(this.address))
+    console.log(chalk.gray('Address') + ': ' + chalk.bold.green(this.primaryAccount.address))
     console.log(chalk.gray('Bor Chain ID') + ': ' + chalk.bold.green(this.borChainId))
     console.log(chalk.gray('Heimdall Chain ID') + ': ' + chalk.bold.green(this.heimdallChainId))
   }
@@ -110,20 +103,13 @@ export async function loadConfig(options = {}) {
 
   const hasConfigFile = await fs.exists(configFile)
   if (hasConfigFile) {
-    const { override } = await inquirer.prompt({
-      type: 'confirm',
-      name: 'override',
-      message: 'Configuration found in this directory. Do you want to override?'
-    })
-
-    if (override) {
-      await fs.remove(configFile)
-    } else {
-      process.exit(0) // exit from the process
+    const _options = require(configFile) // get options from config
+    options = {
+      ...options,
+      ..._options
     }
   }
 
-  // create new config
   const config = new Config({
     fileName: fileName,
     targetDirectory: targetDirectory,
@@ -137,8 +123,8 @@ export async function loadConfig(options = {}) {
   return config
 }
 
-export async function saveConfig(config, targetDirectory) {
-  const configFile = path.join(targetDirectory, config.fileName || defaultConfigFileName)
+export async function saveConfig(config) {
+  const configFile = path.join(config.targetDirectory, config.fileName || defaultConfigFileName)
   const data = JSON.stringify(config, null, 2)
   return fs.writeFileSync(configFile, data, { mode: 0o755 })
 }

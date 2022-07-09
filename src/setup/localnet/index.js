@@ -13,9 +13,9 @@ import { Bor } from '../bor'
 import { processTemplateFiles } from '../../lib/utils'
 
 async function setupLocalnet(config) {
-  const ganache = new Ganache(config, { repositoryBranch: config.defaultBranch })
-  const bor = new Bor(config, { repositoryBranch: config.defaultBranch })
-  const heimdall = new Heimdall(config, { repositoryBranch: config.defaultBranch })
+  const ganache = new Ganache(config, { contractsBranch: config.contractsBranch })
+  const bor = new Bor(config, { repositoryBranch: config.borBranch })
+  const heimdall = new Heimdall(config, { repositoryBranch: config.heimdallBranch })
   const genesis = new Genesis(config, { repositoryBranch: 'master' })
 
   const tasks = new Listr(
@@ -50,7 +50,7 @@ async function setupLocalnet(config) {
           const templateDir = path.resolve(
             new URL(import.meta.url).pathname,
             '../templates'
-          );
+          )
 
           // copy all templates to target directory
           await fs.copy(templateDir, config.targetDirectory)
@@ -83,7 +83,7 @@ export default async function () {
   // configuration
   const config = await loadConfig()
   await config.loadChainIds()
-  await config.loadAccount()
+  await config.loadAccounts()
 
   // load branch
   const answers = await getDefaultBranch(config)
