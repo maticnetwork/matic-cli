@@ -15,7 +15,7 @@ ADDRESS=${ADDRESSES[$INDEX]};
 NODE_DIR=/root/.bor
 DATA_DIR=/root/.bor/data
 
-docker compose run --service-ports -d --name bor$INDEX --entrypoint bash bor$INDEX -c "
+docker compose run --service-ports -d --identity bor$INDEX --entrypoint bash bor$INDEX -c "
 touch /root/logs/bor.log
 bor server \
   --chain=$NODE_DIR/genesis.json \
@@ -24,11 +24,15 @@ bor server \
   --bor.heimdall http://heimdall$INDEX:1317 \
   --http --http.addr '0.0.0.0' \
   --ws --ws.port 8546 \
-  --jsonrpc.vhosts '*' \
-  --jsonrpc.corsdomain '*' \
+  --http.vhosts '*' \
+  --http.corsdomain '*' \
+  --ws.vhosts '*' \
+  --ws.corsdomain '*' \
+  --graphql.vhosts '*' \
+  --graphql.corsdomain '*' \
   --http.port 8545 \
   --ipcpath $DATA_DIR/bor.ipc \
-  --http.modules 'personal,eth,net,web3,txpool,miner,admin,bor' \
+  --http.api 'personal,eth,net,web3,txpool,miner,admin,bor' \
   --syncmode 'full' \
   --miner.gaslimit '2000000000' \
   --txpool.nolocals \
