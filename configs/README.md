@@ -22,10 +22,10 @@ defaultStake: 10000
 defaultFee: 2000
 
 # ChainID of bor
-borChainId: "15001"
+borChainId:
 
 # ChainID of heimdall
-heimdallChainId: heimdall-15001
+heimdallChainId:
 
 # Branch of bor to use. Repository: https://github.com/maticnetwork/bor
 borBranch: v0.2.16
@@ -52,6 +52,9 @@ numOfNonValidators: 0
 
 # URL to Ethereum RPC
 ethURL: http://ganache:9545
+
+# Remote User for Ethereum RPC. Only effective when devnetType is remote.
+ethHostUser: ubuntu
 
 # Devnet type, choose from [docker, remote]
 devnetType: docker
