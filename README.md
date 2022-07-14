@@ -125,6 +125,9 @@ Notes:
 1. The host machine and remote machine has to be an linux machine with ubuntu as user
 2. The ganache URL hostname will be used for ganache - http://<1st machine IP>:9545
 3. Make sure that the host machines has access to remote machines for transferring the data
+    ###### Tip to persist ssh key for remote access: 
+    - eval "$(ssh-agent -s)"
+    - ssh-add <pem/cer file(key to all the nodes in devnet)>
 4. We have provided the default values where ever so to ensure smooth functioning of the process
 
 **After the setup is done, follow these steps for local docker deployment:**
