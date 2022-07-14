@@ -19,7 +19,7 @@ docker compose run --service-ports -d --name bor$INDEX --entrypoint bash bor$IND
 touch /root/logs/bor.log
 bor server \
   --chain=$NODE_DIR/genesis.json \
-  --identity `matic-cli`
+  --identity matic-cli
   --datadir $DATA_DIR \
   --port 30303 \
   --bor.heimdall http://heimdall$INDEX:1317 \
