@@ -19,16 +19,19 @@ docker compose run --service-ports -d --name bor$INDEX --entrypoint bash bor$IND
 touch /root/logs/bor.log
 bor server \
   --chain=$NODE_DIR/genesis.json \
+  --identity matic-cli
   --datadir $DATA_DIR \
   --port 30303 \
   --bor.heimdall http://heimdall$INDEX:1317 \
   --http --http.addr '0.0.0.0' \
   --ws --ws.port 8546 \
-  --jsonrpc.vhosts '*' \
-  --jsonrpc.corsdomain '*' \
+  --http.vhosts '*' \
+  --http.corsdomain '*' \
+  --ws.vhosts '*' \
+  --ws.corsdomain '*' \
   --http.port 8545 \
   --ipcpath $DATA_DIR/bor.ipc \
-  --http.modules 'personal,eth,net,web3,txpool,miner,admin,bor' \
+  --http.api 'personal,eth,net,web3,txpool,miner,admin,bor' \
   --syncmode 'full' \
   --miner.gaslimit '2000000000' \
   --txpool.nolocals \
