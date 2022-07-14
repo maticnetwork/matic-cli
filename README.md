@@ -2,12 +2,13 @@
 
 🏗 A CLI to setup and manage Matic validator nodes
 
-### Installation (Host Machine)
+### Installation (Host Machine, Ubuntu for e.g.)
 
 Please make sure you have installed following dependencies:
 
 * Build Essentials
     ```bash
+    sudo apt update
     sudo apt install build-essential
     ```
 * Node v10.17.0
@@ -32,7 +33,7 @@ Please make sure you have installed following dependencies:
     alias python="/usr/bin/python2"
     ```
 
-### Installation (Remote Machine)
+### Installation (Remote Machine, Ubuntu for e.g.)
 
 Please make sure you have installed following dependencies:
 
@@ -54,19 +55,15 @@ Please make sure you have installed following dependencies:
 ### Usage
 
 ```bash
+cd ~
 git clone https://github.com/maticnetwork/matic-cli.git
+cd matic-cli
 npm i
 mkdir devnet
 cd devnet
 ```
 
-Setup a local network interactively
-
-```bash
-../bin/matic-cli setup devnet -i
-```
-
-Alternatively, setup a local network with a template configuration file
+#### To setup multi-node local network
 
 ```bash
 ../bin/matic-cli setup devnet -c ../configs/devnet/docker-setup-config.yaml
@@ -74,21 +71,10 @@ Alternatively, setup a local network with a template configuration file
 
 You can find more details about configuration options [here](configs/README.md).
 
+Alternatively, setup a local/remote network interactively
 
-#### To setup multi-node local network (via docker)
-
-It will ask you several questions (default values are provided):
-
-```
-Please enter Bor chain id - Input the bor chain id you want
-Please enter Heimdall chain id - Input the heimdall chain id you want
-Please enter Bor docker tag - Input the bor tag you want to deploy
-Please enter Heimdall docker tag - Input the heimdall tag you want to deploy
-Please enter Contracts branch - Input the contracts branch
-Please enter number of validator nodes - Input the number of validator nodes you want to run
-Please enter number of non-validator nodes - Input the number of sentry nodes you want to run
-Please enter ETH url - Input the eth url to use
-Please select devnet type - docker
+```bash
+../bin/matic-cli setup devnet -i
 ```
 
 Notes:
@@ -123,24 +109,21 @@ Logs will be at `logs/` folder
 
 #### To setup multi-node remote network
 
-It will ask you several questions:
-
+```bash
+../bin/matic-cli setup devnet -c ../configs/devnet/remote-setup-config.yaml
 ```
-Please enter Bor chain id - Input the bor chain id you want
-Please enter Heimdall chain id - Input the heimdall chain id you want
-Please enter Bor docker tag - Input the bor tag you want to deploy
-Please enter Heimdall docker tag - Input the heimdall tag you want to deploy
-Please enter Contracts branch - Input the contracts branch
-Please enter number of validator nodes - Input the number of validator nodes you want to run
-Please enter number of non-validator nodes - Input the number of sentry nodes you want to run
-Please enter ETH url - Input the eth url to use
-Please select devnet type - remote
-Please enter comma separated hosts/IPs - Enter the IPs
+
+You can find more details about configuration options [here](configs/README.md).
+
+Alternatively, setup a local/remote network interactively
+
+```bash
+../bin/matic-cli setup devnet -i
 ```
 
 Notes:
 1. The host machine and remote machine has to be an linux machine with ubuntu as user
-2. The first machine will be used for ganache as well so enter the ETH url as - http://<1st machine IP>:9545
+2. The ganache URL hostname will be used for ganache - http://<1st machine IP>:9545
 3. Make sure that the host machines has access to remote machines for transferring the data
 4. We have provided the default values where ever so to ensure smooth functioning of the process
 
