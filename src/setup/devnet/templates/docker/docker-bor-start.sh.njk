@@ -15,7 +15,7 @@ ADDRESS=${ADDRESSES[$INDEX]};
 NODE_DIR=/root/.bor
 DATA_DIR=/root/.bor/data
 
-docker compose run --service-ports -d --identity bor$INDEX --entrypoint bash bor$INDEX -c "
+docker compose run --service-ports -d --name bor$INDEX --entrypoint bash bor$INDEX -c "
 touch /root/logs/bor.log
 bor server \
   --chain=$NODE_DIR/genesis.json \
