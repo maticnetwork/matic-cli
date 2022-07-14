@@ -24,13 +24,11 @@ bor server \
   --bor.heimdall http://heimdall$INDEX:1317 \
   --http --http.addr '0.0.0.0' \
   --ws --ws.port 8546 \
-  --http.vhosts '*' \
-  --http.corsdomain '*' \
-  --ws.vhosts '*' \
-  --ws.corsdomain '*' \
+  --jsonrpc.vhosts '*' \
+  --jsonrpc.corsdomain '*' \
   --http.port 8545 \
   --ipcpath $DATA_DIR/bor.ipc \
-  --http.api 'personal,eth,net,web3,txpool,miner,admin,bor' \
+  --http.modules 'personal,eth,net,web3,txpool,miner,admin,bor' \
   --syncmode 'full' \
   --miner.gaslimit '2000000000' \
   --txpool.nolocals \
