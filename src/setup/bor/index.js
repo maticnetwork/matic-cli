@@ -76,7 +76,7 @@ export class Bor {
         },
         {
           title: 'Build Bor',
-          task: () => execa('make', ['bor-all'], {
+          task: () => execa('make', ['bor'], {
             cwd: this.repositoryDir
           })
         },
@@ -172,7 +172,7 @@ export default async function (command) {
 
   // configuration
   await loadConfig({
-    targetDirectory: command.parent.directory, 
+    targetDirectory: command.parent.directory,
     fileName: command.parent.config,
     interactive: command.parent.interactive
   })
