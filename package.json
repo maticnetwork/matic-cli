@@ -18,23 +18,23 @@
   "license": "MIT",
   "dependencies": {
     "boxen": "^7.0.0",
-    "chalk": "^5.0.1",
-    "commander": "^9.3.0",
+    "chalk": "^2.4.2",
+    "commander": "^5.0.0",
     "covgen": "^3.1.0",
     "esm": "^3.2.18",
     "eth-crypto": "^2.3.0",
     "ethereumjs-util": "^7.1.5",
-    "execa": "^6.1.0",
+    "execa": "^1.0.0",
     "fs-extra": "^10.1.0",
     "ganache-cli": "^6.9.1",
-    "inquirer": "^9.0.0",
+    "inquirer": "^6.2.2",
     "listr": "^0.14.3",
     "moonwalker": "github:atvanguard/moonwalker",
     "nunjucks": "^3.2.1",
     "pkg-install": "^1.0.0",
     "truffle-privatekey-provider": "^1.5.0",
     "web3": "^1.7.4",
-    "yaml": "^2.1.1"
+    "yaml": "^1.10.2"
   },
   "files": [
     "bin/",
