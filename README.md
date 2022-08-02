@@ -26,7 +26,7 @@ Please make sure you have installed following dependencies:
     ```bash
     sudo snap install solc
     ```
-* Python 2
+* Python 3
     ```bash
     sudo apt install python3
     alias python=python3
