@@ -427,6 +427,13 @@ export class Devnet {
                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:~/node/`
             ])
 
+            // Do symlink for .bor and .heimdalld
+            await execa('ssh', [
+              `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
+              `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+              `sudo ln -nfs ~/.bor /var/lib/bor && sudo ln -nfs ~/.heimdalld /var/lib/heimdall`
+            ])
+
             // Create a tmux session and start bor and heimdall services in it
             await execa('ssh', [
               `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
