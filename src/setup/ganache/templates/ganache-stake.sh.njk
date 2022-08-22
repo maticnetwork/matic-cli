@@ -12,7 +12,14 @@ FEE={{ obj.config.defaultFee }}
 cd {{ obj.contracts.repositoryDir }}
 
 # root contracts are deployed on base chain
+ITER=0
 {% for acc in obj.config.accounts %}
-npm run truffle exec scripts/stake.js -- --network development {{ acc.address }} {{ acc.privateKey | publicKey }} $STAKE $FEE
+if [ $ITER == 0 ]; then
+  npm run truffle exec scripts/stake.js -- --network development {{ acc.address }} {{ acc.privateKey | publicKey }} $STAKE $FEE
+  STAKE=$(expr $STAKE + 200)
+  ITER=$(expr $ITER + 1)
+else
+  npm run truffle exec scripts/stake.js -- --network development {{ acc.address }} {{ acc.privateKey | publicKey }} $STAKE $FEE
+fi
 sleep 10
 {% endfor %}
