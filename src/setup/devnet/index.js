@@ -289,6 +289,20 @@ export class Devnet {
         },
       },
       {
+        title: "Modify Span Interval",
+        task: async() => {
+          // set heimdall
+          for (let i = 0; i < this.totalNodes; i++) {
+            fileReplacer(this.heimdallHeimdallConfigFilePath(i))
+              .replace(
+                /"span_duration":[ ]*".*"/gi,
+                `"span_duration": "128"`
+              )
+              .save();
+          }
+        }
+      },
+      {
         title: "Process contract addresses",
         task: () => {
           // get root contracts
