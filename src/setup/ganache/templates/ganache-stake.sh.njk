@@ -16,7 +16,7 @@ ITER=0
 {% for acc in obj.config.accounts %}
 if [ $ITER == 0 ]; then
   npm run truffle exec scripts/stake.js -- --network development {{ acc.address }} {{ acc.privateKey | publicKey }} $STAKE $FEE
-  STAKE=$(expr $STAKE + 200)
+  STAKE=$(expr $STAKE + 2000)
   ITER=$(expr $ITER + 1)
 else
   npm run truffle exec scripts/stake.js -- --network development {{ acc.address }} {{ acc.privateKey | publicKey }} $STAKE $FEE
