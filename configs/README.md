@@ -27,6 +27,9 @@ borChainId:
 # ChainID of heimdall
 heimdallChainId:
 
+# Sprint size
+sprintSize:
+
 # Branch of bor to use. Repository: https://github.com/maticnetwork/bor
 borBranch: v0.2.16
 

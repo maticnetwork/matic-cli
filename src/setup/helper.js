@@ -3,7 +3,7 @@ import chalk from "chalk";
 
 import { getNewPrivateKey, errorMissingConfigs } from "../lib/utils";
 
-export async function printDependencyInstructions() {}
+export async function printDependencyInstructions() { }
 
 export async function getChainIds(options = {}) {
   let questions = []
@@ -41,6 +41,33 @@ export async function getChainIds(options = {}) {
 
   // get answers
   return await inquirer.prompt(questions);
+}
+
+export async function getNetworkParams(options = {}) {
+  // Only asking sprint size for now
+  let questions = []
+
+  if (!options.sprintSize) {
+    questions.push({
+      type: 'input',
+      name: 'sprintSize',
+      message: 'Please enter the sprint size',
+      default: '64'
+    })
+  }
+  if (questions.length === 0) {
+    return {};
+  }
+
+  if (!options.interactive && !options.sprintSize) {
+    return {
+      "sprintSize": "64"
+    }
+  }
+
+  // get answers
+  return await inquirer.prompt(questions);
+
 }
 
 export async function getDefaultBranch(options = {}) {

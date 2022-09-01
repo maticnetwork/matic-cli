@@ -19,7 +19,7 @@ export class Genesis {
     this.config = config;
 
     this.repositoryName = this.name;
-    this.repositoryBranch = options.repositoryBranch || "master";
+    this.repositoryBranch = options.repositoryBranch || "raneet10/pos-752";
     this.repositoryUrl =
       options.repositoryUrl ||
       "https://github.com/maticnetwork/genesis-contracts";
@@ -55,8 +55,8 @@ export class Genesis {
   async print() {
     console.log(
       chalk.gray("Bor genesis path") +
-        ": " +
-        chalk.bold.green(this.borGenesisFilePath)
+      ": " +
+      chalk.bold.green(this.borGenesisFilePath)
     );
   }
 
@@ -173,6 +173,8 @@ export class Genesis {
                 this.config.borChainId,
                 "--heimdall-chain-id",
                 this.config.heimdallChainId,
+                "--sprint-size",
+                this.config.sprintSize
               ],
               {
                 cwd: this.repositoryDir,
@@ -190,6 +192,8 @@ export class Genesis {
                 this.config.borChainId,
                 "--heimdall-chain-id",
                 this.config.heimdallChainId,
+                "--sprint-size",
+                this.config.sprintSize
               ],
               {
                 cwd: this.repositoryDir,
