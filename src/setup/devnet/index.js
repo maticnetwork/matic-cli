@@ -386,20 +386,20 @@ export class Devnet {
           await execa('scp', [
             `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
             `${this.config.targetDirectory}/ganache-start-remote.sh`,
-            `${this.config.devnetBorUsers[i]}@${ganacheURL.hostname}:~/ganache-start-remote.sh`
+            `${this.config.ethHostUser}@${ganacheURL.hostname}:~/ganache-start-remote.sh`
           ])
 
           await execa('scp', [
             `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,`-r`,
             `${this.config.targetDirectory}/data`,
-            `${this.config.devnetBorUsers[i]}@${ganacheURL.hostname}:~/data`
+            `${this.config.ethHostUser}@${ganacheURL.hostname}:~/data`
           ])
 
           // Run ganache in tmux
           await execa('ssh', [
             `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
-            `${this.config.devnetBorUsers[i]}@${ganacheURL.hostname}`,
-            `tmux new -d -s matic-cli-ganache; tmux send-keys -t matic-cli-ganache:0 'bash /home/${this.config.devnetBorUsers[i]}/ganache-start-remote.sh' ENTER`])
+            `${this.config.ethHostUser}@${ganacheURL.hostname}`,
+            `tmux new -d -s matic-cli-ganache; tmux send-keys -t matic-cli-ganache:0 'bash /home/${this.config.ethHostUser}/ganache-start-remote.sh' ENTER`])
 
           for(let i=0; i<this.totalNodes; i++) {
             // copy files to remote servers
@@ -422,29 +422,25 @@ export class Devnet {
             ])
 
             await execa('scp', [
-              `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
-              `${this.config.targetDirectory}/code/heimdall/build/bridge`,
-              `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/bridge`
-            ])
-
-            await execa('scp', [
                `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,`-r`,
                `${this.testnetDir}/node${i}/`,
                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:~/node/`
+            ])
+
+            // Do symlink for .bor and .heimdalld
+            await execa('ssh', [
+              `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
+              `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+              `sudo ln -nfs ~/.bor /var/lib/bor && sudo ln -nfs ~/.heimdalld /var/lib/heimdall`
             ])
 
             // Create a tmux session and start bor and heimdall services in it
             await execa('ssh', [
               `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
               `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-              `tmux new -d -s matic-cli; tmux new-window -t matic-cli; tmux new-window -t matic-cli; tmux new-window -t matic-cli; tmux new-window -t matic-cli; tmux send-keys -t matic-cli:0 'bash /home/${this.config.devnetBorUsers[i]}/node/heimdalld-setup.sh' ENTER; tmux send-keys -t matic-cli:0 'heimdalld start' ENTER; tmux send-keys -t matic-cli:1 'heimdalld rest-server' ENTER; tmux send-keys -t matic-cli:3 'bash /home/${this.config.devnetBorUsers[i]}/node/bor-setup.sh' ENTER; tmux send-keys -t matic-cli:3 'bash /home/${this.config.devnetBorUsers[i]}/node/bor-start.sh' ENTER`
+              `tmux new -d -s matic-cli; tmux new-window -t matic-cli; tmux new-window -t matic-cli;  tmux send-keys -t matic-cli:0 'bash /home/${this.config.devnetBorUsers[i]}/node/heimdalld-setup.sh' ENTER; tmux send-keys -t matic-cli:0 'heimdalld start --home /home/${this.config.devnetBorUsers[i]}/.heimdalld --chain=/home/${this.config.devnetBorUsers[i]}.heimdalld/config/genesis.json --bridge --all --rest-server' ENTER; tmux send-keys -t matic-cli:1 'bash /home/${this.config.devnetBorUsers[i]}/node/bor-setup.sh' ENTER; tmux send-keys -t matic-cli:1 'bash /home/${this.config.devnetBorUsers[i]}/node/bor-start.sh' ENTER`
             ])
 
-            await execa('ssh', [
-              `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
-              `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-              `tmux send-keys -t matic-cli:2 'bridge start --all' ENTER`
-            ])
           }
         }
       }
@@ -459,18 +455,14 @@ export class Devnet {
         title: "Create testnet files for Heimdall",
         task: async () => {
           const args = [
-            "create-testnet",
-            "--v",
-            this.config.numOfValidators,
-            "--n",
-            this.config.numOfNonValidators,
-            "--chain-id",
-            this.config.heimdallChainId,
-            "--node-host-prefix",
-            "heimdall",
-            "--output-dir",
-            "devnet",
-          ];
+            'create-testnet',
+            '--home', 'devnet',
+            '--v', this.config.numOfValidators,
+            '--n', this.config.numOfNonValidators,
+            '--chain-id', this.config.heimdallChainId,
+            '--node-host-prefix', 'heimdall',
+            '--output-dir', 'devnet'
+          ]
 
           // create testnet
           await execa(heimdall.heimdalldCmd, args, {
@@ -631,15 +623,11 @@ export class Devnet {
 }
 
 async function setupDevnet(config) {
-  const devnet = new Devnet(config);
-  devnet.ganache = new Ganache(config, {
-    contractsBranch: config.contractsBranch,
-  });
-  devnet.bor = new Bor(config, { repositoryBranch: config.borBranch });
-  devnet.heimdall = new Heimdall(config, {
-    repositoryBranch: config.heimdallBranch,
-  });
-  devnet.genesis = new Genesis(config, { repositoryBranch: "master" });
+  const devnet = new Devnet(config)
+  devnet.ganache = new Ganache(config, { contractsBranch: config.contractsBranch })
+  devnet.bor = new Bor(config, { repositoryBranch: config.borBranch })
+  devnet.heimdall = new Heimdall(config, { repositoryBranch: config.heimdallBranch, dockerContext: config.heimdallDockerBuildContext })
+  devnet.genesis = new Genesis(config, { repositoryBranch: 'master' })
 
   const tasks = await devnet.getTasks();
   await tasks.run();
