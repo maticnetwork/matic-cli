@@ -44,7 +44,6 @@ export async function getChainIds(options = {}) {
 }
 
 export async function getNetworkParams(options = {}) {
-  // Only asking sprint size for now
   let questions = []
 
   if (!options.sprintSize) {
@@ -55,14 +54,34 @@ export async function getNetworkParams(options = {}) {
       default: '64'
     })
   }
-  if (questions.length === 0) {
+
+  if (!options.blockTime) {
+    questions.push({
+      type: 'input',
+      name: 'blockTime',
+      message: 'Please enter the block times(s) seperated by commas',
+      default: '2'
+    })
+
+    questions.push({
+      type: 'input',
+      name: 'blockNumber',
+      message: 'Please enter the corresponding block numbers(s) seperated by commas',
+      default: '0'
+    })
+  }
+
+   // return if no questions
+   if (questions.length === 0) {
     return {};
   }
 
-  if (!options.interactive && !options.sprintSize) {
+  if (!options.interactive && !options.blockTime && !options.sprintSize) {
     return {
-      "sprintSize": "64"
-    }
+      "sprintSize": "64",
+      "blockTime": "2",
+      "blockNumber": "0"
+    };
   }
 
   // get answers

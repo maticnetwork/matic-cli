@@ -163,6 +163,44 @@ export class Genesis {
           },
         },
         {
+          title: "Configure Block time",
+          task: () => {
+            const blocks = []
+            const blockTimes = this.config.blockTime.split(",")
+            const blockNumbers = this.config.blockNumber.split(",")
+
+            for (let i = 0; i < blockTimes.length; i++) {
+              blocks[i] = {
+                number: blockNumbers[i],
+                time: blockTimes[i]
+              } 
+              
+            }
+
+            return Promise.resolve()
+              .then(() => {
+                const blockJsPath = path.join(
+                  this.repositoryDir,
+                  "blocks.js"
+                );
+                if (!fs.existsSync(blockJsPath)) {
+                  return;
+                }
+
+                // Backup of the block time config
+                return execa("mv", ["blocks.js", "blocks.js.backup"], {
+                  cwd: this.repositoryDir,
+                });
+              })
+              .then(() => {
+                fs.writeFileSync(
+                  path.join(this.repositoryDir, "blocks.json"),
+                  JSON.stringify(blocks, null, 2)
+                )
+              })
+          }
+        },
+        {
           title: "Generate Bor validator set",
           task: () =>
             execa(
