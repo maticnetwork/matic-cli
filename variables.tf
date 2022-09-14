@@ -1,44 +1,45 @@
-variable "access_key" {
-    default = "ACCESS_KEY"
+variable "ACCESS_KEY" {
+    type = string
 }
 
-variable "secret_key" {
-    default = "SECRET_KEY"
+variable "SECRET_KEY" {
+    type = string
 }
 
-variable "validator_count" {
+variable "VALIDATOR_COUNT" {
     default = "2"
 }
 
-variable "sentry_count" {
+variable "SENTRY_COUNT" {
     default = "1"
 }
 
-variable "instance_type" {
+variable "INSTANCE_TYPE" {
     default = "t2.micro"
 }
 
-variable "instance_ami" {
+variable "INSTANCE_AMI" {
   default = "ami-08d70e59c07c61a3a"
 }
 
-variable "pem_file" {
+variable "PEM_FILE" {
   default = "shivam-matic"
 }
 
-variable "region" {
+variable "REGION" {
   default = "us-west-2"
 }
 
-variable "sg-cidr-blocks" {
+variable "SG_CIDR_BLOCKS" {
     default = ["0.0.0.0/0"]
 }
 
 // set ports to be opened in security group for incoming 
-variable "ports_in" {
+variable "PORTS_IN" {
     default = [80, 443, 30303, 1317, 8545, 9545, 1337, 8546]
 }
 
-variable "ports_out" {
+// to allow all ports to outside, set to [0]
+variable "PORTS_OUT" {
     default = [0]
 }

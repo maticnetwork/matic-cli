@@ -12,16 +12,16 @@ terraform {
 }
 
 provider "aws" {
-  region  = var.region
-  access_key = var.access_key
-  secret_key = var.secret_key
+  region  = var.REGION
+  access_key = var.ACCESS_KEY
+  secret_key = var.SECRET_KEY
 }
 
 resource "aws_instance" "app_server" {
-  count         = var.validator_count + var.sentry_count
-  ami           = var.instance_ami
-  instance_type = var.instance_type
-  key_name      = var.pem_file
+  count         = var.VALIDATOR_COUNT + var.SENTRY_COUNT
+  ami           = var.INSTANCE_AMI
+  instance_type = var.INSTANCE_TYPE
+  key_name      = var.PEM_FILE
   vpc_security_group_ids = [aws_security_group.internet_facing_alb.id]
   subnet_id = "${aws_subnet.public-subnet-1.id}"
 
@@ -38,23 +38,23 @@ resource "aws_security_group" "internet_facing_alb" {
   vpc_id = aws_vpc.My_VPC.id
 
   dynamic "ingress" {
-    for_each = toset(var.ports_in)
+    for_each = toset(var.PORTS_IN)
     content {
       description = "Web Traffic from internet"
       from_port   = ingress.value
       to_port     = ingress.value
       protocol    = "tcp"
-      cidr_blocks = var.sg-cidr-blocks
+      cidr_blocks = var.SG_CIDR_BLOCKS
     }
   }
   dynamic "egress" {
-    for_each = toset(var.ports_out)
+    for_each = toset(var.PORTS_OUT)
     content {
       description = "Web Traffic to internet"
       from_port   = egress.value
       to_port     = egress.value
       protocol    = "-1"
-      cidr_blocks = var.sg-cidr-blocks
+      cidr_blocks = var.SG_CIDR_BLOCKS
     }
   }
   tags = {

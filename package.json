@@ -34,6 +34,7 @@
     "moonwalker": "github:atvanguard/moonwalker",
     "nunjucks": "^3.2.1",
     "pkg-install": "^0.2.0",
+    "shelljs": "^0.8.5",
     "truffle-privatekey-provider": "1.0.0",
     "web3": "^1.2.6",
     "yaml": "^1.10.2"
