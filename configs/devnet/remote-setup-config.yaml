@@ -12,7 +12,9 @@ ethHostUser: ubuntu
 devnetType: remote
 devnetBorHosts:
   - 54.202.55.147
+  - 54.202.55.147
 devnetHeimdallHosts:
+  - 54.202.55.147
   - 54.202.55.147
 devnetBorUsers:
   - ubuntu
