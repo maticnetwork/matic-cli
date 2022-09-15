@@ -626,7 +626,7 @@ async function setupDevnet(config) {
   devnet.ganache = new Ganache(config, { contractsBranch: config.contractsBranch })
   devnet.bor = new Bor(config, { repositoryBranch: config.borBranch })
   devnet.heimdall = new Heimdall(config, { repositoryBranch: config.heimdallBranch, dockerContext: config.heimdallDockerBuildContext })
-  devnet.genesis = new Genesis(config, { repositoryBranch: 'master' })
+  devnet.genesis = new Genesis(config, { repositoryBranch: 'mardizzone/POS-756' })
 
   const tasks = await devnet.getTasks();
   await tasks.run();
