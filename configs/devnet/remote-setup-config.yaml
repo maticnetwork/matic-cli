@@ -10,7 +10,7 @@ blockNumber:
 blockTime:
 numOfValidators: 2
 numOfNonValidators: 0
-ethURL: http://172.20.1.100:9545
+ethURL: http://54.202.55.147:9545
 ethHostUser: ubuntu
 devnetType: remote
 devnetBorHosts:
