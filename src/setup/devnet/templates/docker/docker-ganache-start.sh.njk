@@ -10,4 +10,5 @@ docker compose run -d --rm --service-ports --name ganache ganache --hardfork ist
   {% for acc in obj.config.accounts %}--account {{ acc.privateKey }},1000000000000000000000 {% endfor %}\
   --gasLimit 8000000 \
   --gasPrice 0 \
-  -p 9545 -h 0.0.0.0
+  -p 9545 -h 0.0.0.0 \
+  1>/dev/null 2>/dev/null &
