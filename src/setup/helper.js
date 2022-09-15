@@ -3,7 +3,7 @@ import chalk from "chalk";
 
 import { getNewPrivateKey, errorMissingConfigs } from "../lib/utils";
 
-export async function printDependencyInstructions() {}
+export async function printDependencyInstructions() { }
 
 export async function getChainIds(options = {}) {
   let questions = []
@@ -41,6 +41,52 @@ export async function getChainIds(options = {}) {
 
   // get answers
   return await inquirer.prompt(questions);
+}
+
+export async function getNetworkParams(options = {}) {
+  let questions = []
+
+  if (!options.sprintSize) {
+    questions.push({
+      type: 'input',
+      name: 'sprintSize',
+      message: 'Please enter the sprint size',
+      default: '64'
+    })
+  }
+
+  if (!options.blockTime) {
+    questions.push({
+      type: 'input',
+      name: 'blockTime',
+      message: 'Please enter the block times(s) seperated by commas',
+      default: '2'
+    })
+
+    questions.push({
+      type: 'input',
+      name: 'blockNumber',
+      message: 'Please enter the corresponding block numbers(s) seperated by commas',
+      default: '0'
+    })
+  }
+
+   // return if no questions
+   if (questions.length === 0) {
+    return {};
+  }
+
+  if (!options.interactive && !options.blockTime && !options.sprintSize) {
+    return {
+      "sprintSize": "64",
+      "blockTime": "2",
+      "blockNumber": "0"
+    };
+  }
+
+  // get answers
+  return await inquirer.prompt(questions);
+
 }
 
 export async function getDefaultBranch(options = {}) {

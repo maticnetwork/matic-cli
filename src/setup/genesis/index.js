@@ -19,7 +19,7 @@ export class Genesis {
     this.config = config;
 
     this.repositoryName = this.name;
-    this.repositoryBranch = options.repositoryBranch || "arpit/pos-689";
+    this.repositoryBranch = options.repositoryBranch || "raneet10/pos-752";
     this.repositoryUrl =
       options.repositoryUrl ||
       "https://github.com/maticnetwork/genesis-contracts";
@@ -163,6 +163,44 @@ export class Genesis {
           },
         },
         {
+          title: "Configure Block time",
+          task: () => {
+            const blocks = []
+            const blockTimes = this.config.blockTime.split(",")
+            const blockNumbers = this.config.blockNumber.split(",")
+
+            for (let i = 0; i < blockTimes.length; i++) {
+              blocks[i] = {
+                number: blockNumbers[i],
+                time: blockTimes[i]
+              }
+
+            }
+
+            return Promise.resolve()
+              .then(() => {
+                const blockJsPath = path.join(
+                  this.repositoryDir,
+                  "blocks.js"
+                );
+                if (!fs.existsSync(blockJsPath)) {
+                  return;
+                }
+
+                // Backup of the block time config
+                return execa("mv", ["blocks.js", "blocks.js.backup"], {
+                  cwd: this.repositoryDir,
+                });
+              })
+              .then(() => {
+                fs.writeFileSync(
+                  path.join(this.repositoryDir, "blocks.json"),
+                  JSON.stringify(blocks, null, 2)
+                )
+              })
+          }
+        },
+        {
           title: "Generate Bor validator set",
           task: () =>
             execa(
@@ -173,6 +211,8 @@ export class Genesis {
                 this.config.borChainId,
                 "--heimdall-chain-id",
                 this.config.heimdallChainId,
+                "--sprint-size",
+                this.config.sprintSize
               ],
               {
                 cwd: this.repositoryDir,
@@ -190,6 +230,8 @@ export class Genesis {
                 this.config.borChainId,
                 "--heimdall-chain-id",
                 this.config.heimdallChainId,
+                "--sprint-size",
+                this.config.sprintSize
               ],
               {
                 cwd: this.repositoryDir,

@@ -5,6 +5,9 @@ heimdallChainId:
 borBranch:
 heimdallBranch:
 contractsBranch: arpit/v0.3.2-backport
+sprintSize:
+blockNumber:
+blockTime:
 numOfValidators: 2
 numOfNonValidators: 0
 ethURL: http://172.20.1.100:9545
