@@ -109,13 +109,15 @@ Logs will be at `logs/` folder
 
 #### To setup multi-node remote network
 
+The following command will setup and run the whole stack  
+
 ```bash
 ../bin/matic-cli setup devnet -c ../configs/devnet/remote-setup-config.yaml
 ```
 
 You can find more details about configuration options [here](configs/README.md).
 
-Alternatively, setup a local/remote network interactively
+Alternatively, setup a remote network interactively
 
 ```bash
 ../bin/matic-cli setup devnet -i
@@ -129,35 +131,6 @@ Notes:
     - eval "$(ssh-agent -s)"
     - ssh-add <pem/cer file(key to all the nodes in devnet)>
 4. We have provided the default values where ever so to ensure smooth functioning of the process
-
-**After the setup is done, follow these steps for local docker deployment:**
-
-1. Log into first machine and run ganache:
-```bash
-cd ~/
-bash ganache-start-remote.sh
-```
-
-2. Log into the remote machines and on each machine run the following steps in different terminals:
-```bash
-cd ~/node
-bash heimdalld-setup.sh
-heimdalld start
-```
-
-```bash
-heimdalld rest-server
-```
-
-```bash
-bridge start --all
-```
-
-```bash
-cd ~/node
-bash bor-setup.sh
-bash bor-start.sh
-```
 
 #### Clean Setup
 

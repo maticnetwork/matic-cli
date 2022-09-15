@@ -12,10 +12,8 @@ ethHostUser: ubuntu
 devnetType: remote
 devnetBorHosts:
   - 172.20.1.100
-  - 172.20.1.101
 devnetHeimdallHosts:
   - 172.20.1.100
-  - 172.20.1.101
 devnetBorUsers:
   - ubuntu
   - ubuntu
