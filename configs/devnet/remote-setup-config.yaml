@@ -11,9 +11,9 @@ ethURL: http://172.20.1.100:9545
 ethHostUser: ubuntu
 devnetType: remote
 devnetBorHosts:
-  - 172.20.1.100
+  - 54.202.55.147
 devnetHeimdallHosts:
-  - 172.20.1.100
+  - 54.202.55.147
 devnetBorUsers:
   - ubuntu
   - ubuntu
