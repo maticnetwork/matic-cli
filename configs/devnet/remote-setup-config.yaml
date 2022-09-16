@@ -1,10 +1,10 @@
 defaultStake: 10000
 defaultFee: 2000
-borChainId:
-heimdallChainId:
-borBranch:
-heimdallBranch:
-contractsBranch: arpit/v0.3.2-backport
+borChainId: 15005
+heimdallChainId: heimdall-4052
+borBranch: v0.2.16
+heimdallBranch: v0.2.10
+contractsBranch: arpit/v0.3.1-backport
 sprintSize:
 blockNumber:
 blockTime:
