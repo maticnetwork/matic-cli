@@ -36,7 +36,7 @@ variable "SG_CIDR_BLOCKS" {
 
 // set ports to be opened in security group for incoming 
 variable "PORTS_IN" {
-    default = [80, 443, 30303, 1317, 8545, 9545, 1337, 8546]
+    default = [22, 80, 443, 30303, 1317, 8545, 9545, 1337, 8546]
 }
 
 // to allow all ports to outside, set to [0]

@@ -88,6 +88,21 @@ resource "aws_vpc" "My_VPC" {
     }
 }
 
+resource "aws_internet_gateway" "gw" { vpc_id = aws_vpc.My_VPC.id}
+
+resource "aws_route_table" "table" {
+  vpc_id = "${aws_vpc.My_VPC.id}"
+  route {
+      cidr_block = "0.0.0.0/0"
+      gateway_id = "${aws_internet_gateway.gw.id}"
+    }
+}
+
+resource "aws_main_route_table_association" "route_table_assoc" {
+  vpc_id         = "${aws_vpc.My_VPC.id}"
+  route_table_id = "${aws_route_table.table.id}"
+}
+
 variable "Public_Subnet_1" {
 default = "10.0.0.0/24"
 description = "Public_Subnet_1"
