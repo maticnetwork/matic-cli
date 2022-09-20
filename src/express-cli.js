@@ -51,81 +51,6 @@ function setConfigValue(key, value) {
     }
 }
 
-async function rmDevnet() {
-    shell.exec(`rm -rf devnet`);
-}
-
-async function runMaticCLI(ips) {
-
-    let ipsArray = ips.split(' ').join('').split(",")
-    let maticCliRepo = process.env.MATIC_CLI_REPO
-    let maticCliBranch = process.env.MATIC_CLI_BRANCH
-
-    console.log("Git checkout " +maticCliRepo+ " and pull branch " + maticCliBranch + " on machine " +ipsArray[0])
-    try {
-        await execa('ssh', [
-                `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                `-i`, `${process.env.PEM_FILE_PATH}`,
-                `${doc['ethHostUser']}@${ipsArray[0]}`,
-                `cd ~ && git clone ${maticCliRepo} && cd matic-cli && git checkout ${maticCliBranch}`],
-            {stdio: 'inherit'})
-    } catch (error) {
-        console.log("Error while checking out matic-cli: \n", error)
-        process.exit(1)
-    }
-
-    console.log("Install matic-cli dependencies ...")
-    try {
-        await execa('ssh', [
-                `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                `-i`, `${process.env.PEM_FILE_PATH}`,
-                `${doc['ethHostUser']}@${ipsArray[0]}`,
-                `cd ~/matic-cli && npm i`],
-            {stdio: 'inherit'})
-    } catch (error) {
-        console.log("Error while installing matic-cli dependencies: \n", error)
-        process.exit(1)
-    }
-
-    console.log("Creating devnet and removing default configs...")
-    try {
-        await execa('ssh', [
-                `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                `-i`, `${process.env.PEM_FILE_PATH}`,
-                `${doc['ethHostUser']}@${ipsArray[0]}`,
-                `cd ~/matic-cli && mkdir devnet && rm configs/devnet/remote-setup-config.yaml`],
-            {stdio: 'inherit'})
-    } catch (error) {
-        console.log("Error while creating devnet and removing default configs: \n", error)
-        process.exit(1)
-    }
-
-    console.log("Copying new matic-cli configurations...")
-    try {
-        await execa('scp', [
-            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-            `./configs/devnet/remote-setup-config.yaml`,
-            `${doc['ethHostUser']}@${ipsArray[0]}:~/matic-cli/configs/devnet/remote-setup-config.yaml`
-        ], {stdio: 'inherit'})
-    } catch (error) {
-        console.log("Error while copying new matic-cli configs to ~/matic-cli/configs/devnet/remote-setup-config.yaml: \n", error)
-        process.exit(1)
-    }
-
-    console.log("Execute remote setup with matic-cli...")
-    try {
-        await execa('ssh', [
-                `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                `-i`, `${process.env.PEM_FILE_PATH}`,
-                `${doc['ethHostUser']}@${ipsArray[0]}`,
-                `cd ~/matic-cli/devnet && ../bin/matic-cli setup devnet -c ../configs/devnet/remote-setup-config.yaml`],
-            {stdio: 'inherit'})
-    } catch (error) {
-        console.log("Error while executing remote matic-cli setup: \n", error)
-        process.exit(1)
-    }
-}
-
 function setConfigList(key, value) {
     if (value) {
         value = value.split(' ').join('')
@@ -199,52 +124,28 @@ async function editMaticCliRemoteYAMLConfig() {
 
 async function installRequiredSoftwareOnRemoteMachines(ips) {
     let ipsArray = ips.split(' ').join('').split(",")
-    console.log("VMs IPs: " +ipsArray)
+    console.log("VMs IPs: " + ipsArray)
 
     // TODO execute the following steps in parallel using Promises
     for (let i = 0; i < ipsArray.length; i++) {
         if (i === 0) {
 
-            console.log("Copying certificate to " +ipsArray[i]+ "~/cert.pem ...")
-            try {
-                await execa('scp', [
-                    `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                    `${process.env.PEM_FILE_PATH}`,
-                    `${doc['ethHostUser']}@${ipsArray[i]}:~/cert.pem`
-                ], {stdio: 'inherit'})
-            } catch (error) {
-                console.log("Error while copying certificate to ~/cert.pem: \n", error)
-                process.exit(1)
-            }
+            console.log("Copying certificate to " + ipsArray[i] + "~/cert.pem ...")
+            let src = `${process.env.PEM_FILE_PATH}`
+            let dest = `${doc['ethHostUser']}@${ipsArray[i]}:~/cert.pem`
+            await runScpCommand(src, dest)
 
-            console.log("Add ssh for " +ipsArray[i]+ "~/cert.pem ...")
-            try {
-                await execa('ssh', [
-                        `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                        `-i`, `${process.env.PEM_FILE_PATH}`,
-                        `${doc['ethHostUser']}@${ipsArray[i]}`,
-                        `eval "$(ssh-agent -s)" && ssh-add ~/cert.pem`],
-                    {stdio: 'inherit'})
-            } catch (error) {
-                console.log("Error while adding ssh for ~/cert.pem: \n", error)
-                process.exit(1)
-            }
+            console.log("Add ssh for " + ipsArray[i] + "~/cert.pem ...")
+            let machineIp = `${doc['ethHostUser']}@${ipsArray[i]}`
+            let command = `eval "$(ssh-agent -s)" && ssh-add ~/cert.pem`
+            await runSshCommand(machineIp, command)
 
             console.log("Installing required software on remote ganache machine " + ipsArray[i] + " ...")
-            try {
-                await execa('ssh', [
-                        `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                        `-i`, `${process.env.PEM_FILE_PATH}`,
-                        `${doc['ethHostUser']}@${ipsArray[i]}`,
-                        `echo "${doc['ethHostUser']} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers &&
+            command = `echo "${doc['ethHostUser']} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers &&
                          sudo apt update -y &&
                          sudo apt install nodejs npm -y &&
-                         sudo npm install -g ganache-cli -y`],
-                    {stdio: 'inherit'})
-            } catch (error) {
-                console.log("Error while installing required software on ganache remote machine " + ipsArray[i] + " : \n", error)
-                process.exit(1)
-            }
+                         sudo npm install -g ganache-cli -y`
+            await runSshCommand(machineIp, command)
 
         } else {
 
@@ -252,20 +153,69 @@ async function installRequiredSoftwareOnRemoteMachines(ips) {
             let borHosts = doc['devnetBorHosts'].toString().split(' ').join('').split(",")
 
             console.log("Installing required software on node remote machine " + ipsArray[i] + " ...")
-            try {
-                await execa('ssh', [
-                        `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                        `-i`, `${process.env.PEM_FILE_PATH}`,
-                        `${borUsers[i]}@${borHosts[i]}`,
-                        `echo "${borUsers[i]} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers &&
+            let machineIp = `${borUsers[i]}@${borHosts[i]}`
+            let command = `echo "${borUsers[i]} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers &&
                          sudo apt update -y &&
-                         sudo apt install rabbitmq-server -y`],
-                    {stdio: 'inherit'})
-            } catch (error) {
-                console.log("Error while installing required software on node remote machine " + ipsArray[i] + " : \n", error)
-                process.exit(1)
-            }
+                         sudo apt install rabbitmq-server -y`
+            await runSshCommand(machineIp, command)
         }
+    }
+}
+
+async function runRemoteSetupWithMaticCLI(ips) {
+
+    let ipsArray = ips.split(' ').join('').split(",")
+    let maticCliRepo = process.env.MATIC_CLI_REPO
+    let maticCliBranch = process.env.MATIC_CLI_BRANCH
+
+    console.log("Git checkout " + maticCliRepo + " and pull branch " + maticCliBranch + " on machine " + ipsArray[0])
+    let machineIp = doc['ethHostUser'] + "@" + ipsArray[0]
+    let command = `cd ~ && git clone ${maticCliRepo} && cd matic-cli && git checkout ${maticCliBranch}`
+    await runSshCommand(machineIp, command)
+
+    console.log("Install matic-cli dependencies ...")
+    command = `cd ~/matic-cli && npm i`
+    await runSshCommand(machineIp, command)
+
+    console.log("Creating devnet and removing default configs...")
+    command = `cd ~/matic-cli && mkdir devnet && rm configs/devnet/remote-setup-config.yaml`
+    await runSshCommand(machineIp, command)
+
+    console.log("Copying new matic-cli configurations...")
+    let src = `./configs/devnet/remote-setup-config.yaml`
+    let dest = `${doc['ethHostUser']}@${ipsArray[0]}:~/matic-cli/configs/devnet/remote-setup-config.yaml`
+    await runScpCommand(src, dest)
+
+    console.log("Execute remote setup with matic-cli...")
+    machineIp = `${doc['ethHostUser']}@${ipsArray[0]}`
+    command = `cd ~/matic-cli/devnet && ../bin/matic-cli setup devnet -c ../configs/devnet/remote-setup-config.yaml`
+    await runSshCommand(machineIp, command)
+}
+
+async function runSshCommand(machineIp, command) {
+    try {
+        await execa('ssh', [
+                `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                `-i`, `${process.env.PEM_FILE_PATH}`,
+                machineIp,
+                command],
+            {stdio: 'inherit'})
+    } catch (error) {
+        console.log("Error while executing command: '" + command + "' : \n", error)
+        process.exit(1)
+    }
+}
+
+async function runScpCommand(src, dest) {
+    try {
+        await execa('scp', [
+            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+            src,
+            dest
+        ], {stdio: 'inherit'})
+    } catch (error) {
+        console.log("Error while copying '" + src + "' to '" + dest + "': \n", error)
+        process.exit(1)
     }
 }
 
@@ -285,16 +235,15 @@ export async function cli(args) {
             await editMaticCliRemoteYAMLConfig();
 
             console.log("Waiting 5s for the VM to initialize...")
-            //await timer(5000)
+            await timer(5000)
 
-            //await installRequiredSoftwareOnRemoteMachines(ips)
+            await installRequiredSoftwareOnRemoteMachines(ips)
 
-            //await runMaticCLI(ips);
+            await runRemoteSetupWithMaticCLI(ips);
             break;
 
         case "--destroy":
             await terraformDestroy();
-            await rmDevnet();
             break;
 
         case "--init":
