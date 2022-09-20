@@ -5,25 +5,25 @@ heimdallChainId: heimdall-4052
 borBranch: v0.2.16
 heimdallBranch: v0.2.10
 contractsBranch: arpit/v0.3.1-backport
-sprintSize:
-blockNumber:
-blockTime:
-numOfValidators: 2
-numOfNonValidators: 0
-ethURL: http://34.211.149.16:9545
+sprintSize: 64
+blockNumber: 0,64
+blockTime: 2,5
+numOfValidators: 1
+numOfNonValidators: 1
+ethURL: http://35.87.112.210:9545
 ethHostUser: ubuntu
 devnetType: remote
 devnetBorHosts:
-  - 34.211.149.16
-  - 34.211.149.16
+  - 35.87.112.210
+  - 34.222.101.53
 devnetHeimdallHosts:
-  - 34.211.149.16
-  - 34.211.149.16
+  - 35.87.112.210
+  - 34.222.101.53
 devnetBorUsers:
   - ubuntu
   - ubuntu
 devnetHeimdallUsers:
   - ubuntu
   - ubuntu
-borDockerBuildContext: "https://github.com/maticnetwork/bor.git#develop"
-heimdallDockerBuildContext: "https://github.com/maticnetwork/heimdall.git#develop"
+borDockerBuildContext: https://github.com/maticnetwork/bor.git#develop
+heimdallDockerBuildContext: https://github.com/maticnetwork/heimdall.git#develop

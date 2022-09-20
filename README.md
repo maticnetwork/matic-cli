@@ -139,3 +139,13 @@ Remove the devnet folder and you can start the process once again
 ## License
 
 MIT
+
+
+
+# express-cli 
+
+Requirements:  
+- install `terraform` on your local machine: https://learn.hashicorp.com/tutorials/terraform/install-cli  
+- run `./bin/express-cli --init` to init terraform
+- run `./bin/express-cli --start` to create the remote setup with matic-cli
+- run `./bin/express-cli --destroy` to destroy the remote setup

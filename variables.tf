@@ -19,11 +19,11 @@ variable "INSTANCE_TYPE" {
 }
 
 variable "INSTANCE_AMI" {
-  default = "ami-08d70e59c07c61a3a"
+  default = "ami-0d70546e43a941d70"
 }
 
 variable "PEM_FILE" {
-  default = "shivam-matic"
+  default = "aws-key"
 }
 
 variable "REGION" {
@@ -34,9 +34,19 @@ variable "SG_CIDR_BLOCKS" {
     default = ["0.0.0.0/0"]
 }
 
-// set ports to be opened in security group for incoming 
+// set ports to be opened in security group for incoming
 variable "PORTS_IN" {
-    default = [22, 80, 443, 30303, 1317, 8545, 9545, 1337, 8546]
+  // 22: ssh
+  // 80: http
+  // 443: https ssl enabled
+  // 30303: p2p bor
+  // 1317: heimdall
+  // 8545: bor https
+  // 8546: bor rpc websockets
+  // 9545: ganache
+  // 1337:
+  // 25526: heimdall comms
+  default = [22, 80, 443, 30303, 1317, 8545, 9545, 1337, 8546, 25526]
 }
 
 // to allow all ports to outside, set to [0]
