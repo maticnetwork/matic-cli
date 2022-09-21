@@ -53,8 +53,9 @@ async function rmDevnet(){
 
 async function runMaticCLI(){
   shell.exec(`mkdir devnet`);
-  shell.cd('devnet');
+  shell.pushd('devnet');
   shell.exec(`../bin/matic-cli setup devnet -c ../configs/devnet/remote-setup-config.yaml`);
+  shell.popd();
 }
 
 function sshSetup(){
@@ -94,6 +95,17 @@ function setEthHostUser(value){
   if(value){
     doc['ethHostUser'] = value;
   }
+}
+
+async function startStressTest(){
+  shell.pushd("tests/stress-test");
+  shell.exec(`go mod tidy`);
+  shell.exec(`go run main.go`, {
+    env: {
+      ...process.env,
+    }
+  });
+  shell.popd();
 }
 
 async function editRemoteYAMLConfig(){
@@ -146,6 +158,10 @@ export async function cli(args) {
       
       case "--init":
         await terraformInit();
+        break;
+
+      case "--stress":
+        await startStressTest();
         break;
     
       default:
