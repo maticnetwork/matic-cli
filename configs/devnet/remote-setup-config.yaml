@@ -10,15 +10,15 @@ blockNumber: 0,64
 blockTime: 2,5
 numOfValidators: 1
 numOfNonValidators: 1
-ethURL: http://35.87.112.210:9545
+ethURL: http://34.220.10.108:9545
 ethHostUser: ubuntu
 devnetType: remote
 devnetBorHosts:
-  - 35.87.112.210
-  - 34.222.101.53
+  - 34.220.10.108
+  - 54.218.244.70
 devnetHeimdallHosts:
-  - 35.87.112.210
-  - 34.222.101.53
+  - 34.220.10.108
+  - 54.218.244.70
 devnetBorUsers:
   - ubuntu
   - ubuntu
