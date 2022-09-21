@@ -142,7 +142,7 @@ async function installRequiredSoftwareOnRemoteMachines(ips) {
 
             console.log("Add ssh for " + ipsArray[i] + "~/cert.pem ...")
             let machineIp = `${doc['ethHostUser']}@${ipsArray[i]}`
-            let command = `eval "$(ssh-agent -s)" && ssh-add ~/cert.pem`
+            let command = `eval "$(ssh-agent -s)" && ssh-add ~/cert.pem && exit`
             await runSshCommand(machineIp, command)
 
             console.log("Installing required software on remote host machine " + ipsArray[i] + " ...")
@@ -187,7 +187,7 @@ async function installRequiredSoftwareOnRemoteMachines(ips) {
             await runSshCommand(machineIp, command)
 
             console.log("Install rabbitmq...")
-            command = `sudo apt install rabbitmq-server -y`
+            command = `sudo apt install rabbitmq-server -y && exit`
             await runSshCommand(machineIp, command)
 
             console.log("Install ganache-cli...")
@@ -203,7 +203,7 @@ async function installRequiredSoftwareOnRemoteMachines(ips) {
             let machineIp = `${borUsers[i]}@${borHosts[i]}`
 
             console.log("Allowing user not to use password...")
-            let command = `echo "${doc['ethHostUser']} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers && exit`
+            let command = `echo "${borUsers[i]} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers && exit`
             await runSshCommand(machineIp, command)
 
             console.log("Run apt update...")
@@ -215,7 +215,7 @@ async function installRequiredSoftwareOnRemoteMachines(ips) {
             await runSshCommand(machineIp, command)
 
             console.log("Install rabbitmq...")
-            command = `sudo apt install rabbitmq-server -y`
+            command = `sudo apt install rabbitmq-server -y && exit`
             await runSshCommand(machineIp, command)
 
             console.log("Install go...")
@@ -235,7 +235,7 @@ async function runRemoteSetupWithMaticCLI(ips) {
     let maticCliBranch = process.env.MATIC_CLI_BRANCH
 
     console.log("Git checkout " + maticCliRepo + " and pull branch " + maticCliBranch + " on machine " + ipsArray[0])
-    let machineIp = doc['ethHostUser'] + "@" + ipsArray[0]
+    let machineIp = `${doc['ethHostUser']}@${ipsArray[0]}`
     let command = `cd ~ && git clone ${maticCliRepo} && cd matic-cli && git checkout ${maticCliBranch}`
     await runSshCommand(machineIp, command)
 
@@ -253,7 +253,6 @@ async function runRemoteSetupWithMaticCLI(ips) {
     await runScpCommand(src, dest)
 
     console.log("Execute remote setup with matic-cli...")
-    machineIp = `${doc['ethHostUser']}@${ipsArray[0]}`
     command = `cd ~/matic-cli/devnet && ../bin/matic-cli setup devnet -c ../configs/devnet/remote-setup-config.yaml`
     await runSshCommand(machineIp, command)
 }
