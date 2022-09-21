@@ -557,6 +557,7 @@ export class Devnet {
               signerDumpData[i].priv_key,
               password
             );
+            // TODO have a look at it
             const p = [
               // save password file
               fs.writeFile(this.borPasswordFilePath(i), `${password}\n`),

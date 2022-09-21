@@ -33,6 +33,9 @@ async function terraformDestroy() {
             ...process.env,
         }
     });
+    // delete local terraform files
+    // FIXME see POS-812 https://polygon.atlassian.net/browse/POS-812
+    shell.exec(`rm -rf .terraform && rm .terraform.lock.hcl && rm terraform.tfstate && rm terraform.tfstate.backup`)
 }
 
 async function terraformOutput() {
@@ -144,6 +147,7 @@ async function installRequiredSoftwareOnRemoteMachines(ips) {
             command = `echo "${doc['ethHostUser']} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers &&
                          sudo apt update -y &&
                          sudo apt install nodejs npm -y &&
+                         sudo apt install rabbitmq-server -y &&
                          sudo npm install -g ganache-cli -y`
             await runSshCommand(machineIp, command)
 
