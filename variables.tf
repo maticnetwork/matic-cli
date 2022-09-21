@@ -19,7 +19,7 @@ variable "INSTANCE_TYPE" {
 }
 
 variable "INSTANCE_AMI" {
-  default = "ami-0c09c7eb16d3e8e70"
+  default = "ami-017fecd1353bcc96e"
 }
 
 variable "PEM_FILE" {

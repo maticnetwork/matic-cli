@@ -28,6 +28,7 @@ async function terraformApply() {
 }
 
 async function terraformDestroy() {
+    console.log("Executing terraform destroy...")
     shell.exec(`terraform destroy -auto-approve`, {
         env: {
             ...process.env,
@@ -39,6 +40,7 @@ async function terraformDestroy() {
 }
 
 async function terraformOutput() {
+    console.log("Executing terraform output...")
     const {stdout} = shell.exec(`terraform output --json`, {
         env: {
             ...process.env,
@@ -143,12 +145,53 @@ async function installRequiredSoftwareOnRemoteMachines(ips) {
             let command = `eval "$(ssh-agent -s)" && ssh-add ~/cert.pem`
             await runSshCommand(machineIp, command)
 
-            console.log("Installing required software on remote ganache machine " + ipsArray[i] + " ...")
-            command = `echo "${doc['ethHostUser']} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers &&
-                         sudo apt update -y &&
-                         sudo apt install nodejs npm -y &&
-                         sudo apt install rabbitmq-server -y &&
-                         sudo npm install -g ganache-cli -y`
+            console.log("Installing required software on remote host machine " + ipsArray[i] + " ...")
+
+            console.log("Allowing user not to use password...")
+            command = `echo "${doc['ethHostUser']} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers && exit`
+            await runSshCommand(machineIp, command)
+
+            console.log("Run apt update...")
+            command = `sudo apt update -y  && exit`
+            await runSshCommand(machineIp, command)
+
+            console.log("Install build-essential...")
+            command = `sudo apt install build-essential -y && exit`
+            await runSshCommand(machineIp, command)
+
+            console.log("Get script to install nvm...")
+            command = `curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash &&
+                        export NVM_DIR="$HOME/.nvm"
+                        [ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
+                        [ -s "$NVM_DIR/bash_completion" ] && \\. "$NVM_DIR/bash_completion" && 
+                        nvm install 10.17.0 && exit`
+            await runSshCommand(machineIp, command)
+
+            console.log("Install go...")
+            command = `wget https://raw.githubusercontent.com/maticnetwork/node-ansible/master/go-install.sh &&
+                         bash go-install.sh --remove &&
+                         bash go-install.sh &&
+                         source /home/ubuntu/.bashrc && exit`
+            await runSshCommand(machineIp, command)
+
+            console.log("Install solc...")
+            command = `sudo snap install solc && exit`
+            await runSshCommand(machineIp, command)
+
+            console.log("Install python2...")
+            command = `sudo apt install python2 -y && alias python="/usr/bin/python2" && exit`
+            await runSshCommand(machineIp, command)
+
+            console.log("Install nodejs and npm...")
+            command = `sudo apt install nodejs npm -y && exit`
+            await runSshCommand(machineIp, command)
+
+            console.log("Install rabbitmq...")
+            command = `sudo apt install rabbitmq-server -y`
+            await runSshCommand(machineIp, command)
+
+            console.log("Install ganache-cli...")
+            command = `sudo npm install -g ganache-cli -y && exit`
             await runSshCommand(machineIp, command)
 
         } else {
@@ -156,11 +199,30 @@ async function installRequiredSoftwareOnRemoteMachines(ips) {
             let borUsers = doc['devnetBorUsers'].toString().split(' ').join('').split(",")
             let borHosts = doc['devnetBorHosts'].toString().split(' ').join('').split(",")
 
-            console.log("Installing required software on node remote machine " + ipsArray[i] + " ...")
+            console.log("Installing required software on remote machines " + ipsArray[i] + " ...")
             let machineIp = `${borUsers[i]}@${borHosts[i]}`
-            let command = `echo "${borUsers[i]} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers &&
-                         sudo apt update -y &&
-                         sudo apt install rabbitmq-server -y`
+
+            console.log("Allowing user not to use password...")
+            let command = `echo "${doc['ethHostUser']} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers && exit`
+            await runSshCommand(machineIp, command)
+
+            console.log("Run apt update...")
+            command = `sudo apt update -y && exit`
+            await runSshCommand(machineIp, command)
+
+            console.log("Install build-essential...")
+            command = `sudo apt install build-essential -y && exit`
+            await runSshCommand(machineIp, command)
+
+            console.log("Install rabbitmq...")
+            command = `sudo apt install rabbitmq-server -y`
+            await runSshCommand(machineIp, command)
+
+            console.log("Install go...")
+            command = `wget https://raw.githubusercontent.com/maticnetwork/node-ansible/master/go-install.sh &&
+                         bash go-install.sh --remove &&
+                         bash go-install.sh &&
+                         source /home/ubuntu/.bashrc && exit`
             await runSshCommand(machineIp, command)
         }
     }
