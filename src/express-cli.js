@@ -135,31 +135,31 @@ async function installRequiredSoftwareOnRemoteMachines(ips) {
     for (let i = 0; i < ipsArray.length; i++) {
         if (i === 0) {
 
-            console.log("Copying certificate to " + ipsArray[i] + "~/cert.pem ...")
+            console.log("Copying certificate to " + ipsArray[i] + "~/cert.pem...")
             let src = `${process.env.PEM_FILE_PATH}`
             let dest = `${doc['ethHostUser']}@${ipsArray[i]}:~/cert.pem`
             await runScpCommand(src, dest)
 
-            console.log("Add ssh for " + ipsArray[i] + "~/cert.pem ...")
+            console.log("Adding ssh for " + ipsArray[i] + "~/cert.pem...")
             let machineIp = `${doc['ethHostUser']}@${ipsArray[i]}`
             let command = `sudo chmod 600 ~/cert.pem && eval "$(ssh-agent -s)" && ssh-add ~/cert.pem && exit`
             await runSshCommand(machineIp, command)
 
-            console.log("Installing required software on remote host machine " + ipsArray[i] + " ...")
+            console.log("Installing required software on remote host machine " + ipsArray[i] + "...")
 
             console.log("Allowing user not to use password...")
             command = `echo "${doc['ethHostUser']} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers && exit`
             await runSshCommand(machineIp, command)
 
-            console.log("Run apt update...")
+            console.log("Running apt update...")
             command = `sudo apt update -y  && exit`
             await runSshCommand(machineIp, command)
 
-            console.log("Install build-essential...")
+            console.log("Installing build-essential...")
             command = `sudo apt install build-essential -y && exit`
             await runSshCommand(machineIp, command)
 
-            console.log("Get script to install nvm...")
+            console.log("Installing nvm...")
             command = `curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash &&
                         export NVM_DIR="$HOME/.nvm"
                         [ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
@@ -167,30 +167,39 @@ async function installRequiredSoftwareOnRemoteMachines(ips) {
                         nvm install 10.17.0 && exit`
             await runSshCommand(machineIp, command)
 
-            console.log("Install go...")
+            console.log("Installing go...")
             command = `wget https://raw.githubusercontent.com/maticnetwork/node-ansible/master/go-install.sh &&
                          bash go-install.sh --remove &&
                          bash go-install.sh &&
                          source /home/ubuntu/.bashrc && exit`
             await runSshCommand(machineIp, command)
 
-            console.log("Install solc...")
+            console.log("Creating symlink for go...")
+            command = `sudo ln -sf /home/ubuntu/.go/bin/go /usr/local/bin/go`
+            await runSshCommand(machineIp, command)
+
+            console.log("Installing solc...")
             command = `sudo snap install solc && exit`
             await runSshCommand(machineIp, command)
 
-            console.log("Install python2...")
+            console.log("Installing python2...")
             command = `sudo apt install python2 -y && alias python="/usr/bin/python2" && exit`
             await runSshCommand(machineIp, command)
 
-            console.log("Install nodejs and npm...")
+            console.log("Installing nodejs and npm...")
             command = `sudo apt install nodejs npm -y && exit`
             await runSshCommand(machineIp, command)
 
-            console.log("Install rabbitmq...")
+            console.log("Creating symlink for npm and node...")
+            command = `sudo ln -sf /home/ubuntu/.nvm/versions/node/v10.17.0/bin/npm /usr/bin/npm &&
+                    sudo ln -sf /home/ubuntu/.nvm/versions/node/v10.17.0/bin/node /usr/bin/node`
+            await runSshCommand(machineIp, command)
+
+            console.log("Installing rabbitmq...")
             command = `sudo apt install rabbitmq-server -y && exit`
             await runSshCommand(machineIp, command)
 
-            console.log("Install ganache-cli...")
+            console.log("Installing ganache-cli...")
             command = `sudo npm install -g ganache-cli -y && exit`
             await runSshCommand(machineIp, command)
 
@@ -199,30 +208,34 @@ async function installRequiredSoftwareOnRemoteMachines(ips) {
             let borUsers = doc['devnetBorUsers'].toString().split(' ').join('').split(",")
             let borHosts = doc['devnetBorHosts'].toString().split(' ').join('').split(",")
 
-            console.log("Installing required software on remote machines " + ipsArray[i] + " ...")
+            console.log("Installing required software on remote machines " + ipsArray[i] + "...")
             let machineIp = `${borUsers[i]}@${borHosts[i]}`
 
             console.log("Allowing user not to use password...")
             let command = `echo "${borUsers[i]} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers && exit`
             await runSshCommand(machineIp, command)
 
-            console.log("Run apt update...")
+            console.log("Running apt update...")
             command = `sudo apt update -y && exit`
             await runSshCommand(machineIp, command)
 
-            console.log("Install build-essential...")
+            console.log("Installing build-essential...")
             command = `sudo apt install build-essential -y && exit`
             await runSshCommand(machineIp, command)
 
-            console.log("Install rabbitmq...")
+            console.log("Installing rabbitmq...")
             command = `sudo apt install rabbitmq-server -y && exit`
             await runSshCommand(machineIp, command)
 
-            console.log("Install go...")
+            console.log("Installing go...")
             command = `wget https://raw.githubusercontent.com/maticnetwork/node-ansible/master/go-install.sh &&
                          bash go-install.sh --remove &&
                          bash go-install.sh &&
                          source /home/ubuntu/.bashrc && exit`
+            await runSshCommand(machineIp, command)
+
+            console.log("Creating symlink for go...")
+            command = `sudo ln -sf /home/ubuntu/.go/bin/go /usr/local/bin/go`
             await runSshCommand(machineIp, command)
         }
     }
@@ -231,15 +244,16 @@ async function installRequiredSoftwareOnRemoteMachines(ips) {
 async function runRemoteSetupWithMaticCLI(ips) {
 
     let ipsArray = ips.split(' ').join('').split(",")
+    let machineIp = `${doc['ethHostUser']}@${ipsArray[0]}`
+
     let maticCliRepo = process.env.MATIC_CLI_REPO
     let maticCliBranch = process.env.MATIC_CLI_BRANCH
 
     console.log("Git checkout " + maticCliRepo + " and pull branch " + maticCliBranch + " on machine " + ipsArray[0])
-    let machineIp = `${doc['ethHostUser']}@${ipsArray[0]}`
     let command = `cd ~ && git clone ${maticCliRepo} && cd matic-cli && git checkout ${maticCliBranch}`
     await runSshCommand(machineIp, command)
 
-    console.log("Install matic-cli dependencies ...")
+    console.log("Installing matic-cli dependencies...")
     command = `cd ~/matic-cli && npm i`
     await runSshCommand(machineIp, command)
 
@@ -252,7 +266,7 @@ async function runRemoteSetupWithMaticCLI(ips) {
     let dest = `${doc['ethHostUser']}@${ipsArray[0]}:~/matic-cli/configs/devnet/remote-setup-config.yaml`
     await runScpCommand(src, dest)
 
-    console.log("Execute remote setup with matic-cli...")
+    console.log("Executing remote setup with matic-cli...")
     command = `cd ~/matic-cli/devnet && ../bin/matic-cli setup devnet -c ../configs/devnet/remote-setup-config.yaml`
     await runSshCommand(machineIp, command)
 }
