@@ -382,24 +382,25 @@ export class Devnet {
           // copy the Ganache files to the first node
 
           let ganacheURL = new URL(this.config.ethURL)
+          let ganacheUser = this.config.ethHostUser
 
           await execa('scp', [
             `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
             `${this.config.targetDirectory}/ganache-start-remote.sh`,
-            `${this.config.ethHostUser}@${ganacheURL.hostname}:~/ganache-start-remote.sh`
+            `${ganacheUser}@${ganacheURL.hostname}:~/ganache-start-remote.sh`
           ])
 
           await execa('scp', [
             `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,`-r`,
             `${this.config.targetDirectory}/data`,
-            `${this.config.ethHostUser}@${ganacheURL.hostname}:~/data`
+            `${ganacheUser}@${ganacheURL.hostname}:~/data`
           ])
 
           // Run ganache in tmux
           await execa('ssh', [
             `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
-            `${this.config.ethHostUser}@${ganacheURL.hostname}`,
-            `tmux new -d -s matic-cli-ganache; tmux send-keys -t matic-cli-ganache:0 'bash /home/${this.config.ethHostUser}/ganache-start-remote.sh' ENTER`])
+            `${ganacheUser}@${ganacheURL.hostname}`,
+            `tmux new -d -s matic-cli-ganache; tmux send-keys -t matic-cli-ganache:0 'bash /home/${ganacheUser}/ganache-start-remote.sh' ENTER`])
 
           for(let i=0; i<this.totalNodes; i++) {
             // copy files to remote servers
@@ -422,6 +423,12 @@ export class Devnet {
             ])
 
             await execa('scp', [
+              `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
+              `${this.config.targetDirectory}/code/heimdall/build/bridge`,
+              `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/bridge`
+            ])
+
+            await execa('scp', [
                `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,`-r`,
                `${this.testnetDir}/node${i}/`,
                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:~/node/`
@@ -439,6 +446,12 @@ export class Devnet {
               `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
               `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
               `tmux new -d -s matic-cli; tmux new-window -t matic-cli; tmux new-window -t matic-cli;  tmux send-keys -t matic-cli:0 'bash /home/${this.config.devnetBorUsers[i]}/node/heimdalld-setup.sh' ENTER; tmux send-keys -t matic-cli:0 'heimdalld start --home /home/${this.config.devnetBorUsers[i]}/.heimdalld --chain=/home/${this.config.devnetBorUsers[i]}.heimdalld/config/genesis.json --bridge --all --rest-server' ENTER; tmux send-keys -t matic-cli:1 'bash /home/${this.config.devnetBorUsers[i]}/node/bor-setup.sh' ENTER; tmux send-keys -t matic-cli:1 'bash /home/${this.config.devnetBorUsers[i]}/node/bor-start.sh' ENTER`
+            ])
+
+            await execa('ssh', [
+              `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
+              `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+              `tmux send-keys -t matic-cli:2 'bridge start --all' ENTER`
             ])
           }
         }
@@ -557,7 +570,6 @@ export class Devnet {
               signerDumpData[i].priv_key,
               password
             );
-            // TODO have a look at it
             const p = [
               // save password file
               fs.writeFile(this.borPasswordFilePath(i), `${password}\n`),
