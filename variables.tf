@@ -1,21 +1,26 @@
 variable "ACCESS_KEY" {
-    type = string
+  type = string
 }
 
 variable "SECRET_KEY" {
-    type = string
+  type = string
+}
+
+variable "VM_NAME" {
+  type    = string
+  default = "polygon-user"
 }
 
 variable "VALIDATOR_COUNT" {
-    default = "2"
+  default = "2"
 }
 
 variable "SENTRY_COUNT" {
-    default = "1"
+  default = "1"
 }
 
 variable "INSTANCE_TYPE" {
-    default = "t2.micro"
+  default = "t2.micro"
 }
 
 variable "INSTANCE_AMI" {
@@ -31,7 +36,7 @@ variable "REGION" {
 }
 
 variable "SG_CIDR_BLOCKS" {
-    default = ["0.0.0.0/0"]
+  default = ["0.0.0.0/0"]
 }
 
 // set ports to be opened in security group for incoming
@@ -51,5 +56,5 @@ variable "PORTS_IN" {
 
 // to allow all ports to outside, set to [0]
 variable "PORTS_OUT" {
-    default = [0]
+  default = [0]
 }

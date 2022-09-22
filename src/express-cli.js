@@ -142,7 +142,7 @@ async function installRequiredSoftwareOnRemoteMachines(ips) {
 
             console.log("Add ssh for " + ipsArray[i] + "~/cert.pem ...")
             let machineIp = `${doc['ethHostUser']}@${ipsArray[i]}`
-            let command = `eval "$(ssh-agent -s)" && ssh-add ~/cert.pem && exit`
+            let command = `sudo chmod 600 ~/cert.pem && eval "$(ssh-agent -s)" && ssh-add ~/cert.pem && exit`
             await runSshCommand(machineIp, command)
 
             console.log("Installing required software on remote host machine " + ipsArray[i] + " ...")

@@ -148,6 +148,7 @@ Requirements:
 - install `terraform` on your local machine: https://learn.hashicorp.com/tutorials/terraform/install-cli  
 - copy `.env.example` to `.env` with command `cp .env.example .env`
 - replace `TF_VAR_ACCESS_KEY` and `TF_VAR_SECRET_KEY` with your own keys (ask devops to generate one for you)
+- optionally replace `TF_VAR_VM_NAME` with your own identifier (it can be any string, default is "polygon-user")
 - make sure `PEM_FILE_PATH` points to a correct AWS key certificate, otherwise use the default
 - run `./bin/express-cli --init` to init terraform
 - run `./bin/express-cli --start` to create the remote setup with `matic-cli`
