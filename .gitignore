@@ -3,3 +3,7 @@ test
 .DS_Store
 devnet
 .idea
+.env
+.terraform*
+terraform.tfstate
+terraform.tfstate.backup

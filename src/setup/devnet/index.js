@@ -382,6 +382,7 @@ export class Devnet {
           // copy the Ganache files to the first node
 
           let ganacheURL = new URL(this.config.ethURL)
+          let ganacheUser = this.config.ethHostUser
 
           await execa('scp', [
             `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
