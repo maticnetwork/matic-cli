@@ -176,8 +176,12 @@ function splitToArray(value) {
 }
 
 async function installCommonPackages(user, ip) {
+    console.log("Give permissions to all users for root folder...")
+    let command = `sudo chmod 777 /home/ubuntu && sudo chmod 777 ~/ && exit`
+    await runSshCommand(ip, command)
+
     console.log("Allowing user not to use password...")
-    let command = `echo "${user} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers && exit`
+    command = `echo "${user} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers && exit`
     await runSshCommand(ip, command)
 
     console.log("Copying certificate to " + ip + ":~/cert.pem...")
@@ -199,6 +203,7 @@ async function installCommonPackages(user, ip) {
     command = `sudo apt install build-essential -y && exit`
     await runSshCommand(ip, command)
 
+    // todo do not download if exists
     console.log("Installing go...")
     command = `wget https://raw.githubusercontent.com/maticnetwork/node-ansible/master/go-install.sh &&
                          bash go-install.sh --remove &&
