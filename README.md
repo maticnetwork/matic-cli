@@ -148,8 +148,11 @@ Requirements:
 - install `terraform` on your local machine: https://learn.hashicorp.com/tutorials/terraform/install-cli  
 - copy `.env.example` to `.env` with command `cp .env.example .env`
 - replace `TF_VAR_ACCESS_KEY` and `TF_VAR_SECRET_KEY` with your own keys (ask devops to generate one for you)
-- optionally replace `TF_VAR_VM_NAME` with your own identifier (it can be any string, default is "polygon-user")
+- (optionally) replace `TF_VAR_VM_NAME` with your own identifier (it can be any string, default is "polygon-user")
+- (optionally) replace `TF_VAR_DISK_SIZE_GB` with your preferred disk size in GB (default is 500 GB)
+- set `TF_VAR_DOCKERIZED` to 'yes' if you want to run the network on one VM only in a dockerized stack (default is 'no')
 - make sure `PEM_FILE_PATH` points to a correct AWS key certificate, otherwise use the default
+- source the `.env` file if your local system requires to, with command `source .env`  
 - run `./bin/express-cli --init` to init terraform
 - run `./bin/express-cli --start` to create the remote setup with `matic-cli`
 - run `./bin/express-cli --destroy` to destroy the remote setup

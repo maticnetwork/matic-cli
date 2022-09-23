@@ -18,13 +18,18 @@ provider "aws" {
 }
 
 resource "aws_instance" "app_server" {
-  count                  = var.VALIDATOR_COUNT + var.SENTRY_COUNT
+  count = (var.DOCKERIZED == "yes") ? 1 : (var.VALIDATOR_COUNT + var.SENTRY_COUNT)
   ami                    = var.INSTANCE_AMI
   instance_type          = var.INSTANCE_TYPE
   key_name               = var.PEM_FILE
   vpc_security_group_ids = [aws_security_group.internet_facing_alb.id]
   subnet_id              = "${aws_subnet.public-subnet-1.id}"
 
+  ebs_block_device {
+    device_name = "/dev/sda1"
+    volume_size = var.DISK_SIZE_GB
+    volume_type = "gp2"
+  }
 
   tags = {
     Name = "${var.VM_NAME}-terraform-${count.index + 1}"
