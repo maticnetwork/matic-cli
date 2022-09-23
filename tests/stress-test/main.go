@@ -237,7 +237,7 @@ func fundAccounts(ctx context.Context, client *ethclient.Client, genAccounts Acc
 	senderAddress common.Address, opts *bind.TransactOpts) {
 	for i := 0; i < N; i++ {
 		fmt.Println("Reqd nonce: ", Nonce+uint64(i))
-		runTransaction(ctx, client, genAccounts[i].addr, chainID, senderAddress, opts, Nonce+uint64(i), 10000000000000000)
+		runTransaction(ctx, client, genAccounts[i].addr, chainID, senderAddress, opts, Nonce+uint64(i), 3000000000000000000)
 	}
 }
 
@@ -414,17 +414,17 @@ func runBotTransaction(ctx context.Context, Clients *ethclient.Client, recipient
 	r := nonce % 6
 	switch r {
 	case 0:
-		gasPrice = genRandomGas(32000, 34000)
+		gasPrice = genRandomGas(3500000000, 4000000000)
 	case 1:
-		gasPrice = genRandomGas(22000, 24000)
+		gasPrice = genRandomGas(2000000000, 2500000000)
 	case 2:
-		gasPrice = genRandomGas(28000, 30000)
+		gasPrice = genRandomGas(2500000000, 3000000000)
 	case 3:
-		gasPrice = genRandomGas(26000, 28000)
+		gasPrice = genRandomGas(1500000000, 2000000000)
 	case 4:
-		gasPrice = genRandomGas(20000, 24000)
+		gasPrice = genRandomGas(1000000000, 1500000000)
 	case 5:
-		gasPrice = genRandomGas(30000, 32000)
+		gasPrice = genRandomGas(3000000000, 3500000000)
 
 	}
 
