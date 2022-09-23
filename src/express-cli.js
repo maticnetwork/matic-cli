@@ -186,11 +186,11 @@ async function installCommonPackages(user, ip) {
     await runScpCommand(src, dest)
 
     console.log("Adding ssh for " + ip + ":~/cert.pem...")
-    command = `sudo chmod 600 ~/cert.pem && eval "$(ssh-agent -s)" && ssh-add ~/cert.pem && exit`
+    command = `sudo chmod 700 ~/cert.pem && eval "$(ssh-agent -s)" && ssh-add ~/cert.pem && sudo chmod -R 700 ~/.ssh && exit`
     await runSshCommand(ip, command)
 
     console.log("Give permissions to all users for root folder...")
-    command = `sudo chmod 777 /home/ubuntu && sudo chmod 777 ~/ && exit`
+    command = `sudo chmod 755 -R /home/ubuntu && sudo chmod 755 -R ~/ && exit`
     await runSshCommand(ip, command)
 
     console.log("Installing required software on remote machine " + ip + "...")
