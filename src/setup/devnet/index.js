@@ -381,15 +381,18 @@ export class Devnet {
           }
           // copy the Ganache files to the proper position
 
-          await execa('cp', [${this.config.targetDirectory}/ganache-start-remote.sh`,
+          console.log("Copy ganache scripts");
+          await execa('sudo cp -f', [`${this.config.targetDirectory}/ganache-start-remote.sh`,
             `/home/${this.config.ethHostUser}/ganache-start-remote.sh]`])
-          await execa('cp', [`${this.config.targetDirectory}/data`,
-            `/home/${this.config.ethHostUser}//data`])
+          await execa('sudo cp -f', [`${this.config.targetDirectory}/data`,
+            `/home/${this.config.ethHostUser}/data`])
 
+          console.log("Run ganache");
           // Run ganache in tmux
           await execa(`cd /home/${this.config.ethHostUser}/ && tmux new -d -s matic-cli-ganache; tmux send-keys -t matic-cli-ganache:0 
           'bash /home/${this.config.ethHostUser}/ganache-start-remote.sh' ENTER`)
 
+          console.log("Copy files to nodes");
           for(let i=0; i<this.totalNodes; i++) {
             // copy files to remote servers
             await execa('scp', [
