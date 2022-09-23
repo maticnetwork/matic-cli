@@ -382,9 +382,14 @@ export class Devnet {
           // copy the Ganache files to the proper position
 
           console.log("Copy ganache scripts");
-          await execa('sudo cp', [`${this.config.targetDirectory}/ganache-start-remote.sh`,
-            `/home/${this.config.ethHostUser}/ganache-start-remote.sh]`])
-          await execa('sudo cp', [`${this.config.targetDirectory}/data`,
+          await execa('cp', [
+            `${this.config.targetDirectory}/ganache-start-remote.sh`,
+            `/home/ubuntu/ganache-start-remote.sh`
+          ])
+
+          await execa('cp', [
+              `-r`
+              `${this.config.targetDirectory}/data`,
             `/home/${this.config.ethHostUser}/data`])
 
           console.log("Run ganache");
