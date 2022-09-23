@@ -382,8 +382,8 @@ export async function cli(args) {
                 await editMaticCliRemoteYAMLConfig();
             }
 
-            console.log("Waiting 10s for the VM to initialize...")
-            await timer(10000)
+            console.log("Waiting 15s for the VM to initialize...")
+            await timer(15000)
 
             await installRequiredSoftwareOnRemoteMachines(ips)
 
