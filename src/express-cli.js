@@ -151,14 +151,13 @@ async function installRequiredSoftwareOnRemoteMachines(ips) {
 
     let ipsArray = splitToArray(ips)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
-    let borHosts = splitToArray(doc['devnetBorHosts'].toString())
 
     let user, ip
 
     for (let i = 0; i < ipsArray.length; i++) {
 
         i === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[i]}`
-        i === 0 ? ip = `${user}@${ipsArray[i]}` : `${user}@${borHosts[i]}`
+        ip = `${user}@${ipsArray[i]}`
 
         await installCommonPackages(user, ip)
 
@@ -331,7 +330,7 @@ async function runDockerSetupWithMaticCLI(ips) {
     let dest = `${doc['ethHostUser']}@${ipsArray[0]}:~/matic-cli/configs/devnet/docker-setup-config.yaml`
     await runScpCommand(src, dest)
 
-    console.log("Executing remote setup with matic-cli...")
+    console.log("Executing docker setup with matic-cli...")
     command = `cd ~/matic-cli/devnet && ../bin/matic-cli setup devnet -c ../configs/devnet/docker-setup-config.yaml`
     await runSshCommand(ip, command)
 
