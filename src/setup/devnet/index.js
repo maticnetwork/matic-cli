@@ -381,11 +381,13 @@ export class Devnet {
           }
           // copy the Ganache files to the proper position
 
-          await execa('cp', [`${this.config.targetDirectory}/ganache-start-remote.sh`, `~/ganache-start-remote.sh]`])
-          await execa('cp', [`${this.config.targetDirectory}/data`, `~/data`])
+          await execa('cp', [${this.config.targetDirectory}/ganache-start-remote.sh`,
+            `/home/${this.config.ethHostUser}/ganache-start-remote.sh]`])
+          await execa('cp', [`${this.config.targetDirectory}/data`,
+            `/home/${this.config.ethHostUser}//data`])
 
           // Run ganache in tmux
-          await execa(`cd ~ && tmux new -d -s matic-cli-ganache; tmux send-keys -t matic-cli-ganache:0 
+          await execa(`cd /home/${this.config.ethHostUser}/ && tmux new -d -s matic-cli-ganache; tmux send-keys -t matic-cli-ganache:0 
           'bash /home/${this.config.ethHostUser}/ganache-start-remote.sh' ENTER`)
 
           for(let i=0; i<this.totalNodes; i++) {
