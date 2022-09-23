@@ -176,6 +176,10 @@ function splitToArray(value) {
 }
 
 async function installCommonPackages(user, ip) {
+    console.log("Allowing user not to use password...")
+    let command = `echo "${user} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers && exit`
+    await runSshCommand(ip, command)
+
     console.log("Copying certificate to " + ip + ":~/cert.pem...")
     let src = `${process.env.PEM_FILE_PATH}`
     let dest = `${ip}:~/cert.pem`
@@ -183,10 +187,6 @@ async function installCommonPackages(user, ip) {
 
     console.log("Adding ssh for " + ip + ":~/cert.pem...")
     command = `sudo chmod 600 ~/cert.pem && eval "$(ssh-agent -s)" && ssh-add ~/cert.pem && exit`
-    await runSshCommand(ip, command)
-
-    console.log("Allowing user not to use password...")
-    let command = `echo "${user} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers && exit`
     await runSshCommand(ip, command)
 
     console.log("Give permissions to all users for root folder...")
@@ -203,9 +203,8 @@ async function installCommonPackages(user, ip) {
     command = `sudo apt install build-essential -y && exit`
     await runSshCommand(ip, command)
 
-    // todo do not download if exists
     console.log("Installing go...")
-    command = `wget https://raw.githubusercontent.com/maticnetwork/node-ansible/master/go-install.sh &&
+    command = `wget -nc https://raw.githubusercontent.com/maticnetwork/node-ansible/master/go-install.sh &&
                          bash go-install.sh --remove &&
                          bash go-install.sh &&
                          source /home/ubuntu/.bashrc && exit`
