@@ -288,8 +288,12 @@ async function prepareMaticCLI(ips) {
     let maticCliRepo = process.env.MATIC_CLI_REPO
     let maticCliBranch = process.env.MATIC_CLI_BRANCH
 
-    console.log("Git checkout " + maticCliRepo + " and pull branch " + maticCliBranch + " on machine " + ipsArray[0])
-    let command = `cd ~ && git clone ${maticCliRepo} && cd matic-cli && git checkout ${maticCliBranch}`
+    console.log("Git clone " + maticCliRepo + " if does not exist on machine " + ipsArray[0])
+    let command = `cd ~ && git clone ${maticCliRepo} || (cd ~/matic-cli; git fetch)`
+    await runSshCommand(ip, command)
+
+    console.log("Git checkout " + maticCliBranch + " and git pull on machine " + ipsArray[0])
+    command = `cd ~/matic-cli && git checkout ${maticCliBranch} && git pull`
     await runSshCommand(ip, command)
 
     console.log("Installing matic-cli dependencies...")
@@ -303,7 +307,7 @@ async function runRemoteSetupWithMaticCLI(ips) {
     let ip = `${doc['ethHostUser']}@${ipsArray[0]}`
 
     console.log("Creating devnet and removing default configs...")
-    let command = `cd ~/matic-cli && mkdir devnet && rm configs/devnet/remote-setup-config.yaml`
+    let command = `cd ~/matic-cli && mkdir -p devnet && rm configs/devnet/remote-setup-config.yaml`
     await runSshCommand(ip, command)
 
     console.log("Copying remote matic-cli configurations...")
@@ -322,7 +326,7 @@ async function runDockerSetupWithMaticCLI(ips) {
     let ip = `${doc['ethHostUser']}@${ipsArray[0]}`
 
     console.log("Creating devnet and removing default configs...")
-    let command = `cd ~/matic-cli && mkdir devnet && rm configs/devnet/docker-setup-config.yaml`
+    let command = `cd ~/matic-cli && mkdir -p devnet && rm configs/devnet/docker-setup-config.yaml`
     await runSshCommand(ip, command)
 
     console.log("Copying remote matic-cli configurations...")
