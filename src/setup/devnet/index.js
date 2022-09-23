@@ -22,6 +22,7 @@ import {
 import { loadConfig } from "../config";
 import fileReplacer from "../../lib/file-replacer";
 
+const shell = require("shelljs");
 const getAllFiles = function (dirPath, arrayOfFiles) {
   var files = fs.readdirSync(dirPath);
 
@@ -394,61 +395,99 @@ export class Devnet {
 
           console.log("Run ganache");
           // Run ganache in tmux
-          await execa(`cd /home/${this.config.ethHostUser}/ && tmux new -d -s matic-cli-ganache; tmux send-keys -t matic-cli-ganache:0 
-          'bash /home/${this.config.ethHostUser}/ganache-start-remote.sh' ENTER`)
+          shell.exec(`cd /home/${this.config.ethHostUser}/ && tmux new -d -s matic-cli-ganache; tmux send-keys -t matic-cli-ganache:0 'bash /home/${this.config.ethHostUser}/ganache-start-remote.sh' ENTER`)
 
           console.log("Copy files to nodes");
           for(let i=0; i<this.totalNodes; i++) {
-            // copy files to remote servers
-            await execa('scp', [
-              `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
-              `${this.config.targetDirectory}/code/bor/build/bin/bor`,
-              `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/bor`
-            ])
 
-            await execa('scp', [
-              `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
-              `${this.config.targetDirectory}/code/heimdall/build/heimdalld`,
-              `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/heimdalld`
-            ])
+            if (this.config.devnetBorHosts[i] === this.config.ethHostUser) {
+              // host node
 
-            await execa('scp', [
-              `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
-              `${this.config.targetDirectory}/code/heimdall/build/heimdallcli`,
-              `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/heimdallcli`
-            ])
+              await execa('cp', [
+                `${this.config.targetDirectory}/code/bor/build/bin/bor`,
+                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/bor`
+              ])
 
-            await execa('scp', [
-              `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
-              `${this.config.targetDirectory}/code/heimdall/build/bridge`,
-              `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/bridge`
-            ])
+              await execa('cp', [
+                `${this.config.targetDirectory}/code/heimdall/build/heimdalld`,
+                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/heimdalld`
+              ])
 
-            await execa('scp', [
-               `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,`-r`,
-               `${this.testnetDir}/node${i}/`,
-               `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:~/node/`
-            ])
+              await execa('cp', [
+                `${this.config.targetDirectory}/code/heimdall/build/heimdallcli`,
+                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/heimdallcli`
+              ])
 
-            // Do symlink for .bor and .heimdalld
-            await execa('ssh', [
-              `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
-              `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-              `sudo ln -nfs ~/.bor /var/lib/bor && sudo ln -nfs ~/.heimdalld /var/lib/heimdall`
-            ])
+              await execa('cp', [
+                `${this.config.targetDirectory}/code/heimdall/build/bridge`,
+                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/bridge`
+              ])
 
-            // Create a tmux session and start bor and heimdall services in it
-            await execa('ssh', [
-              `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
-              `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-              `tmux new -d -s matic-cli; tmux new-window -t matic-cli; tmux new-window -t matic-cli;  tmux send-keys -t matic-cli:0 'bash /home/${this.config.devnetBorUsers[i]}/node/heimdalld-setup.sh' ENTER; tmux send-keys -t matic-cli:0 'heimdalld start --home /home/${this.config.devnetBorUsers[i]}/.heimdalld --chain=/home/${this.config.devnetBorUsers[i]}.heimdalld/config/genesis.json --bridge --all --rest-server' ENTER; tmux send-keys -t matic-cli:1 'bash /home/${this.config.devnetBorUsers[i]}/node/bor-setup.sh' ENTER; tmux send-keys -t matic-cli:1 'bash /home/${this.config.devnetBorUsers[i]}/node/bor-start.sh' ENTER`
-            ])
+              await execa('cp', [
+                 `-r`
+                `${this.testnetDir}/node${i}/`,
+                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:~/node/`
+              ])
 
-            await execa('ssh', [
-              `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
-              `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-              `tmux send-keys -t matic-cli:2 'bridge start --all' ENTER`
-            ])
+              // Create a tmux session and start bor and heimdall services in it
+              shell.exec(`cd /home/${this.config.devnetBorUsers[i]}/ && tmux new -d -s matic-cli; tmux new-window -t matic-cli; tmux new-window -t matic-cli; tmux new-window -t matic-cli; tmux new-window -t matic-cli; tmux send-keys -t matic-cli:0 'bash /home/${this.config.devnetBorUsers[i]}/node/heimdalld-setup.sh' ENTER; tmux send-keys -t matic-cli:0 'heimdalld start' ENTER; tmux send-keys -t matic-cli:1 'heimdalld rest-server' ENTER; tmux send-keys -t matic-cli:3 'bash /home/${this.config.devnetBorUsers[i]}/node/bor-setup.sh' ENTER; tmux send-keys -t matic-cli:3 'bash /home/${this.config.devnetBorUsers[i]}/node/bor-start.sh' ENTER`)
+
+              shell.exec(`cd /home/${this.config.devnetBorUsers[i]}/ && tmux send-keys -t matic-cli:2 'bridge start --all' ENTER`)
+
+            } else {
+
+              // remote nodes
+              // copy files to remote servers
+              await execa('scp', [
+                `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
+                `${this.config.targetDirectory}/code/bor/build/bin/bor`,
+                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/bor`
+              ])
+
+              await execa('scp', [
+                `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
+                `${this.config.targetDirectory}/code/heimdall/build/heimdalld`,
+                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/heimdalld`
+              ])
+
+              await execa('scp', [
+                `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
+                `${this.config.targetDirectory}/code/heimdall/build/heimdallcli`,
+                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/heimdallcli`
+              ])
+
+              await execa('scp', [
+                `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
+                `${this.config.targetDirectory}/code/heimdall/build/bridge`,
+                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/bridge`
+              ])
+
+              await execa('scp', [
+                `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,`-r`,
+                `${this.testnetDir}/node${i}/`,
+                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:~/node/`
+              ])
+
+              // Do symlink for .bor and .heimdalld
+              await execa('ssh', [
+                `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
+                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                `sudo ln -nfs ~/.bor /var/lib/bor && sudo ln -nfs ~/.heimdalld /var/lib/heimdall`
+              ])
+
+              // Create a tmux session and start bor and heimdall services in it
+              await execa('ssh', [
+                `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
+                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                `tmux new -d -s matic-cli; tmux new-window -t matic-cli; tmux new-window -t matic-cli; tmux new-window -t matic-cli; tmux new-window -t matic-cli; tmux send-keys -t matic-cli:0 'bash /home/${this.config.devnetBorUsers[i]}/node/heimdalld-setup.sh' ENTER; tmux send-keys -t matic-cli:0 'heimdalld start' ENTER; tmux send-keys -t matic-cli:1 'heimdalld rest-server' ENTER; tmux send-keys -t matic-cli:3 'bash /home/${this.config.devnetBorUsers[i]}/node/bor-setup.sh' ENTER; tmux send-keys -t matic-cli:3 'bash /home/${this.config.devnetBorUsers[i]}/node/bor-start.sh' ENTER`
+              ])
+
+              await execa('ssh', [
+                `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
+                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                `tmux send-keys -t matic-cli:2 'bridge start --all' ENTER`
+              ])
+            }
           }
         }
       }
@@ -463,14 +502,18 @@ export class Devnet {
         title: "Create testnet files for Heimdall",
         task: async () => {
           const args = [
-            'create-testnet',
-            '--home', 'devnet',
-            '--v', this.config.numOfValidators,
-            '--n', this.config.numOfNonValidators,
-            '--chain-id', this.config.heimdallChainId,
-            '--node-host-prefix', 'heimdall',
-            '--output-dir', 'devnet'
-          ]
+            "create-testnet",
+            "--v",
+            this.config.numOfValidators,
+            "--n",
+            this.config.numOfNonValidators,
+            "--chain-id",
+            this.config.heimdallChainId,
+            "--node-host-prefix",
+            "heimdall",
+            "--output-dir",
+            "devnet",
+          ];
 
           // create testnet
           await execa(heimdall.heimdalldCmd, args, {
@@ -631,11 +674,15 @@ export class Devnet {
 }
 
 async function setupDevnet(config) {
-  const devnet = new Devnet(config)
-  devnet.ganache = new Ganache(config, { contractsBranch: config.contractsBranch })
-  devnet.bor = new Bor(config, { repositoryBranch: config.borBranch })
-  devnet.heimdall = new Heimdall(config, { repositoryBranch: config.heimdallBranch, dockerContext: config.heimdallDockerBuildContext })
-  devnet.genesis = new Genesis(config, { repositoryBranch: 'raneet10/pos-752' })
+  const devnet = new Devnet(config);
+  devnet.ganache = new Ganache(config, {
+    contractsBranch: config.contractsBranch,
+  });
+  devnet.bor = new Bor(config, { repositoryBranch: config.borBranch });
+  devnet.heimdall = new Heimdall(config, {
+    repositoryBranch: config.heimdallBranch,
+  });
+  devnet.genesis = new Genesis(config, { repositoryBranch: "master" });
 
   const tasks = await devnet.getTasks();
   await tasks.run();
