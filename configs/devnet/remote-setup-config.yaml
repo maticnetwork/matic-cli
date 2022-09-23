@@ -4,7 +4,7 @@ borChainId: 15005
 heimdallChainId: heimdall-4052
 borBranch: v0.2.16
 heimdallBranch: v0.2.10
-contractsBranch: arpit/v0.3.1-backport
+contractsBranch: jc/v0.3.1-backport
 numOfValidators: 2
 numOfNonValidators: 0
 ethURL: http://172.20.1.100:9545
