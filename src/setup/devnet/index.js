@@ -379,20 +379,14 @@ export class Devnet {
           if (this.config.devnetBorHosts === undefined) {
             return;
           }
-          // copy the Ganache files to the first node
+          // copy the Ganache files to the proper position
 
-          let ganacheURL = new URL(this.config.ethURL)
-          let ganacheUser = this.config.ethHostUser
-
-          await execa('cp', [`${this.config.targetDirectory}/ganache-start-remote.sh`,
-            `${ganacheUser}@${ganacheURL.hostname}:~/ganache-start-remote.sh]`])
-
-          await execa('cp', [`${this.config.targetDirectory}/data`,
-            `${ganacheUser}@${ganacheURL.hostname}:~/data`])
+          await execa('cp', [`${this.config.targetDirectory}/ganache-start-remote.sh`, `~/ganache-start-remote.sh]`])
+          await execa('cp', [`${this.config.targetDirectory}/data`, `~/data`])
 
           // Run ganache in tmux
-          await execa(`tmux new -d -s matic-cli-ganache; tmux send-keys -t matic-cli-ganache:0 
-          'bash /home/${ganacheUser}/ganache-start-remote.sh' ENTER`)
+          await execa(`cd ~ && tmux new -d -s matic-cli-ganache; tmux send-keys -t matic-cli-ganache:0 
+          'bash /home/${this.config.ethHostUser}/ganache-start-remote.sh' ENTER`)
 
           for(let i=0; i<this.totalNodes; i++) {
             // copy files to remote servers
