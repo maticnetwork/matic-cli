@@ -149,9 +149,10 @@ function setCommonConfigs() {
 
 async function installRequiredSoftwareOnRemoteMachines(ips) {
 
-    let ipsArray = ips.split(' ').join('').split(",")
-    let borUsers = doc['devnetBorUsers'].toString().split(' ').join('').split(",")
-    let borHosts = doc['devnetBorHosts'].toString().split(' ').join('').split(",")
+    let ipsArray = splitToArray(ips)
+    let borUsers = splitToArray(doc['devnetBorUsers'].toString())
+    let borHosts = splitToArray(doc['devnetBorHosts'].toString())
+
     let user, ip
 
     for (let i = 0; i < ipsArray.length; i++) {
@@ -169,6 +170,10 @@ async function installRequiredSoftwareOnRemoteMachines(ips) {
             }
         }
     }
+}
+
+function splitToArray(value) {
+    return value.split(' ').join('').split(",")
 }
 
 async function installCommonPackages(user, ip) {
