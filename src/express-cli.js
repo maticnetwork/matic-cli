@@ -176,14 +176,6 @@ function splitToArray(value) {
 }
 
 async function installCommonPackages(user, ip) {
-    console.log("Give permissions to all users for root folder...")
-    let command = `sudo chmod 777 /home/ubuntu && sudo chmod 777 ~/ && exit`
-    await runSshCommand(ip, command)
-
-    console.log("Allowing user not to use password...")
-    command = `echo "${user} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers && exit`
-    await runSshCommand(ip, command)
-
     console.log("Copying certificate to " + ip + ":~/cert.pem...")
     let src = `${process.env.PEM_FILE_PATH}`
     let dest = `${ip}:~/cert.pem`
@@ -191,6 +183,14 @@ async function installCommonPackages(user, ip) {
 
     console.log("Adding ssh for " + ip + ":~/cert.pem...")
     command = `sudo chmod 600 ~/cert.pem && eval "$(ssh-agent -s)" && ssh-add ~/cert.pem && exit`
+    await runSshCommand(ip, command)
+
+    console.log("Allowing user not to use password...")
+    let command = `echo "${user} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers && exit`
+    await runSshCommand(ip, command)
+
+    console.log("Give permissions to all users for root folder...")
+    command = `sudo chmod 777 /home/ubuntu && sudo chmod 777 ~/ && exit`
     await runSshCommand(ip, command)
 
     console.log("Installing required software on remote machine " + ip + "...")
