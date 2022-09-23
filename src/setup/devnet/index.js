@@ -379,29 +379,20 @@ export class Devnet {
           if (this.config.devnetBorHosts === undefined) {
             return;
           }
-          // copy the Ganache files to the first node
+          // copy the Ganache files to the proper position
 
-          let ganacheURL = new URL(this.config.ethURL)
-          let ganacheUser = this.config.ethHostUser
+          console.log("Copy ganache scripts");
+          await execa('sudo cp -f', [`${this.config.targetDirectory}/ganache-start-remote.sh`,
+            `/home/${this.config.ethHostUser}/ganache-start-remote.sh]`])
+          await execa('sudo cp -f', [`${this.config.targetDirectory}/data`,
+            `/home/${this.config.ethHostUser}/data`])
 
-          await execa('scp', [
-            `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
-            `${this.config.targetDirectory}/ganache-start-remote.sh`,
-            `${ganacheUser}@${ganacheURL.hostname}:~/ganache-start-remote.sh`
-          ])
-
-          await execa('scp', [
-            `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,`-r`,
-            `${this.config.targetDirectory}/data`,
-            `${ganacheUser}@${ganacheURL.hostname}:~/data`
-          ])
-
+          console.log("Run ganache");
           // Run ganache in tmux
-          await execa('ssh', [
-            `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
-            `${ganacheUser}@${ganacheURL.hostname}`,
-            `tmux new -d -s matic-cli-ganache; tmux send-keys -t matic-cli-ganache:0 'bash /home/${ganacheUser}/ganache-start-remote.sh' ENTER`])
+          await execa(`cd /home/${this.config.ethHostUser}/ && tmux new -d -s matic-cli-ganache; tmux send-keys -t matic-cli-ganache:0 
+          'bash /home/${this.config.ethHostUser}/ganache-start-remote.sh' ENTER`)
 
+          console.log("Copy files to nodes");
           for(let i=0; i<this.totalNodes; i++) {
             // copy files to remote servers
             await execa('scp', [
