@@ -181,7 +181,7 @@ async function installCommonPackages(user, ip) {
     await runSshCommand(ip, command)
 
     console.log("Give permissions to all users for root folder...")
-    command = `sudo chmod 755 -R /home/ubuntu && sudo chmod 755 -R ~/ && exit`
+    command = `sudo chmod 755 -R && sudo chmod 755 -R ~/ && exit`
     await runSshCommand(ip, command)
 
     console.log("Copying certificate to " + ip + ":~/cert.pem...")
@@ -207,11 +207,11 @@ async function installCommonPackages(user, ip) {
     command = `wget -nc https://raw.githubusercontent.com/maticnetwork/node-ansible/master/go-install.sh &&
                          bash go-install.sh --remove &&
                          bash go-install.sh &&
-                         source /home/ubuntu/.bashrc && exit`
+                         source ~/.bashrc && exit`
     await runSshCommand(ip, command)
 
     console.log("Creating symlink for go...")
-    command = `sudo ln -sf /home/ubuntu/.go/bin/go /usr/local/bin/go && exit`
+    command = `sudo ln -sf ~/.go/bin/go /usr/local/bin/go && exit`
     await runSshCommand(ip, command)
 
     console.log("Installing rabbitmq...")
@@ -241,9 +241,9 @@ async function installHostSpecificPackages(ip) {
     await runSshCommand(ip, command)
 
     console.log("Creating symlink for npm and node...")
-    command = `sudo ln -sf /home/ubuntu/.nvm/versions/node/v10.17.0/bin/npm /usr/bin/npm &&
-                    sudo ln -sf /home/ubuntu/.nvm/versions/node/v10.17.0/bin/node /usr/bin/node &&
-                    sudo ln -sf /home/ubuntu/.nvm/versions/node/v10.17.0/bin/npx /usr/bin/npx && exit`
+    command = `sudo ln -sf ~/.nvm/versions/node/v10.17.0/bin/npm /usr/bin/npm &&
+                    sudo ln -sf ~/.nvm/versions/node/v10.17.0/bin/node /usr/bin/node &&
+                    sudo ln -sf ~/.nvm/versions/node/v10.17.0/bin/npx /usr/bin/npx && exit`
     await runSshCommand(ip, command)
 
     console.log("Installing ganache-cli...")

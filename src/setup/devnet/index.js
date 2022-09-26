@@ -386,14 +386,14 @@ export class Devnet {
 
           await execa('scp', [
             `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
-            `-i`,`/home/ubuntu/cert.pem`,
+            `-i`,`~/cert.pem`,
             `${this.config.targetDirectory}/ganache-start-remote.sh`,
             `${ganacheUser}@${ganacheURL.hostname}:~/ganache-start-remote.sh`
           ])
 
           await execa('scp', [
             `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,`-r`,
-            `-i`,`/home/ubuntu/cert.pem`,
+            `-i`,`~/cert.pem`,
             `${this.config.targetDirectory}/data`,
             `${ganacheUser}@${ganacheURL.hostname}:~/data`
           ])
@@ -401,43 +401,43 @@ export class Devnet {
           // Run ganache in tmux
           await execa('ssh', [
             `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
-            `-i`,`/home/ubuntu/cert.pem`,
+            `-i`,`~/cert.pem`,
             `${ganacheUser}@${ganacheURL.hostname}`,
-            `tmux new -d -s matic-cli-ganache; tmux send-keys -t matic-cli-ganache:0 'bash /home/${ganacheUser}/ganache-start-remote.sh' ENTER`])
+            `tmux new -d -s matic-cli-ganache; tmux send-keys -t matic-cli-ganache:0 'bash ~/ganache-start-remote.sh' ENTER`])
 
           for(let i=0; i<this.totalNodes; i++) {
             // copy files to remote servers
             await execa('scp', [
               `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
-              `-i`,`/home/ubuntu/cert.pem`,
+              `-i`,`~/cert.pem`,
               `${this.config.targetDirectory}/code/bor/build/bin/bor`,
               `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/bor`
             ])
 
             await execa('scp', [
               `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
-              `-i`,`/home/ubuntu/cert.pem`,
+              `-i`,`~/cert.pem`,
               `${this.config.targetDirectory}/code/heimdall/build/heimdalld`,
               `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/heimdalld`
             ])
 
             await execa('scp', [
               `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
-              `-i`,`/home/ubuntu/cert.pem`,
+              `-i`,`~/cert.pem`,
               `${this.config.targetDirectory}/code/heimdall/build/heimdallcli`,
               `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/heimdallcli`
             ])
 
             await execa('scp', [
               `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
-              `-i`,`/home/ubuntu/cert.pem`,
+              `-i`,`~/cert.pem`,
               `${this.config.targetDirectory}/code/heimdall/build/bridge`,
               `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/bridge`
             ])
 
             await execa('scp', [
                `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,`-r`,
-              `-i`,`/home/ubuntu/cert.pem`,
+              `-i`,`~/cert.pem`,
                `${this.testnetDir}/node${i}/`,
                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:~/node/`
             ])
@@ -445,14 +445,14 @@ export class Devnet {
             // Create a tmux session and start bor and heimdall services in it
             await execa('ssh', [
               `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
-              `-i`,`/home/ubuntu/cert.pem`,
+              `-i`,`~/cert.pem`,
               `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
               `tmux new -d -s matic-cli; tmux new-window -t matic-cli; tmux new-window -t matic-cli; tmux new-window -t matic-cli; tmux new-window -t matic-cli; tmux send-keys -t matic-cli:0 'bash /home/${this.config.devnetBorUsers[i]}/node/heimdalld-setup.sh' ENTER; tmux send-keys -t matic-cli:0 'heimdalld start' ENTER; tmux send-keys -t matic-cli:1 'heimdalld rest-server' ENTER; tmux send-keys -t matic-cli:3 'bash /home/${this.config.devnetBorUsers[i]}/node/bor-setup.sh' ENTER; tmux send-keys -t matic-cli:3 'bash /home/${this.config.devnetBorUsers[i]}/node/bor-start.sh' ENTER`
             ])
 
             await execa('ssh', [
               `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
-              `-i`,`/home/ubuntu/cert.pem`,
+              `-i`,`~/cert.pem`,
               `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
               `tmux send-keys -t matic-cli:2 'bridge start --all' ENTER`
             ])
