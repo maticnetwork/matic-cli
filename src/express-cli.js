@@ -188,11 +188,11 @@ function splitToArray(value) {
 async function configureCertAndPermissions(user, ip) {
 
     console.log("Allowing user not to use password...")
-    let command = `echo "${user} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers && exit`
+    let command = `echo "${user} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers`
     await runSshCommand(ip, command)
 
     console.log("Give permissions to all users for root folder...")
-    command = `sudo chmod 755 -R ~/ && exit`
+    command = `sudo chmod 755 -R ~/`
     await runSshCommand(ip, command)
 
     console.log("Copying certificate to " + ip + ":~/cert.pem...")
@@ -201,7 +201,7 @@ async function configureCertAndPermissions(user, ip) {
     await runScpCommand(src, dest)
 
     console.log("Adding ssh for " + ip + ":~/cert.pem...")
-    command = `sudo chmod 700 ~/cert.pem && eval "$(ssh-agent -s)" && ssh-add ~/cert.pem && sudo chmod -R 700 ~/.ssh && exit`
+    command = `sudo chmod 700 ~/cert.pem && eval "$(ssh-agent -s)" && ssh-add ~/cert.pem && sudo chmod -R 700 ~/.ssh`
     await runSshCommand(ip, command)
 }
 
@@ -210,26 +210,26 @@ async function installCommonPackages(user, ip) {
     console.log("Installing required software on remote machine " + ip + "...")
 
     console.log("Running apt update...")
-    let command = `sudo apt update -y  && exit`
+    let command = `sudo apt update -y`
     await runSshCommand(ip, command)
 
     console.log("Installing build-essential...")
-    command = `sudo apt install build-essential -y && exit`
+    command = `sudo apt install build-essential -y`
     await runSshCommand(ip, command)
 
     console.log("Installing go...")
     command = `wget -nc https://raw.githubusercontent.com/maticnetwork/node-ansible/master/go-install.sh &&
                          bash go-install.sh --remove &&
                          bash go-install.sh &&
-                         source ~/.bashrc && exit`
+                         source ~/.bashrc`
     await runSshCommand(ip, command)
 
     console.log("Creating symlink for go...")
-    command = `sudo ln -sf ~/.go/bin/go /usr/local/bin/go && exit`
+    command = `sudo ln -sf ~/.go/bin/go /usr/local/bin/go`
     await runSshCommand(ip, command)
 
     console.log("Installing rabbitmq...")
-    command = `sudo apt install rabbitmq-server -y && exit`
+    command = `sudo apt install rabbitmq-server -y`
     await runSshCommand(ip, command)
 }
 
@@ -239,29 +239,29 @@ async function installHostSpecificPackages(ip) {
                         export NVM_DIR="$HOME/.nvm"
                         [ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
                         [ -s "$NVM_DIR/bash_completion" ] && \\. "$NVM_DIR/bash_completion" && 
-                        nvm install 10.17.0 && exit`
+                        nvm install 10.17.0`
     await runSshCommand(ip, command)
 
     console.log("Installing solc...")
-    command = `sudo snap install solc && exit`
+    command = `sudo snap install solc`
     await runSshCommand(ip, command)
 
     console.log("Installing python2...")
-    command = `sudo apt install python2 -y && alias python="/usr/bin/python2" && exit`
+    command = `sudo apt install python2 -y && alias python="/usr/bin/python2"`
     await runSshCommand(ip, command)
 
     console.log("Installing nodejs and npm...")
-    command = `sudo apt install nodejs npm -y && exit`
+    command = `sudo apt install nodejs npm -y`
     await runSshCommand(ip, command)
 
     console.log("Creating symlink for npm and node...")
     command = `sudo ln -sf ~/.nvm/versions/node/v10.17.0/bin/npm /usr/bin/npm &&
                     sudo ln -sf ~/.nvm/versions/node/v10.17.0/bin/node /usr/bin/node &&
-                    sudo ln -sf ~/.nvm/versions/node/v10.17.0/bin/npx /usr/bin/npx && exit`
+                    sudo ln -sf ~/.nvm/versions/node/v10.17.0/bin/npx /usr/bin/npx`
     await runSshCommand(ip, command)
 
     console.log("Installing ganache-cli...")
-    command = `sudo npm install -g ganache-cli -y && exit`
+    command = `sudo npm install -g ganache-cli -y`
     await runSshCommand(ip, command)
 }
 
@@ -271,15 +271,17 @@ async function installDocker(ip, user) {
     await runSshCommand(ip, command)
 
     console.log("Installing docker...")
-    command = `curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - && exit`
+    command = `curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -`
     await runSshCommand(ip, command)
-    command = `sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable && exit"`
+    command = `sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"`
     await runSshCommand(ip, command)
-    command = `sudo apt install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y && exit`
+    command = `sudo apt install docker-ce docker-ce-cli containerd.io -y`
+    await runSshCommand(ip, command)
+    command = `sudo apt install docker-compose-plugin -y`
     await runSshCommand(ip, command)
 
     console.log("Adding user to docker group...")
-    command = `sudo usermod -aG docker ${user} && exit`
+    command = `sudo usermod -aG docker ${user}`
     await runSshCommand(ip, command)
 }
 
@@ -343,19 +345,19 @@ async function runDockerSetupWithMaticCLI(ips) {
     await runSshCommand(ip, command)
 
     console.log("Starting ganache...")
-    command = `bash ~/matic-cli/devnet/docker-ganache-start.sh`
+    command = `cd ~/matic-cli/devnet && bash docker-ganache-start.sh`
     await runSshCommand(ip, command)
 
     console.log("Starting heimdall...")
-    command = `bash ~/matic-cli/devnet/docker-heimdall-start-all.sh`
+    command = `cd ~/matic-cli/devnet &&  bash docker-heimdall-start-all.sh`
     await runSshCommand(ip, command)
 
     console.log("Setting bor up...")
-    command = `bash ~/matic-cli/devnet/docker-bor-setup.sh`
+    command = `cd ~/matic-cli/devnet &&  bash docker-bor-setup.sh`
     await runSshCommand(ip, command)
 
     console.log("Starting bor...")
-    command = `bash ~/matic-cli/devnet/docker-bor-start-all.sh`
+    command = `cd ~/matic-cli/devnet &&  bash docker-bor-start-all.sh`
     await runSshCommand(ip, command)
 }
 
@@ -365,7 +367,7 @@ async function runSshCommand(ip, command) {
                 `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                 `-i`, `${process.env.PEM_FILE_PATH}`,
                 ip,
-                command],
+                command + ` && exit`],
             {stdio: 'inherit'})
     } catch (error) {
         console.log("Error while executing command: '" + command + "' : \n", error)
