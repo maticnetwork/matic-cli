@@ -192,7 +192,7 @@ async function installCommonPackages(user, ip) {
     await runSshCommand(ip, command)
 
     console.log("Give permissions to all users for root folder...")
-    command = `sudo chmod 755 -R && sudo chmod 755 -R ~/ && exit`
+    command = `sudo chmod 755 -R ~/ && exit`
     await runSshCommand(ip, command)
 
     console.log("Copying certificate to " + ip + ":~/cert.pem...")
@@ -360,6 +360,7 @@ async function runSshCommand(ip, command) {
     try {
         await execa('ssh', [
                 `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                `-i`, `${process.env.PEM_FILE_PATH}`,
                 ip,
                 command],
             {stdio: 'inherit'})
@@ -373,6 +374,7 @@ async function runScpCommand(src, dest) {
     try {
         await execa('scp', [
             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+            `-i`, `${process.env.PEM_FILE_PATH}`,
             src,
             dest
         ], {stdio: 'inherit'})
