@@ -3,6 +3,7 @@ import execa from "execa";
 const shell = require("shelljs");
 const yaml = require('js-yaml');
 const fs = require('fs');
+const fetch = require('node-fetch');
 
 require('dotenv').config();
 let doc = {};
@@ -35,7 +36,6 @@ async function terraformDestroy() {
         }
     });
     // delete local terraform files
-    // FIXME see POS-812 https://polygon.atlassian.net/browse/POS-812
     shell.exec(`rm -rf .terraform && rm .terraform.lock.hcl && rm terraform.tfstate && rm terraform.tfstate.backup`)
 }
 
@@ -107,6 +107,17 @@ async function editMaticCliDockerYAMLConfig() {
             process.exit(1)
         }
     });
+}
+
+async function startStressTest() {
+  shell.pushd("tests/stress-test");
+  shell.exec(`go mod tidy`);
+  shell.exec(`go run main.go`, {
+    env: {
+      ...process.env,
+    }
+  });
+  shell.popd();
 }
 
 async function editMaticCliRemoteYAMLConfig() {
@@ -371,6 +382,79 @@ async function runScpCommand(src, dest) {
     }
 }
 
+async function sendStateSyncTx() {
+  let contractAddresses = require('../devnet/code/contracts/contractAddresses.json');
+  let MaticToken = contractAddresses.root.tokens.MaticToken;
+
+  shell.pushd("devnet/code/contracts");
+  shell.exec(`npm run truffle exec scripts/deposit.js -- --network development ${MaticToken} 100000000000000000000`)
+  shell.popd();
+}
+
+async function checkCheckpoint(machine0) {
+  let url = `http://${machine0}:1317/checkpoints/count`;
+  let response = await fetch(url);
+  let responseJson = await response.json();
+  if (responseJson.result) {
+    if (responseJson.result.result) {
+      let count = responseJson.result.result
+      return count
+    }
+  }
+
+  return 0
+}
+
+async function checkStateSyncTx(machine0) {
+  let url = `http://${machine0}:1317/clerk/event-record/1`;
+  let response = await fetch(url);
+  let responseJson = await response.json();
+  if (responseJson.error) {
+    return undefined
+  } else {
+    if (responseJson.result) {
+      return responseJson.result.tx_hash
+    }
+  }
+
+  return undefined
+}
+
+async function monitor() {
+  doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
+  if (doc['devnetBorHosts'].length > 0) {
+    console.log("Monitoring the first node", doc['devnetBorHosts'][0]);
+  }
+  let machine0 = doc['devnetBorHosts'][0];
+  console.log("Checking for statesyncs && Checkpoints")
+
+  while (true) {
+
+    await timer(1000);
+    console.log()
+
+    let checkpointCount = await checkCheckpoint(machine0);
+    if (checkpointCount > 0) {
+      console.log("Checkpoint found ✅ ; Count: ", checkpointCount);
+    } else {
+      console.log("Awaiting Checkpoint 🚌")
+    }
+
+
+    let stateSyncTx = await checkStateSyncTx(machine0);
+    if (stateSyncTx) {
+      console.log("Statesync found ✅ ; Tx_Hash: ", stateSyncTx);
+    } else {
+      console.log("Awaiting Statesync 🚌")
+    }
+
+    if (checkpointCount > 0 && stateSyncTx) {
+      break;
+    }
+
+  }
+}
+
 // start CLI
 export async function cli(args) {
     console.log("Using Express CLI 🚀");
@@ -412,10 +496,28 @@ export async function cli(args) {
             await terraformInit();
             break;
 
+        case "--stress":
+          await startStressTest();
+          break;
+
+        case "--send-state-sync":
+          await sendStateSyncTx();
+          break;
+
+        case "--monitor":
+          await monitor();
+          break;
+
         // TODO >>> add an option to rebuild & restart heimdall/bor on all remote nodes
 
         default:
-            console.log("Please use --init or --start or --destroy");
+            console.log("Please use one of the following commands: \n " +
+                "--init \n" +
+                "--start \n" +
+                "--destroy \n" +
+                "--stress \n" +
+                "--send-state-sync \n" +
+                "--monitor \n");
             break;
     }
 }
