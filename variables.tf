@@ -58,8 +58,8 @@ variable "PORTS_IN" {
   // 8546: bor rpc websockets
   // 9545: ganache
   // 1337:
-  // 25526: heimdall comms
-  default = [22, 80, 443, 30303, 1317, 8545, 9545, 1337, 8546, 25526]
+  // 26656: heimdall comms
+  default = [22, 80, 443, 30303, 1317, 8545, 9545, 1337, 8546, 26656]
 }
 
 // to allow all ports to outside, set to [0]

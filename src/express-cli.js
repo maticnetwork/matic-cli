@@ -88,7 +88,6 @@ function setEthURL(value) {
 function setEthHostUser(value) {
     if (value) {
         doc['ethHostUser'] = value;
-        process.env.ETH_HOST_USER = value
     }
 }
 
@@ -99,7 +98,7 @@ async function editMaticCliDockerYAMLConfig() {
 
     setCommonConfigs()
     setEthURL('localhost');
-    setEthHostUser('ubuntu');
+    setEthHostUser(process.env.ETH_HOST_USER);
 
     fs.writeFile('./configs/devnet/docker-setup-config.yaml', yaml.dump(doc), (err) => {
         if (err) {
@@ -152,7 +151,6 @@ function setCommonConfigs() {
     setConfigValue('contractsBranch', process.env.CONTRACTS_BRANCH);
     setConfigValue('numOfValidators', parseInt(process.env.TF_VAR_VALIDATOR_COUNT));
     setConfigValue('numOfNonValidators', parseInt(process.env.TF_VAR_SENTRY_COUNT));
-    setConfigValue('devnetType', process.env.DEVNET_TYPE);
     setConfigValue('ethHostUser', process.env.ETH_HOST_USER);
     setConfigValue('borDockerBuildContext', process.env.BOR_DOCKER_BUILD_CONTENXT);
     setConfigValue('heimdallDockerBuildContext', process.env.HEIMDALL_DOCKER_BUILD_CONTENXT);
@@ -177,7 +175,7 @@ async function installRequiredSoftwareOnRemoteMachines(ips) {
             await installHostSpecificPackages(ip)
 
             if (process.env.TF_VAR_DOCKERIZED === 'yes') {
-                await installDocker(ip)
+                await installDocker(ip, user)
             }
         }
     }
@@ -267,35 +265,21 @@ async function installHostSpecificPackages(ip) {
     await runSshCommand(ip, command)
 }
 
-async function installDocker(ip) {
-    console.log("Removing older versions of docker, if installed...")
-    let command = `sudo apt-get remove docker docker-engine docker.io containerd runc -y && exit`
-    await runSshCommand(ip, command)
-
+async function installDocker(ip, user) {
     console.log("Setting docker repository up...")
-    command = `sudo apt-get update -y && 
-                        sudo apt-get install ca-certificates curl gnupg lsb-release && 
-                        sudo mkdir -p /etc/apt/keyrings && 
-                        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg && 
-                        echo \\
-                        "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \\
-                        $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null && exit`
+    let command = `sudo apt-get update -y && sudo apt install apt-transport-https ca-certificates curl software-properties-common -y`
     await runSshCommand(ip, command)
 
-    console.log("Installing docker engine...")
-    command = `sudo apt-get update && sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin && exit`
+    console.log("Installing docker...")
+    command = `curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - && exit`
+    await runSshCommand(ip, command)
+    command = `sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable && exit"`
+    await runSshCommand(ip, command)
+    command = `sudo apt install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y && exit`
     await runSshCommand(ip, command)
 
-    console.log("Verifying docker installation...")
-    command = `sudo service docker start && sudo docker run hello-world && exit`
-    await runSshCommand(ip, command)
-
-    console.log("Create docker group and add user to it...")
-    command = `sudo groupadd docker && sudo usermod -aG docker $USER && exit`
-    await runSshCommand(ip, command)
-
-    console.log("Applying changes to docker group and verifying installation...")
-    command = `newgrp docker && docker run hello-world && exit`
+    console.log("Adding user to docker group...")
+    command = `sudo usermod -aG docker ${user} && exit`
     await runSshCommand(ip, command)
 }
 
@@ -349,7 +333,7 @@ async function runDockerSetupWithMaticCLI(ips) {
     let command = `cd ~/matic-cli && mkdir -p devnet && rm configs/devnet/docker-setup-config.yaml`
     await runSshCommand(ip, command)
 
-    console.log("Copying remote matic-cli configurations...")
+    console.log("Copying docker matic-cli configurations...")
     let src = `./configs/devnet/docker-setup-config.yaml`
     let dest = `${doc['ethHostUser']}@${ipsArray[0]}:~/matic-cli/configs/devnet/docker-setup-config.yaml`
     await runScpCommand(src, dest)
@@ -359,19 +343,19 @@ async function runDockerSetupWithMaticCLI(ips) {
     await runSshCommand(ip, command)
 
     console.log("Starting ganache...")
-    command = `bash ~/docker-ganache-start.sh`
+    command = `bash ~/matic-cli/devnet/docker-ganache-start.sh`
     await runSshCommand(ip, command)
 
     console.log("Starting heimdall...")
-    command = `bash ~/docker-heimdall-start-all.sh`
+    command = `bash ~/matic-cli/devnet/docker-heimdall-start-all.sh`
     await runSshCommand(ip, command)
 
     console.log("Setting bor up...")
-    command = `bash ~/docker-bor-setup.sh`
+    command = `bash ~/matic-cli/devnet/docker-bor-setup.sh`
     await runSshCommand(ip, command)
 
     console.log("Starting bor...")
-    command = `bash ~/docker-bor-start-all.sh`
+    command = `bash ~/matic-cli/devnet/docker-bor-start-all.sh`
     await runSshCommand(ip, command)
 }
 
@@ -490,6 +474,7 @@ export async function cli(args) {
 
             if (process.env.TF_VAR_DOCKERIZED === 'yes') {
                 await editMaticCliDockerYAMLConfig();
+                doc['devnetBorUsers']=ips
             } else {
                 await editMaticCliRemoteYAMLConfig();
             }
