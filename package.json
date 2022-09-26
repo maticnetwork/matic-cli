@@ -33,9 +33,10 @@
     "js-yaml": "^4.1.0",
     "listr": "^0.14.3",
     "moonwalker": "github:atvanguard/moonwalker",
+    "node-fetch": "^3.2.10",
     "nunjucks": "^3.2.1",
-    "shelljs": "^0.8.5",
     "pkg-install": "^1.0.0",
+    "shelljs": "^0.8.5",
     "truffle-privatekey-provider": "^1.5.0",
     "web3": "^1.7.4",
     "yaml": "^1.10.2"
