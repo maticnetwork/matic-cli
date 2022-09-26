@@ -358,7 +358,21 @@ async function runDockerSetupWithMaticCLI(ips) {
     command = `cd ~/matic-cli/devnet && ../bin/matic-cli setup devnet -c ../configs/devnet/docker-setup-config.yaml`
     await runSshCommand(ip, command)
 
-    // TODO start ganache, start all heimdall, setup bor, start bor
+    console.log("Starting ganache...")
+    command = `bash ~/docker-ganache-start.sh`
+    await runSshCommand(ip, command)
+
+    console.log("Starting heimdall...")
+    command = `bash ~/docker-heimdall-start-all.sh`
+    await runSshCommand(ip, command)
+
+    console.log("Setting bor up...")
+    command = `bash ~/docker-bor-setup.sh`
+    await runSshCommand(ip, command)
+
+    console.log("Starting bor...")
+    command = `bash ~/docker-bor-start-all.sh`
+    await runSshCommand(ip, command)
 }
 
 async function runSshCommand(ip, command) {
