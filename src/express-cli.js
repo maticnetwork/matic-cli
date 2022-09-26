@@ -110,14 +110,14 @@ async function editMaticCliDockerYAMLConfig() {
 }
 
 async function startStressTest() {
-  shell.pushd("tests/stress-test");
-  shell.exec(`go mod tidy`);
-  shell.exec(`go run main.go`, {
-    env: {
-      ...process.env,
-    }
-  });
-  shell.popd();
+    shell.pushd("tests/stress-test");
+    shell.exec(`go mod tidy`);
+    shell.exec(`go run main.go`, {
+        env: {
+            ...process.env,
+        }
+    });
+    shell.popd();
 }
 
 async function editMaticCliRemoteYAMLConfig() {
@@ -170,6 +170,7 @@ async function installRequiredSoftwareOnRemoteMachines(ips) {
         i === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[i]}`
         ip = `${user}@${ipsArray[i]}`
 
+        await configureCertAndPermissions(user, ip)
         await installCommonPackages(user, ip)
 
         if (i === 0) {
@@ -186,7 +187,8 @@ function splitToArray(value) {
     return value.split(' ').join('').split(",")
 }
 
-async function installCommonPackages(user, ip) {
+async function configureCertAndPermissions(user, ip) {
+
     console.log("Allowing user not to use password...")
     let command = `echo "${user} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers && exit`
     await runSshCommand(ip, command)
@@ -203,11 +205,14 @@ async function installCommonPackages(user, ip) {
     console.log("Adding ssh for " + ip + ":~/cert.pem...")
     command = `sudo chmod 700 ~/cert.pem && eval "$(ssh-agent -s)" && ssh-add ~/cert.pem && sudo chmod -R 700 ~/.ssh && exit`
     await runSshCommand(ip, command)
+}
+
+async function installCommonPackages(user, ip) {
 
     console.log("Installing required software on remote machine " + ip + "...")
 
     console.log("Running apt update...")
-    command = `sudo apt update -y  && exit`
+    let command = `sudo apt update -y  && exit`
     await runSshCommand(ip, command)
 
     console.log("Installing build-essential...")
@@ -385,76 +390,75 @@ async function runScpCommand(src, dest) {
 }
 
 async function sendStateSyncTx() {
-  let contractAddresses = require('../devnet/code/contracts/contractAddresses.json');
-  let MaticToken = contractAddresses.root.tokens.MaticToken;
+    let contractAddresses = require('../devnet/code/contracts/contractAddresses.json');
+    let MaticToken = contractAddresses.root.tokens.MaticToken;
 
-  shell.pushd("devnet/code/contracts");
-  shell.exec(`npm run truffle exec scripts/deposit.js -- --network development ${MaticToken} 100000000000000000000`)
-  shell.popd();
+    shell.pushd("devnet/code/contracts");
+    shell.exec(`npm run truffle exec scripts/deposit.js -- --network development ${MaticToken} 100000000000000000000`)
+    shell.popd();
 }
 
 async function checkCheckpoint(machine0) {
-  let url = `http://${machine0}:1317/checkpoints/count`;
-  let response = await fetch(url);
-  let responseJson = await response.json();
-  if (responseJson.result) {
-    if (responseJson.result.result) {
-      let count = responseJson.result.result
-      return count
+    let url = `http://${machine0}:1317/checkpoints/count`;
+    let response = await fetch(url);
+    let responseJson = await response.json();
+    if (responseJson.result) {
+        if (responseJson.result.result) {
+            return responseJson.result.result
+        }
     }
-  }
 
-  return 0
+    return 0
 }
 
 async function checkStateSyncTx(machine0) {
-  let url = `http://${machine0}:1317/clerk/event-record/1`;
-  let response = await fetch(url);
-  let responseJson = await response.json();
-  if (responseJson.error) {
-    return undefined
-  } else {
-    if (responseJson.result) {
-      return responseJson.result.tx_hash
+    let url = `http://${machine0}:1317/clerk/event-record/1`;
+    let response = await fetch(url);
+    let responseJson = await response.json();
+    if (responseJson.error) {
+        return undefined
+    } else {
+        if (responseJson.result) {
+            return responseJson.result.tx_hash
+        }
     }
-  }
 
-  return undefined
+    return undefined
 }
 
 async function monitor() {
-  doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
-  if (doc['devnetBorHosts'].length > 0) {
-    console.log("Monitoring the first node", doc['devnetBorHosts'][0]);
-  }
-  let machine0 = doc['devnetBorHosts'][0];
-  console.log("Checking for statesyncs && Checkpoints")
-
-  while (true) {
-
-    await timer(1000);
-    console.log()
-
-    let checkpointCount = await checkCheckpoint(machine0);
-    if (checkpointCount > 0) {
-      console.log("Checkpoint found ✅ ; Count: ", checkpointCount);
-    } else {
-      console.log("Awaiting Checkpoint 🚌")
+    doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
+    if (doc['devnetBorHosts'].length > 0) {
+        console.log("Monitoring the first node", doc['devnetBorHosts'][0]);
     }
+    let machine0 = doc['devnetBorHosts'][0];
+    console.log("Checking for statesyncs && Checkpoints")
+
+    while (true) {
+
+        await timer(1000);
+        console.log()
+
+        let checkpointCount = await checkCheckpoint(machine0);
+        if (checkpointCount > 0) {
+            console.log("Checkpoint found ✅ ; Count: ", checkpointCount);
+        } else {
+            console.log("Awaiting Checkpoint 🚌")
+        }
 
 
-    let stateSyncTx = await checkStateSyncTx(machine0);
-    if (stateSyncTx) {
-      console.log("Statesync found ✅ ; Tx_Hash: ", stateSyncTx);
-    } else {
-      console.log("Awaiting Statesync 🚌")
+        let stateSyncTx = await checkStateSyncTx(machine0);
+        if (stateSyncTx) {
+            console.log("Statesync found ✅ ; Tx_Hash: ", stateSyncTx);
+        } else {
+            console.log("Awaiting Statesync 🚌")
+        }
+
+        if (checkpointCount > 0 && stateSyncTx) {
+            break;
+        }
+
     }
-
-    if (checkpointCount > 0 && stateSyncTx) {
-      break;
-    }
-
-  }
 }
 
 // start CLI
@@ -499,16 +503,16 @@ export async function cli(args) {
             break;
 
         case "--stress":
-          await startStressTest();
-          break;
+            await startStressTest();
+            break;
 
         case "--send-state-sync":
-          await sendStateSyncTx();
-          break;
+            await sendStateSyncTx();
+            break;
 
         case "--monitor":
-          await monitor();
-          break;
+            await monitor();
+            break;
 
         // TODO >>> add an option to rebuild & restart heimdall/bor on all remote nodes
 
