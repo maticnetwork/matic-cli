@@ -24,7 +24,7 @@ export class Heimdall {
     this.config = config
 
     this.repositoryName = this.name
-    this.repositoryBranch = options.repositoryBranch || 'v0.3.0-dev'
+    this.repositoryBranch = options.repositoryBranch || 'develop'
     this.repositoryUrl = options.repositoryUrl || 'https://github.com/maticnetwork/heimdall'
     this.dockerContext = options.dockerContext
   }
@@ -284,7 +284,7 @@ export default async function (command) {
 
   // configuration
   await loadConfig({
-    targetDirectory: command.parent.directory, 
+    targetDirectory: command.parent.directory,
     fileName: command.parent.config,
     interactive: command.parent.interactive
   })
