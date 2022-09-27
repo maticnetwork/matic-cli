@@ -349,11 +349,11 @@ async function runDockerSetupWithMaticCLI(ips) {
     await runSshCommand(ip, command)
 
     console.log("Starting heimdall...")
-    command = `cd ~/matic-cli/devnet &&  bash docker-heimdall-start-all.sh`
+    command = `cd ~/matic-cli/devnet && bash docker-heimdall-start-all.sh`
     await runSshCommand(ip, command)
 
     console.log("Setting bor up...")
-    command = `cd ~/matic-cli/devnet &&  bash docker-bor-setup.sh`
+    command = `cd ~/matic-cli/devnet && bash docker-bor-setup.sh`
     await runSshCommand(ip, command)
 
     console.log("Starting bor...")
