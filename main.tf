@@ -89,7 +89,7 @@ resource "aws_vpc" "My_VPC" {
   enable_dns_hostnames = true
 
   tags = {
-    Name = "Matic-CLI-VPC"
+    Name = "${var.VM_NAME}-express-cli-vpc"
   }
 }
 
