@@ -91,7 +91,7 @@ type Signer struct {
 }
 
 func getSecretKey() string {
-	filename := "../../devnet/devnet/signer-dump.json"
+	filename := "../../signer-dump.json"
 	jsonFile, err := os.Open(filename)
 	if err != nil {
 		fmt.Printf("failed to open json file: %s, error: %v", filename, err)
@@ -237,11 +237,11 @@ func fundAccounts(ctx context.Context, client *ethclient.Client, genAccounts Acc
 	senderAddress common.Address, opts *bind.TransactOpts) {
 	for i := 0; i < N; i++ {
 		fmt.Println("Reqd nonce: ", Nonce+uint64(i))
-		runTransaction(ctx, client, genAccounts[i].addr, chainID, senderAddress, opts, Nonce+uint64(i), 3000000000000000000)
+		go runTransaction(ctx, client, genAccounts[i].addr, chainID, senderAddress, opts, Nonce+uint64(i), 3000000000000000000)
 	}
 }
 
-func runTransaction(ctx context.Context, Clients *ethclient.Client, recipient common.Address, chainID *big.Int,
+func runTransaction(ctx context.Context, Client *ethclient.Client, recipient common.Address, chainID *big.Int,
 	senderAddress common.Address, opts *bind.TransactOpts, nonce uint64, value int64) {
 
 	fmt.Println("Running transaction : ", nonce)
@@ -259,7 +259,7 @@ func runTransaction(ctx context.Context, Clients *ethclient.Client, recipient co
 	if err != nil {
 		log.Fatal("Error in signing tx: ", err)
 	}
-	err = Clients.SendTransaction(ctx, signedTx)
+	err = Client.SendTransaction(ctx, signedTx)
 	if err != nil {
 		log.Fatal("Error in sending tx: ", err)
 	}

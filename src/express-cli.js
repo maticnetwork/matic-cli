@@ -108,14 +108,28 @@ async function editMaticCliDockerYAMLConfig() {
     });
 }
 
-async function startStressTest() {
+async function startStressTest(fund) {
+
+    doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
+    if (doc['devnetBorHosts'].length > 0) {
+        console.log("Monitoring the first node", doc['devnetBorHosts'][0]);
+    }
+    let machine0 = doc['devnetBorHosts'][0];
+
+    let src = `${doc['ethHostUser']}@${machine0}:~/matic-cli/devnet/devnet/signer-dump.json`
+    let dest = `./signer-dump.json`
+    await runScpCommand(src, dest)
+
     shell.pushd("tests/stress-test");
     shell.exec(`go mod tidy`);
+
     shell.exec(`go run main.go`, {
         env: {
             ...process.env,
+            FUND : fund
         }
     });
+
     shell.popd();
 }
 
@@ -528,7 +542,14 @@ export async function cli(args) {
             break;
 
         case "--stress":
-            await startStressTest();
+            if(args.length>=4){
+                if(args[3]==="--init"){
+                    await startStressTest(true);
+                    break;
+                }
+            }
+
+            await startStressTest(false);
             break;
 
         case "--send-state-sync":
@@ -546,6 +567,7 @@ export async function cli(args) {
                 "--init \n" +
                 "--start \n" +
                 "--destroy \n" +
+                "--stress --init (for running stress test first time)\n" +
                 "--stress \n" +
                 "--send-state-sync \n" +
                 "--monitor \n");
