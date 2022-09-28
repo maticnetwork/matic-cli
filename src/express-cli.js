@@ -308,11 +308,11 @@ async function prepareMaticCLI(ips) {
     let maticCliRepo = process.env.MATIC_CLI_REPO
     let maticCliBranch = process.env.MATIC_CLI_BRANCH
 
-    console.log("📍Git clone " + maticCliRepo + " if does not exist on machine " + ipsArray[0])
+    console.log("📍Git clone " + maticCliRepo + " if does not exist on " + ip)
     let command = `cd ~ && git clone ${maticCliRepo} || (cd ~/matic-cli; git fetch)`
     await runSshCommand(ip, command)
 
-    console.log("📍Git checkout " + maticCliBranch + " and git pull on machine " + ipsArray[0])
+    console.log("📍Git checkout " + maticCliBranch + " and git pull on machine " + ip)
     command = `cd ~/matic-cli && git checkout ${maticCliBranch} && git pull`
     await runSshCommand(ip, command)
 
@@ -477,8 +477,8 @@ async function updateAll() {
         i === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[i]}`
         ip = `${user}@${doc['devnetBorHosts'][i]}`
 
-        await stopAndRestartBor(ip)
-        await stopAndRestartHeimdall(ip)
+        await stopAndRestartBor(ip, i)
+        await stopAndRestartHeimdall(ip, i)
 
     }
 }
@@ -496,7 +496,7 @@ async function updateBor() {
         i === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[i]}`
         ip = `${user}@${doc['devnetBorHosts'][i]}`
 
-        await stopAndRestartBor(ip)
+        await stopAndRestartBor(ip, i)
 
     }
 }
@@ -514,51 +514,87 @@ async function updateHeimdall() {
         i === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[i]}`
         ip = `${user}@${doc['devnetBorHosts'][i]}`
 
-        await stopAndRestartHeimdall(ip)
+        await stopAndRestartHeimdall(ip, i)
 
     }
 }
 
-async function stopAndRestartBor(ip) {
+async function stopAndRestartBor(ip, i) {
 
     console.log("📍Working on bor for machine " + ip + "...")
 
+    let borRepo = process.env.BOR_REPO
     let borBranch = process.env.BOR_BRANCH
 
     console.log("📍Stopping bor...")
     let command = `tmux send-keys -t matic-cli:3 'C-c' ENTER`
     await runSshCommand(ip, command)
 
-    console.log("📍Pulling bor latest changes for branch " + borBranch + " ...")
-    command = `cd ~/matic-cli/devnet/code/bor && git fetch && git checkout ${borBranch} && git pull`
-    await runSshCommand(ip, command)
+    if (i === 0) {
 
-    console.log("📍Installing bor...")
-    command = `cd ~/matic-cli/devnet/code/bor && make bor`
-    await runSshCommand(ip, command)
+        console.log("📍Pulling bor latest changes for branch " + borBranch + " ...")
+        command = `cd ~/matic-cli/devnet/code/bor && git fetch && git checkout ${borBranch} && git pull origin ${borBranch} `
+        await runSshCommand(ip, command)
+
+        console.log("📍Installing bor...")
+        command = `cd ~/matic-cli/devnet/code/bor && make bor`
+        await runSshCommand(ip, command)
+
+    } else {
+
+        console.log("📍Cloning bor repo...")
+        command = `cd ~ && git clone ${borRepo} || (cd ~/bor; git fetch)`
+        await runSshCommand(ip, command)
+
+        console.log("📍Pulling bor latest changes for branch " + borBranch + " ...")
+        command = `cd ~/bor && git fetch && git checkout ${borBranch} && git pull origin ${borBranch} `
+        await runSshCommand(ip, command)
+
+        console.log("📍Installing bor...")
+        command = `cd ~/bor && make bor`
+        await runSshCommand(ip, command)
+    }
 
     console.log("📍Starting bor...")
     command = `tmux send-keys -t matic-cli:3 'bash ~/node/bor-start.sh' ENTER`
     await runSshCommand(ip, command)
 }
 
-async function stopAndRestartHeimdall(ip) {
+async function stopAndRestartHeimdall(ip, i) {
 
     console.log("📍Working on heimdall for machine " + ip + "...")
 
+    let heimdallRepo = process.env.HEIMDALL_REPO
     let heimdallBranch = process.env.HEIMDALL_BRANCH
 
     console.log("📍Stopping heimdall...")
     let command = `tmux send-keys -t matic-cli:0 'C-c' ENTER`
     await runSshCommand(ip, command)
 
-    console.log("📍Pulling heimdall latest changes for branch " + heimdallBranch + " ...")
-    command = `cd ~/matic-cli/devnet/code/heimdall && git fetch && git checkout ${heimdallBranch} && git pull`
-    await runSshCommand(ip, command)
+    if (i === 0) {
 
-    console.log("📍Installing heimdall...")
-    command = `cd ~/matic-cli/devnet/code/heimdall && make install`
-    await runSshCommand(ip, command)
+        console.log("📍Pulling heimdall latest changes for branch " + heimdallBranch + " ...")
+        command = `cd ~/matic-cli/devnet/code/heimdall && git fetch && git checkout ${heimdallBranch} && git pull origin ${heimdallBranch} `
+        await runSshCommand(ip, command)
+
+        console.log("📍Installing heimdall...")
+        command = `cd ~/matic-cli/devnet/code/heimdall && make install`
+        await runSshCommand(ip, command)
+
+    } else {
+
+        console.log("📍Cloning heimdall repo...")
+        command = `cd ~ && git clone ${heimdallRepo} || (cd ~/bor; git fetch)`
+        await runSshCommand(ip, command)
+
+        console.log("📍Pulling heimdall latest changes for branch " + heimdallBranch + " ...")
+        command = `cd ~/heimdall && git fetch && git checkout ${heimdallBranch} && git pull origin ${heimdallBranch} `
+        await runSshCommand(ip, command)
+
+        console.log("📍Installing heimdall...")
+        command = `cd ~/heimdall && make install`
+        await runSshCommand(ip, command)
+    }
 
     console.log("📍Starting heimdall...")
     command = `tmux send-keys -t matic-cli:0 'heimdalld start' ENTER`
