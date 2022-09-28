@@ -237,7 +237,7 @@ func fundAccounts(ctx context.Context, client *ethclient.Client, genAccounts Acc
 	senderAddress common.Address, opts *bind.TransactOpts) {
 	for i := 0; i < N; i++ {
 		fmt.Println("Reqd nonce: ", Nonce+uint64(i))
-		go runTransaction(ctx, client, genAccounts[i].addr, chainID, senderAddress, opts, Nonce+uint64(i), 3000000000000000000)
+		go runTransaction(ctx, client, genAccounts[i].addr, chainID, senderAddress, opts, Nonce+uint64(i), 9200000000000000000)
 	}
 }
 
@@ -248,7 +248,7 @@ func runTransaction(ctx context.Context, Client *ethclient.Client, recipient com
 	var data []byte
 	gasLimit := uint64(21000)
 
-	gasPrice := big.NewInt(1000000000)
+	gasPrice := big.NewInt(4500000000)
 
 	val := big.NewInt(value)
 
@@ -261,7 +261,7 @@ func runTransaction(ctx context.Context, Client *ethclient.Client, recipient com
 	}
 	err = Client.SendTransaction(ctx, signedTx)
 	if err != nil {
-		log.Fatal("Error in sending tx: ", err)
+		fmt.Println("Error in sending tx: ", err, "nonce : ", nonce)
 	}
 }
 
