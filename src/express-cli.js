@@ -6,7 +6,7 @@ const fs = require('fs');
 const fetch = require('node-fetch');
 
 require('dotenv').config();
-let doc = {};
+var doc = {};
 
 const timer = ms => new Promise(res => setTimeout(res, ms))
 
@@ -324,6 +324,16 @@ async function runRemoteSetupWithMaticCLI(ips) {
     console.log("Executing remote setup with matic-cli...")
     command = `cd ~/matic-cli/devnet && ../bin/matic-cli setup devnet -c ../configs/devnet/remote-setup-config.yaml`
     await runSshCommand(ip, command)
+
+    console.log("Deploying StateSync Contracts...")
+
+    await timer(10000)
+    command = `cd ~/matic-cli/devnet &&  bash ganache-deployment-bor.sh`
+    await runSshCommand(ip, command)
+
+    await timer(10000)
+    command = `cd ~/matic-cli/devnet &&  bash ganache-deployment-sync.sh`
+    await runSshCommand(ip, command)
 }
 
 async function runDockerSetupWithMaticCLI(ips) {
@@ -390,12 +400,26 @@ async function runScpCommand(src, dest) {
 }
 
 async function sendStateSyncTx() {
-    let contractAddresses = require('../devnet/code/contracts/contractAddresses.json');
+
+    doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
+    if (doc['devnetBorHosts'].length > 0) {
+        console.log("Monitoring the first node", doc['devnetBorHosts'][0]);
+    }
+    let machine0 = doc['devnetBorHosts'][0];
+
+    let src = `${doc['ethHostUser']}@${machine0}:~/matic-cli/devnet/code/contracts/contractAddresses.json`
+    let dest = `./contractAddresses.json`
+    await runScpCommand(src, dest)
+
+    let contractAddresses = require('../contractAddresses.json');
     let MaticToken = contractAddresses.root.tokens.MaticToken;
 
-    shell.pushd("devnet/code/contracts");
-    shell.exec(`npm run truffle exec scripts/deposit.js -- --network development ${MaticToken} 100000000000000000000`)
-    shell.popd();
+    console.log("Sending State-Sync Tx")
+    let command = `cd ~/matic-cli/devnet/code/contracts && sudo npm run truffle exec scripts/deposit.js -- --network development ${MaticToken} 100000000000000000000`
+    await runSshCommand(`${doc['ethHostUser']}@${machine0}`, command)
+
+    console.log(`State-Sync Tx Sent, check with "./bin/express-cli --monitor"`)
+
 }
 
 async function checkCheckpoint(machine0) {

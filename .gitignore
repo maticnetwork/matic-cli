@@ -7,3 +7,4 @@ devnet
 terraform.tfstate
 terraform.tfstate.backup
 .idea
+contractAddresses.json
