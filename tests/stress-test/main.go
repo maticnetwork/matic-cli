@@ -14,6 +14,7 @@ import (
 	"math/big"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -31,7 +32,7 @@ var MNEMONIC string
 var SK string
 var N int
 var MAX_ACCOUNTS int
-var DATA_PATH string
+var DEBUG_LOGS bool
 
 var CURRENT_ITERATIONS int = 0
 var Nonce uint64 = 0
@@ -191,6 +192,12 @@ func main1() {
 		fundAccounts(ctx, cls[0], generatedAccounts, chainID, add, ksOpts)
 	}
 
+	debug_logs_str := os.Getenv("STRESS_DEBUG_LOGS")
+	DEBUG_LOGS, err = strconv.ParseBool(debug_logs_str)
+	if err != nil {
+		DEBUG_LOGS = false
+	}
+
 	fmt.Println("Preparing")
 	if fund == "true" {
 		fmt.Println("Loadbot Starting in 15 secs")
@@ -223,7 +230,7 @@ func generateAccountsUsingMnemonic(ctx context.Context, client *ethclient.Client
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Println("Account", i, ":", account.Address)
+
 		privKey, err := wallet.PrivateKey(account)
 		if err != nil {
 			log.Fatal(err)
@@ -236,15 +243,15 @@ func generateAccountsUsingMnemonic(ctx context.Context, client *ethclient.Client
 func fundAccounts(ctx context.Context, client *ethclient.Client, genAccounts Accounts, chainID *big.Int,
 	senderAddress common.Address, opts *bind.TransactOpts) {
 	for i := 0; i < N; i++ {
-		fmt.Println("Reqd nonce: ", Nonce+uint64(i))
-		go runTransaction(ctx, client, genAccounts[i].addr, chainID, senderAddress, opts, Nonce+uint64(i), 9200000000000000000)
+
+		time.Sleep(5 * time.Millisecond)
+		go runTransaction(ctx, client, genAccounts[i].addr, chainID, senderAddress, opts, Nonce+uint64(i), 2200000000000000000)
 	}
 }
 
 func runTransaction(ctx context.Context, Client *ethclient.Client, recipient common.Address, chainID *big.Int,
 	senderAddress common.Address, opts *bind.TransactOpts, nonce uint64, value int64) {
 
-	fmt.Println("Running transaction : ", nonce)
 	var data []byte
 	gasLimit := uint64(21000)
 
@@ -260,7 +267,7 @@ func runTransaction(ctx context.Context, Client *ethclient.Client, recipient com
 		log.Fatal("Error in signing tx: ", err)
 	}
 	err = Client.SendTransaction(ctx, signedTx)
-	if err != nil {
+	if err != nil && DEBUG_LOGS {
 		fmt.Println("Error in sending tx: ", err, "nonce : ", nonce)
 	}
 }
@@ -303,10 +310,10 @@ func startLoadbot(ctx context.Context, clients []*ethclient.Client, chainID *big
 			break
 		}
 		flag++
-		fmt.Printf("i is %v \n", i)
+
 		go func(i int, a Account, m *sync.Mutex) {
 			nonce, err := clients[0].PendingNonceAt(ctx, a.addr)
-			if err != nil {
+			if err != nil && DEBUG_LOGS {
 				fmt.Printf("failed to retrieve pending nonce for account %s: %v", a.addr.String(), err)
 			}
 			m.Lock()
@@ -315,7 +322,6 @@ func startLoadbot(ctx context.Context, clients []*ethclient.Client, chainID *big
 		}(i, a, &noncesStruct.mu)
 	}
 
-	fmt.Printf("intialization completed \n")
 	recpIdx := 0
 	sendIdx := 0
 
@@ -323,12 +329,14 @@ func startLoadbot(ctx context.Context, clients []*ethclient.Client, chainID *big
 	period := 1 * time.Second / time.Duration(N)
 	ticker := time.NewTicker(period)
 
+	resetChan := make(chan bool)
+
 	for {
 		select {
 		case <-ticker.C:
 
 			if CURRENT_ITERATIONS%100 == 0 && CURRENT_ITERATIONS > 0 {
-				fmt.Println("CURRENT_ACCOUNTS: ", CURRENT_ITERATIONS)
+				fmt.Println("TX_SENT: ", CURRENT_ITERATIONS)
 			}
 			if MAX_ACCOUNTS > 0 && CURRENT_ITERATIONS >= MAX_ACCOUNTS {
 				os.Exit(0)
@@ -339,7 +347,7 @@ func startLoadbot(ctx context.Context, clients []*ethclient.Client, chainID *big
 			sender := genAccounts[sendIdx%N] //cfg.Accounts[sendIdx%len(cfg.Accounts)]
 			nonce := noncesStruct.nonces[sendIdx%N]
 
-			go func(sender Account, nonce uint64) error {
+			go func(sender Account, nonce uint64, resetChan chan bool) error {
 
 				recpointer := createAccount()
 				recipient := recpointer.addr
@@ -347,48 +355,49 @@ func startLoadbot(ctx context.Context, clients []*ethclient.Client, chainID *big
 				recpointer2 := createAccount()
 				recipient2 := recpointer2.addr
 
-				recpointer3 := createAccount()
-				recipient3 := recpointer3.addr
-
-				recpointer4 := createAccount()
-				recipient4 := recpointer4.addr
-
-				recpointer5 := createAccount()
-				recipient5 := recpointer5.addr
-
 				totalClients := uint64(len(clients))
 				err := runBotTransaction(ctx, clients[nonce%totalClients], recipient, chainID, sender, nonce, 1)
 				if err != nil {
-					return err
+					err1 := strings.Split(err.Error(), " ")
+					if err1[0] == "Post" {
+						ticker.Stop()
+						resetChan <- true
+						ctx.Done()
+					}
 				}
 
 				err = runBotTransaction(ctx, clients[nonce%totalClients], recipient2, chainID, sender, nonce+1, 1)
 				if err != nil {
-					return err
+					err1 := strings.Split(err.Error(), " ")
+					if err1[0] == "Post" {
+						ticker.Stop()
+						resetChan <- true
+						ctx.Done()
+					}
 				}
-
-				err = runBotTransaction(ctx, clients[nonce%totalClients], recipient3, chainID, sender, nonce+2, 1)
 				if err != nil {
 					return err
 				}
-
-				err = runBotTransaction(ctx, clients[nonce%totalClients], recipient4, chainID, sender, nonce+3, 1)
-				if err != nil {
-					return err
-				}
-
-				err = runBotTransaction(ctx, clients[nonce%totalClients], recipient5, chainID, sender, nonce+4, 1)
-				if err != nil {
-					return err
-				}
-
 				return nil
 
-			}(sender, nonce)
-			noncesStruct.nonces[sendIdx%N] = noncesStruct.nonces[sendIdx%N] + 5
+			}(sender, nonce, resetChan)
+			noncesStruct.nonces[sendIdx%N] = noncesStruct.nonces[sendIdx%N] + 2
 
-		case <-ctx.Done():
-			// return group.Wait()
+		case <-resetChan:
+			fmt.Println("Machine not able to take load... resetting.!")
+			os.Setenv("FUND", "false")
+			for {
+				fmt.Println("RPCs overloaded... waiting for 2 seconds")
+
+				time.Sleep(2 * time.Second)
+
+				if isConnAlive() {
+					break
+				}
+			}
+			main1()
+			return
+
 		}
 	}
 }
@@ -402,6 +411,28 @@ func genRandomGas(min int64, max int64) *big.Int {
 	}
 
 	return big.NewInt(n.Int64() + min)
+}
+
+func isConnAlive() bool {
+	cls := []*ethclient.Client{}
+
+	ctx := context.Background()
+
+	for _, rpc := range RPC_SERVERS {
+		cl, err := ethclient.Dial(rpc)
+		if err != nil {
+			log.Println("Error in dial connection: ", err)
+		}
+		cls = append(cls, cl)
+	}
+
+	_, err := cls[0].ChainID(ctx)
+	if err != nil {
+		return false
+	}
+
+	_, err = cls[0].PendingNonceAt(ctx, common.HexToAddress("0x0"))
+	return err == nil
 }
 
 func runBotTransaction(ctx context.Context, Clients *ethclient.Client, recipient common.Address, chainID *big.Int,
@@ -445,7 +476,7 @@ func runBotTransaction(ctx context.Context, Clients *ethclient.Client, recipient
 	}
 
 	err = Clients.SendTransaction(ctx, signedTx)
-	if err != nil {
+	if err != nil && DEBUG_LOGS {
 		fmt.Printf("Error in sending tx: %s, From : %s, To : %s\n", err, sender.addr, recipient.Hash())
 	}
 	// Nonce++
