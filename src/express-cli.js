@@ -7,6 +7,7 @@ const fetch = require('node-fetch');
 
 require('dotenv').config();
 let doc = {};
+let remoteStdio = 'inherit'
 
 const timer = ms => new Promise(res => setTimeout(res, ms))
 
@@ -102,7 +103,7 @@ async function editMaticCliDockerYAMLConfig() {
 
     fs.writeFile('./configs/devnet/docker-setup-config.yaml', yaml.dump(doc), (err) => {
         if (err) {
-            console.log("❌Error while writing docker YAML configs: \n", err)
+            console.log("❌ Error while writing docker YAML configs: \n", err)
             process.exit(1)
         }
     });
@@ -146,7 +147,7 @@ async function editMaticCliRemoteYAMLConfig() {
 
     fs.writeFile('./configs/devnet/remote-setup-config.yaml', yaml.dump(doc), (err) => {
         if (err) {
-            console.log("❌Error while writing remote YAML configs: \n", err)
+            console.log("❌ Error while writing remote YAML configs: \n", err)
             process.exit(1)
         }
     });
@@ -392,9 +393,9 @@ async function runSshCommand(ip, command) {
                 `-i`, `${process.env.PEM_FILE_PATH}`,
                 ip,
                 command + ` && exit`],
-            {stdio: 'inherit'})
+            {stdio: remoteStdio})
     } catch (error) {
-        console.log("❌Error while executing command: '" + command + "' : \n", error)
+        console.log("❌ Error while executing command: '" + command + "' : \n", error)
         process.exit(1)
     }
 }
@@ -406,9 +407,9 @@ async function runScpCommand(src, dest) {
             `-i`, `${process.env.PEM_FILE_PATH}`,
             src,
             dest
-        ], {stdio: 'inherit'})
+        ], {stdio: remoteStdio})
     } catch (error) {
-        console.log("❌Error while copying '" + src + "' to '" + dest + "': \n", error)
+        console.log("❌ Error while copying '" + src + "' to '" + dest + "': \n", error)
         process.exit(1)
     }
 }
@@ -584,7 +585,7 @@ async function stopAndRestartHeimdall(ip, i) {
     } else {
 
         console.log("📍Cloning heimdall repo...")
-        command = `cd ~ && git clone ${heimdallRepo} || (cd ~/bor; git fetch)`
+        command = `cd ~ && git clone ${heimdallRepo} || (cd ~/heimdall; git fetch)`
         await runSshCommand(ip, command)
 
         console.log("📍Pulling heimdall latest changes for branch " + heimdallBranch + " ...")
@@ -639,6 +640,10 @@ async function monitor() {
 // start CLI
 export async function cli(args) {
     console.log("📍Using Express CLI 🚀");
+
+    if (process.env.VERBOSE === 'false') {
+        remoteStdio = 'ignore'
+    }
 
     switch (args[2]) {
         case "--start":
