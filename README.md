@@ -145,14 +145,35 @@ MIT
 # express-cli 
 
 Requirements:  
-- install `terraform` on your local machine: https://learn.hashicorp.com/tutorials/terraform/install-cli  
+- install `terraform` on your local machine: https://learn.hashicorp.com/tutorials/terraform/install-cli
+- `node` version v10.17.0. This is also documented in `.nvmrc` file
+- generate a keypair on AWS EC2 and download its certificate locally (`.pem` or `.cer` file)
 - copy `.env.example` to `.env` with command `cp .env.example .env`
 - replace `TF_VAR_ACCESS_KEY` and `TF_VAR_SECRET_KEY` with your own keys (ask devops to generate one for you)
-- (optionally) replace `TF_VAR_VM_NAME` with your own identifier (it can be any string, default is "polygon-user")
-- (optionally) replace `TF_VAR_DISK_SIZE_GB` with your preferred disk size in GB (default is 500 GB)
-- set `TF_VAR_DOCKERIZED` to 'yes' if you want to run the network on one VM only in a dockerized stack (default is 'no')
-- make sure `PEM_FILE_PATH` points to a correct AWS key certificate, otherwise use the default
-- source the `.env` file if your local system requires to, with command `source .env`  
-- run `./bin/express-cli --init` to init terraform
-- run `./bin/express-cli --start` to create the remote setup with `matic-cli`
-- run `./bin/express-cli --destroy` to destroy the remote setup
+- (optional) replace `TF_VAR_VM_NAME` with your own identifier (it can be any string, default is "polygon-user")
+- (optional) replace `TF_VAR_DISK_SIZE_GB` with your preferred disk size in GB (default is 500 GB)
+- `VERBOSE=true` prints logs from the remote machines. If set to `false`, only `express-cli` logs - end errors - will be shown
+- set `TF_VAR_DOCKERIZED` to `no`. Option `yes` runs the network on one VM only in a dockerized stack, but it's still a WIP (see POS-848)
+- make sure `PEM_FILE_PATH` points to a correct AWS key certificate, the one you downloaded in the previous step
+- (optional) source the `.env` file if your local system requires to, with command `source .env`  
+- see other details of `.env` vars in the `.env.example` template
+- `BLOCK_NUMBER` and `BLOCK_TIME` are working as expected most of the times, but a has been reported (see https://0xpolygon.slack.com/archives/C027FCE028P/p1664366701502579). Therefore, for the time being, it is recommended to use single values there. 
+- install `express-cli` and `matic-cli` locally with command `npm i`
+
+Run options:
+- `./bin/express-cli --init`
+  - Initializes terraform and creates some git-ignored files locally. This step is mandatory before running any other command.
+- `./bin/express-cli --start` 
+  - Creates the desired remote setup, based on the preferences defined in the `.env` file
+- `./bin/express-cli --destroy`
+  - Destroys the remote setup and delete the local `terraform` files 
+- `./bin/express-cli --update-all`
+  - Fetches `heimdall` and `bor` branches defined as `HEIMDALL_BRANCH` and `BOR_BRANCH` in `.env` file, pulls relative changes and restarts those services on the remote machines
+- `./bin/express-cli --update-bor`
+  - Fetches `bor` branch defined as `BOR_BRANCH` in `.env` file, pulls relative changes and restarts it on the remote machines
+- `./bin/express-cli --update-heimdall`
+  - Fetches `heimdall` branch defined as `HEIMDALL_BRANCH` in `.env` file, pulls relative changes and restarts it on the remote machines
+- `./bin/express-cli --send-state-sync`
+  - Create a `state-sync` transaction on the remote network 
+- `./bin/express-cli --monitor`
+  - Monitors the reception of state-syncs and checkpoints to make sure the whole network is in a healthy state. If `--send-state-sync` haven't been used before, only checkpoints will be detected. The execution stops when a `state-sync` is found

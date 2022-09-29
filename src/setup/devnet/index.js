@@ -22,6 +22,8 @@ import {
 import { loadConfig } from "../config";
 import fileReplacer from "../../lib/file-replacer";
 
+const timer = ms => new Promise(res => setTimeout(res, ms))
+
 const getAllFiles = function (dirPath, arrayOfFiles) {
   var files = fs.readdirSync(dirPath);
 
@@ -449,6 +451,9 @@ export class Devnet {
               `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
               `tmux new -d -s matic-cli; tmux new-window -t matic-cli; tmux new-window -t matic-cli; tmux new-window -t matic-cli; tmux new-window -t matic-cli; tmux send-keys -t matic-cli:0 'bash /home/${this.config.devnetBorUsers[i]}/node/heimdalld-setup.sh' ENTER; tmux send-keys -t matic-cli:0 'heimdalld start' ENTER; tmux send-keys -t matic-cli:1 'heimdalld rest-server' ENTER; tmux send-keys -t matic-cli:3 'bash /home/${this.config.devnetBorUsers[i]}/node/bor-setup.sh' ENTER; tmux send-keys -t matic-cli:3 'bash /home/${this.config.devnetBorUsers[i]}/node/bor-start.sh' ENTER`
             ])
+
+            // make sure we wait for the rest-server to be up and running before starting the bridge
+            await timer(2000)
 
             await execa('ssh', [
               `-o`,`StrictHostKeyChecking=no`,`-o`,`UserKnownHostsFile=/dev/null`,
