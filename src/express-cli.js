@@ -729,7 +729,7 @@ export async function cli(args) {
                 "--update-heimdall \n" +
                 "--send-state-sync \n" +
                 "--monitor \n" +
-                "--stress --init (for running stress test first time) \n" +
+                "--stress --init \n" +
                 "--stress \n");
             break;
     }
