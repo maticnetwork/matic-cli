@@ -177,3 +177,7 @@ Run options:
   - Create a `state-sync` transaction on the remote network 
 - `./bin/express-cli --monitor`
   - Monitors the reception of state-syncs and checkpoints to make sure the whole network is in a healthy state. If `--send-state-sync` haven't been used before, only checkpoints will be detected. The execution stops when a `state-sync` is found
+- `./bin/express-cli --stress --init`
+  - Runs the stress tests on remote nodes. The flag `--init` is needed when stress tests are ran for the first time, to fund the accounts 
+- `./bin/express-cli --stress`
+  - Runs the stress tests on remote nodes

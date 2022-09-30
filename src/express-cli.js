@@ -724,10 +724,13 @@ export async function cli(args) {
                 "--init \n" +
                 "--start \n" +
                 "--destroy \n" +
-                "--stress --init (for running stress test first time)\n" +
-                "--stress \n" +
+                "--update-all \n" +
+                "--update-bor \n" +
+                "--update-heimdall \n" +
                 "--send-state-sync \n" +
-                "--monitor \n");
+                "--monitor \n" +
+                "--stress --init (for running stress test first time) \n" +
+                "--stress \n");
             break;
     }
 }
