@@ -4,6 +4,7 @@ const shell = require("shelljs");
 const yaml = require('js-yaml');
 const fs = require('fs');
 const fetch = require('node-fetch');
+const maxRetries = 3
 
 require('dotenv').config();
 let doc = {};
@@ -119,7 +120,7 @@ async function startStressTest(fund) {
 
     let src = `${doc['ethHostUser']}@${machine0}:~/matic-cli/devnet/devnet/signer-dump.json`
     let dest = `./signer-dump.json`
-    await runScpCommand(src, dest)
+    await runScpCommand(src, dest, maxRetries)
 
     shell.pushd("tests/stress-test");
     shell.exec(`go mod tidy`);
@@ -204,20 +205,20 @@ async function configureCertAndPermissions(user, ip) {
 
     console.log("📍Allowing user not to use password...")
     let command = `echo "${user} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Give permissions to all users for root folder...")
     command = `sudo chmod 755 -R ~/`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Copying certificate to " + ip + ":~/cert.pem...")
     let src = `${process.env.PEM_FILE_PATH}`
     let dest = `${ip}:~/cert.pem`
-    await runScpCommand(src, dest)
+    await runScpCommand(src, dest, maxRetries)
 
     console.log("📍Adding ssh for " + ip + ":~/cert.pem...")
     command = `sudo chmod 700 ~/cert.pem && eval "$(ssh-agent -s)" && ssh-add ~/cert.pem && sudo chmod -R 700 ~/.ssh`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 }
 
 async function installCommonPackages(user, ip) {
@@ -226,26 +227,26 @@ async function installCommonPackages(user, ip) {
 
     console.log("📍Running apt update...")
     let command = `sudo apt update -y`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Installing build-essential...")
     command = `sudo apt install build-essential -y`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Installing go...")
     command = `wget -nc https://raw.githubusercontent.com/maticnetwork/node-ansible/master/go-install.sh &&
                          bash go-install.sh --remove &&
                          bash go-install.sh &&
                          source ~/.bashrc`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Creating symlink for go...")
     command = `sudo ln -sf ~/.go/bin/go /usr/local/bin/go`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Installing rabbitmq...")
     command = `sudo apt install rabbitmq-server -y`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 }
 
 async function installHostSpecificPackages(ip) {
@@ -255,49 +256,49 @@ async function installHostSpecificPackages(ip) {
                         [ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
                         [ -s "$NVM_DIR/bash_completion" ] && \\. "$NVM_DIR/bash_completion" && 
                         nvm install 10.17.0`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Installing solc...")
     command = `sudo snap install solc`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Installing python2...")
     command = `sudo apt install python2 -y && alias python="/usr/bin/python2"`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Installing nodejs and npm...")
     command = `sudo apt install nodejs npm -y`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Creating symlink for npm and node...")
     command = `sudo ln -sf ~/.nvm/versions/node/v10.17.0/bin/npm /usr/bin/npm &&
                     sudo ln -sf ~/.nvm/versions/node/v10.17.0/bin/node /usr/bin/node &&
                     sudo ln -sf ~/.nvm/versions/node/v10.17.0/bin/npx /usr/bin/npx`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Installing ganache-cli...")
     command = `sudo npm install -g ganache-cli -y`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 }
 
 async function installDocker(ip, user) {
     console.log("📍Setting docker repository up...")
     let command = `sudo apt-get update -y && sudo apt install apt-transport-https ca-certificates curl software-properties-common -y`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Installing docker...")
     command = `curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
     command = `sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
     command = `sudo apt install docker-ce docker-ce-cli containerd.io -y`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
     command = `sudo apt install docker-compose-plugin -y`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Adding user to docker group...")
     command = `sudo usermod -aG docker ${user}`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 }
 
 
@@ -311,15 +312,15 @@ async function prepareMaticCLI(ips) {
 
     console.log("📍Git clone " + maticCliRepo + " if does not exist on " + ip)
     let command = `cd ~ && git clone ${maticCliRepo} || (cd ~/matic-cli; git fetch)`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Git checkout " + maticCliBranch + " and git pull on machine " + ip)
     command = `cd ~/matic-cli && git checkout ${maticCliBranch} && git pull`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Installing matic-cli dependencies...")
     command = `cd ~/matic-cli && npm i`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 }
 
 async function runRemoteSetupWithMaticCLI(ips) {
@@ -329,26 +330,26 @@ async function runRemoteSetupWithMaticCLI(ips) {
 
     console.log("📍Creating devnet and removing default configs...")
     let command = `cd ~/matic-cli && mkdir -p devnet && rm configs/devnet/remote-setup-config.yaml`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Copying remote matic-cli configurations...")
     let src = `./configs/devnet/remote-setup-config.yaml`
     let dest = `${doc['ethHostUser']}@${ipsArray[0]}:~/matic-cli/configs/devnet/remote-setup-config.yaml`
-    await runScpCommand(src, dest)
+    await runScpCommand(src, dest, maxRetries)
 
     console.log("📍Executing remote setup with matic-cli...")
     command = `cd ~/matic-cli/devnet && ../bin/matic-cli setup devnet -c ../configs/devnet/remote-setup-config.yaml`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Deploying StateSync Contracts...")
 
     await timer(10000)
     command = `cd ~/matic-cli/devnet &&  bash ganache-deployment-bor.sh`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 
     await timer(10000)
     command = `cd ~/matic-cli/devnet &&  bash ganache-deployment-sync.sh`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 }
 
 async function runDockerSetupWithMaticCLI(ips) {
@@ -358,35 +359,39 @@ async function runDockerSetupWithMaticCLI(ips) {
 
     console.log("📍Creating devnet and removing default configs...")
     let command = `cd ~/matic-cli && mkdir -p devnet && rm configs/devnet/docker-setup-config.yaml`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Copying docker matic-cli configurations...")
     let src = `./configs/devnet/docker-setup-config.yaml`
     let dest = `${doc['ethHostUser']}@${ipsArray[0]}:~/matic-cli/configs/devnet/docker-setup-config.yaml`
-    await runScpCommand(src, dest)
+    await runScpCommand(src, dest, maxRetries)
 
     console.log("📍Executing docker setup with matic-cli...")
     command = `cd ~/matic-cli/devnet && ../bin/matic-cli setup devnet -c ../configs/devnet/docker-setup-config.yaml`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Starting ganache...")
     command = `cd ~/matic-cli/devnet && bash docker-ganache-start.sh`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Starting heimdall...")
     command = `cd ~/matic-cli/devnet && bash docker-heimdall-start-all.sh`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Setting bor up...")
     command = `cd ~/matic-cli/devnet && bash docker-bor-setup.sh`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Starting bor...")
     command = `cd ~/matic-cli/devnet && bash docker-bor-start-all.sh`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 }
 
-async function runSshCommand(ip, command) {
+async function runSshCommand(ip, command, retries) {
+    if (retries < 0) {
+        console.log("❌ runSshCommand called with negative retries number: ", retries)
+        process.exit(1)
+    }
     try {
         await execa('ssh', [
                 `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
@@ -396,11 +401,20 @@ async function runSshCommand(ip, command) {
             {stdio: remoteStdio})
     } catch (error) {
         console.log("❌ Error while executing command: '" + command + "' : \n", error)
-        process.exit(1)
+        if (retries - 1 > 0) {
+            await runSshCommand(ip, command, retries - 1)
+        } else {
+            console.log("❌ SSH command " + command + " failed too many times, exiting... \n", error)
+            process.exit(1)
+        }
     }
 }
 
-async function runScpCommand(src, dest) {
+async function runScpCommand(src, dest, retries) {
+    if (retries < 0) {
+        console.log("❌ runScpCommand called with negative retries number: ", retries)
+        process.exit(1)
+    }
     try {
         await execa('scp', [
             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
@@ -410,7 +424,12 @@ async function runScpCommand(src, dest) {
         ], {stdio: remoteStdio})
     } catch (error) {
         console.log("❌ Error while copying '" + src + "' to '" + dest + "': \n", error)
-        process.exit(1)
+        if (retries - 1 > 0) {
+            await runScpCommand(src, dest, retries - 1)
+        } else {
+            console.log("❌ SCP copy failed too many times, exiting... \n", error)
+            process.exit(1)
+        }
     }
 }
 
@@ -424,14 +443,14 @@ async function sendStateSyncTx() {
 
     let src = `${doc['ethHostUser']}@${machine0}:~/matic-cli/devnet/code/contracts/contractAddresses.json`
     let dest = `./contractAddresses.json`
-    await runScpCommand(src, dest)
+    await runScpCommand(src, dest, maxRetries)
 
     let contractAddresses = require('../contractAddresses.json');
     let MaticToken = contractAddresses.root.tokens.MaticToken;
 
     console.log("📍Sending State-Sync Tx")
     let command = `cd ~/matic-cli/devnet/code/contracts && sudo npm run truffle exec scripts/deposit.js -- --network development ${MaticToken} 100000000000000000000`
-    await runSshCommand(`${doc['ethHostUser']}@${machine0}`, command)
+    await runSshCommand(`${doc['ethHostUser']}@${machine0}`, command, maxRetries)
 
     console.log(`📍State-Sync Tx Sent, check with "./bin/express-cli --monitor"`)
 
@@ -529,36 +548,36 @@ async function stopAndRestartBor(ip, i) {
 
     console.log("📍Stopping bor...")
     let command = `tmux send-keys -t matic-cli:3 'C-c' ENTER`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 
     if (i === 0) {
 
         console.log("📍Pulling bor latest changes for branch " + borBranch + " ...")
         command = `cd ~/matic-cli/devnet/code/bor && git fetch && git checkout ${borBranch} && git pull origin ${borBranch} `
-        await runSshCommand(ip, command)
+        await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Installing bor...")
         command = `cd ~/matic-cli/devnet/code/bor && make bor`
-        await runSshCommand(ip, command)
+        await runSshCommand(ip, command, maxRetries)
 
     } else {
 
         console.log("📍Cloning bor repo...")
         command = `cd ~ && git clone ${borRepo} || (cd ~/bor; git fetch)`
-        await runSshCommand(ip, command)
+        await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Pulling bor latest changes for branch " + borBranch + " ...")
         command = `cd ~/bor && git fetch && git checkout ${borBranch} && git pull origin ${borBranch} `
-        await runSshCommand(ip, command)
+        await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Installing bor...")
         command = `cd ~/bor && make bor`
-        await runSshCommand(ip, command)
+        await runSshCommand(ip, command, maxRetries)
     }
 
     console.log("📍Starting bor...")
     command = `tmux send-keys -t matic-cli:3 'bash ~/node/bor-start.sh' ENTER`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 }
 
 async function stopAndRestartHeimdall(ip, i) {
@@ -570,36 +589,36 @@ async function stopAndRestartHeimdall(ip, i) {
 
     console.log("📍Stopping heimdall...")
     let command = `tmux send-keys -t matic-cli:0 'C-c' ENTER`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 
     if (i === 0) {
 
         console.log("📍Pulling heimdall latest changes for branch " + heimdallBranch + " ...")
         command = `cd ~/matic-cli/devnet/code/heimdall && git fetch && git checkout ${heimdallBranch} && git pull origin ${heimdallBranch} `
-        await runSshCommand(ip, command)
+        await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Installing heimdall...")
         command = `cd ~/matic-cli/devnet/code/heimdall && make install`
-        await runSshCommand(ip, command)
+        await runSshCommand(ip, command, maxRetries)
 
     } else {
 
         console.log("📍Cloning heimdall repo...")
         command = `cd ~ && git clone ${heimdallRepo} || (cd ~/heimdall; git fetch)`
-        await runSshCommand(ip, command)
+        await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Pulling heimdall latest changes for branch " + heimdallBranch + " ...")
         command = `cd ~/heimdall && git fetch && git checkout ${heimdallBranch} && git pull origin ${heimdallBranch} `
-        await runSshCommand(ip, command)
+        await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Installing heimdall...")
         command = `cd ~/heimdall && make install`
-        await runSshCommand(ip, command)
+        await runSshCommand(ip, command, maxRetries)
     }
 
     console.log("📍Starting heimdall...")
     command = `tmux send-keys -t matic-cli:0 'heimdalld start' ENTER`
-    await runSshCommand(ip, command)
+    await runSshCommand(ip, command, maxRetries)
 }
 
 async function monitor() {
@@ -717,6 +736,10 @@ export async function cli(args) {
 
         case "--monitor":
             await monitor();
+            break;
+
+        case "--test":
+            await runSshCommand('35.93.68.183', 'gst', maxRetries);
             break;
 
         default:
