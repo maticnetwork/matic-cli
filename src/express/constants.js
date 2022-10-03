@@ -1,5 +1,3 @@
-// File: constants.js
-
 let remoteStdio = 'inherit'
 const maxRetries = 3
 
