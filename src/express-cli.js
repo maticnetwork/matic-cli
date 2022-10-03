@@ -1,178 +1,31 @@
-import execa from "execa";
+import {
+    terraformApply, terraformDestroy, terraformInit, terraformOutput
+} from "./express/terraform";
+
+import {
+    editMaticCliDockerYAMLConfig, editMaticCliRemoteYAMLConfig, splitToArray
+} from "./express/config-utils";
+
+import {
+    runScpCommand, runSshCommand
+} from "./express/remote-worker";
+
+let {
+    remoteStdio,
+    maxRetries
+} = require('./express/constants');
+
+require('dotenv').config();
 
 const shell = require("shelljs");
 const yaml = require('js-yaml');
 const fs = require('fs');
 const fetch = require('node-fetch');
-const maxRetries = 3
-
-require('dotenv').config();
-let doc = {};
-let remoteStdio = 'inherit'
-
 const timer = ms => new Promise(res => setTimeout(res, ms))
 
-async function terraformInit() {
-    console.log("📍Executing terraform init...")
-    shell.exec(`terraform init`, {
-        env: {
-            ...process.env,
-        }
-    });
-}
-
-async function terraformApply() {
-    console.log("📍Executing terraform apply...")
-    shell.exec(`terraform apply -auto-approve`, {
-        env: {
-            ...process.env,
-        }
-    });
-}
-
-async function terraformDestroy() {
-    console.log("📍Executing terraform destroy...")
-    shell.exec(`terraform destroy -auto-approve`, {
-        env: {
-            ...process.env,
-        }
-    });
-    // delete local terraform files
-    shell.exec(`rm -rf .terraform && rm .terraform.lock.hcl && rm terraform.tfstate && rm terraform.tfstate.backup`)
-}
-
-async function terraformOutput() {
-    console.log("📍Executing terraform output...")
-    const {stdout} = shell.exec(`terraform output --json`, {
-        env: {
-            ...process.env,
-        }
-    });
-
-    return stdout
-}
-
-function setConfigValue(key, value) {
-    if (value) {
-        doc[key] = value;
-    }
-}
-
-function setConfigList(key, value) {
-    if (value) {
-        value = value.split(' ').join('')
-        const valueArray = value.split(",");
-        if (valueArray.length > 0) {
-            doc[key] = []
-            for (let i = 0; i < valueArray.length; i++) {
-                doc[key][i] = valueArray[i];
-
-                if (i === 0) {
-                    if (key === 'devnetBorHosts') {
-                        setEthURL(valueArray[i]);
-                    }
-                    if (key === 'devnetBorUsers') {
-                        setEthHostUser(valueArray[i]);
-                    }
-                }
-            }
-        }
-    }
-}
-
-function setEthURL(value) {
-    if (value) {
-        doc['ethURL'] = 'http://' + value + ':9545';
-        process.env.ETH_URL = doc['ethURL']
-    }
-}
-
-function setEthHostUser(value) {
-    if (value) {
-        doc['ethHostUser'] = value;
-    }
-}
-
-async function editMaticCliDockerYAMLConfig() {
-    console.log("📍Editing matic-cli docker YAML configs...")
-
-    doc = await yaml.load(fs.readFileSync('./configs/devnet/docker-setup-config.yaml', 'utf8'), undefined);
-
-    setCommonConfigs()
-    setEthURL('localhost');
-    setEthHostUser(process.env.ETH_HOST_USER);
-
-    fs.writeFile('./configs/devnet/docker-setup-config.yaml', yaml.dump(doc), (err) => {
-        if (err) {
-            console.log("❌ Error while writing docker YAML configs: \n", err)
-            process.exit(1)
-        }
-    });
-}
-
-async function startStressTest(fund) {
-
-    doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
-    if (doc['devnetBorHosts'].length > 0) {
-        console.log("📍Monitoring the first node", doc['devnetBorHosts'][0]);
-    }
-    let machine0 = doc['devnetBorHosts'][0];
-
-    let src = `${doc['ethHostUser']}@${machine0}:~/matic-cli/devnet/devnet/signer-dump.json`
-    let dest = `./signer-dump.json`
-    await runScpCommand(src, dest, maxRetries)
-
-    shell.pushd("tests/stress-test");
-    shell.exec(`go mod tidy`);
-
-    shell.exec(`go run main.go`, {
-        env: {
-            ...process.env,
-            FUND: fund
-        }
-    });
-
-    shell.popd();
-}
-
-async function editMaticCliRemoteYAMLConfig() {
-    console.log("📍Editing matic-cli remote YAML configs...")
-
-    doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'), undefined);
-
-    setCommonConfigs()
-    setConfigList('devnetBorHosts', process.env.DEVNET_BOR_HOSTS);
-    setConfigList('devnetHeimdallHosts', process.env.DEVNET_BOR_HOSTS);
-    setConfigList('devnetBorUsers', process.env.DEVNET_BOR_USERS);
-    setConfigList('devnetHeimdallUsers', process.env.DEVNET_BOR_USERS);
-
-    fs.writeFile('./configs/devnet/remote-setup-config.yaml', yaml.dump(doc), (err) => {
-        if (err) {
-            console.log("❌ Error while writing remote YAML configs: \n", err)
-            process.exit(1)
-        }
-    });
-}
-
-function setCommonConfigs() {
-    setConfigValue('defaultStake', parseInt(process.env.DEFAULT_STAKE));
-    setConfigValue('defaultFee', parseInt(process.env.DEFAULT_FEE));
-    setConfigValue('borChainId', parseInt(process.env.BOR_CHAIN_ID));
-    setConfigValue('heimdallChainId', process.env.HEIMDALL_CHAIN_ID);
-    setConfigValue('sprintSize', parseInt(process.env.SPRINT_SIZE));
-    setConfigValue('blockNumber', process.env.BLOCK_NUMBER);
-    setConfigValue('blockTime', process.env.BLOCK_TIME);
-    setConfigValue('borBranch', process.env.BOR_BRANCH);
-    setConfigValue('heimdallBranch', process.env.HEIMDALL_BRANCH);
-    setConfigValue('contractsBranch', process.env.CONTRACTS_BRANCH);
-    setConfigValue('numOfValidators', parseInt(process.env.TF_VAR_VALIDATOR_COUNT));
-    setConfigValue('numOfNonValidators', parseInt(process.env.TF_VAR_SENTRY_COUNT));
-    setConfigValue('ethHostUser', process.env.ETH_HOST_USER);
-    setConfigValue('borDockerBuildContext', process.env.BOR_DOCKER_BUILD_CONTENXT);
-    setConfigValue('heimdallDockerBuildContext', process.env.HEIMDALL_DOCKER_BUILD_CONTENXT);
-}
-
 async function installRequiredSoftwareOnRemoteMachines(ips) {
+
+    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
 
     let ipsArray = splitToArray(ips)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
@@ -195,10 +48,6 @@ async function installRequiredSoftwareOnRemoteMachines(ips) {
             }
         }
     }
-}
-
-function splitToArray(value) {
-    return value.split(' ').join('').split(",")
 }
 
 async function configureCertAndPermissions(user, ip) {
@@ -250,6 +99,7 @@ async function installCommonPackages(user, ip) {
 }
 
 async function installHostSpecificPackages(ip) {
+
     console.log("📍Installing nvm...")
     let command = `curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash &&
                         export NVM_DIR="$HOME/.nvm"
@@ -282,6 +132,7 @@ async function installHostSpecificPackages(ip) {
 }
 
 async function installDocker(ip, user) {
+
     console.log("📍Setting docker repository up...")
     let command = `sudo apt-get update -y && sudo apt install apt-transport-https ca-certificates curl software-properties-common -y`
     await runSshCommand(ip, command, maxRetries)
@@ -301,9 +152,9 @@ async function installDocker(ip, user) {
     await runSshCommand(ip, command, maxRetries)
 }
 
-
 async function prepareMaticCLI(ips) {
 
+    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
     let ipsArray = ips.split(' ').join('').split(",")
     let ip = `${doc['ethHostUser']}@${ipsArray[0]}`
 
@@ -325,6 +176,7 @@ async function prepareMaticCLI(ips) {
 
 async function runRemoteSetupWithMaticCLI(ips) {
 
+    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
     let ipsArray = ips.split(' ').join('').split(",")
     let ip = `${doc['ethHostUser']}@${ipsArray[0]}`
 
@@ -344,16 +196,17 @@ async function runRemoteSetupWithMaticCLI(ips) {
     console.log("📍Deploying StateSync Contracts...")
 
     await timer(10000)
-    command = `cd ~/matic-cli/devnet &&  bash ganache-deployment-bor.sh`
+    command = `cd ~/matic-cli/devnet && bash ganache-deployment-bor.sh`
     await runSshCommand(ip, command, maxRetries)
 
     await timer(10000)
-    command = `cd ~/matic-cli/devnet &&  bash ganache-deployment-sync.sh`
+    command = `cd ~/matic-cli/devnet && bash ganache-deployment-sync.sh`
     await runSshCommand(ip, command, maxRetries)
 }
 
 async function runDockerSetupWithMaticCLI(ips) {
 
+    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
     let ipsArray = ips.split(' ').join('').split(",")
     let ip = `${doc['ethHostUser']}@${ipsArray[0]}`
 
@@ -387,55 +240,9 @@ async function runDockerSetupWithMaticCLI(ips) {
     await runSshCommand(ip, command, maxRetries)
 }
 
-async function runSshCommand(ip, command, retries) {
-    if (retries < 0) {
-        console.log("❌ runSshCommand called with negative retries number: ", retries)
-        process.exit(1)
-    }
-    try {
-        await execa('ssh', [
-                `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                `-i`, `${process.env.PEM_FILE_PATH}`,
-                ip,
-                command + ` && exit`],
-            {stdio: remoteStdio})
-    } catch (error) {
-        console.log("❌ Error while executing command: '" + command + "' : \n", error)
-        if (retries - 1 > 0) {
-            await runSshCommand(ip, command, retries - 1)
-        } else {
-            console.log("❌ SSH command " + command + " failed too many times, exiting... \n", error)
-            process.exit(1)
-        }
-    }
-}
-
-async function runScpCommand(src, dest, retries) {
-    if (retries < 0) {
-        console.log("❌ runScpCommand called with negative retries number: ", retries)
-        process.exit(1)
-    }
-    try {
-        await execa('scp', [
-            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-            `-i`, `${process.env.PEM_FILE_PATH}`,
-            src,
-            dest
-        ], {stdio: remoteStdio})
-    } catch (error) {
-        console.log("❌ Error while copying '" + src + "' to '" + dest + "': \n", error)
-        if (retries - 1 > 0) {
-            await runScpCommand(src, dest, retries - 1)
-        } else {
-            console.log("❌ SCP copy failed too many times, exiting... \n", error)
-            process.exit(1)
-        }
-    }
-}
-
 async function sendStateSyncTx() {
 
-    doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
+    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
     if (doc['devnetBorHosts'].length > 0) {
         console.log("📍Monitoring the first node", doc['devnetBorHosts'][0]);
     }
@@ -453,35 +260,6 @@ async function sendStateSyncTx() {
     await runSshCommand(`${doc['ethHostUser']}@${machine0}`, command, maxRetries)
 
     console.log(`📍State-Sync Tx Sent, check with "./bin/express-cli --monitor"`)
-
-}
-
-async function checkCheckpoint(machine0) {
-    let url = `http://${machine0}:1317/checkpoints/count`;
-    let response = await fetch(url);
-    let responseJson = await response.json();
-    if (responseJson.result) {
-        if (responseJson.result.result) {
-            return responseJson.result.result
-        }
-    }
-
-    return 0
-}
-
-async function checkStateSyncTx(machine0) {
-    let url = `http://${machine0}:1317/clerk/event-record/1`;
-    let response = await fetch(url);
-    let responseJson = await response.json();
-    if (responseJson.error) {
-        return undefined
-    } else {
-        if (responseJson.result) {
-            return responseJson.result.tx_hash
-        }
-    }
-
-    return undefined
 }
 
 async function updateAll() {
@@ -499,7 +277,6 @@ async function updateAll() {
 
         await stopAndRestartBor(ip, i)
         await stopAndRestartHeimdall(ip, i)
-
     }
 }
 
@@ -517,7 +294,6 @@ async function updateBor() {
         ip = `${user}@${doc['devnetBorHosts'][i]}`
 
         await stopAndRestartBor(ip, i)
-
     }
 }
 
@@ -535,7 +311,6 @@ async function updateHeimdall() {
         ip = `${user}@${doc['devnetBorHosts'][i]}`
 
         await stopAndRestartHeimdall(ip, i)
-
     }
 }
 
@@ -621,8 +396,61 @@ async function stopAndRestartHeimdall(ip, i) {
     await runSshCommand(ip, command, maxRetries)
 }
 
+async function checkCheckpoint(ip) {
+    let url = `http://${ip}:1317/checkpoints/count`;
+    let response = await fetch(url);
+    let responseJson = await response.json();
+    if (responseJson.result) {
+        if (responseJson.result.result) {
+            return responseJson.result.result
+        }
+    }
+
+    return 0
+}
+
+async function checkStateSyncTx(ip) {
+    let url = `http://${ip}:1317/clerk/event-record/1`;
+    let response = await fetch(url);
+    let responseJson = await response.json();
+    if (responseJson.error) {
+        return undefined
+    } else {
+        if (responseJson.result) {
+            return responseJson.result.tx_hash
+        }
+    }
+
+    return undefined
+}
+
+async function startStressTest(fund) {
+
+    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
+    if (doc['devnetBorHosts'].length > 0) {
+        console.log("📍Monitoring the first node", doc['devnetBorHosts'][0]);
+    }
+    let machine0 = doc['devnetBorHosts'][0];
+
+    let src = `${doc['ethHostUser']}@${machine0}:~/matic-cli/devnet/devnet/signer-dump.json`
+    let dest = `./signer-dump.json`
+    await runScpCommand(src, dest, maxRetries)
+
+    shell.pushd("tests/stress-test");
+    shell.exec(`go mod tidy`);
+
+    shell.exec(`go run main.go`, {
+        env: {
+            ...process.env, FUND: fund
+        }
+    });
+
+    shell.popd();
+}
+
 async function monitor() {
-    doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
+
+    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
     if (doc['devnetBorHosts'].length > 0) {
         console.log("📍Monitoring the first node", doc['devnetBorHosts'][0]);
     }
@@ -641,7 +469,6 @@ async function monitor() {
             console.log("📍Awaiting Checkpoint 🚌")
         }
 
-
         let stateSyncTx = await checkStateSyncTx(machine0);
         if (stateSyncTx) {
             console.log("📍Statesync found ✅ ; Tx_Hash: ", stateSyncTx);
@@ -658,6 +485,7 @@ async function monitor() {
 
 // start CLI
 export async function cli(args) {
+
     console.log("📍Using Express CLI 🚀");
 
     if (process.env.VERBOSE === 'false') {
@@ -674,8 +502,7 @@ export async function cli(args) {
             process.env.DEVNET_BOR_HOSTS = ips;
 
             if (process.env.TF_VAR_DOCKERIZED === 'yes') {
-                await editMaticCliDockerYAMLConfig();
-                doc['devnetBorUsers'] = ips
+                await editMaticCliDockerYAMLConfig(ips);
             } else {
                 await editMaticCliRemoteYAMLConfig();
             }
@@ -734,26 +561,26 @@ export async function cli(args) {
             await sendStateSyncTx();
             break;
 
+        case "--test":
+            await runSshCommand();
+            break;
+
         case "--monitor":
             await monitor();
             break;
 
-        case "--test":
-            await runSshCommand('35.93.68.183', 'gst', maxRetries);
-            break;
-
         default:
-            console.log("⛔ Please use one of the following commands: \n " +
-                "--init \n" +
-                "--start \n" +
-                "--destroy \n" +
-                "--update-all \n" +
-                "--update-bor \n" +
-                "--update-heimdall \n" +
-                "--send-state-sync \n" +
-                "--monitor \n" +
-                "--stress --init \n" +
-                "--stress \n");
+            console.log("⛔ Please use one of the following commands: \n "
+                + "--init \n"
+                + "--start \n"
+                + "--destroy \n"
+                + "--update-all \n"
+                + "--update-bor \n"
+                + "--update-heimdall \n"
+                + "--send-state-sync \n"
+                + "--monitor \n"
+                + "--stress --init \n"
+                + "--stress \n");
             break;
     }
 }
