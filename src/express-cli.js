@@ -54,7 +54,7 @@ export async function cli(args) {
             console.log("📍Command --stress");
             if (args.length >= 4) {
                 if (args[3] === "--init") {
-                    console.log("📍Using -init");
+                    console.log("📍Using --init");
                     await startStressTest(true);
                     break;
                 }

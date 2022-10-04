@@ -152,12 +152,12 @@ Requirements:
 - replace `TF_VAR_ACCESS_KEY` and `TF_VAR_SECRET_KEY` with your own keys (ask devops to generate one for you)
 - (optional) replace `TF_VAR_VM_NAME` with your own identifier (it can be any string, default is "polygon-user")
 - (optional) replace `TF_VAR_DISK_SIZE_GB` with your preferred disk size in GB (default is 500 GB)
-- `VERBOSE=true` prints logs from the remote machines. If set to `false`, only `express-cli` logs - end errors - will be shown
+- `VERBOSE=true` prints logs from the remote machines. If set to `false`, only `express-cli` and `matic-cli` logs will be shown
 - set `TF_VAR_DOCKERIZED` to `no`. Option `yes` runs the network on one VM only in a dockerized stack, but it's still a WIP (see POS-848)
 - make sure `PEM_FILE_PATH` points to a correct AWS key certificate, the one you downloaded in the previous step
 - (optional) source the `.env` file if your local system requires to, with command `source .env`  
 - see other details of `.env` vars in the `.env.example` template
-- `BLOCK_NUMBER` and `BLOCK_TIME` are working as expected most of the times, but a has been reported (see https://0xpolygon.slack.com/archives/C027FCE028P/p1664366701502579). Therefore, for the time being, it is recommended to use single values there. 
+- For `BLOCK_NUMBER` and `BLOCK_TIME`, a bug with `bor` has been reported (see https://0xpolygon.slack.com/archives/C027FCE028P/p1664366701502579). Therefore, until the bug is fixed, it is recommended to use single values. 
 - install `express-cli` and `matic-cli` locally with command `npm i`
 
 Run options:
