@@ -21,7 +21,7 @@ import {
 } from "../../lib/utils";
 import {loadConfig} from "../config";
 import fileReplacer from "../../lib/file-replacer";
-import {remoteStdio} from "../../express/common/remote-worker";
+import {getRemoteStdio} from "../../express/common/remote-worker";
 
 const timer = ms => new Promise(res => setTimeout(res, ms))
 
@@ -368,7 +368,7 @@ export class Devnet {
                             p.push(
                                 execa("rm", ["-rf", fp], {
                                     cwd: this.config.targetDirectory,
-                                    stdio: remoteStdio,
+                                    stdio: getRemoteStdio(),
                                 })
                             );
                         }
@@ -394,14 +394,14 @@ export class Devnet {
                         `-i`, `~/cert.pem`,
                         `${this.config.targetDirectory}/ganache-start-remote.sh`,
                         `${ganacheUser}@${ganacheURL.hostname}:~/ganache-start-remote.sh`
-                    ], {stdio: remoteStdio})
+                    ], {stdio: getRemoteStdio()})
 
                     await execa('scp', [
                         `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`, `-r`,
                         `-i`, `~/cert.pem`,
                         `${this.config.targetDirectory}/data`,
                         `${ganacheUser}@${ganacheURL.hostname}:~/data`
-                    ], {stdio: remoteStdio})
+                    ], {stdio: getRemoteStdio()})
 
                     // Run ganache in tmux
                     await execa('ssh', [
@@ -409,7 +409,7 @@ export class Devnet {
                             `-i`, `~/cert.pem`,
                             `${ganacheUser}@${ganacheURL.hostname}`,
                             `tmux new -d -s matic-cli-ganache; tmux send-keys -t matic-cli-ganache:0 'bash ~/ganache-start-remote.sh' ENTER`],
-                        {stdio: remoteStdio})
+                        {stdio: getRemoteStdio()})
 
                     for (let i = 0; i < this.totalNodes; i++) {
                         // copy files to remote servers
@@ -418,35 +418,35 @@ export class Devnet {
                             `-i`, `~/cert.pem`,
                             `${this.config.targetDirectory}/code/bor/build/bin/bor`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/bor`
-                        ], {stdio: remoteStdio})
+                        ], {stdio: getRemoteStdio()})
 
                         await execa('scp', [
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
                             `${this.config.targetDirectory}/code/heimdall/build/heimdalld`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/heimdalld`
-                        ], {stdio: remoteStdio})
+                        ], {stdio: getRemoteStdio()})
 
                         await execa('scp', [
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
                             `${this.config.targetDirectory}/code/heimdall/build/heimdallcli`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/heimdallcli`
-                        ], {stdio: remoteStdio})
+                        ], {stdio: getRemoteStdio()})
 
                         await execa('scp', [
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
                             `${this.config.targetDirectory}/code/heimdall/build/bridge`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/bridge`
-                        ], {stdio: remoteStdio})
+                        ], {stdio: getRemoteStdio()})
 
                         await execa('scp', [
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`, `-r`,
                             `-i`, `~/cert.pem`,
                             `${this.testnetDir}/node${i}/`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:~/node/`
-                        ], {stdio: remoteStdio})
+                        ], {stdio: getRemoteStdio()})
 
                         // Create a tmux session and start bor and heimdall services in it
                         await execa('ssh', [
@@ -454,7 +454,7 @@ export class Devnet {
                             `-i`, `~/cert.pem`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                             `tmux new -d -s matic-cli; tmux new-window -t matic-cli; tmux new-window -t matic-cli; tmux new-window -t matic-cli; tmux new-window -t matic-cli; tmux send-keys -t matic-cli:0 'bash /home/${this.config.devnetBorUsers[i]}/node/heimdalld-setup.sh' ENTER; tmux send-keys -t matic-cli:0 'heimdalld start' ENTER; tmux send-keys -t matic-cli:1 'heimdalld rest-server' ENTER; tmux send-keys -t matic-cli:3 'bash /home/${this.config.devnetBorUsers[i]}/node/bor-setup.sh' ENTER; tmux send-keys -t matic-cli:3 'bash /home/${this.config.devnetBorUsers[i]}/node/bor-start.sh' ENTER`
-                        ], {stdio: remoteStdio})
+                        ], {stdio: getRemoteStdio()})
 
                         // make sure we wait for the rest-server to be up and running before starting the bridge
                         await timer(2000)
@@ -464,7 +464,7 @@ export class Devnet {
                             `-i`, `~/cert.pem`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                             `tmux send-keys -t matic-cli:2 'bridge start --all' ENTER`
-                        ], {stdio: remoteStdio})
+                        ], {stdio: getRemoteStdio()})
                     }
                 }
             }
@@ -495,7 +495,7 @@ export class Devnet {
                     // create testnet
                     await execa(heimdall.heimdalldCmd, args, {
                         cwd: this.config.targetDirectory,
-                        stdio: remoteStdio,
+                        stdio: getRemoteStdio(),
                     });
 
                     // set heimdall peers with devnet heimdall hosts
@@ -579,7 +579,7 @@ export class Devnet {
                             "-p",
                             this.borDataDir(i),
                             this.borKeystoreDir(i),
-                        ], {stdio: remoteStdio});
+                        ], {stdio: getRemoteStdio()});
                         const password = `password${i}`;
 
                         // create keystore files
@@ -612,7 +612,7 @@ export class Devnet {
                             execa("cp", [
                                 genesis.borGenesisFilePath,
                                 this.borGenesisFilePath(i),
-                            ], {stdio: remoteStdio}),
+                            ], {stdio: getRemoteStdio()}),
                         ];
                         await Promise.all(p);
                     }

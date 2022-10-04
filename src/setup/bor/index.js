@@ -8,7 +8,7 @@ import {loadConfig} from "../config";
 import {cloneRepository, getKeystoreFile, processTemplateFiles,} from "../../lib/utils";
 import {getDefaultBranch, printDependencyInstructions} from "../helper";
 import {Genesis} from "../genesis";
-import {remoteStdio} from "../../express/common/remote-worker";
+import {getRemoteStdio} from "../../express/common/remote-worker";
 
 // default password
 export const KEYSTORE_PASSWORD = "hello";
@@ -103,7 +103,7 @@ export class Bor {
                     task: () =>
                         execa("make", ["bor"], {
                             cwd: this.repositoryDir,
-                            stdio: remoteStdio,
+                            stdio: getRemoteStdio(),
                         }),
                 },
                 {
@@ -114,7 +114,7 @@ export class Bor {
                             ["-p", this.config.dataDir, this.borDataDir, this.keystoreDir],
                             {
                                 cwd: this.config.targetDirectory,
-                                stdio: remoteStdio,
+                                stdio: getRemoteStdio(),
                             }
                         );
                     },

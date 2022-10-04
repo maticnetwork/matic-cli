@@ -6,7 +6,7 @@ import YAML from "yaml";
 
 import {getChainIds, getKeystoreDetails, getNetworkParams} from "./helper";
 import {getAccountFromPrivateKey} from "../lib/utils";
-import {remoteStdio} from "../express/common/remote-worker";
+import {getRemoteStdio} from "../express/common/remote-worker";
 
 const defaultConfigFileName = "config.json";
 
@@ -154,7 +154,7 @@ export async function loadConfig(options = {}) {
     ["-p", config.configDir, config.dataDir, config.configDir],
     {
       cwd: config.targetDirectory,
-      stdio: remoteStdio,
+      stdio: getRemoteStdio(),
     }
   );
 

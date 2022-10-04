@@ -9,7 +9,7 @@ import {loadConfig} from "../config";
 import {processTemplateFiles} from "../../lib/utils";
 import {getDefaultBranch, printDependencyInstructions} from "../helper";
 import {Contracts} from "../contracts";
-import {remoteStdio} from "../../express/common/remote-worker";
+import {getRemoteStdio} from "../../express/common/remote-worker";
 
 export class Ganache {
     constructor(config, options = {}) {
@@ -55,7 +55,7 @@ export class Ganache {
                     task: () =>
                         execa("bash", ["ganache-stake.sh"], {
                             cwd: this.config.targetDirectory,
-                            stdio: remoteStdio,
+                            stdio: getRemoteStdio(),
                         }),
                 },
             ],
@@ -109,7 +109,7 @@ export class Ganache {
                     task: () =>
                         execa("bash", ["ganache-deployment.sh"], {
                             cwd: this.config.targetDirectory,
-                            stdio: remoteStdio,
+                            stdio: getRemoteStdio(),
                         }),
                 },
                 {
@@ -150,7 +150,7 @@ export class Ganache {
                 task: () =>
                     execa("bash", ["ganache-deployment-bor.sh"], {
                         cwd: this.config.targetDirectory,
-                        stdio: remoteStdio,
+                        stdio: getRemoteStdio(),
                     }),
             },
             {
@@ -158,7 +158,7 @@ export class Ganache {
                 task: () =>
                     execa("bash", ["ganache-deployment-sync.sh"], {
                         cwd: this.config.targetDirectory,
-                        stdio: remoteStdio,
+                        stdio: getRemoteStdio(),
                     }),
             },
         ];

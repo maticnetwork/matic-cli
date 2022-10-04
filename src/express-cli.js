@@ -6,10 +6,6 @@ import {startStressTest} from "./express/commands/stress";
 import {sendStateSyncTx} from "./express/commands/send-state-sync";
 import {monitor} from "./express/commands/monitor";
 
-let {
-    remoteStdio
-} = require('./express/common/remote-worker');
-
 require('dotenv').config();
 
 const timer = ms => new Promise(res => setTimeout(res, ms))
@@ -17,10 +13,6 @@ const timer = ms => new Promise(res => setTimeout(res, ms))
 export async function cli(args) {
 
     console.log("📍Express CLI 🚀");
-
-    if (process.env.VERBOSE === 'false') {
-        remoteStdio = 'ignore'
-    }
 
     switch (args[2]) {
 

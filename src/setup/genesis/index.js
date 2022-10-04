@@ -10,7 +10,7 @@ import {isValidAddress} from "ethereumjs-util";
 import {loadConfig} from "../config";
 import {cloneRepository, errorMissingConfigs} from "../../lib/utils";
 import {printDependencyInstructions} from "../helper";
-import {remoteStdio} from "../../express/common/remote-worker";
+import {getRemoteStdio} from "../../express/common/remote-worker";
 
 // balance
 const DEFAULT_BALANCE = 1000000000; // 1 Billion - Without 10^18
@@ -87,7 +87,7 @@ export class Genesis {
                     task: () =>
                         execa("git", ["submodule", "init"], {
                             cwd: this.repositoryDir,
-                            stdio: remoteStdio,
+                            stdio: getRemoteStdio(),
                         }),
                 },
                 {
@@ -95,7 +95,7 @@ export class Genesis {
                     task: () =>
                         execa("git", ["submodule", "update"], {
                             cwd: this.repositoryDir,
-                            stdio: remoteStdio,
+                            stdio: getRemoteStdio(),
                         }),
                 },
                 {
@@ -119,7 +119,7 @@ export class Genesis {
                             ],
                             {
                                 cwd: this.maticContractDir,
-                                stdio: remoteStdio,
+                                stdio: getRemoteStdio(),
                             }
                         ),
                 },
@@ -155,7 +155,7 @@ export class Genesis {
                                 // take validator js backup
                                 return execa("mv", ["validators.js", "validators.js.backup"], {
                                     cwd: this.repositoryDir,
-                                    stdio: remoteStdio,
+                                    stdio: getRemoteStdio(),
                                 });
                             })
                             .then(() => {
@@ -195,7 +195,7 @@ export class Genesis {
                                 // Backup of the block time config
                                 return execa("mv", ["blocks.js", "blocks.js.backup"], {
                                     cwd: this.repositoryDir,
-                                    stdio: remoteStdio,
+                                    stdio: getRemoteStdio(),
                                 });
                             })
                             .then(() => {
@@ -222,7 +222,7 @@ export class Genesis {
                             ],
                             {
                                 cwd: this.repositoryDir,
-                                stdio: remoteStdio,
+                                stdio: getRemoteStdio(),
                             }
                         ),
                 },
@@ -242,7 +242,7 @@ export class Genesis {
                             ],
                             {
                                 cwd: this.repositoryDir,
-                                stdio: remoteStdio,
+                                stdio: getRemoteStdio(),
                             }
                         ),
                 },

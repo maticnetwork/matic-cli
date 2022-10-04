@@ -4,7 +4,7 @@ import fs from "fs-extra";
 import {projectInstall} from "pkg-install";
 
 import {cloneRepository} from "../../lib/utils";
-import {remoteStdio} from "../../express/common/remote-worker";
+import {getRemoteStdio} from "../../express/common/remote-worker";
 
 export class Contracts {
     constructor(config, options = {}) {
@@ -81,7 +81,7 @@ export class Contracts {
                         ],
                         {
                             cwd: this.repositoryDir,
-                            stdio: remoteStdio,
+                            stdio: getRemoteStdio(),
                         }
                     ),
             },
@@ -90,7 +90,7 @@ export class Contracts {
                 task: () =>
                     execa("npm", ["run", "truffle:compile"], {
                         cwd: this.repositoryDir,
-                        stdio: remoteStdio,
+                        stdio: getRemoteStdio(),
                     }),
             },
         ];
@@ -106,7 +106,7 @@ export class Contracts {
                         await execa("cp", [
                             this.localContractAddressesPath,
                             this.contractAddressesPath,
-                        ], {stdio: remoteStdio});
+                        ], {stdio: getRemoteStdio()});
                     }
                 },
             },

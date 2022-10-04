@@ -10,7 +10,7 @@ import {loadConfig} from "../config";
 import {cloneRepository, compressedPublicKey, privateKeyToPublicKey, processTemplateFiles,} from "../../lib/utils";
 import {getDefaultBranch, printDependencyInstructions} from "../helper";
 import {Ganache} from "../ganache";
-import {remoteStdio} from "../../express/common/remote-worker";
+import {getRemoteStdio} from "../../express/common/remote-worker";
 
 // repository name
 export const REPOSITORY_NAME = "heimdall";
@@ -138,7 +138,7 @@ export class Heimdall {
             ["show-account", "--home", this.heimdallDataDir],
             {
                 cwd: this.config.targetDirectory,
-                stdio: remoteStdio,
+                stdio: getRemoteStdio(),
             }
         ).then((output) => {
             return JSON.parse(output.stdout);
@@ -152,7 +152,7 @@ export class Heimdall {
             ["show-privatekey", "--home", this.heimdallDataDir],
             {
                 cwd: this.config.targetDirectory,
-                stdio: remoteStdio,
+                stdio: getRemoteStdio(),
             }
         ).then((output) => {
             return JSON.parse(output.stdout).priv_key;
@@ -171,7 +171,7 @@ export class Heimdall {
             ],
             {
                 cwd: this.config.configDir,
-                stdio: remoteStdio,
+                stdio: getRemoteStdio(),
             }
         ).then(() => {
             return require(this.configValidatorKeyFilePath);
@@ -286,7 +286,7 @@ export class Heimdall {
             task: () =>
                 execa("make", ["build", "network=local"], {
                     cwd: this.repositoryDir,
-                    stdio: remoteStdio,
+                    stdio: getRemoteStdio(),
                 }),
         };
     }
@@ -311,7 +311,7 @@ export class Heimdall {
                             ],
                             {
                                 cwd: this.repositoryDir,
-                                stdio: remoteStdio,
+                                stdio: getRemoteStdio(),
                             }
                         );
                     },
