@@ -7,7 +7,7 @@ import ganacheCli from "ganache-cli";
 
 import {loadConfig} from "../config";
 import {processTemplateFiles} from "../../lib/utils";
-import {printDependencyInstructions, getDefaultBranch} from "../helper";
+import {getDefaultBranch, printDependencyInstructions} from "../helper";
 import {Contracts} from "../contracts";
 import {remoteStdio} from "../../express/common/remote-worker";
 

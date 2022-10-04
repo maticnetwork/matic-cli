@@ -1,6 +1,6 @@
 import inquirer from "inquirer";
 
-import {getNewPrivateKey, errorMissingConfigs} from "../lib/utils";
+import {errorMissingConfigs, getNewPrivateKey} from "../lib/utils";
 
 export async function printDependencyInstructions() {
 }

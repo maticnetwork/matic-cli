@@ -4,8 +4,8 @@ import execa from "execa";
 import chalk from "chalk";
 import YAML from "yaml";
 
-import { getKeystoreDetails, getChainIds, getNetworkParams } from "./helper";
-import { getAccountFromPrivateKey } from "../lib/utils";
+import {getChainIds, getKeystoreDetails, getNetworkParams} from "./helper";
+import {getAccountFromPrivateKey} from "../lib/utils";
 import {remoteStdio} from "../express/common/remote-worker";
 
 const defaultConfigFileName = "config.json";

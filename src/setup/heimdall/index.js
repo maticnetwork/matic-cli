@@ -7,13 +7,8 @@ import os from "os";
 
 import fileReplacer from "../../lib/file-replacer";
 import {loadConfig} from "../config";
-import {
-    cloneRepository,
-    privateKeyToPublicKey,
-    compressedPublicKey,
-    processTemplateFiles,
-} from "../../lib/utils";
-import {printDependencyInstructions, getDefaultBranch} from "../helper";
+import {cloneRepository, compressedPublicKey, privateKeyToPublicKey, processTemplateFiles,} from "../../lib/utils";
+import {getDefaultBranch, printDependencyInstructions} from "../helper";
 import {Ganache} from "../ganache";
 import {remoteStdio} from "../../express/common/remote-worker";
 

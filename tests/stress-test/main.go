@@ -1,5 +1,5 @@
 // loadbot script to generate public address
-// this is done by sending(celo) transactions from a single address to different addresses
+// this is done by sending transactions from a single address to different addresses
 
 package main
 

@@ -5,12 +5,8 @@ import path from "path";
 import fs from "fs-extra";
 
 import {loadConfig} from "../config";
-import {
-    cloneRepository,
-    getKeystoreFile,
-    processTemplateFiles,
-} from "../../lib/utils";
-import {printDependencyInstructions, getDefaultBranch} from "../helper";
+import {cloneRepository, getKeystoreFile, processTemplateFiles,} from "../../lib/utils";
+import {getDefaultBranch, printDependencyInstructions} from "../helper";
 import {Genesis} from "../genesis";
 import {remoteStdio} from "../../express/common/remote-worker";
 

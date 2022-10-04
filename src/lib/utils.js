@@ -4,7 +4,7 @@ import path from "path";
 import Web3 from "web3";
 import nunjucks from "nunjucks";
 import ethCrypto from "eth-crypto";
-import {toBuffer, privateToPublic, bufferToHex} from "ethereumjs-util";
+import {bufferToHex, privateToPublic, toBuffer} from "ethereumjs-util";
 
 //
 // Add custom nunjucks filters

@@ -1,7 +1,7 @@
 import yaml from "js-yaml";
 import fs from "fs";
 import {editMaticCliDockerYAMLConfig, editMaticCliRemoteYAMLConfig, splitToArray} from "../common/config-utils";
-import {runScpCommand, runSshCommand, maxRetries} from "../common/remote-worker";
+import {maxRetries, runScpCommand, runSshCommand} from "../common/remote-worker";
 
 const shell = require("shelljs");
 const timer = ms => new Promise(res => setTimeout(res, ms))

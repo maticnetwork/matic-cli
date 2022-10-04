@@ -5,19 +5,19 @@ import chalk from "chalk";
 import execa from "execa";
 import fs from "fs-extra";
 import nunjucks from "nunjucks";
-import {toBuffer, privateToPublic, bufferToHex} from "ethereumjs-util";
+import {bufferToHex, privateToPublic, toBuffer} from "ethereumjs-util";
 
 import {Heimdall} from "../heimdall";
 import {Bor} from "../bor";
 import {Ganache} from "../ganache";
 import {Genesis} from "../genesis";
-import {printDependencyInstructions, getDefaultBranch} from "../helper";
+import {getDefaultBranch, printDependencyInstructions} from "../helper";
 import {
-    getNewPrivateKey,
-    getKeystoreFile,
-    processTemplateFiles,
-    getAccountFromPrivateKey,
-    errorMissingConfigs,
+  errorMissingConfigs,
+  getAccountFromPrivateKey,
+  getKeystoreFile,
+  getNewPrivateKey,
+  processTemplateFiles,
 } from "../../lib/utils";
 import {loadConfig} from "../config";
 import fileReplacer from "../../lib/file-replacer";
