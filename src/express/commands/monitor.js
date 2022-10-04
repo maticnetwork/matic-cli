@@ -38,7 +38,7 @@ export async function monitor() {
         console.log("📍Monitoring the first node", doc['devnetBorHosts'][0]);
     }
     let machine0 = doc['devnetBorHosts'][0];
-    console.log("📍Checking for statesyncs && Checkpoints")
+    console.log("📍Checking for StateSyncs && Checkpoints")
 
     while (true) {
 
@@ -54,9 +54,9 @@ export async function monitor() {
 
         let stateSyncTx = await checkStateSyncTx(machine0);
         if (stateSyncTx) {
-            console.log("📍Statesync found ✅ ; Tx_Hash: ", stateSyncTx);
+            console.log("📍StateSync found ✅ ; Tx_Hash: ", stateSyncTx);
         } else {
-            console.log("📍Awaiting Statesync 🚌")
+            console.log("📍Awaiting StateSync 🚌")
         }
 
         if (checkpointCount > 0 && stateSyncTx) {

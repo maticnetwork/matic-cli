@@ -1,7 +1,6 @@
 const yaml = require("js-yaml");
 const fs = require("fs");
-const {runScpCommand, runSshCommand} = require("../remote-worker");
-const {maxRetries} = require("../constants");
+const {runScpCommand, runSshCommand, maxRetries} = require("../common/remote-worker");
 const contractAddresses = require("../../../contractAddresses.json");
 
 export async function sendStateSyncTx() {
@@ -18,9 +17,9 @@ export async function sendStateSyncTx() {
 
     let MaticToken = contractAddresses.root.tokens.MaticToken;
 
-    console.log("📍Sending State-Sync Tx")
+    console.log("📍Sending StateSync Tx")
     let command = `cd ~/matic-cli/devnet/code/contracts && sudo npm run truffle exec scripts/deposit.js -- --network development ${MaticToken} 100000000000000000000`
     await runSshCommand(`${doc['ethHostUser']}@${machine0}`, command, maxRetries)
 
-    console.log(`📍State-Sync Tx Sent, check with "./bin/express-cli --monitor"`)
+    console.log(`📍StateSync Tx Sent, check with "./bin/express-cli --monitor"`)
 }

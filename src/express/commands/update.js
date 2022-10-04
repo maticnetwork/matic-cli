@@ -1,9 +1,7 @@
 const yaml = require("js-yaml");
 const fs = require("fs");
-const {splitToArray} = require("../config-utils");
-const {runSshCommand} = require("../remote-worker");
-const {maxRetries} = require("../constants");
-
+const {splitToArray} = require("../common/config-utils");
+const {runSshCommand, maxRetries} = require("../common/remote-worker");
 
 async function stopAndRestartBor(ip, i) {
 

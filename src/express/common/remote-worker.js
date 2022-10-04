@@ -1,5 +1,7 @@
 import execa from "execa";
-import {remoteStdio} from "./constants";
+
+export let remoteStdio = 'inherit'
+export let maxRetries = 3
 
 export async function runSshCommand(ip, command, retries) {
     if (retries < 0) {

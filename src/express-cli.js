@@ -8,7 +8,7 @@ import {monitor} from "./express/commands/monitor";
 
 let {
     remoteStdio
-} = require('./express/constants');
+} = require('./express/common/remote-worker');
 
 require('dotenv').config();
 

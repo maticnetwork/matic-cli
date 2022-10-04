@@ -1,8 +1,7 @@
 const yaml = require("js-yaml");
 const fs = require("fs");
-const {runScpCommand} = require("../remote-worker");
-const {maxRetries} = require("../constants");
 const shell = require("shelljs");
+const {runScpCommand, maxRetries} = require("../common/remote-worker");
 
 export async function startStressTest(fund) {
 
