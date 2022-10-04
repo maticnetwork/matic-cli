@@ -1,4 +1,4 @@
-import { Command } from "commander";
+import {Command} from "commander";
 
 import heimdall from "./heimdall";
 import genesis from "./genesis";
@@ -29,10 +29,10 @@ const devnetCmd = new Command("devnet");
 devnetCmd.action(devnet);
 
 export default [
-  heimdallCmd,
-  genesisCmd,
-  borCmd,
-  ganacheCmd,
-  localnetCmd,
-  devnetCmd,
+    heimdallCmd,
+    genesisCmd,
+    borCmd,
+    ganacheCmd,
+    localnetCmd,
+    devnetCmd,
 ];

@@ -6,427 +6,436 @@ import fs from "fs-extra";
 import os from "os";
 
 import fileReplacer from "../../lib/file-replacer";
-import { loadConfig } from "../config";
+import {loadConfig} from "../config";
 import {
-  cloneRepository,
-  privateKeyToPublicKey,
-  compressedPublicKey,
-  processTemplateFiles,
+    cloneRepository,
+    privateKeyToPublicKey,
+    compressedPublicKey,
+    processTemplateFiles,
 } from "../../lib/utils";
-import { printDependencyInstructions, getDefaultBranch } from "../helper";
-import { Ganache } from "../ganache";
+import {printDependencyInstructions, getDefaultBranch} from "../helper";
+import {Ganache} from "../ganache";
+import {remoteStdio} from "../../express/common/remote-worker";
 
 // repository name
 export const REPOSITORY_NAME = "heimdall";
 export const HEIMDALL_HOME = ".heimdalld";
 
 export function getValidatorKeyPath() {
-  return path.join(
-    os.homedir(),
-    HEIMDALL_HOME,
-    "config/priv_validator_key.json"
-  );
+    return path.join(
+        os.homedir(),
+        HEIMDALL_HOME,
+        "config/priv_validator_key.json"
+    );
 }
 
 export class Heimdall {
-  constructor(config, options = {}) {
-    this.config = config;
+    constructor(config, options = {}) {
+        this.config = config;
 
-    this.repositoryName = this.name
-    this.repositoryBranch = options.repositoryBranch || 'develop'
-    this.repositoryUrl = options.repositoryUrl || 'https://github.com/maticnetwork/heimdall'
-    this.dockerContext = options.dockerContext
-  }
-
-  get name() {
-    return "heimdall";
-  }
-
-  get taskTitle() {
-    return "Setup heimdall";
-  }
-
-  get validatorKeyFile() {
-    return "priv_validator_key.json";
-  }
-
-  get configValidatorKeyFilePath() {
-    return path.join(this.config.configDir, this.validatorKeyFile);
-  }
-
-  get repositoryDir() {
-    if (this.dockerContext !== undefined && !this.dockerContext.startsWith("http")) {
-      return this.dockerContext
-    } else {
-      return path.join(this.config.codeDir, this.repositoryName)
+        this.repositoryName = this.name
+        this.repositoryBranch = options.repositoryBranch || 'develop'
+        this.repositoryUrl = options.repositoryUrl || 'https://github.com/maticnetwork/heimdall'
+        this.dockerContext = options.dockerContext
     }
-  }
 
-  get buildDir() {
-    return path.join(this.repositoryDir, "build");
-  }
+    get name() {
+        return "heimdall";
+    }
 
-  get heimdalldCmd() {
-    return path.join(this.buildDir, "heimdalld");
-  }
+    get taskTitle() {
+        return "Setup heimdall";
+    }
 
-  get heimdallDataDir() {
-    return path.join(this.config.dataDir, this.name);
-  }
+    get validatorKeyFile() {
+        return "priv_validator_key.json";
+    }
 
-  get heimdallConfigDir() {
-    return path.join(this.heimdallDataDir, "config");
-  }
+    get configValidatorKeyFilePath() {
+        return path.join(this.config.configDir, this.validatorKeyFile);
+    }
 
-  get heimdallGenesisFilePath() {
-    return path.join(this.heimdallConfigDir, "genesis.json");
-  }
+    get repositoryDir() {
+        if (this.dockerContext !== undefined && !this.dockerContext.startsWith("http")) {
+            return this.dockerContext
+        } else {
+            return path.join(this.config.codeDir, this.repositoryName)
+        }
+    }
 
-  get heimdallHeimdallConfigFilePath() {
-    return path.join(this.heimdallConfigDir, "heimdall-config.toml");
-  }
+    get buildDir() {
+        return path.join(this.repositoryDir, "build");
+    }
 
-  get heimdallConfigFilePath() {
-    return path.join(this.heimdallConfigDir, "config.toml");
-  }
+    get heimdalldCmd() {
+        return path.join(this.buildDir, "heimdalld");
+    }
 
-  get heimdallValidatorKeyFilePath() {
-    return path.join(this.heimdallConfigDir, this.validatorKeyFile);
-  }
+    get heimdallDataDir() {
+        return path.join(this.config.dataDir, this.name);
+    }
 
-  async print() {
-    // print details
-    console.log(
-      chalk.gray("Heimdall home") +
-        ": " +
-        chalk.bold.green(this.heimdallDataDir)
-    );
-    console.log(
-      chalk.gray("Heimdall genesis") +
-        ": " +
-        chalk.bold.green(this.heimdallGenesisFilePath)
-    );
-    console.log(
-      chalk.gray("Heimdall validator key") +
-        ": " +
-        chalk.bold.green(this.heimdallValidatorKeyFilePath)
-    );
-    console.log(
-      chalk.gray("Heimdall repo") + ": " + chalk.bold.green(this.repositoryDir)
-    );
-    console.log(
-      chalk.gray("Setup heimdall") +
-        ": " +
-        chalk.bold.green("bash heimdall-start.sh")
-    );
-    console.log(
-      chalk.gray("Start heimdall rest-server") +
-        ": " +
-        chalk.bold.green("bash heimdall-server-start.sh")
-    );
-    console.log(
-      chalk.gray("Start heimdall bridge") +
-        ": " +
-        chalk.bold.green("bash heimdall-bridge-start.sh")
-    );
-    console.log(
-      chalk.gray("Reset heimdall") +
-        ": " +
-        chalk.bold.green("bash heimdall-clean.sh")
-    );
-  }
+    get heimdallConfigDir() {
+        return path.join(this.heimdallDataDir, "config");
+    }
 
-  async account() {
-    return execa(
-      this.heimdalldCmd,
-      ["show-account", "--home", this.heimdallDataDir],
-      {
-        cwd: this.config.targetDirectory,
-      }
-    ).then((output) => {
-      return JSON.parse(output.stdout);
-    });
-  }
+    get heimdallGenesisFilePath() {
+        return path.join(this.heimdallConfigDir, "genesis.json");
+    }
 
-  // returns heimdall private key details
-  async accountPrivateKey() {
-    return execa(
-      this.heimdalldCmd,
-      ["show-privatekey", "--home", this.heimdallDataDir],
-      {
-        cwd: this.config.targetDirectory,
-      }
-    ).then((output) => {
-      return JSON.parse(output.stdout).priv_key;
-    });
-  }
+    get heimdallHeimdallConfigFilePath() {
+        return path.join(this.heimdallConfigDir, "heimdall-config.toml");
+    }
 
-  // returns content of validator key
-  async generateValidatorKey() {
-    return execa(
-      this.heimdalldCmd,
-      [
-        "generate-validatorkey",
-        this.config.primaryAccount.privateKey,
-        "--home",
-        this.heimdallDataDir,
-      ],
-      {
-        cwd: this.config.configDir,
-      }
-    ).then(() => {
-      return require(this.configValidatorKeyFilePath);
-    });
-  }
+    get heimdallConfigFilePath() {
+        return path.join(this.heimdallConfigDir, "config.toml");
+    }
 
-  async getProcessGenesisFileTasks() {
-    return new Listr(
-      [
-        {
-          title: "Process Heimdall and Bor chain ids",
-          task: () => {
-            fileReplacer(this.heimdallGenesisFilePath)
-              .replace(
-                /"chain_id":[ ]*".*"/gi,
-                `"chain_id": "${this.config.heimdallChainId}"`
-              )
-              .replace(
-                /"bor_chain_id":[ ]*".*"/gi,
-                `"bor_chain_id": "${this.config.borChainId}"`
-              )
-              .save();
-          },
-        },
-        {
-          title: "Process validators",
-          task: () => {
-            fileReplacer(this.heimdallGenesisFilePath)
-              .replace(
-                /"address":[ ]*".*"/gi,
-                `"address": "${this.config.primaryAccount.address}"`
-              )
-              .replace(
-                /"signer":[ ]*".*"/gi,
-                `"signer": "${this.config.primaryAccount.address}"`
-              )
-              .replace(
-                /"pub_key":[ ]*".*"/gi,
-                `"pub_key": "${compressedPublicKey(
-                  privateKeyToPublicKey(
-                    this.config.primaryAccount.privateKey
-                  ).replace("0x", "0x04")
-                )}"`
-              )
-              .replace(
-                /"power":[ ]*".*"/gi,
-                `"power": "${this.config.defaultStake}"`
-              )
-              .replace(
-                /"user":[ ]*".*"/gi,
-                `"user": "${this.config.primaryAccount.address}"`
-              )
-              .save();
-          },
-        },
-        {
-          title: "Process contract addresses",
-          task: () => {
-            // get root contracts
-            const rootContracts = this.config.contractAddresses.root;
+    get heimdallValidatorKeyFilePath() {
+        return path.join(this.heimdallConfigDir, this.validatorKeyFile);
+    }
 
-            fileReplacer(this.heimdallGenesisFilePath)
-              .replace(
-                /"matic_token_address":[ ]*".*"/gi,
-                `"matic_token_address": "${rootContracts.tokens.TestToken}"`
-              )
-              .replace(
-                /"staking_manager_address":[ ]*".*"/gi,
-                `"staking_manager_address": "${rootContracts.StakeManagerProxy}"`
-              )
-              .replace(
-                /"root_chain_address":[ ]*".*"/gi,
-                `"root_chain_address": "${rootContracts.RootChainProxy}"`
-              )
-              .replace(
-                /"staking_info_address":[ ]*".*"/gi,
-                `"staking_info_address": "${rootContracts.StakingInfo}"`
-              )
-              .replace(
-                /"state_sender_address":[ ]*".*"/gi,
-                `"state_sender_address": "${rootContracts.StateSender}"`
-              )
-              .save();
-          },
-          enabled: () => {
-            return this.config.contractAddresses;
-          },
-        },
-      ],
-      {
-        exitOnError: true,
-      }
-    );
-  }
+    async print() {
+        // print details
+        console.log(
+            chalk.gray("Heimdall home") +
+            ": " +
+            chalk.bold.green(this.heimdallDataDir)
+        );
+        console.log(
+            chalk.gray("Heimdall genesis") +
+            ": " +
+            chalk.bold.green(this.heimdallGenesisFilePath)
+        );
+        console.log(
+            chalk.gray("Heimdall validator key") +
+            ": " +
+            chalk.bold.green(this.heimdallValidatorKeyFilePath)
+        );
+        console.log(
+            chalk.gray("Heimdall repo") + ": " + chalk.bold.green(this.repositoryDir)
+        );
+        console.log(
+            chalk.gray("Setup heimdall") +
+            ": " +
+            chalk.bold.green("bash heimdall-start.sh")
+        );
+        console.log(
+            chalk.gray("Start heimdall rest-server") +
+            ": " +
+            chalk.bold.green("bash heimdall-server-start.sh")
+        );
+        console.log(
+            chalk.gray("Start heimdall bridge") +
+            ": " +
+            chalk.bold.green("bash heimdall-bridge-start.sh")
+        );
+        console.log(
+            chalk.gray("Reset heimdall") +
+            ": " +
+            chalk.bold.green("bash heimdall-clean.sh")
+        );
+    }
 
-  cloneRepositoryTask() {
-    return {
-      title: "Clone Heimdall repository",
-      task: () =>
-        cloneRepository(
-          this.repositoryName,
-          this.repositoryBranch,
-          this.repositoryUrl,
-          this.config.codeDir
-        ),
-    };
-  }
+    async account() {
+        return execa(
+            this.heimdalldCmd,
+            ["show-account", "--home", this.heimdallDataDir],
+            {
+                cwd: this.config.targetDirectory,
+                stdio: remoteStdio,
+            }
+        ).then((output) => {
+            return JSON.parse(output.stdout);
+        });
+    }
 
-  buildTask() {
-    return {
-      title: "Build Heimdall",
-      task: () =>
-        execa("make", ["build", "network=local"], {
-          cwd: this.repositoryDir,
-        }),
-    };
-  }
+    // returns heimdall private key details
+    async accountPrivateKey() {
+        return execa(
+            this.heimdalldCmd,
+            ["show-privatekey", "--home", this.heimdallDataDir],
+            {
+                cwd: this.config.targetDirectory,
+                stdio: remoteStdio,
+            }
+        ).then((output) => {
+            return JSON.parse(output.stdout).priv_key;
+        });
+    }
 
-  async getTasks() {
-    return new Listr(
-      [
-        this.cloneRepositoryTask(),
-        this.buildTask(),
-        {
-          title: "Init Heimdall",
-          task: () => {
-            return execa(
-              this.heimdalldCmd,
-              [
-                "init",
+    // returns content of validator key
+    async generateValidatorKey() {
+        return execa(
+            this.heimdalldCmd,
+            [
+                "generate-validatorkey",
+                this.config.primaryAccount.privateKey,
                 "--home",
                 this.heimdallDataDir,
-                "--chain-id",
-                this.heimdallChainId,
-                "heimdall-test",
-              ],
-              {
-                cwd: this.repositoryDir,
-              }
-            );
-          },
-        },
-        {
-          title: "Create Heimdall account from private key",
-          task: () => {
-            // It generates new account for validator
-            // and replaces it with new validator key
-            return this.generateValidatorKey().then((data) => {
-              return fs.writeFile(
-                this.heimdallValidatorKeyFilePath,
-                JSON.stringify(data, null, 2),
-                { mode: 0o755 }
-              );
-            });
-          },
-        },
-        {
-          title: "Process genesis file",
-          task: () => {
-            return this.getProcessGenesisFileTasks();
-          },
-        },
-        {
-          title: "Process heimdall config file",
-          task: () => {
-            fileReplacer(this.heimdallHeimdallConfigFilePath)
-              .replace(
-                /eth_rpc_url[ ]*=[ ]*".*"/gi,
-                'eth_rpc_url = "http://localhost:9545"'
-              )
-              .replace(
-                /bor_rpc_url[ ]*=[ ]*".*"/gi,
-                'bor_rpc_url = "http://localhost:8545"'
-              )
-              .save();
-          },
-        },
-        {
-          title: "Copy template scripts",
-          task: async () => {
-            const templateDir = path.resolve(
-              new URL(import.meta.url).pathname,
-              "../templates"
-            );
+            ],
+            {
+                cwd: this.config.configDir,
+                stdio: remoteStdio,
+            }
+        ).then(() => {
+            return require(this.configValidatorKeyFilePath);
+        });
+    }
 
-            // copy all templates to target directory
-            await fs.copy(templateDir, this.config.targetDirectory);
+    async getProcessGenesisFileTasks() {
+        return new Listr(
+            [
+                {
+                    title: "Process Heimdall and Bor chain ids",
+                    task: () => {
+                        fileReplacer(this.heimdallGenesisFilePath)
+                            .replace(
+                                /"chain_id":[ ]*".*"/gi,
+                                `"chain_id": "${this.config.heimdallChainId}"`
+                            )
+                            .replace(
+                                /"bor_chain_id":[ ]*".*"/gi,
+                                `"bor_chain_id": "${this.config.borChainId}"`
+                            )
+                            .save();
+                    },
+                },
+                {
+                    title: "Process validators",
+                    task: () => {
+                        fileReplacer(this.heimdallGenesisFilePath)
+                            .replace(
+                                /"address":[ ]*".*"/gi,
+                                `"address": "${this.config.primaryAccount.address}"`
+                            )
+                            .replace(
+                                /"signer":[ ]*".*"/gi,
+                                `"signer": "${this.config.primaryAccount.address}"`
+                            )
+                            .replace(
+                                /"pub_key":[ ]*".*"/gi,
+                                `"pub_key": "${compressedPublicKey(
+                                    privateKeyToPublicKey(
+                                        this.config.primaryAccount.privateKey
+                                    ).replace("0x", "0x04")
+                                )}"`
+                            )
+                            .replace(
+                                /"power":[ ]*".*"/gi,
+                                `"power": "${this.config.defaultStake}"`
+                            )
+                            .replace(
+                                /"user":[ ]*".*"/gi,
+                                `"user": "${this.config.primaryAccount.address}"`
+                            )
+                            .save();
+                    },
+                },
+                {
+                    title: "Process contract addresses",
+                    task: () => {
+                        // get root contracts
+                        const rootContracts = this.config.contractAddresses.root;
 
-            // process all njk templates
-            await processTemplateFiles(this.config.targetDirectory, {
-              obj: this,
-            });
-          },
-        },
-      ],
-      {
-        exitOnError: true,
-      }
-    );
-  }
+                        fileReplacer(this.heimdallGenesisFilePath)
+                            .replace(
+                                /"matic_token_address":[ ]*".*"/gi,
+                                `"matic_token_address": "${rootContracts.tokens.TestToken}"`
+                            )
+                            .replace(
+                                /"staking_manager_address":[ ]*".*"/gi,
+                                `"staking_manager_address": "${rootContracts.StakeManagerProxy}"`
+                            )
+                            .replace(
+                                /"root_chain_address":[ ]*".*"/gi,
+                                `"root_chain_address": "${rootContracts.RootChainProxy}"`
+                            )
+                            .replace(
+                                /"staking_info_address":[ ]*".*"/gi,
+                                `"staking_info_address": "${rootContracts.StakingInfo}"`
+                            )
+                            .replace(
+                                /"state_sender_address":[ ]*".*"/gi,
+                                `"state_sender_address": "${rootContracts.StateSender}"`
+                            )
+                            .save();
+                    },
+                    enabled: () => {
+                        return this.config.contractAddresses;
+                    },
+                },
+            ],
+            {
+                exitOnError: true,
+            }
+        );
+    }
+
+    cloneRepositoryTask() {
+        return {
+            title: "Clone Heimdall repository",
+            task: () =>
+                cloneRepository(
+                    this.repositoryName,
+                    this.repositoryBranch,
+                    this.repositoryUrl,
+                    this.config.codeDir
+                ),
+        };
+    }
+
+    buildTask() {
+        return {
+            title: "Build Heimdall",
+            task: () =>
+                execa("make", ["build", "network=local"], {
+                    cwd: this.repositoryDir,
+                    stdio: remoteStdio,
+                }),
+        };
+    }
+
+    async getTasks() {
+        return new Listr(
+            [
+                this.cloneRepositoryTask(),
+                this.buildTask(),
+                {
+                    title: "Init Heimdall",
+                    task: () => {
+                        return execa(
+                            this.heimdalldCmd,
+                            [
+                                "init",
+                                "--home",
+                                this.heimdallDataDir,
+                                "--chain-id",
+                                this.heimdallChainId,
+                                "heimdall-test",
+                            ],
+                            {
+                                cwd: this.repositoryDir,
+                                stdio: remoteStdio,
+                            }
+                        );
+                    },
+                },
+                {
+                    title: "Create Heimdall account from private key",
+                    task: () => {
+                        // It generates new account for validator
+                        // and replaces it with new validator key
+                        return this.generateValidatorKey().then((data) => {
+                            return fs.writeFile(
+                                this.heimdallValidatorKeyFilePath,
+                                JSON.stringify(data, null, 2),
+                                {mode: 0o755}
+                            );
+                        });
+                    },
+                },
+                {
+                    title: "Process genesis file",
+                    task: () => {
+                        return this.getProcessGenesisFileTasks();
+                    },
+                },
+                {
+                    title: "Process heimdall config file",
+                    task: () => {
+                        fileReplacer(this.heimdallHeimdallConfigFilePath)
+                            .replace(
+                                /eth_rpc_url[ ]*=[ ]*".*"/gi,
+                                'eth_rpc_url = "http://localhost:9545"'
+                            )
+                            .replace(
+                                /bor_rpc_url[ ]*=[ ]*".*"/gi,
+                                'bor_rpc_url = "http://localhost:8545"'
+                            )
+                            .save();
+                    },
+                },
+                {
+                    title: "Copy template scripts",
+                    task: async () => {
+                        const templateDir = path.resolve(
+                            new URL(import.meta.url).pathname,
+                            "../templates"
+                        );
+
+                        // copy all templates to target directory
+                        await fs.copy(templateDir, this.config.targetDirectory);
+
+                        // process all njk templates
+                        await processTemplateFiles(this.config.targetDirectory, {
+                            obj: this,
+                        });
+                    },
+                },
+            ],
+            {
+                exitOnError: true,
+            }
+        );
+    }
 }
 
 async function setupHeimdall(config) {
-  const ganache = new Ganache(config, { contractsBranch: config.contractsBranch })
-  const heimdall = new Heimdall(config, { repositoryBranch: config.heimdallBranch, dockerContext: config.heimdallDockerBuildContext })
+    const ganache = new Ganache(config, {contractsBranch: config.contractsBranch})
+    const heimdall = new Heimdall(config, {
+        repositoryBranch: config.heimdallBranch,
+        dockerContext: config.heimdallDockerBuildContext
+    })
 
-  // get all heimdall related tasks
-  const tasks = new Listr(
-    [
-      {
-        title: ganache.taskTitle,
-        task: () => {
-          return ganache.getTasks();
-        },
-      },
-      {
-        title: heimdall.taskTitle,
-        task: () => {
-          return heimdall.getTasks();
-        },
-      },
-    ],
-    {
-      exitOnError: true,
-    }
-  );
+    // get all heimdall related tasks
+    const tasks = new Listr(
+        [
+            {
+                title: ganache.taskTitle,
+                task: () => {
+                    return ganache.getTasks();
+                },
+            },
+            {
+                title: heimdall.taskTitle,
+                task: () => {
+                    return heimdall.getTasks();
+                },
+            },
+        ],
+        {
+            exitOnError: true,
+        }
+    );
 
-  await tasks.run();
-  console.log("%s Heimdall is ready", chalk.green.bold("DONE"));
+    await tasks.run();
+    console.log("%s Heimdall is ready", chalk.green.bold("DONE"));
 
-  // print details
-  await config.print();
-  await ganache.print();
-  await heimdall.print();
+    // print details
+    await config.print();
+    await ganache.print();
+    await heimdall.print();
 
-  return true;
+    return true;
 }
 
 export default async function (command) {
-  await printDependencyInstructions();
+    await printDependencyInstructions();
 
-  // configuration
-  await loadConfig({
-    targetDirectory: command.parent.directory,
-    fileName: command.parent.config,
-    interactive: command.parent.interactive,
-  });
-  await config.loadChainIds();
-  await config.loadAccounts();
+    // configuration
+    await loadConfig({
+        targetDirectory: command.parent.directory,
+        fileName: command.parent.config,
+        interactive: command.parent.interactive,
+    });
+    await config.loadChainIds();
+    await config.loadAccounts();
 
-  // load branch
-  const answers = await getDefaultBranch(config);
-  config.set(answers);
+    // load branch
+    const answers = await getDefaultBranch(config);
+    config.set(answers);
 
-  // start setup
-  await setupHeimdall(config);
+    // start setup
+    await setupHeimdall(config);
 }

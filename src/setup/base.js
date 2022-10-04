@@ -1,7 +1,8 @@
 export default class Base {
-  constructor(config) {
-    this.config = config;
-  }
+    constructor(config) {
+        this.config = config;
+    }
 
-  getTasks() {}
+    getTasks() {
+    }
 }

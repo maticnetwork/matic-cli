@@ -2,11 +2,11 @@ import fs from "fs-extra";
 import path from "path";
 import execa from "execa";
 import chalk from "chalk";
-import { toBuffer, privateToPublic, bufferToHex } from "ethereumjs-util";
 import YAML from "yaml";
 
 import { getKeystoreDetails, getChainIds, getNetworkParams } from "./helper";
 import { getAccountFromPrivateKey } from "../lib/utils";
+import {remoteStdio} from "../express/common/remote-worker";
 
 const defaultConfigFileName = "config.json";
 
@@ -154,6 +154,7 @@ export async function loadConfig(options = {}) {
     ["-p", config.configDir, config.dataDir, config.configDir],
     {
       cwd: config.targetDirectory,
+      stdio: remoteStdio,
     }
   );
 
