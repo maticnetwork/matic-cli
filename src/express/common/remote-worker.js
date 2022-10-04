@@ -14,7 +14,6 @@ export async function runSshCommand(ip, command, retries) {
         console.log("❌ runSshCommand called with negative retries number: ", retries)
         process.exit(1)
     }
-    console.log(getRemoteStdio())
     try {
         await execa('ssh',
             [`-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
