@@ -12,7 +12,7 @@ import { cloneRepository, errorMissingConfigs } from "../../lib/utils";
 import { printDependencyInstructions } from "../helper";
 
 // balance
-const DEFAULT_BALANCE = 100000000000; // 100 Billion - Without 10^18
+const DEFAULT_BALANCE = 1000000000; // 1 Billion - Without 10^18
 
 export class Genesis {
   constructor(config, options = {}) {
