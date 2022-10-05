@@ -106,6 +106,7 @@ export async function cli(args) {
                 + "--restart-all \n"
                 + "--restart-bor \n"
                 + "--restart-heimdall \n"
+                + "--cleanup \n"
                 + "--send-state-sync \n"
                 + "--monitor \n"
                 + "--stress --init \n"
