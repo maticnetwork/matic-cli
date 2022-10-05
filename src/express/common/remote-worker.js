@@ -25,7 +25,7 @@ export async function runSshCommand(ip, command, retries) {
         if (retries - 1 > 0) {
             await runSshCommand(ip, command, retries - 1)
         } else {
-            console.log("❌ SSH command " + command + " failed too many times, exiting... \n", error)
+            console.log("❌ SSH command " + command + " failed too many times, exiting... \n")
             process.exit(1)
         }
     }
@@ -47,7 +47,7 @@ export async function runScpCommand(src, dest, retries) {
         if (retries - 1 > 0) {
             await runScpCommand(src, dest, retries - 1)
         } else {
-            console.log("❌ SCP copy failed too many times, exiting... \n", error)
+            console.log("❌ SCP copy failed too many times, exiting... \n")
             process.exit(1)
         }
     }

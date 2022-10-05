@@ -6,6 +6,7 @@ import {startStressTest} from "./express/commands/stress";
 import {sendStateSyncTx} from "./express/commands/send-state-sync";
 import {monitor} from "./express/commands/monitor";
 import {restartAll, restartBor, restartHeimdall} from "./express/commands/restart";
+import {cleanup} from "./express/commands/cleanup";
 
 require('dotenv').config();
 
@@ -65,6 +66,11 @@ export async function cli(args) {
         case "--restart-heimdall":
             console.log("📍Command --restart-heimdall");
             await restartHeimdall();
+            break;
+
+        case "--cleanup":
+            console.log("📍Command --cleanup");
+            await cleanup();
             break;
 
         case "--stress":

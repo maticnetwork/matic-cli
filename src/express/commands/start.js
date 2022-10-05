@@ -169,7 +169,7 @@ async function prepareMaticCLI(ips) {
     await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Git checkout " + maticCliBranch + " and git pull on machine " + ip)
-    command = `cd ~/matic-cli && git checkout ${maticCliBranch} && git pull`
+    command = `cd ~/matic-cli && git checkout ${maticCliBranch} && git pull || (cd ~/matic-cli && git stash && git stash drop && git pull)`
     await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Installing matic-cli dependencies...")

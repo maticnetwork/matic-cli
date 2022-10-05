@@ -181,6 +181,8 @@ Run options:
   - Restarts `heimdall` on all the remote machines
 - `./bin/express-cli --send-state-sync`
   - Create a `state-sync` transaction on the remote network 
+- `./bin/express-cli --cleanup`
+  - Cleans up `ganache`, `bor`, `heimdall` and `bridge`, redeploys all the contracts and restarts all the services
 - `./bin/express-cli --monitor`
   - Monitors the reception of state-syncs and checkpoints to make sure the whole network is in a healthy state. If `--send-state-sync` haven't been used before, only checkpoints will be detected. The execution stops when a `state-sync` is found
 - `./bin/express-cli --stress --init`
