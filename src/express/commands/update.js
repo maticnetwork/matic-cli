@@ -3,7 +3,7 @@ const fs = require("fs");
 const {splitToArray} = require("../common/config-utils");
 const {runSshCommand, maxRetries} = require("../common/remote-worker");
 
-async function stopAndRestartBor(ip, i) {
+export async function pullAndRestartBor(ip, i, isPull) {
 
     console.log("📍Working on bor for machine " + ip + "...")
 
@@ -14,29 +14,32 @@ async function stopAndRestartBor(ip, i) {
     let command = `tmux send-keys -t matic-cli:3 'C-c' ENTER`
     await runSshCommand(ip, command, maxRetries)
 
-    if (i === 0) {
+    if (isPull) {
 
-        console.log("📍Pulling bor latest changes for branch " + borBranch + " ...")
-        command = `cd ~/matic-cli/devnet/code/bor && git fetch && git checkout ${borBranch} && git pull origin ${borBranch} `
-        await runSshCommand(ip, command, maxRetries)
+        if (i === 0) {
 
-        console.log("📍Installing bor...")
-        command = `cd ~/matic-cli/devnet/code/bor && make bor`
-        await runSshCommand(ip, command, maxRetries)
+            console.log("📍Pulling bor latest changes for branch " + borBranch + " ...")
+            command = `cd ~/matic-cli/devnet/code/bor && git fetch && git checkout ${borBranch} && git pull origin ${borBranch} `
+            await runSshCommand(ip, command, maxRetries)
 
-    } else {
+            console.log("📍Installing bor...")
+            command = `cd ~/matic-cli/devnet/code/bor && make bor`
+            await runSshCommand(ip, command, maxRetries)
 
-        console.log("📍Cloning bor repo...")
-        command = `cd ~ && git clone ${borRepo} || (cd ~/bor; git fetch)`
-        await runSshCommand(ip, command, maxRetries)
+        } else {
 
-        console.log("📍Pulling bor latest changes for branch " + borBranch + " ...")
-        command = `cd ~/bor && git fetch && git checkout ${borBranch} && git pull origin ${borBranch} `
-        await runSshCommand(ip, command, maxRetries)
+            console.log("📍Cloning bor repo...")
+            command = `cd ~ && git clone ${borRepo} || (cd ~/bor; git fetch)`
+            await runSshCommand(ip, command, maxRetries)
 
-        console.log("📍Installing bor...")
-        command = `cd ~/bor && make bor`
-        await runSshCommand(ip, command, maxRetries)
+            console.log("📍Pulling bor latest changes for branch " + borBranch + " ...")
+            command = `cd ~/bor && git fetch && git checkout ${borBranch} && git pull origin ${borBranch} `
+            await runSshCommand(ip, command, maxRetries)
+
+            console.log("📍Installing bor...")
+            command = `cd ~/bor && make bor`
+            await runSshCommand(ip, command, maxRetries)
+        }
     }
 
     console.log("📍Starting bor...")
@@ -44,7 +47,7 @@ async function stopAndRestartBor(ip, i) {
     await runSshCommand(ip, command, maxRetries)
 }
 
-async function stopAndRestartHeimdall(ip, i) {
+export async function pullAndRestartHeimdall(ip, i, isPull) {
 
     console.log("📍Working on heimdall for machine " + ip + "...")
 
@@ -55,29 +58,32 @@ async function stopAndRestartHeimdall(ip, i) {
     let command = `tmux send-keys -t matic-cli:0 'C-c' ENTER`
     await runSshCommand(ip, command, maxRetries)
 
-    if (i === 0) {
+    if (isPull) {
 
-        console.log("📍Pulling heimdall latest changes for branch " + heimdallBranch + " ...")
-        command = `cd ~/matic-cli/devnet/code/heimdall && git fetch && git checkout ${heimdallBranch} && git pull origin ${heimdallBranch} `
-        await runSshCommand(ip, command, maxRetries)
+        if (i === 0) {
 
-        console.log("📍Installing heimdall...")
-        command = `cd ~/matic-cli/devnet/code/heimdall && make install`
-        await runSshCommand(ip, command, maxRetries)
+            console.log("📍Pulling heimdall latest changes for branch " + heimdallBranch + " ...")
+            command = `cd ~/matic-cli/devnet/code/heimdall && git fetch && git checkout ${heimdallBranch} && git pull origin ${heimdallBranch} `
+            await runSshCommand(ip, command, maxRetries)
 
-    } else {
+            console.log("📍Installing heimdall...")
+            command = `cd ~/matic-cli/devnet/code/heimdall && make install`
+            await runSshCommand(ip, command, maxRetries)
 
-        console.log("📍Cloning heimdall repo...")
-        command = `cd ~ && git clone ${heimdallRepo} || (cd ~/heimdall; git fetch)`
-        await runSshCommand(ip, command, maxRetries)
+        } else {
 
-        console.log("📍Pulling heimdall latest changes for branch " + heimdallBranch + " ...")
-        command = `cd ~/heimdall && git fetch && git checkout ${heimdallBranch} && git pull origin ${heimdallBranch} `
-        await runSshCommand(ip, command, maxRetries)
+            console.log("📍Cloning heimdall repo...")
+            command = `cd ~ && git clone ${heimdallRepo} || (cd ~/heimdall; git fetch)`
+            await runSshCommand(ip, command, maxRetries)
 
-        console.log("📍Installing heimdall...")
-        command = `cd ~/heimdall && make install`
-        await runSshCommand(ip, command, maxRetries)
+            console.log("📍Pulling heimdall latest changes for branch " + heimdallBranch + " ...")
+            command = `cd ~/heimdall && git fetch && git checkout ${heimdallBranch} && git pull origin ${heimdallBranch} `
+            await runSshCommand(ip, command, maxRetries)
+
+            console.log("📍Installing heimdall...")
+            command = `cd ~/heimdall && make install`
+            await runSshCommand(ip, command, maxRetries)
+        }
     }
 
     console.log("📍Starting heimdall...")
@@ -98,8 +104,8 @@ export async function updateAll() {
         i === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[i]}`
         ip = `${user}@${doc['devnetBorHosts'][i]}`
 
-        await stopAndRestartBor(ip, i)
-        await stopAndRestartHeimdall(ip, i)
+        await pullAndRestartBor(ip, i, true)
+        await pullAndRestartHeimdall(ip, i, true)
     }
 }
 
@@ -116,7 +122,7 @@ export async function updateBor() {
         i === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[i]}`
         ip = `${user}@${doc['devnetBorHosts'][i]}`
 
-        await stopAndRestartBor(ip, i)
+        await pullAndRestartBor(ip, i, true)
     }
 }
 
@@ -133,6 +139,6 @@ export async function updateHeimdall() {
         i === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[i]}`
         ip = `${user}@${doc['devnetBorHosts'][i]}`
 
-        await stopAndRestartHeimdall(ip, i)
+        await pullAndRestartHeimdall(ip, i, true)
     }
 }

@@ -5,6 +5,7 @@ import {terraformDestroy} from "./express/commands/destroy";
 import {startStressTest} from "./express/commands/stress";
 import {sendStateSyncTx} from "./express/commands/send-state-sync";
 import {monitor} from "./express/commands/monitor";
+import {restartAll, restartBor, restartHeimdall} from "./express/commands/restart";
 
 require('dotenv').config();
 
@@ -50,6 +51,22 @@ export async function cli(args) {
             await updateHeimdall();
             break;
 
+        case "--restart-all":
+            console.log("📍Command --restart-all");
+            await restartAll();
+            break;
+
+        case "--restart-bor":
+            console.log("📍Command --restart-bor");
+            await timer(3000)
+            await restartBor();
+            break;
+
+        case "--restart-heimdall":
+            console.log("📍Command --restart-heimdall");
+            await restartHeimdall();
+            break;
+
         case "--stress":
             console.log("📍Command --stress");
             if (args.length >= 4) {
@@ -80,6 +97,9 @@ export async function cli(args) {
                 + "--update-all \n"
                 + "--update-bor \n"
                 + "--update-heimdall \n"
+                + "--restart-all \n"
+                + "--restart-bor \n"
+                + "--restart-heimdall \n"
                 + "--send-state-sync \n"
                 + "--monitor \n"
                 + "--stress --init \n"

@@ -173,6 +173,12 @@ Run options:
   - Fetches `bor` branch defined as `BOR_BRANCH` in `.env` file, pulls relative changes and restarts it on the remote machines
 - `./bin/express-cli --update-heimdall`
   - Fetches `heimdall` branch defined as `HEIMDALL_BRANCH` in `.env` file, pulls relative changes and restarts it on the remote machines
+- `./bin/express-cli --restart-all`
+  - Restarts `bor` and `heimdall` on all the remote machines
+- `./bin/express-cli --restart-bor`
+  - Restarts `bor` on all the remote machines
+- `./bin/express-cli --restart-heimdall`
+  - Restarts `heimdall` on all the remote machines
 - `./bin/express-cli --send-state-sync`
   - Create a `state-sync` transaction on the remote network 
 - `./bin/express-cli --monitor`
