@@ -1,7 +1,6 @@
 const yaml = require("js-yaml");
 const fs = require("fs");
 const {runScpCommand, runSshCommand, maxRetries} = require("../common/remote-worker");
-const contractAddresses = require("../../../contractAddresses.json");
 
 export async function sendStateSyncTx() {
 
@@ -14,6 +13,8 @@ export async function sendStateSyncTx() {
     let src = `${doc['ethHostUser']}@${machine0}:~/matic-cli/devnet/code/contracts/contractAddresses.json`
     let dest = `./contractAddresses.json`
     await runScpCommand(src, dest, maxRetries)
+
+    let contractAddresses = require("../../../contractAddresses.json");
 
     let MaticToken = contractAddresses.root.tokens.MaticToken;
 
