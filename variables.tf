@@ -28,7 +28,7 @@ variable "SENTRY_COUNT" {
 }
 
 variable "INSTANCE_TYPE" {
-  default = "t2.micro"
+  default = "t2.xlarge"
 }
 
 variable "INSTANCE_AMI" {

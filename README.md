@@ -166,7 +166,7 @@ Run options:
 - `./bin/express-cli --start` 
   - Creates the desired remote setup, based on the preferences defined in the `.env` file
 - `./bin/express-cli --destroy`
-  - Destroys the remote setup and delete the local `terraform` files 
+  - Destroys the remote setup and delete the dedicated VMs
 - `./bin/express-cli --update-all`
   - Fetches `heimdall` and `bor` branches defined as `HEIMDALL_BRANCH` and `BOR_BRANCH` in `.env` file, pulls relative changes and restarts those services on the remote machines
 - `./bin/express-cli --update-bor`
@@ -179,12 +179,12 @@ Run options:
   - Restarts `bor` on all the remote machines
 - `./bin/express-cli --restart-heimdall`
   - Restarts `heimdall` on all the remote machines
-- `./bin/express-cli --send-state-sync`
-  - Create a `state-sync` transaction on the remote network 
 - `./bin/express-cli --cleanup`
   - Cleans up `ganache`, `bor`, `heimdall` and `bridge`, redeploys all the contracts and restarts all the services
+- `./bin/express-cli --send-state-sync`
+  - Create a `state-sync` transaction on the remote network 
 - `./bin/express-cli --monitor`
-  - Monitors the reception of state-syncs and checkpoints to make sure the whole network is in a healthy state. If `--send-state-sync` haven't been used before, only checkpoints will be detected. The execution stops when a `state-sync` is found
+  - Monitors the reception of state-syncs and checkpoints to make sure the whole network is in a healthy state. If `--send-state-sync` hasn't been used before, only checkpoints will be detected. The execution stops when a `state-sync` is found
 - `./bin/express-cli --stress --init`
   - Runs the stress tests on remote nodes. The flag `--init` is needed when stress tests are ran for the first time, to fund the accounts 
 - `./bin/express-cli --stress`

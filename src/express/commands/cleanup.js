@@ -112,7 +112,7 @@ async function startServices(doc) {
         }
 
         console.log("📍Setting up heimdall on machine " + ip + " ...")
-        let command = `tmux send-keys -t matic-cli:0 'bash ~//node/heimdalld-setup.sh' ENTER`
+        let command = `tmux send-keys -t matic-cli:0 'bash ~/node/heimdalld-setup.sh' ENTER`
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Starting heimdall on machine " + ip + " ...")
