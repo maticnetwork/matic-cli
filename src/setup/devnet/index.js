@@ -660,7 +660,7 @@ async function setupDevnet(config) {
     devnet.heimdall = new Heimdall(config, {
         repositoryBranch: config.heimdallBranch,
     });
-    devnet.genesis = new Genesis(config, {repositoryBranch: "raneet10/pos-752"});
+    devnet.genesis = new Genesis(config, {repositoryBranch: "master"});
 
     const tasks = await devnet.getTasks();
     await tasks.run();
