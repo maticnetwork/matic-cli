@@ -31,7 +31,7 @@ program
     .version(pkg.version);
 
 
-export async function cli(args) {
+export async function cli() {
 
     console.log("\n📍Express CLI 🚀", "\nUse --help to see the available commands\n");
 
@@ -100,7 +100,7 @@ export async function cli(args) {
 
     else if (options.stress) {
         console.log("📍Command --stress");
-        if (options.stress == "fund") {
+        if (options.stress === "fund") {
             await startStressTest(true);
         } else {
             await startStressTest(false);

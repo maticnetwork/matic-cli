@@ -435,13 +435,6 @@ export class Devnet {
                         ], {stdio: getRemoteStdio()})
 
                         await execa('scp', [
-                            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                            `-i`, `~/cert.pem`,
-                            `${this.config.targetDirectory}/code/heimdall/build/bridge`,
-                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/bridge`
-                        ], {stdio: getRemoteStdio()})
-
-                        await execa('scp', [
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`, `-r`,
                             `-i`, `~/cert.pem`,
                             `${this.testnetDir}/node${i}/`,

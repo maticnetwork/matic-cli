@@ -162,7 +162,8 @@ To use the `express-cli` you must have the following requirement steps executed.
 - install `express-cli` and `matic-cli` locally with command `npm i`
 
 Instructions to run `express-cli`.
-Firs off, you need to `--init` terraform on your local machine, by executing the following command.
+For the list of commands, please run `express-cli --help`
+First off, you need to `--init` terraform on your local machine, by executing the following command.
 - `./bin/express-cli --init`
   - Initializes terraform and creates some git-ignored files locally. This step is mandatory before running any other command.
 Then, a remote devnet can be created with the `--start` command, as follows.
