@@ -116,16 +116,6 @@ export class Heimdall {
             chalk.bold.green("bash heimdall-start.sh")
         );
         console.log(
-            chalk.gray("Start heimdall rest-server") +
-            ": " +
-            chalk.bold.green("bash heimdall-server-start.sh")
-        );
-        console.log(
-            chalk.gray("Start heimdall bridge") +
-            ": " +
-            chalk.bold.green("bash heimdall-bridge-start.sh")
-        );
-        console.log(
             chalk.gray("Reset heimdall") +
             ": " +
             chalk.bold.green("bash heimdall-clean.sh")

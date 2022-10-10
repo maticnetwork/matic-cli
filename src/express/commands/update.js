@@ -11,7 +11,7 @@ export async function pullAndRestartBor(ip, i, isPull) {
     let borBranch = process.env.BOR_BRANCH
 
     console.log("📍Stopping bor...")
-    let command = `tmux send-keys -t matic-cli:3 'C-c' ENTER`
+    let command = `tmux send-keys -t matic-cli:1 'C-c' ENTER`
     await runSshCommand(ip, command, maxRetries)
 
     if (isPull) {
@@ -43,7 +43,7 @@ export async function pullAndRestartBor(ip, i, isPull) {
     }
 
     console.log("📍Starting bor...")
-    command = `tmux send-keys -t matic-cli:3 'bash ~/node/bor-start.sh' ENTER`
+    command = `tmux send-keys -t matic-cli:1 'bash ~/node/bor-start.sh' ENTER`
     await runSshCommand(ip, command, maxRetries)
 }
 
@@ -87,7 +87,7 @@ export async function pullAndRestartHeimdall(ip, i, isPull) {
     }
 
     console.log("📍Starting heimdall...")
-    command = `tmux send-keys -t matic-cli:0 'heimdalld start' ENTER`
+    command = `tmux send-keys -t matic-cli:0 'heimdalld start --chain=~/.heimdalld/config/genesis.json --bridge --all --rest-server' ENTER`
     await runSshCommand(ip, command, maxRetries)
 }
 

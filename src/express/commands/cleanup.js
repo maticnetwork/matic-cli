@@ -33,16 +33,8 @@ async function stopServices(doc) {
         let command = `tmux send-keys -t matic-cli:0 'C-c' ENTER`
         await runSshCommand(ip, command, maxRetries)
 
-        console.log("📍Stopping rest-server on machine " + ip + "...")
-        command = `tmux send-keys -t matic-cli:1 'C-c' ENTER`
-        await runSshCommand(ip, command, maxRetries)
-
-        console.log("📍Stopping heimdall bridge on machine " + ip + "...")
-        command = `tmux send-keys -t matic-cli:2 'C-c' ENTER`
-        await runSshCommand(ip, command, maxRetries)
-
         console.log("📍Stopping bor on machine " + ip + " ...")
-        command = `tmux send-keys -t matic-cli:3 'C-c' ENTER`
+        command = `tmux send-keys -t matic-cli:1 'C-c' ENTER`
         await runSshCommand(ip, command, maxRetries)
     }
 }
@@ -69,11 +61,11 @@ async function cleanupServices(doc) {
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Purging queue for heimdall bridge on machine " + ip + " ...")
-        command = `tmux send-keys -t matic-cli:2 'bridge purge-queue' ENTER`
+        command = `tmux send-keys -t matic-cli:0 'heimdalld heimdall-bridge purge-queue' ENTER`
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Resetting heimdall bridge on machine " + ip + " ...")
-        command = `tmux send-keys -t matic-cli:2 'bridge unsafe-reset-all' ENTER`
+        command = `tmux send-keys -t matic-cli:0 'heimdalld heimdall-bridge unsafe-reset-all' ENTER`
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Cleaning up bridge storage on machine " + ip + " ...")
@@ -116,25 +108,15 @@ async function startServices(doc) {
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Starting heimdall on machine " + ip + " ...")
-        command = `tmux send-keys -t matic-cli:0 'heimdalld start' ENTER`
-        await runSshCommand(ip, command, maxRetries)
-
-        console.log("📍Starting rest-server on machine " + ip + " ...")
-        command = `tmux send-keys -t matic-cli:1 'heimdalld rest-server' ENTER`
-        await runSshCommand(ip, command, maxRetries)
-
-        await timer(2000)
-
-        console.log("📍Starting bridge on machine " + ip + " ...")
-        command = `tmux send-keys -t matic-cli:2 'bridge start --all' ENTER`
+        command = `tmux send-keys -t matic-cli:0 'heimdalld start --chain=~/.heimdalld/config/genesis.json --bridge --all --rest-server' ENTER`
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Setting up bor on machine " + ip + " ...")
-        command = `tmux send-keys -t matic-cli:3 'bash ~/node/bor-setup.sh' ENTER`
+        command = `tmux send-keys -t matic-cli:1 'bash ~/node/bor-setup.sh' ENTER`
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Starting bor on machine " + ip + " ...")
-        command = `tmux send-keys -t matic-cli:3 'bash ~/node/bor-start.sh' ENTER`
+        command = `tmux send-keys -t matic-cli:1 'bash ~/node/bor-start.sh' ENTER`
         await runSshCommand(ip, command, maxRetries)
     }
 }

@@ -143,8 +143,9 @@ MIT
 
 
 # express-cli 
+Note: the current version of `express-cli` is compatible with `bor` and `heimdall` versions v0.3.x. Backward compatibility with 0.2.x has been removed.
 
-Requirements:  
+To use the `express-cli` you must have the following requirement steps executed.
 - install `terraform` on your local machine: https://learn.hashicorp.com/tutorials/terraform/install-cli
 - `node` version v10.17.0. This is also documented in `.nvmrc` file
 - generate a keypair on AWS EC2 and download its certificate locally (`.pem` or `.cer` file)
@@ -160,13 +161,17 @@ Requirements:
 - For `BLOCK_NUMBER` and `BLOCK_TIME`, a bug with `bor` has been reported (see https://0xpolygon.slack.com/archives/C027FCE028P/p1664366701502579). Therefore, until the bug is fixed, it is recommended to use single values. 
 - install `express-cli` and `matic-cli` locally with command `npm i`
 
-Run options:
+Instructions to run `express-cli`.
+Firs off, you need to `--init` terraform on your local machine, by executing the following command.
 - `./bin/express-cli --init`
   - Initializes terraform and creates some git-ignored files locally. This step is mandatory before running any other command.
+Then, a remote devnet can be created with the `--start` command, as follows.
 - `./bin/express-cli --start` 
   - Creates the desired remote setup, based on the preferences defined in the `.env` file
+To destroy the remote devnet, you can execute the `--destroy` command.
 - `./bin/express-cli --destroy`
   - Destroys the remote setup and delete the dedicated VMs
+The `express-cli` also comes with additional utility commands, listed below.
 - `./bin/express-cli --update-all`
   - Fetches `heimdall` and `bor` branches defined as `HEIMDALL_BRANCH` and `BOR_BRANCH` in `.env` file, pulls relative changes and restarts those services on the remote machines
 - `./bin/express-cli --update-bor`
@@ -181,6 +186,7 @@ Run options:
   - Restarts `heimdall` on all the remote machines
 - `./bin/express-cli --cleanup`
   - Cleans up `ganache`, `bor`, `heimdall` and `bridge`, redeploys all the contracts and restarts all the services
+The `express-cli` also provides additional testing commands, listed here.
 - `./bin/express-cli --send-state-sync`
   - Create a `state-sync` transaction on the remote network 
 - `./bin/express-cli --monitor`
