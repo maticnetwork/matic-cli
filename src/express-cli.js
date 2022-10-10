@@ -14,8 +14,8 @@ require('dotenv').config();
 
 const timer = ms => new Promise(res => setTimeout(res, ms))
 
-const mainCmd = program
-    .option('-i, --init', 'Iniiate the terraform setup')
+program
+    .option('-i, --init', 'Initiate the terraform setup')
     .option('-s, --start', 'Start the setup')
     .option('-d, --destroy', 'Destroy the setup')
     .option('-uall, --update-all', 'Update the setup')
