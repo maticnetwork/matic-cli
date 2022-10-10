@@ -143,9 +143,9 @@ MIT
 
 
 # express-cli 
-Note: the current version of `express-cli` is compatible with `bor` and `heimdall` versions v0.3.x. Backward compatibility with 0.2.x has been removed.
+#### Note: the current version of `express-cli` is compatible with `bor` and `heimdall` versions `v0.3.x`. Backward compatibility with `0.2.x` has been removed.
 
-To use the `express-cli` you must have the following requirement steps executed.
+To use the `express-cli` you have to execute the following steps.
 - install `terraform` on your local machine: https://learn.hashicorp.com/tutorials/terraform/install-cli
 - `node` version v10.17.0. This is also documented in `.nvmrc` file
 - generate a keypair on AWS EC2 and download its certificate locally (`.pem` or `.cer` file)
@@ -192,7 +192,7 @@ The `express-cli` also provides additional testing commands, listed here.
   - Create a `state-sync` transaction on the remote network 
 - `./bin/express-cli --monitor`
   - Monitors the reception of state-syncs and checkpoints to make sure the whole network is in a healthy state. If `--send-state-sync` hasn't been used before, only checkpoints will be detected. The execution stops when a `state-sync` is found
-- `./bin/express-cli --stress --init`
-  - Runs the stress tests on remote nodes. The flag `--init` is needed when stress tests are ran for the first time, to fund the accounts 
+- `./bin/express-cli --stress [fund]`
+  - Runs the stress tests on remote nodes. The option `fund` is needed when stress tests are ran for the first time, to fund the accounts 
 - `./bin/express-cli --stress`
   - Runs the stress tests on remote nodes
