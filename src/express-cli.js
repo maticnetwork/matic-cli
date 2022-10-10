@@ -33,7 +33,7 @@ const mainCmd = program
 
 export async function cli(args) {
 
-    console.log("\n📍Express CLI 🚀","\nUse --help to see the available commands\n");
+    console.log("\n📍Express CLI 🚀", "\nUse --help to see the available commands\n");
 
     program.parse(process.argv);
     const options = program.opts();
@@ -87,7 +87,7 @@ export async function cli(args) {
         console.log("📍Command --restart-heimdall");
         await restartHeimdall();
     }
-    
+
     else if (options.cleanup) {
         console.log("📍Command --cleanup");
         await cleanup();
@@ -100,9 +100,9 @@ export async function cli(args) {
 
     else if (options.stress) {
         console.log("📍Command --stress");
-        if(options.stress == "fund"){
+        if (options.stress == "fund") {
             await startStressTest(true);
-        }else{
+        } else {
             await startStressTest(false);
         }
     }
