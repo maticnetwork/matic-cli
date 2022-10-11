@@ -107,21 +107,6 @@ Logs
 
 Logs will be at `logs/` folder
 
-
-#### To setup multi-node remote network
-
-```bash
-../bin/matic-cli setup devnet -c ../configs/devnet/remote-setup-config.yaml
-```
-
-You can find more details about configuration options [here](configs/README.md).
-
-Alternatively, setup a local/remote network interactively
-
-```bash
-../bin/matic-cli setup devnet -i
-```
-
 Notes:
 1. The host machine and remote machine has to be an linux machine with ubuntu as user
 2. The ganache URL hostname will be used for ganache - http://<1st machine IP>:9545
