@@ -2,11 +2,11 @@ import fs from "fs-extra";
 import path from "path";
 import execa from "execa";
 import chalk from "chalk";
-import { toBuffer, privateToPublic, bufferToHex } from "ethereumjs-util";
 import YAML from "yaml";
 
-import { getKeystoreDetails, getChainIds } from "./helper";
-import { getAccountFromPrivateKey } from "../lib/utils";
+import {getChainIds, getKeystoreDetails, getNetworkParams} from "./helper";
+import {getAccountFromPrivateKey} from "../lib/utils";
+import {getRemoteStdio} from "../express/common/remote-worker";
 
 const defaultConfigFileName = "config.json";
 
@@ -65,6 +65,11 @@ export default class Config {
     this.set(answers);
   }
 
+  async loadNetworkParams() {
+    const answer = await getNetworkParams(this)
+    this.set(answer)
+  }
+
   async forceAskAccount() {
     this.set({ forceAsk: true });
   }
@@ -87,8 +92,8 @@ export default class Config {
   print() {
     console.log(
       chalk.gray("Config json file") +
-        ": " +
-        chalk.bold.green(this.configFilePath)
+      ": " +
+      chalk.bold.green(this.configFilePath)
     );
     console.log(
       chalk.gray("Code directory") + ": " + chalk.bold.green(this.codeDir)
@@ -98,16 +103,16 @@ export default class Config {
     );
     console.log(
       chalk.gray("Address") +
-        ": " +
-        chalk.bold.green(this.primaryAccount.address)
+      ": " +
+      chalk.bold.green(this.primaryAccount.address)
     );
     console.log(
       chalk.gray("Bor Chain ID") + ": " + chalk.bold.green(this.borChainId)
     );
     console.log(
       chalk.gray("Heimdall Chain ID") +
-        ": " +
-        chalk.bold.green(this.heimdallChainId)
+      ": " +
+      chalk.bold.green(this.heimdallChainId)
     );
   }
 }
@@ -149,6 +154,7 @@ export async function loadConfig(options = {}) {
     ["-p", config.configDir, config.dataDir, config.configDir],
     {
       cwd: config.targetDirectory,
+      stdio: getRemoteStdio(),
     }
   );
 

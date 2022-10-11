@@ -27,6 +27,15 @@ borChainId:
 # ChainID of heimdall
 heimdallChainId:
 
+# Sprint size
+sprintSize:
+
+# Block numbers (comma separated)
+blockNumber:
+
+# Block times for the corresponding block numbers (comma separated)
+blockTime:
+
 # Branch of bor to use. Repository: https://github.com/maticnetwork/bor
 borBranch: v0.2.16
 

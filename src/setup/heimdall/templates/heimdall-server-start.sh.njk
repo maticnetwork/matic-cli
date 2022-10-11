@@ -1,8 +1,0 @@
-#!/usr/bin/env sh
-
-set -x #echo on
-
-HEIMDALL_HOME_DIR={{ obj.heimdallDataDir }}
-BUILD_DIR={{ obj.buildDir }}
-
-$BUILD_DIR/heimdalld --home $HEIMDALL_HOME_DIR rest-server
