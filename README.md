@@ -79,6 +79,7 @@ Alternatively, setup a local/remote network interactively
 
 Notes:
 1. We have provided the default values where ever so to ensure smooth functioning of the process
+2.  Run `go get golang.org/x/sys@latest` on `./devnet/code/heimdall` if you get error - `//go:linkname must refer to declared function or variable`
 
 **After the setup is done, follow these steps for local docker deployment:**
 

@@ -9,3 +9,4 @@ numOfValidators: 2
 numOfNonValidators: 0
 ethURL: http://ganache:9545
 devnetType: docker
+ethHostUser: ubuntu
