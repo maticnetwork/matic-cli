@@ -61,9 +61,19 @@ export class Contracts {
       {
         title: "Install dependencies for matic contracts",
         task: () =>
-          projectInstall({
-            cwd: this.repositoryDir,
-          }),
+          execa(
+            "npm",
+            [
+              "install",
+              "--omit=dev"
+            ],
+            {
+              cwd: this.repositoryDir,
+            }
+          ),
+          // projectInstall({
+          //   cwd: this.repositoryDir,
+          // }),
       },
       {
         title: "Process templates",

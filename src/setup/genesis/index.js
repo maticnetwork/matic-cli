@@ -25,7 +25,7 @@ export class Genesis {
       "https://github.com/maticnetwork/genesis-contracts";
     this.maticContractsRepository = "matic-contracts";
     this.maticContractsRepositoryUrl =
-      "https://github.com/maticnetwork/contracts";
+      "https://github.com/gatsbyz/contracts";
   }
 
   get name() {
@@ -98,9 +98,18 @@ export class Genesis {
         {
           title: "Install dependencies for matic-contracts",
           task: () =>
-            projectInstall({
-              cwd: this.maticContractDir,
-            }),
+            execa(
+              "npm",
+              [
+                "install"
+              ],
+              {
+                cwd: this.maticContractDir,
+              }
+            ),
+            // projectInstall({
+            //   cwd: this.maticContractDir,
+            // }),
         },
         {
           title: "Process templates",
