@@ -101,7 +101,8 @@ export class Genesis {
             execa(
               "npm",
               [
-                "install"
+                "install",
+                "--omit=dev"
               ],
               {
                 cwd: this.maticContractDir,
