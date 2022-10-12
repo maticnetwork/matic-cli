@@ -215,40 +215,63 @@ async function runRemoteSetupWithMaticCLI(ips) {
     await runSshCommand(ip, command, maxRetries)
 }
 
-async function runDockerSetupWithMaticCLI(ips) {
+async function eventuallyCleanupPreviousDevnet(ips) {
 
     let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
-    let ipsArray = ips.split(' ').join('').split(",")
-    let ip = `${doc['ethHostUser']}@${ipsArray[0]}`
 
-    console.log("📍Creating devnet and removing default configs...")
-    let command = `cd ~/matic-cli && mkdir -p devnet && rm configs/devnet/docker-setup-config.yaml`
-    await runSshCommand(ip, command, maxRetries)
+    let ipsArray = splitToArray(ips)
+    let borUsers = splitToArray(doc['devnetBorUsers'].toString())
 
-    console.log("📍Copying docker matic-cli configurations...")
-    let src = `./configs/devnet/docker-setup-config.yaml`
-    let dest = `${doc['ethHostUser']}@${ipsArray[0]}:~/matic-cli/configs/devnet/docker-setup-config.yaml`
-    await runScpCommand(src, dest, maxRetries)
+    let user, ip
 
-    console.log("📍Executing docker setup with matic-cli...")
-    command = `cd ~/matic-cli/devnet && ../bin/matic-cli setup devnet -c ../configs/devnet/docker-setup-config.yaml`
-    await runSshCommand(ip, command, maxRetries)
+    for (let i = 0; i < ipsArray.length; i++) {
 
-    console.log("📍Starting ganache...")
-    command = `cd ~/matic-cli/devnet && bash docker-ganache-start.sh`
-    await runSshCommand(ip, command, maxRetries)
+        i === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[i]}`
+        ip = `${user}@${ipsArray[i]}`
 
-    console.log("📍Starting heimdall...")
-    command = `cd ~/matic-cli/devnet && bash docker-heimdall-start-all.sh`
-    await runSshCommand(ip, command, maxRetries)
+        if (i === 0) {
 
-    console.log("📍Setting bor up...")
-    command = `cd ~/matic-cli/devnet && bash docker-bor-setup.sh`
-    await runSshCommand(ip, command, maxRetries)
+            console.log("📍Removing old devnet (if present) on machine " + ip + " ...")
+            let command = `rm -rf ~/matic-cli/devnet`
+            await runSshCommand(ip, command, maxRetries)
 
-    console.log("📍Starting bor...")
-    command = `cd ~/matic-cli/devnet && bash docker-bor-start-all.sh`
-    await runSshCommand(ip, command, maxRetries)
+            console.log("📍Stopping ganache (if present) on machine " + ip + " ...")
+            command = `tmux send-keys -t matic-cli-ganache:0 'C-c' ENTER || echo 'ganache not running on current machine...'`
+            await runSshCommand(ip, command, maxRetries)
+
+            console.log("📍Killing ganache tmux session (if present) on machine " + ip + " ...")
+            command = `tmux kill-session -t matic-cli-ganache || echo 'matic-cli-ganache tmux session does not exist on current machine...'`
+            await runSshCommand(ip, command, maxRetries)
+        }
+
+        console.log("📍Stopping heimdall (if present) on machine " + ip + " ...")
+        let command = `tmux send-keys -t matic-cli:0 'C-c' ENTER || echo 'heimdall not running on current machine...'`
+        await runSshCommand(ip, command, maxRetries)
+
+        console.log("📍Stopping bor (if present) on machine " + ip + " ...")
+        command = `tmux send-keys -t matic-cli:1 'C-c' ENTER || echo 'bor not running on current machine...'`
+        await runSshCommand(ip, command, maxRetries)
+
+        console.log("📍Killing matic-cli tmux session (if present) on machine " + ip + " ...")
+        command = `tmux kill-session -t matic-cli || echo 'matic-cli tmux session does not exist on current machine...'`
+        await runSshCommand(ip, command, maxRetries)
+
+        console.log("📍Removing .bor folder (if present) on machine " + ip + " ...")
+        command = `rm -rf ~/.bor`
+        await runSshCommand(ip, command, maxRetries)
+
+        console.log("📍Removing .heimdalld folder (if present) on machine " + ip + " ...")
+        command = `rm -rf ~/.heimdalld`
+        await runSshCommand(ip, command, maxRetries)
+
+        console.log("📍Removing data folder (if present) on machine " + ip + " ...")
+        command = `rm -rf ~/data`
+        await runSshCommand(ip, command, maxRetries)
+
+        console.log("📍Removing node folder (if present) on machine " + ip + " ...")
+        command = `rm -rf ~/node`
+        await runSshCommand(ip, command, maxRetries)
+    }
 }
 
 export async function start() {
@@ -271,10 +294,7 @@ export async function start() {
 
     await prepareMaticCLI(ips)
 
-// FIXME see POS-848
-    if (process.env.TF_VAR_DOCKERIZED === 'yes') {
-        await runDockerSetupWithMaticCLI(ips)
-    } else {
-        await runRemoteSetupWithMaticCLI(ips);
-    }
+    await eventuallyCleanupPreviousDevnet(ips)
+
+    await runRemoteSetupWithMaticCLI(ips);
 }
