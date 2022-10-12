@@ -151,10 +151,10 @@ To use the `express-cli` you have to execute the following steps.
 - generate a keypair on AWS EC2 and download its certificate locally (`.pem` or `.cer` file)
 - copy `.env.example` to `.env` with command `cp .env.example .env`
 - replace `TF_VAR_ACCESS_KEY` and `TF_VAR_SECRET_KEY` with your own keys (ask devops to generate one for you)
+- set at least 2 nodes (`TF_VAR_VALIDATOR_COUNT` + `TF_VAR_SENTRY_COUNT` > 1) and adjust the `DEVNET_BOR_USERS` accordingly 
 - (optional) replace `TF_VAR_VM_NAME` with your own identifier (it can be any string, default is "polygon-user")
 - (optional) replace `TF_VAR_DISK_SIZE_GB` with your preferred disk size in GB (default is 500 GB)
 - `VERBOSE=true` prints logs from the remote machines. If set to `false`, only `express-cli` and `matic-cli` logs will be shown
-- set `TF_VAR_DOCKERIZED` to `no`. Option `yes` runs the network on one VM only in a dockerized stack, but it's still a WIP (see POS-848)
 - make sure `PEM_FILE_PATH` points to a correct AWS key certificate, the one you downloaded in the previous step
 - (optional) source the `.env` file if your local system requires to, with command `source .env`  
 - see other details of `.env` vars in the `.env.example` template
@@ -169,6 +169,7 @@ First off, you need to `--init` terraform on your local machine, by executing th
 Then, a remote devnet can be created with the `--start` command, as follows.
 - `./bin/express-cli --start` 
   - Creates the desired remote setup, based on the preferences defined in the `.env` file
+  - `--start` command can be used also to target an existing AWS setup. If changes to `.env` file are detected, the previous devnet will be destroyed and a new one created, reusing the same AWS VMs  
 To destroy the remote devnet, you can execute the `--destroy` command.
 - `./bin/express-cli --destroy`
   - Destroys the remote setup and delete the dedicated VMs

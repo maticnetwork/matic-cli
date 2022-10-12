@@ -11,10 +11,6 @@ variable "VM_NAME" {
   default = "polygon-user"
 }
 
-variable "DOCKERIZED" {
-  default = "no"
-}
-
 variable "DISK_SIZE_GB" {
   default = "500"
 }

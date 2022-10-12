@@ -45,6 +45,8 @@ export async function cli() {
 
     else if (options.start) {
         console.log("📍Command --start");
+        console.log("⛔ If you are targeting an already existing devnet, this comand will only work if all bor ipc sessions have been manually closed...")
+        await timer(3000)
         await start();
     }
 
