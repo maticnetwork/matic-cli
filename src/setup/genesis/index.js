@@ -20,7 +20,7 @@ export class Genesis {
         this.config = config;
 
         this.repositoryName = this.name;
-        this.repositoryBranch = options.repositoryBranch || "master";
+        this.repositoryBranch = "jesse/dependency-update";
         this.repositoryUrl =
             options.repositoryUrl ||
             "https://github.com/maticnetwork/genesis-contracts";
@@ -101,9 +101,16 @@ export class Genesis {
                 {
                     title: "Install dependencies for matic-contracts",
                     task: () =>
-                        projectInstall({
+                        execa(
+                            "npm",
+                            [
+                            "install",
+                            "--omit=dev"
+                            ],
+                            {
                             cwd: this.maticContractDir,
-                        }),
+                            }
+                        ),
                 },
                 {
                     title: "Process templates",
