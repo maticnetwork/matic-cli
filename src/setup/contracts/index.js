@@ -10,9 +10,9 @@ export class Contracts {
     this.config = config;
 
     this.repositoryName = "contracts";
-    this.repositoryBranch = options.repositoryBranch || "master";
+    this.repositoryBranch = "jesse/dependency-update";
     this.repositoryUrl =
-      options.repositoryUrl || "https://github.com/gatsbyz/contracts";
+      options.repositoryUrl || "https://github.com/maticnetwork/contracts";
   }
 
   get name() {
