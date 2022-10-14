@@ -178,6 +178,7 @@ export class Genesis {
                     title: "Configure Block time",
                     task: () => {
                         const blocks = []
+                        console.log('this.config', JSON.stringify(this.config, undefined, 2));
                         const blockTimes = this.config.blockTime.split(",")
                         const blockNumbers = this.config.blockNumber.split(",")
 
