@@ -101,9 +101,16 @@ export class Genesis {
                 {
                     title: "Install dependencies for matic-contracts",
                     task: () =>
-                        projectInstall({
+                        execa(
+                            "npm",
+                            [
+                            "install",
+                            "--omit=dev"
+                            ],
+                            {
                             cwd: this.maticContractDir,
-                        }),
+                            }
+                        ),
                 },
                 {
                     title: "Process templates",

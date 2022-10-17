@@ -5,9 +5,9 @@ heimdallChainId:
 borBranch:
 heimdallBranch:
 contractsBranch: arpit/v0.3.2-backport
-sprintSize:
-blockNumber:
-blockTime:
+sprintSize: 64
+blockNumber: '2'
+blockTime: '0'
 numOfValidators: 2
 numOfNonValidators: 0
 ethURL: http://ganache:9545

@@ -11,10 +11,10 @@ Please make sure you have installed following dependencies:
     sudo apt update
     sudo apt install build-essential
     ```
-* Node v10.17.0
+* Node v16.17.1 (Latest LTS. Check with `nvm ls-remote`)
     ```bash
     curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
-    nvm install 10.17.0
+    nvm install 16.17.1
     ```
 * Go 1.18+
     ```bash
@@ -147,7 +147,7 @@ MIT
 
 To use the `express-cli` you have to execute the following steps.
 - install `terraform` on your local machine: https://learn.hashicorp.com/tutorials/terraform/install-cli
-- `node` version v10.17.0. This is also documented in `.nvmrc` file
+- `node` version v16.17.1. This is also documented in `.nvmrc` file
 - generate a keypair on AWS EC2 and download its certificate locally (`.pem` or `.cer` file)
 - copy `.env.example` to `.env` with command `cp .env.example .env`
 - replace `TF_VAR_ACCESS_KEY` and `TF_VAR_SECRET_KEY` with your own keys (ask devops to generate one for you)
