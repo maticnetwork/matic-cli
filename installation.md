@@ -3,11 +3,11 @@
 You'll require following dependencies in order to run matic-cli on a docker based setup
 
 1. Git
-2. NPM and Node v10.17.0 (preferrable):</br>
+2. NPM and Node v16.17.1 (preferrable):</br>
   - If you're running on a fresh machine, we suggest installing things using node version manager (nvm).
   - Refer [this](https://github.com/nvm-sh/nvm#installing-and-updating) for installing/updating nvm
-  - Once installed, you can download the required node version using `nvm install 10.17.0` and then run `nvm use 10.17.0` to use it.
-  - Cross verify by running `node --version` which should say `v10.17.0`.
+  - Once installed, you can download the required node version using `nvm install 16.17.1` and then run `nvm use 16.17.1` to use it.
+  - Cross verify by running `node --version` which should say `v16.17.1`.
 3. Go 1.18+:</br>
   Follow the steps below to install the latest go version 1.18.1 (if not already installed) (Note that these are preferrable steps which we use. You can also install go by downloading the package from the official documentation)
   - Download the installation script (OS/Platform independent)

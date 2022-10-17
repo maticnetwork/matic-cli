@@ -3,14 +3,14 @@ import chalk from "chalk";
 import path from "path";
 import fs from "fs-extra";
 
-import { printDependencyInstructions, getDefaultBranch } from "../helper";
-import { loadConfig } from "../config";
+import {getDefaultBranch, printDependencyInstructions} from "../helper";
+import {loadConfig} from "../config";
 
-import { Genesis } from "../genesis";
-import { Heimdall } from "../heimdall";
-import { Ganache } from "../ganache";
-import { Bor } from "../bor";
-import { processTemplateFiles } from "../../lib/utils";
+import {Genesis} from "../genesis";
+import {Heimdall} from "../heimdall";
+import {Ganache} from "../ganache";
+import {Bor} from "../bor";
+import {processTemplateFiles} from "../../lib/utils";
 
 async function setupLocalnet(config) {
   const ganache = new Ganache(config, {

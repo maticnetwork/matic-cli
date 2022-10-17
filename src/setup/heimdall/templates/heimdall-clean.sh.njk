@@ -6,5 +6,5 @@ HEIMDALL_HOME_DIR={{ obj.heimdallDataDir }}
 BUILD_DIR={{ obj.buildDir }}
 
 $BUILD_DIR/heimdalld --home $HEIMDALL_HOME_DIR unsafe-reset-all
-$BUILD_DIR/bridge --home $HEIMDALL_HOME_DIR purge-queue
+$BUILD_DIR/heimdalld heimdall-bridge --home $HEIMDALL_HOME_DIR purge-queue
 rm -rf $HEIMDALL_HOME_DIR/bridge

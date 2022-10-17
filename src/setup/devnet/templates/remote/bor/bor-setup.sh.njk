@@ -12,9 +12,9 @@ cp -rf $NODE_DIR/bor/* $BOR_HOME/
 
 # setup bor
 BOR_DATA_DIR=$BOR_HOME/data
-bor --datadir $BOR_DATA_DIR init $BOR_HOME/genesis.json 
 
 # copy bor files
+mkdir -p $BOR_DATA_DIR/bor;
 cp $BOR_HOME/nodekey $BOR_DATA_DIR/bor/
 cp $BOR_HOME/static-nodes.json $BOR_DATA_DIR/
 cp $BOR_HOME/static-nodes.json $BOR_DATA_DIR/bor/

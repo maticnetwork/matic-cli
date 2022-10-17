@@ -1,12 +1,15 @@
 defaultStake: 10000
 defaultFee: 2000
-borChainId:
-heimdallChainId:
+borChainId: 15005
+heimdallChainId: heimdall-4052
 borBranch: v0.2.16
 heimdallBranch: v0.2.10
-contractsBranch: arpit/v0.3.1-backport
-numOfValidators: 2
-numOfNonValidators: 0
+contractsBranch: jc/v0.3.1-backport
+sprintSize: 64
+blockNumber: 0,64
+blockTime: 2,5
+numOfValidators: 1
+numOfNonValidators: 1
 ethURL: http://172.20.1.100:9545
 ethHostUser: ubuntu
 devnetType: remote
@@ -22,3 +25,5 @@ devnetBorUsers:
 devnetHeimdallUsers:
   - ubuntu
   - ubuntu
+borDockerBuildContext: https://github.com/maticnetwork/bor.git#develop
+heimdallDockerBuildContext: https://github.com/maticnetwork/heimdall.git#develop
