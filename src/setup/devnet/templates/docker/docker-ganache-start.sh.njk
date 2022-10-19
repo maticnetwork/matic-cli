@@ -4,10 +4,11 @@ set -x #echo on
 
 DATA_DIR={{ ganache.dbName }}
 
-docker compose run -d --service-ports --name ganache ganache --hardfork istanbul \
+docker compose run -d --rm --service-ports --name ganache ganache --hardfork istanbul \
   --blockTime 1 \
   --db /root/data/$DATA_DIR \
   {% for acc in obj.config.accounts %}--account {{ acc.privateKey }},1000000000000000000000 {% endfor %}\
   --gasLimit 8000000 \
   --gasPrice 0 \
-  -p 9545 -h 0.0.0.0
+  -p 9545 -h 0.0.0.0 \
+  1>/dev/null 2>/dev/null &
