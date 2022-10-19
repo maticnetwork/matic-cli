@@ -29,7 +29,7 @@ export class Heimdall {
         this.config = config;
 
         this.repositoryName = this.name
-        this.repositoryBranch = options.repositoryBranch || 'qa'
+        this.repositoryBranch = options.repositoryBranch || 'develop'
         this.repositoryUrl = options.repositoryUrl || 'https://github.com/maticnetwork/heimdall'
         this.dockerContext = options.dockerContext
     }
