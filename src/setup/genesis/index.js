@@ -20,8 +20,7 @@ export class Genesis {
         this.config = config;
 
         this.repositoryName = this.name;
-        this.repositoryBranch = options.repositoryBranch || "master";
-        console.log(">>>>>>>> genesis-contracts branch: ", this.repositoryBranch)
+        this.repositoryBranch = "mardizzone/pos-880-revert";
         this.repositoryUrl =
             options.repositoryUrl ||
             "https://github.com/maticnetwork/genesis-contracts";
