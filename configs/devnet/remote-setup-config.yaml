@@ -2,12 +2,12 @@ defaultStake: 10000
 defaultFee: 2000
 borChainId: 15005
 heimdallChainId: heimdall-4052
-borBranch: v0.2.16
-heimdallBranch: v0.2.10
-contractsBranch: jc/v0.3.1-backport
+borBranch: v0.3.0-beta5
+heimdallBranch: v0.3.0-beta2
+contractsBranch: mardizzone/pos-880-revert
 sprintSize: 64
-blockNumber: 0,64
-blockTime: 2,5
+blockNumber: '0'
+blockTime: '2'
 numOfValidators: 1
 numOfNonValidators: 1
 ethURL: http://172.20.1.100:9545
@@ -25,5 +25,5 @@ devnetBorUsers:
 devnetHeimdallUsers:
   - ubuntu
   - ubuntu
-borDockerBuildContext: https://github.com/maticnetwork/bor.git#develop
-heimdallDockerBuildContext: https://github.com/maticnetwork/heimdall.git#develop
+borDockerBuildContext: https://github.com/maticnetwork/bor.git#qa
+heimdallDockerBuildContext: https://github.com/maticnetwork/heimdall.git#qa

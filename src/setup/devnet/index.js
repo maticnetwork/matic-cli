@@ -6,6 +6,7 @@ import execa from "execa";
 import fs from "fs-extra";
 import nunjucks from "nunjucks";
 import {bufferToHex, privateToPublic, toBuffer} from "ethereumjs-util";
+import shell from "shelljs";
 
 import {Heimdall} from "../heimdall";
 import {Bor} from "../bor";
@@ -474,6 +475,10 @@ export class Devnet {
                         "--output-dir",
                         "devnet",
                     ];
+
+                    // create heimdall folder
+                    shell.exec(`sudo mkdir -p /var/lib/heimdall`)
+                    shell.exec(`sudo chmod 777 -R /var/lib/heimdall/`)
 
                     // create testnet
                     await execa(heimdall.heimdalldCmd, args, {

@@ -21,6 +21,7 @@ export class Genesis {
 
         this.repositoryName = this.name;
         this.repositoryBranch = options.repositoryBranch || "master";
+        console.log(">>>>>>>> genesis-contracts branch: ", this.repositoryBranch)
         this.repositoryUrl =
             options.repositoryUrl ||
             "https://github.com/maticnetwork/genesis-contracts";
