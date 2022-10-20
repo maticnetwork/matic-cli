@@ -32,6 +32,7 @@
     "inquirer": "^6.2.2",
     "js-yaml": "^4.1.0",
     "listr": "^0.14.3",
+    "moonwalker": "github:atvanguard/moonwalker",
     "node-fetch": "^2.6.7",
     "nunjucks": "^3.2.1",
     "pkg-install": "^1.0.0",
