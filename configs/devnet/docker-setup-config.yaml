@@ -4,7 +4,7 @@ borChainId:
 heimdallChainId:
 borBranch:
 heimdallBranch:
-contractsBranch: arpit/v0.3.2-backport
+contractsBranch: jc/v0.3.1-backport
 sprintSize: 64
 blockNumber: '2'
 blockTime: '0'
