@@ -10,7 +10,7 @@ blockNumber: '0'
 blockTime: '2'
 numOfValidators: 1
 numOfNonValidators: 1
-ethURL: http://localhost:9545
+ethURL: http://ganache:9545
 ethHostUser: ubuntu
 devnetType: docker
 borDockerBuildContext: https://github.com/maticnetwork/bor.git#develop

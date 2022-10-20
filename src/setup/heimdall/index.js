@@ -31,7 +31,7 @@ export class Heimdall {
         this.repositoryName = this.name
         this.repositoryBranch = options.repositoryBranch || 'develop'
         this.repositoryUrl = options.repositoryUrl || 'https://github.com/maticnetwork/heimdall'
-        this.dockerContext = options.dockerContext
+        this.dockerContext = options.dockerContext || "https://github.com/maticnetwork/heimdall.git#develop"
     }
 
     get name() {
@@ -270,16 +270,14 @@ export class Heimdall {
         };
     }
 
-    buildTask() {
-        return {
-            title: "Build Heimdall",
-            task: () =>
-                execa("make", ["build", "network=local"], {
-                    cwd: this.repositoryDir,
-                    stdio: getRemoteStdio(),
-                }),
-        };
+  buildTask() {
+    return {
+      title: 'Build Heimdall',
+      task: () => execa('make', ['build'], {
+        cwd: this.repositoryDir
+      })
     }
+  }
 
     async getTasks() {
         return new Listr(

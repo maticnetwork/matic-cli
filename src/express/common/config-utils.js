@@ -30,7 +30,7 @@ export async function editMaticCliDockerYAMLConfig() {
 
     setCommonConfigs(doc)
     setEthHostUser('ubuntu', doc)
-    setEthURL('localhost', doc);
+    setEthURL('ganache', doc);
     setConfigValue('devnetBorUsers', process.env.DEVNET_BOR_USERS, doc)
     setConfigValue('devnetType', 'docker', doc)
 
