@@ -110,7 +110,6 @@ export async function cli() {
 
     else if (options.monitor) {
         console.log("📍Command --monitor");
-        console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
         await timer(3000)
         await monitor();
     }
@@ -128,8 +127,6 @@ export async function cli() {
 
     else if (options.sendStateSync) {
         console.log("📍Command --send-state-sync");
-        console.log("⛔ This command is only available for non-dockerized devnets. Dockerized environments runs it at startup. " +
-            "Make sure to target such environment...")
         await timer(3000)
         await sendStateSyncTx();
     }

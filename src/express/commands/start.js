@@ -282,10 +282,13 @@ async function runDockerSetupWithMaticCLI(ips) {
 
     await timer(120000)
     console.log("📍Executing bor ipc tests...")
+    console.log("📍1. Fetching admin.peers...")
     command = `cd ~/matic-cli/devnet && docker exec bor0 bash -c "bor attach /root/.bor/data/bor.ipc -exec 'admin.peers'"`
     await runSshCommand(ip, command, maxRetries)
+    console.log("📍2. Fetching eth.blockNumber...")
     command = `cd ~/matic-cli/devnet && docker exec bor0 bash -c "bor attach /root/.bor/data/bor.ipc -exec 'eth.blockNumber'"`
     await runSshCommand(ip, command, maxRetries)
+    console.log("📍bor ipc tests executed...")
 }
 
 async function runRemoteSetupWithMaticCLI(ips) {
@@ -335,7 +338,7 @@ export async function start() {
 
     let devnetType
     if (process.env.TF_VAR_DOCKERIZED === 'yes') {
-        await editMaticCliDockerYAMLConfig(ips);
+        await editMaticCliDockerYAMLConfig();
         devnetType = "docker"
     } else {
         await editMaticCliRemoteYAMLConfig();

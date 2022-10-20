@@ -270,14 +270,16 @@ export class Heimdall {
         };
     }
 
-  buildTask() {
-    return {
-      title: 'Build Heimdall',
-      task: () => execa('make', ['build'], {
-        cwd: this.repositoryDir
-      })
+    buildTask() {
+        return {
+            title: "Build Heimdall",
+            task: () =>
+                execa("make", ["build", "network=local"], {
+                    cwd: this.repositoryDir,
+                    stdio: getRemoteStdio(),
+                }),
+        };
     }
-  }
 
     async getTasks() {
         return new Listr(
