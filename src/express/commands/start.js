@@ -32,6 +32,9 @@ async function installRequiredSoftwareOnRemoteMachines(ips) {
 
     let ipsArray = splitToArray(ips)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
+    let promises = []
+
+    //ipsArray.forEach(ip => )
 
     let user, ip
 
@@ -40,17 +43,23 @@ async function installRequiredSoftwareOnRemoteMachines(ips) {
         i === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[i]}`
         ip = `${user}@${ipsArray[i]}`
 
-        await configureCertAndPermissions(user, ip)
-        await installCommonPackages(user, ip)
+        promises.push(await configureCertAndPermissions(user, ip), 
+                     await installCommonPackages(user, ip))
+        /*await configureCertAndPermissions(user, ip)
+        await installCommonPackages(user, ip)*/
 
         if (i === 0) {
-            await installHostSpecificPackages(ip)
+            promises.push(await installHostSpecificPackages(ip))
+            //await installHostSpecificPackages(ip)
 
             if (process.env.TF_VAR_DOCKERIZED === 'yes') {
-                await installDocker(ip, user)
+                promises.push(await installDocker(ip, user)) 
+                //await installDocker(ip, user)
             }
         }
     }
+
+    await Promise.all(promises)
 }
 
 async function configureCertAndPermissions(user, ip) {
@@ -221,6 +230,7 @@ async function eventuallyCleanupPreviousDevnet(ips) {
 
     let ipsArray = splitToArray(ips)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
+    let promises = []
 
     let user, ip
 
@@ -233,45 +243,58 @@ async function eventuallyCleanupPreviousDevnet(ips) {
 
             console.log("📍Removing old devnet (if present) on machine " + ip + " ...")
             let command = `rm -rf ~/matic-cli/devnet`
-            await runSshCommand(ip, command, maxRetries)
+            promises.push(await runSshCommand(ip, command, maxRetries))
+            //await runSshCommand(ip, command, maxRetries)
 
             console.log("📍Stopping ganache (if present) on machine " + ip + " ...")
             command = `tmux send-keys -t matic-cli-ganache:0 'C-c' ENTER || echo 'ganache not running on current machine...'`
-            await runSshCommand(ip, command, maxRetries)
+            promises.push(await runSshCommand(ip, command, maxRetries))
+            //await runSshCommand(ip, command, maxRetries)
 
             console.log("📍Killing ganache tmux session (if present) on machine " + ip + " ...")
             command = `tmux kill-session -t matic-cli-ganache || echo 'matic-cli-ganache tmux session does not exist on current machine...'`
-            await runSshCommand(ip, command, maxRetries)
+            promises.push(await runSshCommand(ip, command, maxRetries))
+            //await runSshCommand(ip, command, maxRetries)
         }
 
         console.log("📍Stopping heimdall (if present) on machine " + ip + " ...")
         let command = `tmux send-keys -t matic-cli:0 'C-c' ENTER || echo 'heimdall not running on current machine...'`
-        await runSshCommand(ip, command, maxRetries)
+        promises.push(await runSshCommand(ip, command, maxRetries))
+        //await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Stopping bor (if present) on machine " + ip + " ...")
         command = `tmux send-keys -t matic-cli:1 'C-c' ENTER || echo 'bor not running on current machine...'`
-        await runSshCommand(ip, command, maxRetries)
+        promises.push(await runSshCommand(ip, command, maxRetries))
+        //await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Killing matic-cli tmux session (if present) on machine " + ip + " ...")
         command = `tmux kill-session -t matic-cli || echo 'matic-cli tmux session does not exist on current machine...'`
-        await runSshCommand(ip, command, maxRetries)
+        promises.push(await runSshCommand(ip, command, maxRetries))
+        //await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Removing .bor folder (if present) on machine " + ip + " ...")
         command = `rm -rf ~/.bor`
-        await runSshCommand(ip, command, maxRetries)
+        promises.push(await runSshCommand(ip, command, maxRetries))
+        //await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Removing .heimdalld folder (if present) on machine " + ip + " ...")
         command = `rm -rf ~/.heimdalld`
-        await runSshCommand(ip, command, maxRetries)
+        promises.push(await runSshCommand(ip, command, maxRetries))
+        //await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Removing data folder (if present) on machine " + ip + " ...")
         command = `rm -rf ~/data`
-        await runSshCommand(ip, command, maxRetries)
+        promises.push(await runSshCommand(ip, command, maxRetries))
+        //await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Removing node folder (if present) on machine " + ip + " ...")
         command = `rm -rf ~/node`
-        await runSshCommand(ip, command, maxRetries)
+        promises.push(await runSshCommand(ip, command, maxRetries))
+        //await runSshCommand(ip, command, maxRetries)
+
     }
+
+    await Promise.all(promises)
 }
 
 export async function start() {
