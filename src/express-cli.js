@@ -57,6 +57,7 @@ export async function cli() {
 
     else if (options.updateAll) {
         console.log("📍Command --update-all");
+        console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
         console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
         await timer(3000)
         await updateAll();
@@ -64,6 +65,7 @@ export async function cli() {
 
     else if (options.updateBor) {
         console.log("📍Command --update-bor");
+        console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
         console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
         await timer(3000)
         await updateBor();
@@ -71,37 +73,52 @@ export async function cli() {
 
     else if (options.updateHeimdall) {
         console.log("📍Command --update-heimdall");
+        console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
+        await timer(3000)
         await updateHeimdall();
     }
 
     else if (options.restartAll) {
         console.log("📍Command --restart-all");
+        console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
+        console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
+        await timer(3000)
         await restartAll();
     }
 
     else if (options.restartBor) {
         console.log("📍Command --restart-bor");
+        console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
+        console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
         await timer(3000)
         await restartBor();
     }
 
     else if (options.restartHeimdall) {
         console.log("📍Command --restart-heimdall");
+        console.log("⛔ This command is only available for non-dockerized devnets...")
         await restartHeimdall();
     }
 
     else if (options.cleanup) {
         console.log("📍Command --cleanup");
+        console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
+        console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
+        await timer(3000)
         await cleanup();
     }
 
     else if (options.monitor) {
         console.log("📍Command --monitor");
+        console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
+        await timer(3000)
         await monitor();
     }
 
     else if (options.stress) {
         console.log("📍Command --stress");
+        console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
+        await timer(3000)
         if (options.stress === "fund") {
             await startStressTest(true);
         } else {
@@ -111,6 +128,9 @@ export async function cli() {
 
     else if (options.sendStateSync) {
         console.log("📍Command --send-state-sync");
+        console.log("⛔ This command is only available for non-dockerized devnets. Dockerized environments runs it at startup. " +
+            "Make sure to target such environment...")
+        await timer(3000)
         await sendStateSyncTx();
     }
 }

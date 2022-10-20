@@ -150,6 +150,7 @@ To use the `express-cli` you have to execute the following steps.
 - `node` version v10.17.0. This is also documented in `.nvmrc` file
 - generate a keypair on AWS EC2 and download its certificate locally (`.pem` or `.cer` file)
 - copy `.env.example` to `.env` with command `cp .env.example .env`
+- use `TF_VAR_DOCKERZIED=yes` to run the stack on one VM only in a dockerized environment. Else, it will create one VM per node   
 - replace `TF_VAR_ACCESS_KEY` and `TF_VAR_SECRET_KEY` with your own keys (ask devops to generate one for you)
 - set at least 2 nodes (`TF_VAR_VALIDATOR_COUNT` + `TF_VAR_SENTRY_COUNT` > 1) and adjust the `DEVNET_BOR_USERS` accordingly 
 - (optional) replace `TF_VAR_VM_NAME` with your own identifier (it can be any string, default is "polygon-user")
@@ -173,7 +174,7 @@ Then, a remote devnet can be created with the `--start` command, as follows.
 To destroy the remote devnet, you can execute the `--destroy` command.
 - `./bin/express-cli --destroy`
   - Destroys the remote setup and delete the dedicated VMs
-The `express-cli` also comes with additional utility commands, listed below.
+The `express-cli` also comes with additional utility commands, listed below. Some of them are only available for non-dockerized devnets.  
 - `./bin/express-cli --update-all`
   - Fetches `heimdall` and `bor` branches defined as `HEIMDALL_BRANCH` and `BOR_BRANCH` in `.env` file, pulls relative changes and restarts those services on the remote machines
 - `./bin/express-cli --update-bor`

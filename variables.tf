@@ -15,6 +15,10 @@ variable "DISK_SIZE_GB" {
   default = "500"
 }
 
+variable "DOCKERIZED" {
+  default = "no"
+}
+
 variable "VALIDATOR_COUNT" {
   default = "2"
 }
