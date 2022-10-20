@@ -22,6 +22,7 @@ import {
 import {loadConfig} from "../config";
 import fileReplacer from "../../lib/file-replacer";
 import {getRemoteStdio} from "../../express/common/remote-worker";
+import shell from "shelljs";
 
 const timer = ms => new Promise(res => setTimeout(res, ms))
 
@@ -474,6 +475,10 @@ export class Devnet {
                         "--output-dir",
                         "devnet",
                     ];
+
+                    // create heimdall folder
+                    shell.exec(`sudo mkdir -p /var/lib/heimdall`)
+                    shell.exec(`sudo chmod 777 -R /var/lib/heimdall/`)
 
                     // create testnet
                     await execa(heimdall.heimdalldCmd, args, {
