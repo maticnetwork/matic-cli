@@ -37,7 +37,7 @@ async function installRequiredSoftwareOnRemoteMachines(ips, devnetType) {
 
     for (let i = 0; i < ipsArray.length; i++) {
 
-        i === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[i]}`
+        i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
         ip = `${user}@${ipsArray[i]}`
 
         await configureCertAndPermissions(user, ip)
@@ -188,7 +188,7 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType) {
 
     for (let i = 0; i < ipsArray.length; i++) {
 
-        i === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[i]}`
+        i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
         ip = `${user}@${ipsArray[i]}`
 
         if (i === 0) {

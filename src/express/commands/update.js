@@ -103,13 +103,13 @@ export async function updateAll(n) {
 
     if (vmIndex === undefined) {
         for (let i = 0; i < doc['devnetBorUsers'].length; i++) {
-            i === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[i]}`
+            i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
             ip = `${user}@${doc['devnetBorHosts'][i]}`
             await pullAndRestartBor(ip, i, true)
             await pullAndRestartHeimdall(ip, i, true)
         }
     } else {
-        vmIndex === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[vmIndex]}`
+        vmIndex === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[vmIndex]}`
         ip = `${user}@${doc['devnetBorHosts'][vmIndex]}`
         await pullAndRestartBor(ip, vmIndex, true)
         await pullAndRestartHeimdall(ip, vmIndex, true)
@@ -127,7 +127,7 @@ export async function updateBor(n) {
 
     if (vmIndex === undefined) {
         for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
-            i === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[i]}`
+            i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
             ip = `${user}@${doc['devnetBorHosts'][i]}`
             await pullAndRestartBor(ip, i, true)
         }
@@ -149,7 +149,7 @@ export async function updateHeimdall(n) {
 
     if (vmIndex === undefined) {
         for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
-            i === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[i]}`
+            i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
             ip = `${user}@${doc['devnetBorHosts'][i]}`
             await pullAndRestartHeimdall(ip, i, true)
         }

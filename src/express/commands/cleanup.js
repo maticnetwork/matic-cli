@@ -20,7 +20,7 @@ async function stopServices(doc) {
 
     for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
 
-        i === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[i]}`
+        i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
         ip = `${user}@${doc['devnetBorHosts'][i]}`
 
         if (i === 0) {
@@ -46,7 +46,7 @@ async function cleanupServices(doc) {
 
     for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
 
-        i === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[i]}`
+        i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
         ip = `${user}@${doc['devnetBorHosts'][i]}`
 
 
@@ -86,7 +86,7 @@ async function startServices(doc) {
 
     for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
 
-        i === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[i]}`
+        i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
         ip = `${user}@${doc['devnetBorHosts'][i]}`
         if (i === 0) {
 
@@ -128,7 +128,7 @@ async function deployBorContractsAndStateSync(doc) {
 
     for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
 
-        i === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[i]}`
+        i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
         ip = `${user}@${doc['devnetBorHosts'][i]}`
 
         if (i === 0) {
