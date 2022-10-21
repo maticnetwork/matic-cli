@@ -176,17 +176,17 @@ To destroy the remote devnet, you can execute the `--destroy` command.
   - Destroys the remote setup and delete the dedicated VMs
 The `express-cli` also comes with additional utility commands, listed below. Some of them are only available for non-dockerized devnets.  
 - `./bin/express-cli --update-all [index]`
-  - Fetches `heimdall` and `bor` branches defined as `HEIMDALL_BRANCH` and `BOR_BRANCH` in `.env` file, pulls relative changes and restarts those services on the remote machines. If `index` is used, the job will be performed only on the VM corresponding to that index.
+  - Fetches `heimdall` and `bor` branches defined as `HEIMDALL_BRANCH` and `BOR_BRANCH` in `.env` file, pulls relative changes and restarts those services on the remote machines. If an integer `index` is used, the job will be performed only on the VM corresponding to that index.
 - `./bin/express-cli --update-bor [index]`
-  - Fetches `bor` branch defined as `BOR_BRANCH` in `.env` file, pulls relative changes and restarts it on the remote machines. If `index` is used, the job will be performed only on the VM corresponding to that index.
+  - Fetches `bor` branch defined as `BOR_BRANCH` in `.env` file, pulls relative changes and restarts it on the remote machines. If an integer `index` is used, the job will be performed only on the VM corresponding to that index.
 - `./bin/express-cli --update-heimdall [index]`
-  - Fetches `heimdall` branch defined as `HEIMDALL_BRANCH` in `.env` file, pulls relative changes and restarts it on the remote machines. If `index` is used, the job will be performed only on the VM corresponding to that index.
+  - Fetches `heimdall` branch defined as `HEIMDALL_BRANCH` in `.env` file, pulls relative changes and restarts it on the remote machines. If an integer `index` is used, the job will be performed only on the VM corresponding to that index.
 - `./bin/express-cli --restart-all [index]`
-  - Restarts `bor` and `heimdall` on all the remote machines. If `index` is used, the job will be performed only on the VM corresponding to that index.
+  - Restarts `bor` and `heimdall` on all the remote machines. If an integer `index` is used, the job will be performed only on the VM corresponding to that index.
 - `./bin/express-cli --restart-bor [index]`
-  - Restarts `bor` on all the remote machines. If `index` is used, the job will be performed only on the VM corresponding to that index.
+  - Restarts `bor` on all the remote machines. If an integer `index` is used, the job will be performed only on the VM corresponding to that index.
 - `./bin/express-cli --restart-heimdall [index]`
-  - Restarts `heimdall` on all the remote machines. If `index` is used, the job will be performed only on the VM corresponding to that index.
+  - Restarts `heimdall` on all the remote machines. If an integer `index` is used, the job will be performed only on the VM corresponding to that index.
 - `./bin/express-cli --cleanup`
   - Cleans up `ganache`, `bor`, `heimdall` and `bridge`, redeploys all the contracts and restarts all the services
 The `express-cli` also provides additional testing commands, listed here.
@@ -195,4 +195,4 @@ The `express-cli` also provides additional testing commands, listed here.
 - `./bin/express-cli --monitor`
   - Monitors the reception of state-syncs and checkpoints to make sure the whole network is in a healthy state. If `--send-state-sync` hasn't been used before, only checkpoints will be detected. The execution stops when a `state-sync` is found
 - `./bin/express-cli --stress [fund]`
-  - Runs the stress tests on remote nodes. The option `fund` is needed when stress tests are ran for the first time, to fund the accounts 
+  - Runs the stress tests on remote nodes. The string `fund` is needed when stress tests are ran for the first time, to fund the accounts 
