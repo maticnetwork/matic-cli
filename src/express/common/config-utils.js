@@ -58,8 +58,8 @@ export function setCommonConfigs(doc) {
     setConfigValue('numOfValidators', parseInt(process.env.TF_VAR_VALIDATOR_COUNT), doc);
     setConfigValue('numOfNonValidators', parseInt(process.env.TF_VAR_SENTRY_COUNT), doc);
     setConfigValue('ethHostUser', process.env.ETH_HOST_USER, doc);
-    setConfigValue('borDockerBuildContext', process.env.BOR_DOCKER_BUILD_CONTENXT, doc);
-    setConfigValue('heimdallDockerBuildContext', process.env.HEIMDALL_DOCKER_BUILD_CONTENXT, doc);
+    setConfigValue('borDockerBuildContext', process.env.BOR_DOCKER_BUILD_CONTEXT, doc);
+    setConfigValue('heimdallDockerBuildContext', process.env.HEIMDALL_DOCKER_BUILD_CONTEXT, doc);
 }
 
 export function setConfigValue(key, value, doc) {
