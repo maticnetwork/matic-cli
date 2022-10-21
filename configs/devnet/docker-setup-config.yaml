@@ -1,17 +1,20 @@
 defaultStake: 10000
 defaultFee: 2000
-borChainId:
-heimdallChainId:
-borBranch:
-heimdallBranch:
+borChainId: 15005
+heimdallChainId: heimdall-4052
+borBranch: develop
+heimdallBranch: develop
 contractsBranch: jc/v0.3.1-backport
 sprintSize: 64
-blockNumber: '2'
-blockTime: '0'
-numOfValidators: 2
-numOfNonValidators: 0
+blockNumber: '0'
+blockTime: '2'
+numOfValidators: 1
+numOfNonValidators: 1
 ethURL: http://ganache:9545
 ethHostUser: ubuntu
 devnetType: docker
-borDockerBuildContext: "https://github.com/maticnetwork/bor.git#develop"
-heimdallDockerBuildContext: "https://github.com/maticnetwork/heimdall.git#develop"
+borDockerBuildContext: https://github.com/maticnetwork/bor.git#develop
+heimdallDockerBuildContext: https://github.com/maticnetwork/heimdall.git#develop
+devnetBorUsers: ubuntu,ubuntu
+devnetBorHosts:
+  - 35.92.248.232

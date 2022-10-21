@@ -4,7 +4,14 @@ const {runScpCommand, runSshCommand, maxRetries} = require("../common/remote-wor
 
 export async function sendStateSyncTx() {
 
-    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
+    let doc
+
+    if (process.env.TF_VAR_DOCKERIZED === 'yes') {
+        doc = await yaml.load(fs.readFileSync('./configs/devnet/docker-setup-config.yaml', 'utf8'));
+    } else {
+        doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
+    }
+
     if (doc['devnetBorHosts'].length > 0) {
         console.log("📍Monitoring the first node", doc['devnetBorHosts'][0]);
     }

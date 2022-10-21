@@ -18,7 +18,7 @@ provider "aws" {
 }
 
 resource "aws_instance" "app_server" {
-  count = var.VALIDATOR_COUNT + var.SENTRY_COUNT
+  count = (var.DOCKERIZED == "yes") ? 1 : (var.VALIDATOR_COUNT + var.SENTRY_COUNT)
   ami                    = var.INSTANCE_AMI
   instance_type          = var.INSTANCE_TYPE
   key_name               = var.PEM_FILE

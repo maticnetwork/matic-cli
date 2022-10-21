@@ -31,7 +31,7 @@ export async function restartBor() {
         i === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[i]}`
         ip = `${user}@${doc['devnetBorHosts'][i]}`
 
-        await restartBor(ip, i, false)
+        await pullAndRestartBor(ip, i, false)
     }
 }
 
