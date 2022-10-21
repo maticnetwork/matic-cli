@@ -1,4 +1,4 @@
-import yaml from "js-yaml";
+/*import yaml from "js-yaml";
 import fs from "fs";
 import {editMaticCliDockerYAMLConfig, editMaticCliRemoteYAMLConfig, splitToArray} from "../common/config-utils";
 import {maxRetries, runScpCommand, runSshCommand} from "../common/remote-worker";
@@ -32,34 +32,36 @@ async function installRequiredSoftwareOnRemoteMachines(ips, devnetType) {
 
     let ipsArray = splitToArray(ips)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
-    let promises = []
-
-    //ipsArray.forEach(ip => )
-
     let user, ip
+    let users = []
+    let isHostMap = new Map()
 
     for (let i = 0; i < ipsArray.length; i++) {
-
         i === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[i]}`
         ip = `${user}@${ipsArray[i]}`
+        users.push(ip)
 
-        promises.push(await configureCertAndPermissions(user, ip), 
-                     await installCommonPackages(user, ip))
-        /*await configureCertAndPermissions(user, ip)
-        await installCommonPackages(user, ip)*/
-
-        if (i === 0) {
-            promises.push(await installHostSpecificPackages(ip))
-            //await installHostSpecificPackages(ip)
-
-            if (process.env.TF_VAR_DOCKERIZED === 'yes') {
-                promises.push(await installDocker(ip, user)) 
-                //await installDocker(ip, user)
-            }
-        }
+        i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
     }
 
-    await Promise.all(promises)
+    let deps = users.map(async(user) => {
+        let arr = user.split("@")
+        await configureCertAndPermissions(arr[0], user)
+        await installCommonPackages(arr[0], user)
+
+        if (isHostMap.get(user)) {
+            // Install Host dependencies
+            await installHostSpecificPackages(user)
+
+            if (process.env.TF_VAR_DOCKERIZED === 'yes') {
+                //let arr = users.split("@")
+                await installDocker(user, arr[0])
+            }
+        }
+
+    })
+
+    await Promise.all(deps)
 }
 
 async function configureCertAndPermissions(user, ip) {
@@ -192,71 +194,65 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType) {
 
     let ipsArray = splitToArray(ips)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
-    let promises = []
-
+    let users = []
+    let isHostMap = new Map()
     let user, ip
 
     for (let i = 0; i < ipsArray.length; i++) {
-
         i === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[i]}`
         ip = `${user}@${ipsArray[i]}`
+        users.push(ip)
 
-        if (i === 0) {
-
-            console.log("📍Removing old devnet (if present) on machine " + ip + " ...")
-            let command = `rm -rf ~/matic-cli/devnet`
-            promises.push(await runSshCommand(ip, command, maxRetries))
-            //await runSshCommand(ip, command, maxRetries)
-
-            console.log("📍Stopping ganache (if present) on machine " + ip + " ...")
-            command = `tmux send-keys -t matic-cli-ganache:0 'C-c' ENTER || echo 'ganache not running on current machine...'`
-            promises.push(await runSshCommand(ip, command, maxRetries))
-            //await runSshCommand(ip, command, maxRetries)
-
-            console.log("📍Killing ganache tmux session (if present) on machine " + ip + " ...")
-            command = `tmux kill-session -t matic-cli-ganache || echo 'matic-cli-ganache tmux session does not exist on current machine...'`
-            promises.push(await runSshCommand(ip, command, maxRetries))
-            //await runSshCommand(ip, command, maxRetries)
-        }
-
-        console.log("📍Stopping heimdall (if present) on machine " + ip + " ...")
-        let command = `tmux send-keys -t matic-cli:0 'C-c' ENTER || echo 'heimdall not running on current machine...'`
-        promises.push(await runSshCommand(ip, command, maxRetries))
-        //await runSshCommand(ip, command, maxRetries)
-
-        console.log("📍Stopping bor (if present) on machine " + ip + " ...")
-        command = `tmux send-keys -t matic-cli:1 'C-c' ENTER || echo 'bor not running on current machine...'`
-        promises.push(await runSshCommand(ip, command, maxRetries))
-        //await runSshCommand(ip, command, maxRetries)
-
-        console.log("📍Killing matic-cli tmux session (if present) on machine " + ip + " ...")
-        command = `tmux kill-session -t matic-cli || echo 'matic-cli tmux session does not exist on current machine...'`
-        promises.push(await runSshCommand(ip, command, maxRetries))
-        //await runSshCommand(ip, command, maxRetries)
-
-        console.log("📍Removing .bor folder (if present) on machine " + ip + " ...")
-        command = `rm -rf ~/.bor`
-        promises.push(await runSshCommand(ip, command, maxRetries))
-        //await runSshCommand(ip, command, maxRetries)
-
-        console.log("📍Removing .heimdalld folder (if present) on machine " + ip + " ...")
-        command = `rm -rf ~/.heimdalld`
-        promises.push(await runSshCommand(ip, command, maxRetries))
-        //await runSshCommand(ip, command, maxRetries)
-
-        console.log("📍Removing data folder (if present) on machine " + ip + " ...")
-        command = `rm -rf ~/data`
-        promises.push(await runSshCommand(ip, command, maxRetries))
-        //await runSshCommand(ip, command, maxRetries)
-
-        console.log("📍Removing node folder (if present) on machine " + ip + " ...")
-        command = `rm -rf ~/node`
-        promises.push(await runSshCommand(ip, command, maxRetries))
-        //await runSshCommand(ip, command, maxRetries)
-
+        i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
     }
 
-    await Promise.all(promises)
+    let cleanup = users.map(async(user) => {
+
+        if (isHostMap.get(user)) {
+            // Cleanup Host 
+            console.log("📍Removing old devnet (if present) on machine " + user + " ...")
+            let command = `rm -rf ~/matic-cli/devnet`
+            await runSshCommand(user, command, maxRetries)
+
+            console.log("📍Stopping ganache (if present) on machine " + users[0] + " ...")
+            command = `tmux send-keys -t matic-cli-ganache:0 'C-c' ENTER || echo 'ganache not running on current machine...'`
+            await runSshCommand(user, command, maxRetries)
+
+            console.log("📍Killing ganache tmux session (if present) on machine " + users[0] + " ...")
+            command = `tmux kill-session -t matic-cli-ganache || echo 'matic-cli-ganache tmux session does not exist on current machine...'`
+            await runSshCommand(user, command, maxRetries)
+        }
+        console.log("📍Stopping heimdall (if present) on machine " + user + " ...")
+        let command = `tmux send-keys -t matic-cli:0 'C-c' ENTER || echo 'heimdall not running on current machine...'`
+        await runSshCommand(user, command, maxRetries)
+
+        console.log("📍Stopping bor (if present) on machine " + user + " ...")
+        command = `tmux send-keys -t matic-cli:1 'C-c' ENTER || echo 'bor not running on current machine...'`
+        await runSshCommand(user, command, maxRetries)
+
+        console.log("📍Killing matic-cli tmux session (if present) on machine " + user + " ...")
+        command = `tmux kill-session -t matic-cli || echo 'matic-cli tmux session does not exist on current machine...'`
+        await runSshCommand(user, command, maxRetries)
+
+        console.log("📍Removing .bor folder (if present) on machine " + user + " ...")
+        command = `rm -rf ~/.bor`
+        await runSshCommand(user, command, maxRetries)
+
+        console.log("📍Removing .heimdalld folder (if present) on machine " + user + " ...")
+        command = `rm -rf ~/.heimdalld`
+        await runSshCommand(user, command, maxRetries)
+
+        console.log("📍Removing data folder (if present) on machine " + user + " ...")
+        command = `rm -rf ~/data`
+        await runSshCommand(user, command, maxRetries)
+
+        console.log("📍Removing node folder (if present) on machine " + user + " ...")
+        command = `rm -rf ~/node`
+        await runSshCommand(user, command, maxRetries)
+    })
+
+    await Promise.all(cleanup)
+
 }
 
 async function runDockerSetupWithMaticCLI(ips) {
@@ -352,6 +348,73 @@ async function runRemoteSetupWithMaticCLI(ips) {
     await runSshCommand(ip, command, maxRetries)
 }
 
+async function eventuallyCleanupPreviousDevnet(ips) {
+
+    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
+
+    let ipsArray = splitToArray(ips)
+    let borUsers = splitToArray(doc['devnetBorUsers'].toString())
+    let users = []
+    let isHostMap = new Map()
+    let user, ip
+
+    for (let i = 0; i < ipsArray.length; i++) {
+        i === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[i]}`
+        ip = `${user}@${ipsArray[i]}`
+        users.push(ip)
+
+        i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
+    }
+
+    let cleanup = users.map(async(user) => {
+
+        if (isHostMap.get(user)) {
+            // Cleanup Host 
+            console.log("📍Removing old devnet (if present) on machine " + user + " ...")
+            let command = `rm -rf ~/matic-cli/devnet`
+            await runSshCommand(user, command, maxRetries)
+
+            console.log("📍Stopping ganache (if present) on machine " + users[0] + " ...")
+            command = `tmux send-keys -t matic-cli-ganache:0 'C-c' ENTER || echo 'ganache not running on current machine...'`
+            await runSshCommand(user, command, maxRetries)
+
+            console.log("📍Killing ganache tmux session (if present) on machine " + users[0] + " ...")
+            command = `tmux kill-session -t matic-cli-ganache || echo 'matic-cli-ganache tmux session does not exist on current machine...'`
+            await runSshCommand(user, command, maxRetries)
+        }
+        console.log("📍Stopping heimdall (if present) on machine " + user + " ...")
+        let command = `tmux send-keys -t matic-cli:0 'C-c' ENTER || echo 'heimdall not running on current machine...'`
+        await runSshCommand(user, command, maxRetries)
+
+        console.log("📍Stopping bor (if present) on machine " + user + " ...")
+        command = `tmux send-keys -t matic-cli:1 'C-c' ENTER || echo 'bor not running on current machine...'`
+        await runSshCommand(user, command, maxRetries)
+
+        console.log("📍Killing matic-cli tmux session (if present) on machine " + user + " ...")
+        command = `tmux kill-session -t matic-cli || echo 'matic-cli tmux session does not exist on current machine...'`
+        await runSshCommand(user, command, maxRetries)
+
+        console.log("📍Removing .bor folder (if present) on machine " + user + " ...")
+        command = `rm -rf ~/.bor`
+        await runSshCommand(user, command, maxRetries)
+
+        console.log("📍Removing .heimdalld folder (if present) on machine " + user + " ...")
+        command = `rm -rf ~/.heimdalld`
+        await runSshCommand(user, command, maxRetries)
+
+        console.log("📍Removing data folder (if present) on machine " + user + " ...")
+        command = `rm -rf ~/data`
+        await runSshCommand(user, command, maxRetries)
+
+        console.log("📍Removing node folder (if present) on machine " + user + " ...")
+        command = `rm -rf ~/node`
+        await runSshCommand(user, command, maxRetries)
+    })
+
+    await Promise.all(cleanup)
+
+}
+
 export async function start() {
 
     await terraformApply();
@@ -382,4 +445,4 @@ export async function start() {
     } else {
         await runRemoteSetupWithMaticCLI(ips);
     }
-}
+}*/
