@@ -18,9 +18,9 @@ program
     .option('-i, --init', 'Initiate the terraform setup')
     .option('-s, --start', 'Start the setup')
     .option('-d, --destroy', 'Destroy the setup')
-    .option('-uall, --update-all [index]', 'Update bor and heimdall on a specific machine, given its index (default all VMs)')
-    .option('-ubor, --update-bor', 'Update the bor setup')
-    .option('-uheimdall, --update-heimdall', 'Update the heimdall setup')
+    .option('-uall, --update-all [index]', 'Update bor and heimdall on all machines. If [index] is specified, it will only update the VM corresponding to that index')
+    .option('-ubor, --update-bor [index]', 'Update bor on all machines. If [index] is specified, it will only update the VM corresponding to that index')
+    .option('-uheimdall, --update-heimdall [index]', 'Update heimdall on all machines. If [index] is specified, it will only update the VM corresponding to that index')
     .option('-rall, --restart-all', 'Restart both bor and heimdall')
     .option('-rbor, --restart-bor', 'Restart bor')
     .option('-rheimdall, --restart-heimdall', 'Restart heimdall')
@@ -64,18 +64,18 @@ export async function cli() {
     }
 
     else if (options.updateBor) {
-        console.log("📍Command --update-bor");
+        console.log("📍Command --update-bor [index]");
         console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
         console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
         await timer(3000)
-        await updateBor();
+        await updateBor(options.updateBor);
     }
 
     else if (options.updateHeimdall) {
-        console.log("📍Command --update-heimdall");
+        console.log("📍Command --update-heimdall [index]");
         console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
         await timer(3000)
-        await updateHeimdall();
+        await updateHeimdall(options.updateHeimdall);
     }
 
     else if (options.restartAll) {
