@@ -175,8 +175,8 @@ To destroy the remote devnet, you can execute the `--destroy` command.
 - `./bin/express-cli --destroy`
   - Destroys the remote setup and delete the dedicated VMs
 The `express-cli` also comes with additional utility commands, listed below. Some of them are only available for non-dockerized devnets.  
-- `./bin/express-cli --update-all`
-  - Fetches `heimdall` and `bor` branches defined as `HEIMDALL_BRANCH` and `BOR_BRANCH` in `.env` file, pulls relative changes and restarts those services on the remote machines
+- `./bin/express-cli --update-all [index]`
+  - Fetches `heimdall` and `bor` branches defined as `HEIMDALL_BRANCH` and `BOR_BRANCH` in `.env` file, pulls relative changes and restarts those services on the remote machines. If `index` is used, the job will be performed only on the VM corresponding to that index.
 - `./bin/express-cli --update-bor`
   - Fetches `bor` branch defined as `BOR_BRANCH` in `.env` file, pulls relative changes and restarts it on the remote machines
 - `./bin/express-cli --update-heimdall`

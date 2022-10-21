@@ -18,7 +18,7 @@ program
     .option('-i, --init', 'Initiate the terraform setup')
     .option('-s, --start', 'Start the setup')
     .option('-d, --destroy', 'Destroy the setup')
-    .option('-uall, --update-all', 'Update the setup')
+    .option('-uall, --update-all [index]', 'Update bor and heimdall on a specific machine, given its index (default all VMs)')
     .option('-ubor, --update-bor', 'Update the bor setup')
     .option('-uheimdall, --update-heimdall', 'Update the heimdall setup')
     .option('-rall, --restart-all', 'Restart both bor and heimdall')
@@ -56,11 +56,11 @@ export async function cli() {
     }
 
     else if (options.updateAll) {
-        console.log("📍Command --update-all");
+        console.log("📍Command --update-all [index]");
         console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
         console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
         await timer(3000)
-        await updateAll();
+        await updateAll(options.updateAll);
     }
 
     else if (options.updateBor) {

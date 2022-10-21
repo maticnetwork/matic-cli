@@ -107,3 +107,23 @@ export function splitToArray(value) {
     return value.split(' ').join('').split(",")
 }
 
+export async function checkAndReturnVMIndex(n) {
+
+    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'), undefined);
+
+    if (typeof n === "boolean") {
+        console.log("📍Targeting all VMs ...");
+        return undefined
+    }
+
+    if (typeof n === "string") {
+        let vmIndex = parseInt(n, 10)
+        if (vmIndex >= 0 && vmIndex < doc['devnetBorHosts'].length) {
+            console.log(`📍Targeting VM with IP ${doc['devnetBorHosts'][vmIndex]} ...`);
+            return vmIndex
+        } else {
+            console.log("📍Wrong VM index, please check your configs! Exiting...");
+            process.exit(1)
+        }
+    }
+}
