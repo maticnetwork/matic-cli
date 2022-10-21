@@ -463,8 +463,9 @@ export class Devnet {
                 title: "Create testnet files for Heimdall",
                 task: async () => {
                     const args = [
-                        "create-testnet",
-                        "--v",
+                      "create-testnet",
+                      "--home", "devnet",
+                      "--v",
                         this.config.numOfValidators,
                         "--n",
                         this.config.numOfNonValidators,
@@ -646,7 +647,7 @@ async function setupDevnet(config) {
     });
     devnet.bor = new Bor(config, {repositoryBranch: config.borBranch});
     devnet.heimdall = new Heimdall(config, {
-        repositoryBranch: config.heimdallBranch,
+        repositoryBranch: config.heimdallBranch, dockerContext: config.heimdallDockerBuildContext
     });
     devnet.genesis = new Genesis(config, {repositoryBranch: "master"});
 

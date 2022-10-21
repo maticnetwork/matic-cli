@@ -22,7 +22,7 @@ export async function editMaticCliRemoteYAMLConfig() {
     });
 }
 
-export async function editMaticCliDockerYAMLConfig(ips) {
+export async function editMaticCliDockerYAMLConfig() {
 
     console.log("📍Editing matic-cli docker YAML configs...")
 
@@ -30,9 +30,10 @@ export async function editMaticCliDockerYAMLConfig(ips) {
 
     setCommonConfigs(doc)
     setEthHostUser('ubuntu', doc)
-    setEthURL('localhost', doc);
-    setConfigValue('devnetBorUsers', ips, doc)
+    setConfigList('devnetBorHosts', process.env.DEVNET_BOR_HOSTS, doc);
+    setConfigValue('devnetBorUsers', process.env.DEVNET_BOR_USERS, doc)
     setConfigValue('devnetType', 'docker', doc)
+    setEthURL('ganache', doc);
 
     fs.writeFile('./configs/devnet/docker-setup-config.yaml', yaml.dump(doc), (err) => {
         if (err) {

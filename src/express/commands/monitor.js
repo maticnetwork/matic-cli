@@ -32,11 +32,21 @@ async function checkStateSyncTx(ip) {
 }
 
 export async function monitor() {
+    let doc
 
-    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
+    if (process.env.TF_VAR_DOCKERIZED === 'yes') {
+        doc = await yaml.load(fs.readFileSync('./configs/devnet/docker-setup-config.yaml', 'utf8'));
+    } else {
+        doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
+    }
+
     if (doc['devnetBorHosts'].length > 0) {
         console.log("📍Monitoring the first node", doc['devnetBorHosts'][0]);
+    } else {
+        console.log("📍No nodes to monitor, please check your configs! Exiting...");
+        process.exit(1)
     }
+
     let machine0 = doc['devnetBorHosts'][0];
     console.log("📍Checking for StateSyncs && Checkpoints")
 
