@@ -2,6 +2,7 @@ const yaml = require("js-yaml");
 const fs = require("fs");
 const {splitToArray} = require("../common/config-utils");
 const {runSshCommand, maxRetries} = require("../common/remote-worker");
+import {checkAndReturnVMIndex} from "../common/config-utils";
 
 export async function pullAndRestartBor(ip, i, isPull) {
 
@@ -91,54 +92,70 @@ export async function pullAndRestartHeimdall(ip, i, isPull) {
     await runSshCommand(ip, command, maxRetries)
 }
 
-export async function updateAll() {
+export async function updateAll(n) {
 
+    let vmIndex = await checkAndReturnVMIndex(n)
     console.log("📍Will rebuild and rerun bor and heimdall with latest versions from given branches")
 
     let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
     let user, ip
 
-    for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
-
-        i === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[i]}`
-        ip = `${user}@${doc['devnetBorHosts'][i]}`
-
-        await pullAndRestartBor(ip, i, true)
-        await pullAndRestartHeimdall(ip, i, true)
+    if (vmIndex === undefined) {
+        for (let i = 0; i < doc['devnetBorUsers'].length; i++) {
+            i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
+            ip = `${user}@${doc['devnetBorHosts'][i]}`
+            await pullAndRestartBor(ip, i, true)
+            await pullAndRestartHeimdall(ip, i, true)
+        }
+    } else {
+        vmIndex === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[vmIndex]}`
+        ip = `${user}@${doc['devnetBorHosts'][vmIndex]}`
+        await pullAndRestartBor(ip, vmIndex, true)
+        await pullAndRestartHeimdall(ip, vmIndex, true)
     }
 }
 
-export async function updateBor() {
+export async function updateBor(n) {
 
+    let vmIndex = await checkAndReturnVMIndex(n)
     console.log("📍Will rebuild and rerun bor with latest version from given branch")
 
     let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
     let user, ip
 
-    for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
-
-        i === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[i]}`
-        ip = `${user}@${doc['devnetBorHosts'][i]}`
-
-        await pullAndRestartBor(ip, i, true)
+    if (vmIndex === undefined) {
+        for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
+            i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
+            ip = `${user}@${doc['devnetBorHosts'][i]}`
+            await pullAndRestartBor(ip, i, true)
+        }
+    } else {
+        vmIndex === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[vmIndex]}`
+        ip = `${user}@${doc['devnetBorHosts'][vmIndex]}`
+        await pullAndRestartBor(ip, vmIndex, true)
     }
 }
 
-export async function updateHeimdall() {
+export async function updateHeimdall(n) {
 
+    let vmIndex = await checkAndReturnVMIndex(n)
     console.log("📍Will rebuild and rerun heimdall with latest version from given branch")
 
     let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
     let user, ip
 
-    for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
-
-        i === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[i]}`
-        ip = `${user}@${doc['devnetBorHosts'][i]}`
-
-        await pullAndRestartHeimdall(ip, i, true)
+    if (vmIndex === undefined) {
+        for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
+            i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
+            ip = `${user}@${doc['devnetBorHosts'][i]}`
+            await pullAndRestartHeimdall(ip, i, true)
+        }
+    } else {
+        vmIndex === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[vmIndex]}`
+        ip = `${user}@${doc['devnetBorHosts'][vmIndex]}`
+        await pullAndRestartHeimdall(ip, vmIndex, true)
     }
 }

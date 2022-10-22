@@ -37,7 +37,7 @@ async function installRequiredSoftwareOnRemoteMachines(ips, devnetType) {
     let isHostMap = new Map()
 
     for (let i = 0; i < ipsArray.length; i++) {
-        i === 0 ? username = `${doc['ethHostUser']}` : `${borUsers[i]}`
+        i === 0 ? username = `${doc['ethHostUser']}` : username =`${borUsers[i]}`
         user = `${username}@${ipsArray[i]}`
         users.push(user)
 
@@ -206,7 +206,7 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType) {
     let username, user
 
     for (let i = 0; i < ipsArray.length; i++) {
-        i === 0 ? username = `${doc['ethHostUser']}` : `${borUsers[i]}`
+        i === 0 ? username = `${doc['ethHostUser']}` : username =`${borUsers[i]}`
         user = `${username}@${ipsArray[i]}`
         users.push(user)
 
