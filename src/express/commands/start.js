@@ -32,28 +32,28 @@ async function installRequiredSoftwareOnRemoteMachines(ips, devnetType) {
 
     let ipsArray = splitToArray(ips)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
-    let username, user
-    let users = []
+    let user, ip
+    let nodeIps = []
     let isHostMap = new Map()
 
     for (let i = 0; i < ipsArray.length; i++) {
-        i === 0 ? username = `${doc['ethHostUser']}` : username =`${borUsers[i]}`
-        user = `${username}@${ipsArray[i]}`
-        users.push(user)
+        i === 0 ? user = `${doc['ethHostUser']}` : user =`${borUsers[i]}`
+        ip = `${user}@${ipsArray[i]}`
+        nodeIps.push(ip)
 
-        i === 0 ? isHostMap.set(user, true) : isHostMap.set(user, false)
+        i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
     }
 
-    let deps = users.map(async(user) => {
-        await configureCertAndPermissions(user)
-        await installCommonPackages(user)
+    let deps = nodeIps.map(async(ip) => {
+        await configureCertAndPermissions(ip)
+        await installCommonPackages(ip)
 
-        if (isHostMap.get(user)) {
+        if (isHostMap.get(ip)) {
             // Install Host dependencies
-            await installHostSpecificPackages(user)
+            await installHostSpecificPackages(ip)
 
             if (process.env.TF_VAR_DOCKERIZED === 'yes') {
-                await installDocker(user)
+                await installDocker(ip)
             }
         }
 
@@ -62,59 +62,59 @@ async function installRequiredSoftwareOnRemoteMachines(ips, devnetType) {
     await Promise.all(deps)
 }
 
-async function configureCertAndPermissions(user) {
+async function configureCertAndPermissions(ip) {
 
     let arr = []
-    let username
-    arr = user.split("@")
-    username = arr[0]
+    let user
+    arr = ip.split("@")
+    user = arr[0]
 
     console.log("📍Allowing user not to use password...")
-    let command = `echo "${username} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers`
-    await runSshCommand(user, command, maxRetries)
+    let command = `echo "${user} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers`
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Give permissions to all users for root folder...")
     command = `sudo chmod 755 -R ~/`
-    await runSshCommand(user, command, maxRetries)
+    await runSshCommand(ip, command, maxRetries)
 
-    console.log("📍Copying certificate to " + user + ":~/cert.pem...")
+    console.log("📍Copying certificate to " + ip + ":~/cert.pem...")
     let src = `${process.env.PEM_FILE_PATH}`
-    let dest = `${user}:~/cert.pem`
+    let dest = `${ip}:~/cert.pem`
     await runScpCommand(src, dest, maxRetries)
 
-    console.log("📍Adding ssh for " + user + ":~/cert.pem...")
+    console.log("📍Adding ssh for " + ip + ":~/cert.pem...")
     command = `sudo chmod 700 ~/cert.pem && eval "$(ssh-agent -s)" && ssh-add ~/cert.pem && sudo chmod -R 700 ~/.ssh`
-    await runSshCommand(user, command, maxRetries)
+    await runSshCommand(ip, command, maxRetries)
 }
 
-async function installCommonPackages(user) {
-    console.log("📍Installing required software on remote machine " + user + "...")
+async function installCommonPackages(ip) {
+    console.log("📍Installing required software on remote machine " + ip + "...")
 
     console.log("📍Running apt update...")
     let command = `sudo apt update -y`
-    await runSshCommand(user, command, maxRetries)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Installing build-essential...")
     command = `sudo apt install build-essential -y`
-    await runSshCommand(user, command, maxRetries)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Installing go...")
     command = `wget -nc https://raw.githubusercontent.com/maticnetwork/node-ansible/master/go-install.sh &&
                          bash go-install.sh --remove &&
                          bash go-install.sh &&
                          source ~/.bashrc`
-    await runSshCommand(user, command, maxRetries)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Creating symlink for go...")
     command = `sudo ln -sf ~/.go/bin/go /usr/local/bin/go`
-    await runSshCommand(user, command, maxRetries)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Installing rabbitmq...")
     command = `sudo apt install rabbitmq-server -y`
-    await runSshCommand(user, command, maxRetries)
+    await runSshCommand(ip, command, maxRetries)
 }
 
-async function installHostSpecificPackages(user) {
+async function installHostSpecificPackages(ip) {
 
     console.log("📍Installing nvm...")
     let command = `curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash &&
@@ -122,55 +122,55 @@ async function installHostSpecificPackages(user) {
                         [ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
                         [ -s "$NVM_DIR/bash_completion" ] && \\. "$NVM_DIR/bash_completion" && 
                         nvm install 10.17.0`
-    await runSshCommand(user, command, maxRetries)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Installing solc...")
     command = `sudo snap install solc`
-    await runSshCommand(user, command, maxRetries)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Installing python2...")
     command = `sudo apt install python2 -y && alias python="/usr/bin/python2"`
-    await runSshCommand(user, command, maxRetries)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Installing nodejs and npm...")
     command = `sudo apt install nodejs npm -y`
-    await runSshCommand(user, command, maxRetries)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Creating symlink for npm and node...")
     command = `sudo ln -sf ~/.nvm/versions/node/v10.17.0/bin/npm /usr/bin/npm &&
                     sudo ln -sf ~/.nvm/versions/node/v10.17.0/bin/node /usr/bin/node &&
                     sudo ln -sf ~/.nvm/versions/node/v10.17.0/bin/npx /usr/bin/npx`
-    await runSshCommand(user, command, maxRetries)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Installing ganache-cli...")
     command = `sudo npm install -g ganache-cli -y`
-    await runSshCommand(user, command, maxRetries)
+    await runSshCommand(ip, command, maxRetries)
 }
 
-async function installDocker(user) {
-    
+async function installDocker(ip) {
+
     let arr = []
-    let username
-    arr = user.split("@")
-    username = arr[0]
+    let user
+    arr = ip.split("@")
+    user = arr[0]
 
     console.log("📍Setting docker repository up...")
     let command = `sudo apt-get update -y && sudo apt install apt-transport-https ca-certificates curl software-properties-common -y`
-    await runSshCommand(user, command, maxRetries)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Installing docker...")
     command = `curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -`
-    await runSshCommand(user, command, maxRetries)
+    await runSshCommand(ip, command, maxRetries)
     command = `sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"`
-    await runSshCommand(user, command, maxRetries)
+    await runSshCommand(ip, command, maxRetries)
     command = `sudo apt install docker-ce docker-ce-cli containerd.io -y`
-    await runSshCommand(user, command, maxRetries)
+    await runSshCommand(ip, command, maxRetries)
     command = `sudo apt install docker-compose-plugin -y`
-    await runSshCommand(user, command, maxRetries)
+    await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Adding user to docker group...")
-    command = `sudo usermod -aG docker ${username}`
-    await runSshCommand(user, command, maxRetries)
+    command = `sudo usermod -aG docker ${user}`
+    await runSshCommand(ip, command, maxRetries)
 }
 
 async function prepareMaticCLI(ips, devnetType) {
@@ -201,61 +201,61 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType) {
 
     let ipsArray = splitToArray(ips)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
-    let users = []
+    let user, ip
+    let nodeIps = []
     let isHostMap = new Map()
-    let username, user
 
     for (let i = 0; i < ipsArray.length; i++) {
-        i === 0 ? username = `${doc['ethHostUser']}` : username =`${borUsers[i]}`
-        user = `${username}@${ipsArray[i]}`
-        users.push(user)
+        i === 0 ? user = `${doc['ethHostUser']}` : user =`${borUsers[i]}`
+        ip = `${user}@${ipsArray[i]}`
+        nodeIps.push(ip)
 
-        i === 0 ? isHostMap.set(user, true) : isHostMap.set(user, false)
+        i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
     }
 
-    let cleanup = users.map(async(user) => {
+    let cleanup = nodeIps.map(async(ip) => {
 
-        if (isHostMap.get(user)) {
+        if (isHostMap.get(ip)) {
             // Cleanup Host 
-            console.log("📍Removing old devnet (if present) on machine " + user + " ...")
+            console.log("📍Removing old devnet (if present) on machine " + ip + " ...")
             let command = `rm -rf ~/matic-cli/devnet`
-            await runSshCommand(user, command, maxRetries)
+            await runSshCommand(ip, command, maxRetries)
 
-            console.log("📍Stopping ganache (if present) on machine " + users[0] + " ...")
+            console.log("📍Stopping ganache (if present) on machine " + ip + " ...")
             command = `tmux send-keys -t matic-cli-ganache:0 'C-c' ENTER || echo 'ganache not running on current machine...'`
-            await runSshCommand(user, command, maxRetries)
+            await runSshCommand(ip, command, maxRetries)
 
-            console.log("📍Killing ganache tmux session (if present) on machine " + users[0] + " ...")
+            console.log("📍Killing ganache tmux session (if present) on machine " + ip + " ...")
             command = `tmux kill-session -t matic-cli-ganache || echo 'matic-cli-ganache tmux session does not exist on current machine...'`
-            await runSshCommand(user, command, maxRetries)
+            await runSshCommand(ip, command, maxRetries)
         }
-        console.log("📍Stopping heimdall (if present) on machine " + user + " ...")
+        console.log("📍Stopping heimdall (if present) on machine " + ip + " ...")
         let command = `tmux send-keys -t matic-cli:0 'C-c' ENTER || echo 'heimdall not running on current machine...'`
-        await runSshCommand(user, command, maxRetries)
+        await runSshCommand(ip, command, maxRetries)
 
-        console.log("📍Stopping bor (if present) on machine " + user + " ...")
+        console.log("📍Stopping bor (if present) on machine " + ip + " ...")
         command = `tmux send-keys -t matic-cli:1 'C-c' ENTER || echo 'bor not running on current machine...'`
-        await runSshCommand(user, command, maxRetries)
+        await runSshCommand(ip, command, maxRetries)
 
-        console.log("📍Killing matic-cli tmux session (if present) on machine " + user + " ...")
+        console.log("📍Killing matic-cli tmux session (if present) on machine " + ip + " ...")
         command = `tmux kill-session -t matic-cli || echo 'matic-cli tmux session does not exist on current machine...'`
-        await runSshCommand(user, command, maxRetries)
+        await runSshCommand(ip, command, maxRetries)
 
-        console.log("📍Removing .bor folder (if present) on machine " + user + " ...")
+        console.log("📍Removing .bor folder (if present) on machine " + ip + " ...")
         command = `rm -rf ~/.bor`
-        await runSshCommand(user, command, maxRetries)
+        await runSshCommand(ip, command, maxRetries)
 
-        console.log("📍Removing .heimdalld folder (if present) on machine " + user + " ...")
+        console.log("📍Removing .heimdalld folder (if present) on machine " + ip + " ...")
         command = `rm -rf ~/.heimdalld`
-        await runSshCommand(user, command, maxRetries)
+        await runSshCommand(ip, command, maxRetries)
 
-        console.log("📍Removing data folder (if present) on machine " + user + " ...")
+        console.log("📍Removing data folder (if present) on machine " + ip + " ...")
         command = `rm -rf ~/data`
-        await runSshCommand(user, command, maxRetries)
+        await runSshCommand(ip, command, maxRetries)
 
-        console.log("📍Removing node folder (if present) on machine " + user + " ...")
+        console.log("📍Removing node folder (if present) on machine " + ip + " ...")
         command = `rm -rf ~/node`
-        await runSshCommand(user, command, maxRetries)
+        await runSshCommand(ip, command, maxRetries)
     })
 
     await Promise.all(cleanup)
