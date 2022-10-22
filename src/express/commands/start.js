@@ -197,7 +197,7 @@ async function prepareMaticCLI(ips, devnetType) {
 
 async function eventuallyCleanupPreviousDevnet(ips, devnetType) {
 
-    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
+    let doc = await yaml.load(fs.readFileSync(`./configs/devnet/${devnetType}-setup-config.yaml`, 'utf8'));
 
     let ipsArray = splitToArray(ips)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
