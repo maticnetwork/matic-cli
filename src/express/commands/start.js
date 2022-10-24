@@ -43,9 +43,13 @@ async function installRequiredSoftwareOnRemoteMachines(ips, devnetType) {
 
         i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
     }
+    
+    let arr = []
 
     let deps = nodeIps.map(async(ip) => {
-        await configureCertAndPermissions(ip)
+        arr = ip.split("@")
+        user = arr[0]
+        await configureCertAndPermissions(user, ip)
         await installCommonPackages(ip)
 
         if (isHostMap.get(ip)) {
@@ -53,7 +57,7 @@ async function installRequiredSoftwareOnRemoteMachines(ips, devnetType) {
             await installHostSpecificPackages(ip)
 
             if (process.env.TF_VAR_DOCKERIZED === 'yes') {
-                await installDocker(ip)
+                await installDocker(ip, user)
             }
         }
 
@@ -62,12 +66,7 @@ async function installRequiredSoftwareOnRemoteMachines(ips, devnetType) {
     await Promise.all(deps)
 }
 
-async function configureCertAndPermissions(ip) {
-
-    let arr = []
-    let user
-    arr = ip.split("@")
-    user = arr[0]
+async function configureCertAndPermissions(user, ip) {
 
     console.log("📍Allowing user not to use password...")
     let command = `echo "${user} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers`
@@ -147,12 +146,7 @@ async function installHostSpecificPackages(ip) {
     await runSshCommand(ip, command, maxRetries)
 }
 
-async function installDocker(ip) {
-
-    let arr = []
-    let user
-    arr = ip.split("@")
-    user = arr[0]
+async function installDocker(ip, user) {
 
     console.log("📍Setting docker repository up...")
     let command = `sudo apt-get update -y && sudo apt install apt-transport-https ca-certificates curl software-properties-common -y`
