@@ -63,13 +63,13 @@ export function setCommonConfigs(doc) {
 }
 
 export function setConfigValue(key, value, doc) {
-    if (value) {
+    if (value !== undefined) {
         doc[key] = value;
     }
 }
 
 export function setConfigList(key, value, doc) {
-    if (value) {
+    if (value !== undefined) {
         value = value.split(' ').join('')
         const valueArray = value.split(",");
         if (valueArray.length > 0) {
@@ -91,14 +91,14 @@ export function setConfigList(key, value, doc) {
 }
 
 export function setEthURL(value, doc) {
-    if (value) {
+    if (value !== undefined) {
         doc['ethURL'] = 'http://' + value + ':9545';
         process.env.ETH_URL = doc['ethURL']
     }
 }
 
 export function setEthHostUser(value, doc) {
-    if (value) {
+    if (value !== undefined) {
         doc['ethHostUser'] = value;
     }
 }
