@@ -32,25 +32,38 @@ async function installRequiredSoftwareOnRemoteMachines(ips, devnetType) {
 
     let ipsArray = splitToArray(ips)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
-
     let user, ip
+    let nodeIps = []
+    let isHostMap = new Map()
 
     for (let i = 0; i < ipsArray.length; i++) {
-
-        i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
+        i === 0 ? user = `${doc['ethHostUser']}` : user =`${borUsers[i]}`
         ip = `${user}@${ipsArray[i]}`
+        nodeIps.push(ip)
 
+        i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
+    }
+
+    let arr = []
+
+    let deps = nodeIps.map(async(ip) => {
+        arr = ip.split("@")
+        user = arr[0]
         await configureCertAndPermissions(user, ip)
         await installCommonPackages(user, ip)
 
-        if (i === 0) {
+        if (isHostMap.get(ip)) {
+            // Install Host dependencies
             await installHostSpecificPackages(ip)
 
             if (process.env.TF_VAR_DOCKERIZED === 'yes') {
                 await installDocker(ip, user)
             }
         }
-    }
+
+    })
+
+    await Promise.all(deps)
 }
 
 async function configureCertAndPermissions(user, ip) {
@@ -183,16 +196,22 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType) {
 
     let ipsArray = splitToArray(ips)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
-
     let user, ip
+    let nodeIps = []
+    let isHostMap = new Map()
 
     for (let i = 0; i < ipsArray.length; i++) {
-
-        i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
+        i === 0 ? user = `${doc['ethHostUser']}` : user =`${borUsers[i]}`
         ip = `${user}@${ipsArray[i]}`
+        nodeIps.push(ip)
 
-        if (i === 0) {
+        i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
+    }
 
+    let cleanup = nodeIps.map(async(ip) => {
+
+        if (isHostMap.get(ip)) {
+            // Cleanup Host
             console.log("📍Removing old devnet (if present) on machine " + ip + " ...")
             let command = `rm -rf ~/matic-cli/devnet`
             await runSshCommand(ip, command, maxRetries)
@@ -233,7 +252,10 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType) {
         console.log("📍Removing node folder (if present) on machine " + ip + " ...")
         command = `rm -rf ~/node`
         await runSshCommand(ip, command, maxRetries)
-    }
+    })
+
+    await Promise.all(cleanup)
+
 }
 
 async function runDockerSetupWithMaticCLI(ips) {
