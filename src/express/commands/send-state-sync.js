@@ -14,7 +14,11 @@ export async function sendStateSyncTx() {
 
     if (doc['devnetBorHosts'].length > 0) {
         console.log("📍Monitoring the first node", doc['devnetBorHosts'][0]);
+    } else {
+        console.log("📍No nodes to monitor, please check your configs! Exiting...");
+        process.exit(1)
     }
+
     let machine0 = doc['devnetBorHosts'][0];
 
     let src = `${doc['ethHostUser']}@${machine0}:~/matic-cli/devnet/code/contracts/contractAddresses.json`

@@ -63,13 +63,13 @@ export function setCommonConfigs(doc) {
 }
 
 export function setConfigValue(key, value, doc) {
-    if (value) {
+    if (value !== undefined) {
         doc[key] = value;
     }
 }
 
 export function setConfigList(key, value, doc) {
-    if (value) {
+    if (value !== undefined) {
         value = value.split(' ').join('')
         const valueArray = value.split(",");
         if (valueArray.length > 0) {
@@ -91,14 +91,14 @@ export function setConfigList(key, value, doc) {
 }
 
 export function setEthURL(value, doc) {
-    if (value) {
+    if (value !== undefined) {
         doc['ethURL'] = 'http://' + value + ':9545';
         process.env.ETH_URL = doc['ethURL']
     }
 }
 
 export function setEthHostUser(value, doc) {
-    if (value) {
+    if (value !== undefined) {
         doc['ethHostUser'] = value;
     }
 }
@@ -107,3 +107,23 @@ export function splitToArray(value) {
     return value.split(' ').join('').split(",")
 }
 
+export async function checkAndReturnVMIndex(n) {
+
+    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'), undefined);
+
+    if (typeof n === "boolean") {
+        console.log("📍Targeting all VMs ...");
+        return undefined
+    }
+
+    if (typeof n === "string") {
+        let vmIndex = parseInt(n, 10)
+        if (vmIndex >= 0 && vmIndex < doc['devnetBorHosts'].length) {
+            console.log(`📍Targeting VM with IP ${doc['devnetBorHosts'][vmIndex]} ...`);
+            return vmIndex
+        } else {
+            console.log("📍Wrong VM index, please check your configs! Exiting...");
+            process.exit(1)
+        }
+    }
+}

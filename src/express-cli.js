@@ -18,15 +18,15 @@ program
     .option('-i, --init', 'Initiate the terraform setup')
     .option('-s, --start', 'Start the setup')
     .option('-d, --destroy', 'Destroy the setup')
-    .option('-uall, --update-all', 'Update the setup')
-    .option('-ubor, --update-bor', 'Update the bor setup')
-    .option('-uheimdall, --update-heimdall', 'Update the heimdall setup')
-    .option('-rall, --restart-all', 'Restart both bor and heimdall')
-    .option('-rbor, --restart-bor', 'Restart bor')
-    .option('-rheimdall, --restart-heimdall', 'Restart heimdall')
+    .option('-uall, --update-all [index]', 'Update bor and heimdall on all machines. If an integer [index] is specified, it will only update the VM corresponding to that index')
+    .option('-ubor, --update-bor [index]', 'Update bor on all machines. If an integer [index] is specified, it will only update the VM corresponding to that index')
+    .option('-uheimdall, --update-heimdall [index]', 'Update heimdall on all machines. If an integer [index] is specified, it will only update the VM corresponding to that index')
+    .option('-rall, --restart-all [index]', 'Restart both bor and heimdall on all machines. If an integer [index] is specified, it will only update the VM corresponding to that index')
+    .option('-rbor, --restart-bor [index]', 'Restart bor on all machines. If an integer [index] is specified, it will only update the VM corresponding to that index')
+    .option('-rheimdall, --restart-heimdall [index]', 'Restart heimdall on all machines. If an integer [index] is specified, it will only update the VM corresponding to that index')
     .option('-c, --cleanup', 'Cleanup the setup')
     .option('-m, --monitor', 'Monitor the setup')
-    .option('-t, --stress [fund]', 'Start the stress test')
+    .option('-t, --stress [fund]', 'Start the stress test. If the string `fund` is specified, the account will be funded. This option is mandatory when the command is executed the first time on a devnet.')
     .option('-ss, --send-state-sync', 'Send state sync tx')
     .version(pkg.version);
 
@@ -56,48 +56,48 @@ export async function cli() {
     }
 
     else if (options.updateAll) {
-        console.log("📍Command --update-all");
+        console.log("📍Command --update-all [index]");
         console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
         console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
         await timer(3000)
-        await updateAll();
+        await updateAll(options.updateAll);
     }
 
     else if (options.updateBor) {
-        console.log("📍Command --update-bor");
+        console.log("📍Command --update-bor [index]");
         console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
         console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
         await timer(3000)
-        await updateBor();
+        await updateBor(options.updateBor);
     }
 
     else if (options.updateHeimdall) {
-        console.log("📍Command --update-heimdall");
+        console.log("📍Command --update-heimdall [index]");
         console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
         await timer(3000)
-        await updateHeimdall();
+        await updateHeimdall(options.updateHeimdall);
     }
 
     else if (options.restartAll) {
-        console.log("📍Command --restart-all");
+        console.log("📍Command --restart-all [index]");
         console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
         console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
         await timer(3000)
-        await restartAll();
+        await restartAll(options.restartAll);
     }
 
     else if (options.restartBor) {
-        console.log("📍Command --restart-bor");
+        console.log("📍Command --restart-bor [index]");
         console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
         console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
         await timer(3000)
-        await restartBor();
+        await restartBor(options.restartBor);
     }
 
     else if (options.restartHeimdall) {
-        console.log("📍Command --restart-heimdall");
+        console.log("📍Command --restart-heimdall [index]");
         console.log("⛔ This command is only available for non-dockerized devnets...")
-        await restartHeimdall();
+        await restartHeimdall(options.restartHeimdall);
     }
 
     else if (options.cleanup) {
