@@ -22,7 +22,7 @@
     "chalk": "^2.4.2",
     "commander": "^5.0.0",
     "covgen": "^3.1.0",
-    "dotenv": "^16.0.2",
+    "dotenv": "^16.0.3",
     "esm": "^3.2.18",
     "eth-crypto": "^2.3.0",
     "ethereumjs-util": "^7.1.5",
