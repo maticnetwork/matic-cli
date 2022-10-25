@@ -12,15 +12,31 @@ export async function restartAll(n) {
 
     let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
+    let nodeIps = []
+    let hostToIndex = new Map()
     let user, ip
 
     if (vmIndex === undefined) {
         for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
             i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
             ip = `${user}@${doc['devnetBorHosts'][i]}`
+            nodeIps.push(ip)
+            hostToIndex.set(ip, i)
+            //i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
+        }
+
+        let restartAllTasks = nodeIps.map(async(ip) => {
+            await pullAndRestartBor(ip, hostToIndex.get(ip), false)
+            await pullAndRestartHeimdall(ip, hostToIndex.get(ip), false)
+        })
+
+        await Promise.all(restartAllTasks)
+        /*for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
+            i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
+            ip = `${user}@${doc['devnetBorHosts'][i]}`
             await pullAndRestartBor(ip, i, false)
             await pullAndRestartHeimdall(ip, i, false)
-        }
+        }*/
     } else {
         vmIndex === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[vmIndex]}`
         ip = `${user}@${doc['devnetBorHosts'][vmIndex]}`
@@ -36,14 +52,29 @@ export async function restartBor(n) {
 
     let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
+    let nodeIps = []
+    let hostToIndex = new Map()
     let user, ip
 
     if (vmIndex === undefined) {
         for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
             i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
             ip = `${user}@${doc['devnetBorHosts'][i]}`
-            await pullAndRestartBor(ip, i, false)
+            nodeIps.push(ip)
+            hostToIndex.set(ip, i)
+            //i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
         }
+
+        let restartBorTasks = nodeIps.map(async(ip) => {
+            await pullAndRestartBor(ip, hostToIndex.get(ip), false)
+        })
+
+        await Promise.all(restartBorTasks)
+        /*for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
+            i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
+            ip = `${user}@${doc['devnetBorHosts'][i]}`
+            await pullAndRestartBor(ip, i, false)
+        }*/
     } else {
         vmIndex === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[vmIndex]}`
         ip = `${user}@${doc['devnetBorHosts'][vmIndex]}`
@@ -58,14 +89,30 @@ export async function restartHeimdall(n) {
 
     let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
+    let nodeIps = []
+    let hostToIndex = new Map()
     let user, ip
 
     if (vmIndex === undefined) {
         for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
             i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
             ip = `${user}@${doc['devnetBorHosts'][i]}`
-            await pullAndRestartHeimdall(ip, i, false)
+            nodeIps.push(ip)
+            hostToIndex.set(ip, i)
+            //i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
         }
+
+        let restartHeimdallTasks = nodeIps.map(async(ip) => {
+            await pullAndRestartHeimdall(ip, hostToIndex.get(ip), false)
+        })
+
+        await Promise.all(restartHeimdallTasks)
+
+        /*for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
+            i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
+            ip = `${user}@${doc['devnetBorHosts'][i]}`
+            await pullAndRestartHeimdall(ip, i, false)
+        }*/
     } else {
         vmIndex === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[vmIndex]}`
         ip = `${user}@${doc['devnetBorHosts'][vmIndex]}`
