@@ -13,7 +13,7 @@ export async function restartAll(n) {
     let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
     let nodeIps = []
-    let hostToIndex = new Map()
+    let hostToIndexMap = new Map()
     let user, ip
 
     if (vmIndex === undefined) {
@@ -21,12 +21,12 @@ export async function restartAll(n) {
             i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
             ip = `${user}@${doc['devnetBorHosts'][i]}`
             nodeIps.push(ip)
-            hostToIndex.set(ip, i)
+            hostToIndexMap.set(ip, i)
         }
 
         let restartAllTasks = nodeIps.map(async(ip) => {
-            await pullAndRestartBor(ip, hostToIndex.get(ip), false)
-            await pullAndRestartHeimdall(ip, hostToIndex.get(ip), false)
+            await pullAndRestartBor(ip, hostToIndexMap.get(ip), false)
+            await pullAndRestartHeimdall(ip, hostToIndexMap.get(ip), false)
         })
 
         await Promise.all(restartAllTasks)
@@ -47,7 +47,7 @@ export async function restartBor(n) {
     let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
     let nodeIps = []
-    let hostToIndex = new Map()
+    let hostToIndexMap = new Map()
     let user, ip
 
     if (vmIndex === undefined) {
@@ -55,11 +55,11 @@ export async function restartBor(n) {
             i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
             ip = `${user}@${doc['devnetBorHosts'][i]}`
             nodeIps.push(ip)
-            hostToIndex.set(ip, i)
+            hostToIndexMap.set(ip, i)
         }
 
         let restartBorTasks = nodeIps.map(async(ip) => {
-            await pullAndRestartBor(ip, hostToIndex.get(ip), false)
+            await pullAndRestartBor(ip, hostToIndexMap.get(ip), false)
         })
 
         await Promise.all(restartBorTasks)
@@ -79,7 +79,7 @@ export async function restartHeimdall(n) {
     let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
     let nodeIps = []
-    let hostToIndex = new Map()
+    let hostToIndexMap = new Map()
     let user, ip
 
     if (vmIndex === undefined) {
@@ -87,11 +87,11 @@ export async function restartHeimdall(n) {
             i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
             ip = `${user}@${doc['devnetBorHosts'][i]}`
             nodeIps.push(ip)
-            hostToIndex.set(ip, i)
+            hostToIndexMap.set(ip, i)
         }
 
         let restartHeimdallTasks = nodeIps.map(async(ip) => {
-            await pullAndRestartHeimdall(ip, hostToIndex.get(ip), false)
+            await pullAndRestartHeimdall(ip, hostToIndexMap.get(ip), false)
         })
 
         await Promise.all(restartHeimdallTasks)

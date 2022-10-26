@@ -44,7 +44,7 @@ async function installRequiredSoftwareOnRemoteMachines(ips, devnetType) {
         i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
     }
     
-    let depTasks = nodeIps.map(async(ip) => {
+    let requirementTasks = nodeIps.map(async(ip) => {
         user = splitAndGetHostIp(ip)
         await configureCertAndPermissions(user, ip)
         await installCommonPackages(ip)
@@ -60,7 +60,7 @@ async function installRequiredSoftwareOnRemoteMachines(ips, devnetType) {
 
     })
 
-    await Promise.all(depTasks)
+    await Promise.all(requirementTasks)
 }
 
 async function configureCertAndPermissions(user, ip) {
