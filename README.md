@@ -136,11 +136,6 @@ Notes:
 
 Remove the devnet folder and you can start the process once again
 
-## License
-
-MIT
-
-
 
 # express-cli 
 #### Note: the current version of `express-cli` is compatible with `bor` and `heimdall` versions `v0.3.x`. Backward compatibility with `0.2.x` has been removed.
@@ -196,3 +191,18 @@ The `express-cli` also provides additional testing commands, listed here.
   - Monitors the reception of state-syncs and checkpoints to make sure the whole network is in a healthy state. If `--send-state-sync` hasn't been used before, only checkpoints will be detected. The execution stops when a `state-sync` is found
 - `./bin/express-cli --stress [fund]`
   - Runs the stress tests on remote nodes. The string `fund` is needed when stress tests are ran for the first time, to fund the accounts 
+
+
+### Devnet configs
+The devnet configs (for docker and remote setups) are available under `configs/devnet/`  
+These files are used as template, hence they should not be deleted nor any modification committed and pushed.
+Therefore, they are under `.gitignore`, and in case you do not want those changes to be reflected in your local `git`, you can use the commands
+```bash
+git update-index --assume-unchanged configs/devnet/remote-setup-config.yaml
+git update-index --assume-unchanged configs/devnet/docker-setup-config.yaml
+```
+
+
+## License
+
+MIT
