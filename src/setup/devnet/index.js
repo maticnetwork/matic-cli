@@ -447,7 +447,7 @@ export class Devnet {
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                            `tmux new -d -s matic-cli; tmux new-window -t matic-cli; tmux new-window -t matic-cli;  tmux send-keys -t matic-cli:0 'bash /home/${this.config.devnetBorUsers[i]}/node/heimdalld-setup.sh' ENTER; tmux send-keys -t matic-cli:0 'heimdalld start --home /home/${this.config.devnetBorUsers[i]}/.heimdalld --chain=/home/${this.config.devnetBorUsers[i]}.heimdalld/config/genesis.json --bridge --all --rest-server' ENTER; tmux send-keys -t matic-cli:1 'bash /home/${this.config.devnetBorUsers[i]}/node/bor-setup.sh' ENTER; tmux send-keys -t matic-cli:1 'bash /home/${this.config.devnetBorUsers[i]}/node/bor-start.sh' ENTER`
+                            `tmux new -d -s matic-cli; tmux new-window -t matic-cli; tmux new-window -t matic-cli;  tmux send-keys -t matic-cli:0 'bash /home/${this.config.devnetBorUsers[i]}/node/heimdalld-setup.sh' ENTER; tmux send-keys -t matic-cli:0 'heimdalld start --home /home/${this.config.devnetBorUsers[i]}/.heimdalld --chain=/home/${this.config.devnetBorUsers[i]}/.heimdalld/config/genesis.json --bridge --all --rest-server' ENTER; tmux send-keys -t matic-cli:1 'bash /home/${this.config.devnetBorUsers[i]}/node/bor-setup.sh' ENTER; tmux send-keys -t matic-cli:1 'bash /home/${this.config.devnetBorUsers[i]}/node/bor-start.sh' ENTER`
                         ], {stdio: getRemoteStdio()})
                     }
                 }
