@@ -1,6 +1,6 @@
 import yaml from "js-yaml";
 import fs from "fs";
-import {editMaticCliDockerYAMLConfig, editMaticCliRemoteYAMLConfig, splitIp, splitToArray} from "../common/config-utils";
+import {editMaticCliDockerYAMLConfig, editMaticCliRemoteYAMLConfig, splitAndGetHostIp, splitToArray} from "../common/config-utils";
 import {maxRetries, runScpCommand, runSshCommand} from "../common/remote-worker";
 
 const shell = require("shelljs");
@@ -44,11 +44,8 @@ async function installRequiredSoftwareOnRemoteMachines(ips, devnetType) {
         i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
     }
     
-    let arr = []
-
     let depTasks = nodeIps.map(async(ip) => {
-        arr = splitIp(ip)
-        user = arr[0]
+        user = splitAndGetHostIp(ip)
         await configureCertAndPermissions(user, ip)
         await installCommonPackages(ip)
 
