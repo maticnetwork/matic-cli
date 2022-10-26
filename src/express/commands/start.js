@@ -1,6 +1,6 @@
 import yaml from "js-yaml";
 import fs from "fs";
-import {editMaticCliDockerYAMLConfig, editMaticCliRemoteYAMLConfig, splitToArray} from "../common/config-utils";
+import {editMaticCliDockerYAMLConfig, editMaticCliRemoteYAMLConfig, splitAndGetHostIp, splitToArray} from "../common/config-utils";
 import {maxRetries, runScpCommand, runSshCommand} from "../common/remote-worker";
 
 const shell = require("shelljs");
@@ -44,11 +44,8 @@ async function installRequiredSoftwareOnRemoteMachines(ips, devnetType) {
         i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
     }
     
-    let arr = []
-
-    let deps = nodeIps.map(async(ip) => {
-        arr = ip.split("@")
-        user = arr[0]
+    let requirementTasks = nodeIps.map(async(ip) => {
+        user = splitAndGetHostIp(ip)
         await configureCertAndPermissions(user, ip)
         await installCommonPackages(ip)
 
@@ -63,7 +60,7 @@ async function installRequiredSoftwareOnRemoteMachines(ips, devnetType) {
 
     })
 
-    await Promise.all(deps)
+    await Promise.all(requirementTasks)
 }
 
 async function configureCertAndPermissions(user, ip) {
@@ -170,7 +167,7 @@ async function installDocker(ip, user) {
 async function prepareMaticCLI(ips, devnetType) {
 
     let doc = await yaml.load(fs.readFileSync(`./configs/devnet/${devnetType}-setup-config.yaml`, 'utf8'));
-    let ipsArray = ips.split(' ').join('').split(",")
+    let ipsArray = splitToArray(ips)
     let ip = `${doc['ethHostUser']}@${ipsArray[0]}`
 
     let maticCliRepo = process.env.MATIC_CLI_REPO
@@ -207,7 +204,7 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType) {
         i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
     }
 
-    let cleanup = nodeIps.map(async(ip) => {
+    let cleanupTasks = nodeIps.map(async(ip) => {
 
         if (isHostMap.get(ip)) {
             // Cleanup Host 
@@ -252,13 +249,13 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType) {
         await runSshCommand(ip, command, maxRetries)
     })
 
-    await Promise.all(cleanup)
+    await Promise.all(cleanupTasks)
 
 }
 
 async function runDockerSetupWithMaticCLI(ips) {
     let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
-    let ipsArray = ips.split(' ').join('').split(",")
+    let ipsArray = splitToArray(ips)
     let ip = `${doc['ethHostUser']}@${ipsArray[0]}`
 
     console.log("📍Creating devnet and removing default configs...")
@@ -314,7 +311,7 @@ async function runDockerSetupWithMaticCLI(ips) {
 async function runRemoteSetupWithMaticCLI(ips) {
 
     let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
-    let ipsArray = ips.split(' ').join('').split(",")
+    let ipsArray = splitToArray(ips)
     let ip = `${doc['ethHostUser']}@${ipsArray[0]}`
 
     console.log("📍Creating heimdall folder...")

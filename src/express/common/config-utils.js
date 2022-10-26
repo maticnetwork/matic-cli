@@ -104,7 +104,24 @@ export function setEthHostUser(value, doc) {
 }
 
 export function splitToArray(value) {
-    return value.split(' ').join('').split(",")
+    try {
+        return value.split(' ').join('').split(",")
+    } catch (error) {
+        console.error("📍Failed to split to IP array: ", error);
+        console.log("📍Exiting...");
+        process.exit(1)
+    }
+    
+}
+
+export function splitAndGetHostIp(value) {
+    try {
+        return value.split("@")[0]
+    } catch (error) {
+        console.error("📍Failed to split IP: ", error);
+        console.log("📍Exiting...");
+        process.exit(1)
+    }
 }
 
 export async function checkAndReturnVMIndex(n) {

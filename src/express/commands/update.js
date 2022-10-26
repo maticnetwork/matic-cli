@@ -99,15 +99,25 @@ export async function updateAll(n) {
 
     let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
+    let nodeIps = []
+    let hostToIndexMap = new Map()
     let user, ip
 
     if (vmIndex === undefined) {
-        for (let i = 0; i < doc['devnetBorUsers'].length; i++) {
+        for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
             i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
             ip = `${user}@${doc['devnetBorHosts'][i]}`
-            await pullAndRestartBor(ip, i, true)
-            await pullAndRestartHeimdall(ip, i, true)
+            nodeIps.push(ip)
+            hostToIndexMap.set(ip, i)
         }
+
+        let updateAllTasks = nodeIps.map(async(ip) => {
+            await pullAndRestartBor(ip, hostToIndexMap.get(ip), true)
+            await pullAndRestartHeimdall(ip, hostToIndexMap.get(ip), true)
+        })
+
+        await Promise.all(updateAllTasks)
+
     } else {
         vmIndex === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[vmIndex]}`
         ip = `${user}@${doc['devnetBorHosts'][vmIndex]}`
@@ -123,16 +133,26 @@ export async function updateBor(n) {
 
     let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
+    let nodeIps = []
+    let hostToIndexMap = new Map()
     let user, ip
 
     if (vmIndex === undefined) {
         for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
             i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
             ip = `${user}@${doc['devnetBorHosts'][i]}`
-            await pullAndRestartBor(ip, i, true)
+            nodeIps.push(ip)
+            hostToIndexMap.set(ip, i)
         }
+
+        let updateBorTasks = nodeIps.map(async(ip) => {
+            await pullAndRestartBor(ip, hostToIndexMap.get(ip), true)
+        })
+
+        await Promise.all(updateBorTasks)
+
     } else {
-        vmIndex === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[vmIndex]}`
+        vmIndex === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[vmIndex]}`
         ip = `${user}@${doc['devnetBorHosts'][vmIndex]}`
         await pullAndRestartBor(ip, vmIndex, true)
     }
@@ -145,16 +165,26 @@ export async function updateHeimdall(n) {
 
     let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
+    let nodeIps = []
+    let hostToIndexMap = new Map()
     let user, ip
 
     if (vmIndex === undefined) {
         for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
             i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
             ip = `${user}@${doc['devnetBorHosts'][i]}`
-            await pullAndRestartHeimdall(ip, i, true)
+            nodeIps.push(ip)
+            hostToIndexMap.set(ip, i)
         }
+
+        let updateHeimdallTasks = nodeIps.map(async(ip) => {
+            await pullAndRestartHeimdall(ip, hostToIndexMap.get(ip), true)
+        })
+
+        await Promise.all(updateHeimdallTasks)
+
     } else {
-        vmIndex === 0 ? user = `${doc['ethHostUser']}` : `${borUsers[vmIndex]}`
+        vmIndex === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[vmIndex]}`
         ip = `${user}@${doc['devnetBorHosts'][vmIndex]}`
         await pullAndRestartHeimdall(ip, vmIndex, true)
     }
