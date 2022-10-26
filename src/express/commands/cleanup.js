@@ -46,25 +46,6 @@ async function stopServices(doc) {
 
     await Promise.all(stopServiceTasks)
 
-    /*for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
-
-        i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
-        ip = `${user}@${doc['devnetBorHosts'][i]}`
-
-        if (i === 0) {
-            console.log("📍Stopping ganache on machine " + ip + " ...")
-            let command = `tmux send-keys -t matic-cli-ganache:0 'C-c' ENTER`
-            await runSshCommand(ip, command, maxRetries)
-        }
-
-        console.log("📍Stopping heimdall on machine " + ip + "...")
-        let command = `tmux send-keys -t matic-cli:0 'C-c' ENTER`
-        await runSshCommand(ip, command, maxRetries)
-
-        console.log("📍Stopping bor on machine " + ip + " ...")
-        command = `tmux send-keys -t matic-cli:1 'C-c' ENTER`
-        await runSshCommand(ip, command, maxRetries)
-    }*/
 }
 
 async function cleanupServices(doc) {
@@ -111,38 +92,6 @@ async function cleanupServices(doc) {
     })
 
     await Promise.all(cleanupServicesTasks)
-    /*for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
-
-        i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
-        ip = `${user}@${doc['devnetBorHosts'][i]}`
-
-
-        if (i === 0) {
-            console.log("📍Cleaning up ganache on machine " + ip + " ...")
-            let command = `rm -rf ~/data/ganache-db && rm -rf ~/matic-cli/devnet/data/ganache-db`
-            await runSshCommand(ip, command, maxRetries)
-        }
-
-        console.log("📍Cleaning up heimdall on machine " + ip + " ...")
-        let command = `tmux send-keys -t matic-cli:0 'heimdalld unsafe-reset-all' ENTER`
-        await runSshCommand(ip, command, maxRetries)
-
-        console.log("📍Purging queue for heimdall bridge on machine " + ip + " ...")
-        command = `tmux send-keys -t matic-cli:0 'heimdalld heimdall-bridge purge-queue' ENTER`
-        await runSshCommand(ip, command, maxRetries)
-
-        console.log("📍Resetting heimdall bridge on machine " + ip + " ...")
-        command = `tmux send-keys -t matic-cli:0 'heimdalld heimdall-bridge unsafe-reset-all' ENTER`
-        await runSshCommand(ip, command, maxRetries)
-
-        console.log("📍Cleaning up bridge storage on machine " + ip + " ...")
-        command = `rm -rf ~/.heimdalld/bridge`
-        await runSshCommand(ip, command, maxRetries)
-
-        console.log("📍Cleaning up bor on machine " + ip + " ...")
-        command = `rm -rf ~/.bor/data`
-        await runSshCommand(ip, command, maxRetries)
-    }*/
 
 }
 
@@ -194,46 +143,11 @@ async function startServices(doc) {
     })
 
     await Promise.all(startServicesTasks)
-    /*for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
-
-        i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
-        ip = `${user}@${doc['devnetBorHosts'][i]}`
-        if (i === 0) {
-
-            console.log("📍Running ganache in tmux on machine " + ip + " ...")
-            let command = `tmux send-keys -t matic-cli-ganache:0 'bash ~/ganache-start-remote.sh' ENTER`
-            await runSshCommand(ip, command, maxRetries)
-
-            console.log("📍Deploying main net contracts on machine " + ip + " ...")
-            command = `cd ~/matic-cli/devnet && bash ganache-deployment.sh`
-            await runSshCommand(ip, command, maxRetries)
-
-            console.log("📍Setting up validators on machine " + ip + " ...")
-            command = `cd ~/matic-cli/devnet && bash ganache-stake.sh`
-            await runSshCommand(ip, command, maxRetries)
-        }
-
-        console.log("📍Setting up heimdall on machine " + ip + " ...")
-        let command = `tmux send-keys -t matic-cli:0 'bash ~/node/heimdalld-setup.sh' ENTER`
-        await runSshCommand(ip, command, maxRetries)
-
-        console.log("📍Starting heimdall on machine " + ip + " ...")
-        command = `tmux send-keys -t matic-cli:0 'heimdalld start --chain=~/.heimdalld/config/genesis.json --bridge --all --rest-server' ENTER`
-        await runSshCommand(ip, command, maxRetries)
-
-        console.log("📍Setting up bor on machine " + ip + " ...")
-        command = `tmux send-keys -t matic-cli:1 'bash ~/node/bor-setup.sh' ENTER`
-        await runSshCommand(ip, command, maxRetries)
-
-        console.log("📍Starting bor on machine " + ip + " ...")
-        command = `tmux send-keys -t matic-cli:1 'bash ~/node/bor-start.sh' ENTER`
-        await runSshCommand(ip, command, maxRetries)
-    }*/
+  
 }
 
 async function deployBorContractsAndStateSync(doc) {
 
-    //let borUsers = splitToArray(doc['devnetBorUsers'].toString())
     let user, ip
     user = `${doc['ethHostUser']}`
     ip = `${user}@${doc['devnetBorHosts'][0]}`
@@ -248,21 +162,4 @@ async function deployBorContractsAndStateSync(doc) {
     command = `cd ~/matic-cli/devnet && bash ganache-deployment-sync.sh`
     await runSshCommand(ip, command, maxRetries)
 
-    /*for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
-
-        i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
-        ip = `${user}@${doc['devnetBorHosts'][i]}`
-
-        if (i === 0) {
-            console.log("📍Deploying contracts for bor on machine " + ip + " ...")
-            await timer(10000)
-            let command = `cd ~/matic-cli/devnet && bash ganache-deployment-bor.sh`
-            await runSshCommand(ip, command, maxRetries)
-
-            console.log("📍Deploying state-sync contracts on machine " + ip + " ...")
-            await timer(10000)
-            command = `cd ~/matic-cli/devnet && bash ganache-deployment-sync.sh`
-            await runSshCommand(ip, command, maxRetries)
-        }
-    }*/
 }

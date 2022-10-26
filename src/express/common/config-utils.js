@@ -110,6 +110,7 @@ export function splitToArray(value) {
 export function splitIp(value) {
     return value.split("@")
 }
+
 export async function checkAndReturnVMIndex(n) {
 
     let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'), undefined);

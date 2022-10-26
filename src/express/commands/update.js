@@ -109,7 +109,6 @@ export async function updateAll(n) {
             ip = `${user}@${doc['devnetBorHosts'][i]}`
             nodeIps.push(ip)
             hostToIndex.set(ip, i)
-            //i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
         }
 
         let updateAllTasks = nodeIps.map(async(ip) => {
@@ -118,12 +117,7 @@ export async function updateAll(n) {
         })
 
         await Promise.all(updateAllTasks)
-        /*for (let i = 0; i < doc['devnetBorUsers'].length; i++) {
-            i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
-            ip = `${user}@${doc['devnetBorHosts'][i]}`
-            await pullAndRestartBor(ip, i, true)
-            await pullAndRestartHeimdall(ip, i, true)
-        }*/
+
     } else {
         vmIndex === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[vmIndex]}`
         ip = `${user}@${doc['devnetBorHosts'][vmIndex]}`
@@ -149,7 +143,6 @@ export async function updateBor(n) {
             ip = `${user}@${doc['devnetBorHosts'][i]}`
             nodeIps.push(ip)
             hostToIndex.set(ip, i)
-            //i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
         }
 
         let updateBorTasks = nodeIps.map(async(ip) => {
@@ -157,11 +150,7 @@ export async function updateBor(n) {
         })
 
         await Promise.all(updateBorTasks)
-        /*for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
-            i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
-            ip = `${user}@${doc['devnetBorHosts'][i]}`
-            await pullAndRestartBor(ip, i, true)
-        }*/
+
     } else {
         vmIndex === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[vmIndex]}`
         ip = `${user}@${doc['devnetBorHosts'][vmIndex]}`
@@ -186,7 +175,6 @@ export async function updateHeimdall(n) {
             ip = `${user}@${doc['devnetBorHosts'][i]}`
             nodeIps.push(ip)
             hostToIndex.set(ip, i)
-            //i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
         }
 
         let updateHeimdallTasks = nodeIps.map(async(ip) => {
@@ -194,11 +182,7 @@ export async function updateHeimdall(n) {
         })
 
         await Promise.all(updateHeimdallTasks)
-        /*for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
-            i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
-            ip = `${user}@${doc['devnetBorHosts'][i]}`
-            await pullAndRestartHeimdall(ip, i, true)
-        }*/
+
     } else {
         vmIndex === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[vmIndex]}`
         ip = `${user}@${doc['devnetBorHosts'][vmIndex]}`

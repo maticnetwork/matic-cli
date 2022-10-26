@@ -22,7 +22,6 @@ export async function restartAll(n) {
             ip = `${user}@${doc['devnetBorHosts'][i]}`
             nodeIps.push(ip)
             hostToIndex.set(ip, i)
-            //i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
         }
 
         let restartAllTasks = nodeIps.map(async(ip) => {
@@ -31,12 +30,7 @@ export async function restartAll(n) {
         })
 
         await Promise.all(restartAllTasks)
-        /*for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
-            i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
-            ip = `${user}@${doc['devnetBorHosts'][i]}`
-            await pullAndRestartBor(ip, i, false)
-            await pullAndRestartHeimdall(ip, i, false)
-        }*/
+
     } else {
         vmIndex === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[vmIndex]}`
         ip = `${user}@${doc['devnetBorHosts'][vmIndex]}`
@@ -62,7 +56,6 @@ export async function restartBor(n) {
             ip = `${user}@${doc['devnetBorHosts'][i]}`
             nodeIps.push(ip)
             hostToIndex.set(ip, i)
-            //i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
         }
 
         let restartBorTasks = nodeIps.map(async(ip) => {
@@ -70,11 +63,7 @@ export async function restartBor(n) {
         })
 
         await Promise.all(restartBorTasks)
-        /*for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
-            i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
-            ip = `${user}@${doc['devnetBorHosts'][i]}`
-            await pullAndRestartBor(ip, i, false)
-        }*/
+
     } else {
         vmIndex === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[vmIndex]}`
         ip = `${user}@${doc['devnetBorHosts'][vmIndex]}`
@@ -99,7 +88,6 @@ export async function restartHeimdall(n) {
             ip = `${user}@${doc['devnetBorHosts'][i]}`
             nodeIps.push(ip)
             hostToIndex.set(ip, i)
-            //i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
         }
 
         let restartHeimdallTasks = nodeIps.map(async(ip) => {
@@ -107,12 +95,7 @@ export async function restartHeimdall(n) {
         })
 
         await Promise.all(restartHeimdallTasks)
-
-        /*for (let i = 0; i < doc['devnetBorHosts'].length; i++) {
-            i === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[i]}`
-            ip = `${user}@${doc['devnetBorHosts'][i]}`
-            await pullAndRestartHeimdall(ip, i, false)
-        }*/
+        
     } else {
         vmIndex === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[vmIndex]}`
         ip = `${user}@${doc['devnetBorHosts'][vmIndex]}`
