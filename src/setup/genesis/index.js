@@ -102,7 +102,7 @@ export class Genesis {
                 {
                     title: "Install dependencies for matic-contracts",
                     task: () =>
-                        projectInstall({
+                        execa("npm", ["install", "--omit=dev"], {
                             cwd: this.maticContractDir,
                         }),
                 },
@@ -129,6 +129,7 @@ export class Genesis {
                     task: () =>
                         execa("npm", ["run", "truffle:compile"], {
                             cwd: this.maticContractDir,
+                            stdio: getRemoteStdio(),
                         }),
                 },
                 {
