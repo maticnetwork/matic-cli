@@ -1,4 +1,4 @@
-# Devnet
+# Devnet scripts
 
 ### Run multiple heimdall nodes
 
