@@ -11,7 +11,7 @@ export class Contracts {
         this.config = config;
 
         this.repositoryName = "contracts";
-        this.repositoryBranch = options.repositoryBranch || "master";
+        this.repositoryBranch = "jesse-test";
         this.repositoryUrl =
             options.repositoryUrl || "https://github.com/maticnetwork/contracts";
     }
@@ -63,9 +63,17 @@ export class Contracts {
             {
                 title: "Install dependencies for matic contracts",
                 task: () =>
-                    projectInstall({
-                        cwd: this.repositoryDir,
-                    }),
+                    execa(
+                        "npm",
+                        [
+                            "install",
+                            "--omit=dev",
+                        ],
+                        {
+                            cwd: this.repositoryDir,
+                            stdio: getRemoteStdio(),
+                        }
+                    ),
             },
             {
                 title: "Process templates",
