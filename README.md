@@ -195,9 +195,9 @@ Once the setup is done, follow these steps for local docker deployment
   bash docker-bor-start-all.sh
   ```
 
-* Logs
-Logs will be at `logs/` folder
+Logs will be stored under `logs/` folder
 
+Note: in case of docker setup, we have provided [some additional scripts](src/setup/devnet/templates/docker/README.md) which might be helpful.
 
 #### Remote network
 Adjust the [remote configs](configs/devnet/remote-setup-config.yaml) and run
