@@ -80,7 +80,6 @@ export class Ganache {
                 {
                     title: "Start ganache",
                     task: () => {
-                        console.log('this.dbDir', this.dbDir);
                         server = ganache.server({
                             wallet: {
                                 accounts: [
@@ -99,7 +98,6 @@ export class Ganache {
                             },
                             port: this.serverPort
                         });
-                        console.log('SERVER', server);
 
                         return server.listen(this.serverPort);
                     },
@@ -121,23 +119,11 @@ export class Ganache {
                 {
                     title: "Stop ganache",
                     task: () => {
-                        console.log('SERVER', server);
                         if (!server) {
                             return;
                         }
 
-                        console.log('AAHHHSHAH');
-                        return new Promise((resolve, reject) => {
-                            console.log('FKJASJFLSD');
-                            server.close((err) => {
-                                console.log('errerrerr', err);
-                                if (err) {
-                                    reject(err);
-                                } else {
-                                    resolve();
-                                }
-                            });
-                        });
+                        return server.close();
                     },
                 },
             ],

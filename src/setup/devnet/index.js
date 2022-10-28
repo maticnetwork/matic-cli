@@ -246,8 +246,6 @@ export class Devnet {
             {
                 title: "Process templates",
                 task: async () => {
-                    console.log('JESSEEEEEEEE');
-                    console.log(new URL(import.meta.url).pathname);
                     const templateDir = path.resolve(
                         new URL(import.meta.url).pathname,
                         "../templates"
@@ -480,9 +478,9 @@ export class Devnet {
                     ];
 
                     // create heimdall folder
-                    shell.exec(`sudo mkdir -p /var/lib/heimdall`)
-                    shell.exec(`sudo chmod 777 -R /var/lib/heimdall/`)
-
+                    shell.exec(`mkdir -p ${this.config.targetDirectory}`)
+                    shell.exec(`chmod 777 -R ${this.config.targetDirectory}`)
+                    console.log('this.config.targetDirectory', this.config.targetDirectory);
                     // create testnet
                     await execa(heimdall.heimdalldCmd, args, {
                         cwd: this.config.targetDirectory,
