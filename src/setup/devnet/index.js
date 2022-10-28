@@ -246,6 +246,8 @@ export class Devnet {
             {
                 title: "Process templates",
                 task: async () => {
+                    console.log('JESSEEEEEEEE');
+                    console.log(new URL(import.meta.url).pathname);
                     const templateDir = path.resolve(
                         new URL(import.meta.url).pathname,
                         "../templates"
