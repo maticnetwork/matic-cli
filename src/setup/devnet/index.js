@@ -409,7 +409,7 @@ export class Devnet {
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
                             `${ganacheUser}@${ganacheURL.hostname}`,
-                            `bash ~/ganache-start-remote.sh & sleep 5 ENTER`],
+                            `bash ~/ganache-start-remote.sh & sleep 5`],
                         {stdio: getRemoteStdio()})
 
                     for (let i = 0; i < this.totalNodes; i++) {
