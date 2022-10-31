@@ -2,31 +2,27 @@ defaultStake: 10000
 defaultFee: 2000
 borChainId: 15005
 heimdallChainId: heimdall-4052
-borBranch: v0.3.0-beta5
-heimdallBranch: v0.3.0-beta2
+borBranch: develop
+heimdallBranch: develop
 contractsBranch: jc/v0.3.1-backport
 sprintSize: 64
 blockNumber: '0'
 blockTime: '2'
-numOfValidators: 2
+numOfValidators: 1
 numOfNonValidators: 1
-ethURL: http://35.89.147.0:9545
+ethURL: http://172.20.1.100:9545
 ethHostUser: ubuntu
 devnetType: remote
 devnetBorHosts:
-  - 35.89.147.0
-  - 34.219.187.170
-  - 54.203.152.223
+  - 172.20.1.100
+  - 172.20.1.101
 devnetHeimdallHosts:
-  - 35.89.147.0
-  - 34.219.187.170
-  - 54.203.152.223
+  - 172.20.1.100
+  - 172.20.1.101
 devnetBorUsers:
   - ubuntu
   - ubuntu
-  - ubuntu
 devnetHeimdallUsers:
-  - ubuntu
   - ubuntu
   - ubuntu
 borDockerBuildContext: https://github.com/maticnetwork/bor.git#develop
