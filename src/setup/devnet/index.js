@@ -409,7 +409,7 @@ export class Devnet {
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
                             `${ganacheUser}@${ganacheURL.hostname}`,
-                            `tmux new -d -s matic-cli-ganache; tmux send-keys -t matic-cli-ganache:0 'bash ~/ganache-start-remote.sh' ENTER`],
+                            `bash ~/ganache-start-remote.sh ENTER`],
                         {stdio: getRemoteStdio()})
 
                     for (let i = 0; i < this.totalNodes; i++) {
@@ -447,7 +447,7 @@ export class Devnet {
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                            `tmux new -d -s matic-cli; tmux new-window -t matic-cli; tmux new-window -t matic-cli;  tmux send-keys -t matic-cli:0 'bash /home/${this.config.devnetBorUsers[i]}/node/heimdalld-setup.sh' ENTER; tmux send-keys -t matic-cli:0 'heimdalld start --home /home/${this.config.devnetBorUsers[i]}/.heimdalld --chain=/home/${this.config.devnetBorUsers[i]}/.heimdalld/config/genesis.json --bridge --all --rest-server' ENTER; tmux send-keys -t matic-cli:1 'bash /home/${this.config.devnetBorUsers[i]}/node/bor-setup.sh' ENTER; tmux send-keys -t matic-cli:1 'bash /home/${this.config.devnetBorUsers[i]}/node/bor-start.sh' ENTER`
+                            `bash /home/${this.config.devnetBorUsers[i]}/node/heimdalld-setup.sh ENTER; heimdalld start --home /home/${this.config.devnetBorUsers[i]}/.heimdalld --chain=/home/${this.config.devnetBorUsers[i]}/.heimdalld/config/genesis.json --bridge --all --rest-server ENTER; bash /home/${this.config.devnetBorUsers[i]}/node/bor-setup.sh ENTER; bash /home/${this.config.devnetBorUsers[i]}/node/bor-start.sh ENTER`
                         ], {stdio: getRemoteStdio()})
                     }
                 }

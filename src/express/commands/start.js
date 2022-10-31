@@ -369,7 +369,7 @@ export async function start() {
 
     await prepareMaticCLI(ips, devnetType)
 
-    await eventuallyCleanupPreviousDevnet(ips, devnetType)
+   // await eventuallyCleanupPreviousDevnet(ips, devnetType)
 
     if (process.env.TF_VAR_DOCKERIZED === 'yes') {
         await runDockerSetupWithMaticCLI(ips);
