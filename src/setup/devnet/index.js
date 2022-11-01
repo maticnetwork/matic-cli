@@ -417,7 +417,7 @@ export class Devnet {
                             await execa('scp', [
                                 `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                                 `-i`, `~/cert.pem`,
-                                `${this.config.targetDirectory}/ganache.service`,
+                                `~/ganache.service`,
                                 `${ganacheUser}@${ganacheURL.hostname}:/lib/systemd/system/`
                             ], {stdio: getRemoteStdio()})
                         }
@@ -434,7 +434,7 @@ export class Devnet {
                         await execa('scp', [
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
-                            `${this.config.targetDirectory}/bor.service`,
+                            `~/bor.service`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/lib/systemd/system/`
                         ], {stdio: getRemoteStdio()})
                                                 
@@ -442,7 +442,7 @@ export class Devnet {
                         await execa('scp', [
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
-                            `${this.config.targetDirectory}/heimdalld.service`,
+                            `~/heimdalld.service`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/lib/systemd/system/`
                         ], {stdio: getRemoteStdio()})      
                     }
