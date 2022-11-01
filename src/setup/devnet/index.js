@@ -404,6 +404,7 @@ export class Devnet {
                         `${ganacheUser}@${ganacheURL.hostname}:~/data`
                     ], {stdio: getRemoteStdio()})
 
+                    // Generate service files
                     for (let i = 0; i < this.totalNodes; i++) {
                         if (i == 0) {
                             await execa('ssh', [
@@ -420,9 +421,7 @@ export class Devnet {
                                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                                 `sudo mv /home/ubuntu/ganache.service /lib/systemd/system/`
                             ], {stdio: getRemoteStdio()})
-
-                            /*await execa('mv',
-                                    [`/home/ubuntu/ganache.service`,`/lib/systemd/system/`] , {stdio: getRemoteStdio()})*/
+ 
                         }
                         else{
                             await execa('ssh', [
@@ -440,9 +439,6 @@ export class Devnet {
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                             `sudo mv /home/ubuntu/bor.service /lib/systemd/system/`
                         ], {stdio: getRemoteStdio()})
-
-                        /*await execa('mv',
-                                [`/home/ubuntu/bor.service`,`/lib/systemd/system/`] , {stdio: getRemoteStdio()})*/
                                                 
                         // TODO: Target location would vary depending on bor/heimdall version
                         await execa('ssh', [
@@ -451,44 +447,8 @@ export class Devnet {
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                             `sudo mv /home/ubuntu/heimdalld.service /lib/systemd/system/`
                         ], {stdio: getRemoteStdio()})
-
-                        /*await execa('mv',
-                               [`/home/ubuntu/heimdalld.service`,`/lib/systemd/system/`] 
-                                , {stdio: getRemoteStdio()})*/         
+     
                     }
-
-                    // Execute the service files
-                    for (let i = 0; i < this.totalNodes; i++) {
-                        if (i==0) {
-                            await execa('ssh', [
-                                `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                                `-i`, `~/cert.pem`,
-                                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                                `sudo systemctl start ganache.service`
-                            ], {stdio: getRemoteStdio()})
-                        }
-                        
-                        await execa('ssh', [
-                            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                            `-i`, `~/cert.pem`,
-                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                            `sudo systemctl start bor.service`
-                        ], {stdio: getRemoteStdio()})
-
-                        await execa('ssh', [
-                            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                            `-i`, `~/cert.pem`,
-                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                            `sudo systemctl start heimdall.service`
-                        ], {stdio: getRemoteStdio()})
-                    }
-                    // Run ganache in tmux
-                    /*await execa('ssh', [
-                            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                            `-i`, `~/cert.pem`,
-                            `${ganacheUser}@${ganacheURL.hostname}`,
-                            `bash ~/ganache-start-remote.sh`],
-                        {stdio: getRemoteStdio()})
 
                     for (let i = 0; i < this.totalNodes; i++) {
                         // copy files to remote servers
@@ -520,14 +480,38 @@ export class Devnet {
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:~/node/`
                         ], {stdio: getRemoteStdio()})
 
-                        // Create a tmux session and start bor and heimdall services in it
+                        // Execute service files
+                        if (i == 0) {
+                            await execa('ssh', [
+                                `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                                `-i`, `~/cert.pem`,
+                                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                                `sudo systemctl start ganache.service`
+                            ], {stdio: getRemoteStdio()})
+                        }
+
                         await execa('ssh', [
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                            `bash /home/${this.config.devnetBorUsers[i]}/node/heimdalld-setup.sh ENTER; heimdalld start --home /home/${this.config.devnetBorUsers[i]}/.heimdalld --chain=/home/${this.config.devnetBorUsers[i]}/.heimdalld/config/genesis.json --bridge --all --rest-server ENTER; bash /home/${this.config.devnetBorUsers[i]}/node/bor-setup.sh ENTER; bash /home/${this.config.devnetBorUsers[i]}/node/bor-start.sh ENTER`
+                            `sudo systemctl start bor.service`
                         ], {stdio: getRemoteStdio()})
-                    }*/
+
+                        await execa('ssh', [
+                            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                            `-i`, `~/cert.pem`,
+                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                            `sudo systemctl start heimdall.service`
+                        ], {stdio: getRemoteStdio()})
+
+                        // Create a tmux session and start bor and heimdall services in it
+                        /*await execa('ssh', [
+                            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                            `-i`, `~/cert.pem`,
+                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                            `bash /home/${this.config.devnetBorUsers[i]}/node/heimdalld-setup.sh ENTER; heimdalld start --home /home/${this.config.devnetBorUsers[i]}/.heimdalld --chain=/home/${this.config.devnetBorUsers[i]}/.heimdalld/config/genesis.json --bridge --all --rest-server ENTER; bash /home/${this.config.devnetBorUsers[i]}/node/bor-setup.sh ENTER; bash /home/${this.config.devnetBorUsers[i]}/node/bor-start.sh ENTER`
+                        ], {stdio: getRemoteStdio()})*/
+                    }
                 }
             }
         ]
