@@ -418,7 +418,7 @@ export class Devnet {
                                 `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                                 `-i`, `~/cert.pem`,
                                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                                `mv /home/ubuntu/ganache.service /lib/systemd/system/`
+                                `sudo mv /home/ubuntu/ganache.service /lib/systemd/system/`
                             ], {stdio: getRemoteStdio()})
 
                             /*await execa('mv',
@@ -438,7 +438,7 @@ export class Devnet {
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                            `mv /home/ubuntu/bor.service /lib/systemd/system/`
+                            `sudo mv /home/ubuntu/bor.service /lib/systemd/system/`
                         ], {stdio: getRemoteStdio()})
 
                         /*await execa('mv',
@@ -449,7 +449,7 @@ export class Devnet {
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                            `mv /home/ubuntu/heimdalld.service /lib/systemd/system/`
+                            `sudo mv /home/ubuntu/heimdalld.service /lib/systemd/system/`
                         ], {stdio: getRemoteStdio()})
 
                         /*await execa('mv',
