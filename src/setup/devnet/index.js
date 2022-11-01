@@ -414,12 +414,8 @@ export class Devnet {
                             ], {stdio: getRemoteStdio()})
 
                             // TODO: Target location would vary depending on bor/heimdall version
-                            await execa('scp', [
-                                `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                                `-i`, `~/cert.pem`,
-                                `${ganacheUser}@${ganacheURL.hostname}:~/ganache.service`,
-                                `${ganacheUser}@${ganacheURL.hostname}:/lib/systemd/system/`
-                            ], {stdio: getRemoteStdio()})
+                            await execa('sudo mv',
+                                    [`~/ganache.service`,`/lib/systemd/system/`] , {stdio: getRemoteStdio()})
                         }
                         else{
                             await execa('ssh', [
@@ -431,20 +427,13 @@ export class Devnet {
                         }
 
                         // TODO: Target location would vary depending on bor/heimdall version
-                        await execa('scp', [
-                            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                            `-i`, `~/cert.pem`,
-                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:~/bor.service`,
-                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/lib/systemd/system/`
-                        ], {stdio: getRemoteStdio()})
+                         await execa('sudo mv',
+                                [`~/bor.service`,`/lib/systemd/system/`] , {stdio: getRemoteStdio()})
                                                 
                         // TODO: Target location would vary depending on bor/heimdall version
-                        await execa('scp', [
-                            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                            `-i`, `~/cert.pem`,
-                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:~/heimdalld.service`,
-                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/lib/systemd/system/`
-                        ], {stdio: getRemoteStdio()})      
+                        await execa('sudo mv',
+                               [`~/heimdalld.service`,`/lib/systemd/system/`] 
+                                , {stdio: getRemoteStdio()})         
                     }
 
                     // Execute the service files
