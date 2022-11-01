@@ -414,8 +414,15 @@ export class Devnet {
                             ], {stdio: getRemoteStdio()})
 
                             // TODO: Target location would vary depending on bor/heimdall version
-                            await execa('mv',
-                                    [`~/ganache.service`,`/lib/systemd/system/`] , {stdio: getRemoteStdio()})
+                            await execa('ssh', [
+                                `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                                `-i`, `~/cert.pem`,
+                                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                                `mv /home/ubuntu/ganache.service /lib/systemd/system/`
+                            ], {stdio: getRemoteStdio()})
+
+                            /*await execa('mv',
+                                    [`/home/ubuntu/ganache.service`,`/lib/systemd/system/`] , {stdio: getRemoteStdio()})*/
                         }
                         else{
                             await execa('ssh', [
@@ -427,13 +434,27 @@ export class Devnet {
                         }
 
                         // TODO: Target location would vary depending on bor/heimdall version
-                         await execa('mv',
-                                [`~/bor.service`,`/lib/systemd/system/`] , {stdio: getRemoteStdio()})
+                        await execa('ssh', [
+                            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                            `-i`, `~/cert.pem`,
+                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                            `mv /home/ubuntu/bor.service /lib/systemd/system/`
+                        ], {stdio: getRemoteStdio()})
+
+                        /*await execa('mv',
+                                [`/home/ubuntu/bor.service`,`/lib/systemd/system/`] , {stdio: getRemoteStdio()})*/
                                                 
                         // TODO: Target location would vary depending on bor/heimdall version
-                        await execa('mv',
-                               [`~/heimdalld.service`,`/lib/systemd/system/`] 
-                                , {stdio: getRemoteStdio()})         
+                        await execa('ssh', [
+                            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                            `-i`, `~/cert.pem`,
+                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                            `mv /home/ubuntu/heimdalld.service /lib/systemd/system/`
+                        ], {stdio: getRemoteStdio()})
+
+                        /*await execa('mv',
+                               [`/home/ubuntu/heimdalld.service`,`/lib/systemd/system/`] 
+                                , {stdio: getRemoteStdio()})*/         
                     }
 
                     // Execute the service files
