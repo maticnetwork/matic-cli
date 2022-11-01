@@ -414,7 +414,7 @@ export class Devnet {
                             ], {stdio: getRemoteStdio()})
 
                             // TODO: Target location would vary depending on bor/heimdall version
-                            await execa('sudo mv',
+                            await execa('mv',
                                     [`~/ganache.service`,`/lib/systemd/system/`] , {stdio: getRemoteStdio()})
                         }
                         else{
@@ -427,11 +427,11 @@ export class Devnet {
                         }
 
                         // TODO: Target location would vary depending on bor/heimdall version
-                         await execa('sudo mv',
+                         await execa('mv',
                                 [`~/bor.service`,`/lib/systemd/system/`] , {stdio: getRemoteStdio()})
                                                 
                         // TODO: Target location would vary depending on bor/heimdall version
-                        await execa('sudo mv',
+                        await execa('mv',
                                [`~/heimdalld.service`,`/lib/systemd/system/`] 
                                 , {stdio: getRemoteStdio()})         
                     }
