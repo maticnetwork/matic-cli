@@ -35,7 +35,7 @@ cat > bor.service <<EOF
   WorkingDirectory=$NODE_DIR
   Environment=PATH=/home/ubuntu/.nvm/versions/node/v10.17.0/bin:/home/ubuntu/go/bin:/home/ubuntu/.go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
   EnvironmentFile=$HOME/metadata
-  ExecStartPre=/bin/bash $NODE_DIR/bor-setup.sh 
+  #ExecStartPre=/bin/bash $NODE_DIR/bor-setup.sh 
   ExecStart=/bin/bash $NODE_DIR/bor-start.sh $VALIDATOR_ADDRESS
   Type=simple
   User=$USER
@@ -50,7 +50,7 @@ cat > heimdalld.service <<EOF
   Description=heimdalld
 [Service]
   WorkingDirectory=$NODE_DIR
-  ExecStartPre=/bin/bash $NODE_DIR/heimdalld-setup.sh 
+  #ExecStartPre=/bin/bash $NODE_DIR/heimdalld-setup.sh 
   ExecStart=$BIN_DIR/heimdalld start --home $HOME/.heimdalld --chain=$HOME/.heimdalld/config/genesis.json  --bridge --all --rest-server
   Type=simple
   User=$USER

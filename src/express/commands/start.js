@@ -213,24 +213,27 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType) {
             await runSshCommand(ip, command, maxRetries)
 
             console.log("📍Stopping ganache (if present) on machine " + ip + " ...")
-            command = `tmux send-keys -t matic-cli-ganache:0 'C-c' ENTER || echo 'ganache not running on current machine...'`
+            command = `sudo systemctl stop ganache.service`
+            //command = `tmux send-keys -t matic-cli-ganache:0 'C-c' ENTER || echo 'ganache not running on current machine...'`
             await runSshCommand(ip, command, maxRetries)
 
-            console.log("📍Killing ganache tmux session (if present) on machine " + ip + " ...")
-            command = `tmux kill-session -t matic-cli-ganache || echo 'matic-cli-ganache tmux session does not exist on current machine...'`
-            await runSshCommand(ip, command, maxRetries)
+            //console.log("📍Killing ganache tmux session (if present) on machine " + ip + " ...")
+            //command = `tmux kill-session -t matic-cli-ganache || echo 'matic-cli-ganache tmux session does not exist on current machine...'`
+            //await runSshCommand(ip, command, maxRetries)
         }
         console.log("📍Stopping heimdall (if present) on machine " + ip + " ...")
-        let command = `tmux send-keys -t matic-cli:0 'C-c' ENTER || echo 'heimdall not running on current machine...'`
+        let command = `sudo systemctl stop heimdalld.service`
+        //let command = `tmux send-keys -t matic-cli:0 'C-c' ENTER || echo 'heimdall not running on current machine...'`
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Stopping bor (if present) on machine " + ip + " ...")
-        command = `tmux send-keys -t matic-cli:1 'C-c' ENTER || echo 'bor not running on current machine...'`
+        command = `sudo systemctl stop bor.service`
+        //command = `tmux send-keys -t matic-cli:1 'C-c' ENTER || echo 'bor not running on current machine...'`
         await runSshCommand(ip, command, maxRetries)
 
-        console.log("📍Killing matic-cli tmux session (if present) on machine " + ip + " ...")
-        command = `tmux kill-session -t matic-cli || echo 'matic-cli tmux session does not exist on current machine...'`
-        await runSshCommand(ip, command, maxRetries)
+        //console.log("📍Killing matic-cli tmux session (if present) on machine " + ip + " ...")
+        //command = `tmux kill-session -t matic-cli || echo 'matic-cli tmux session does not exist on current machine...'`
+        //await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Removing .bor folder (if present) on machine " + ip + " ...")
         command = `rm -rf ~/.bor`
@@ -369,7 +372,7 @@ export async function start() {
 
     await prepareMaticCLI(ips, devnetType)
 
-   // await eventuallyCleanupPreviousDevnet(ips, devnetType)
+    await eventuallyCleanupPreviousDevnet(ips, devnetType)
 
     if (process.env.TF_VAR_DOCKERIZED === 'yes') {
         await runDockerSetupWithMaticCLI(ips);

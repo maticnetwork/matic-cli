@@ -31,16 +31,19 @@ async function stopServices(doc) {
     let stopServiceTasks = nodeIps.map(async(ip) => {
         if (isHostMap.get(ip)) {
             console.log("📍Stopping ganache on machine " + ip + " ...")
-            let command = `tmux send-keys -t matic-cli-ganache:0 'C-c' ENTER`
+            let command = `sudo systemctl stop ganache.service`
+            //let command = `tmux send-keys -t matic-cli-ganache:0 'C-c' ENTER`
             await runSshCommand(ip, command, maxRetries)
         }
 
         console.log("📍Stopping heimdall on machine " + ip + "...")
-        let command = `tmux send-keys -t matic-cli:0 'C-c' ENTER`
+        let command = `sudo systemctl stop heimdalld.service`
+        //let command = `tmux send-keys -t matic-cli:0 'C-c' ENTER`
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Stopping bor on machine " + ip + " ...")
-        command = `tmux send-keys -t matic-cli:1 'C-c' ENTER`
+        command = `sudo systemctl stop bor.service`
+        //command = `tmux send-keys -t matic-cli:1 'C-c' ENTER`
         await runSshCommand(ip, command, maxRetries)
     })
 
@@ -71,15 +74,18 @@ async function cleanupServices(doc) {
         }
 
         console.log("📍Cleaning up heimdall on machine " + ip + " ...")
-        let command = `tmux send-keys -t matic-cli:0 'heimdalld unsafe-reset-all' ENTER`
+        let command = `heimdalld unsafe-reset-all`
+        //let command = `tmux send-keys -t matic-cli:0 'heimdalld unsafe-reset-all' ENTER`
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Purging queue for heimdall bridge on machine " + ip + " ...")
-        command = `tmux send-keys -t matic-cli:0 'heimdalld heimdall-bridge purge-queue' ENTER`
+        command = `heimdalld heimdall-bridge purge-queue`
+        //command = `tmux send-keys -t matic-cli:0 'heimdalld heimdall-bridge purge-queue' ENTER`
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Resetting heimdall bridge on machine " + ip + " ...")
-        command = `tmux send-keys -t matic-cli:0 'heimdalld heimdall-bridge unsafe-reset-all' ENTER`
+        command = `heimdalld heimdall-bridge unsafe-reset-all`
+        //command = `tmux send-keys -t matic-cli:0 'heimdalld heimdall-bridge unsafe-reset-all' ENTER`
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Cleaning up bridge storage on machine " + ip + " ...")
@@ -112,8 +118,9 @@ async function startServices(doc) {
 
     let startServicesTasks = nodeIps.map(async(ip) => {
         if (isHostMap.get(ip)) {
-            console.log("📍Running ganache in tmux on machine " + ip + " ...")
-            let command = `tmux send-keys -t matic-cli-ganache:0 'bash ~/ganache-start-remote.sh' ENTER`
+            console.log("📍Running ganache in machine " + ip + " ...")
+            let command = `sudo systemctl start ganache.service`
+            //let command = `tmux send-keys -t matic-cli-ganache:0 'bash ~/ganache-start-remote.sh' ENTER`
             await runSshCommand(ip, command, maxRetries)
 
             console.log("📍Deploying main net contracts on machine " + ip + " ...")
@@ -126,20 +133,22 @@ async function startServices(doc) {
         }
 
         console.log("📍Setting up heimdall on machine " + ip + " ...")
-        let command = `tmux send-keys -t matic-cli:0 'bash ~/node/heimdalld-setup.sh' ENTER`
+        let command = `bash ~/node/heimdalld-setup.sh`
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Starting heimdall on machine " + ip + " ...")
-        command = `tmux send-keys -t matic-cli:0 'heimdalld start --chain=~/.heimdalld/config/genesis.json --bridge --all --rest-server' ENTER`
+        command = `sudo systemctl start heimdalld.service`
+        //command = `tmux send-keys -t matic-cli:0 'heimdalld start --chain=~/.heimdalld/config/genesis.json --bridge --all --rest-server' ENTER`
         await runSshCommand(ip, command, maxRetries)
 
-        console.log("📍Setting up bor on machine " + ip + " ...")
-        command = `tmux send-keys -t matic-cli:1 'bash ~/node/bor-setup.sh' ENTER`
+        console.log("📍Setting bor on machine " + ip + " ...")
+        command = `bash ~/node/bor-setup.sh`
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Starting bor on machine " + ip + " ...")
-        command = `tmux send-keys -t matic-cli:1 'bash ~/node/bor-start.sh' ENTER`
-        await runSshCommand(ip, command, maxRetries)
+        command = `sudo systemctl start bor.service`
+        //command = `tmux send-keys -t matic-cli:1 'bash ~/node/bor-start.sh' ENTER`
+        //await runSshCommand(ip, command, maxRetries)
     })
 
     await Promise.all(startServicesTasks)

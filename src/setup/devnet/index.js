@@ -494,7 +494,21 @@ export class Devnet {
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                            `bash /home/${this.config.devnetBorUsers[i]}/node/heimdalld-setup.sh`
+                        ], {stdio: getRemoteStdio()})
+
+                        await execa('ssh', [
+                            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                            `-i`, `~/cert.pem`,
+                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                             `sudo systemctl start heimdalld.service`
+                        ], {stdio: getRemoteStdio()})
+
+                        await execa('ssh', [
+                            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                            `-i`, `~/cert.pem`,
+                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                            `bash /home/${this.config.devnetBorUsers[i]}/node/bor-setup.sh `
                         ], {stdio: getRemoteStdio()})
 
                         await execa('ssh', [
