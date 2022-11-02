@@ -501,7 +501,7 @@ export class Devnet {
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                            `sudo systemctl start heimdall.service`
+                            `sudo systemctl start heimdalld.service`
                         ], {stdio: getRemoteStdio()})
 
                         // Create a tmux session and start bor and heimdall services in it
