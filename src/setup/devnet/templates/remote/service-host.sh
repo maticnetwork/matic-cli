@@ -17,6 +17,7 @@ cat > ganache.service <<EOF
     Description=ganache
 [Service]
     WorkingDirectory=$HOME
+    Environment=PATH=$PATH
     ExecStart=/bin/bash $HOME/ganache-start-remote.sh
     User=ubuntu
     Type=simple
@@ -32,6 +33,7 @@ cat > bor.service <<EOF
   Restart=on-failure
   RestartSec=5s
   WorkingDirectory=$NODE_DIR
+  Environment=PATH=$PATH
   EnvironmentFile=$HOME/metadata
   ExecStartPre=/bin/bash $NODE_DIR/bor-setup.sh 
   ExecStart=/bin/bash $NODE_DIR/bor-start.sh $VALIDATOR_ADDRESS

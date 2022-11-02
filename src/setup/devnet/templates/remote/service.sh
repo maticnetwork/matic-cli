@@ -22,6 +22,7 @@ cat > bor.service <<EOF
   Restart=on-failure
   RestartSec=5s
   WorkingDirectory=$NODE_DIR
+  Environment=PATH=$PATH
   EnvironmentFile=$HOME/metadata
   ExecStartPre=/bin/bash $NODE_DIR/bor-setup.sh
   ExecStart=/bin/bash $NODE_DIR/bor-start.sh

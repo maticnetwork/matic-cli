@@ -9,10 +9,8 @@ mkdir -p $BOR_HOME
 # get address
 ADDRESS="`cat $BOR_HOME/address.txt`"
 
-BOR = $(which bor)
-
 # start bor
-BOR server \
+bor server \
   --chain=$BOR_HOME/genesis.json \
   --datadir $BOR_DATA_DIR \
   --port 30303 \
