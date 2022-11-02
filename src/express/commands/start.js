@@ -213,7 +213,7 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType) {
             await runSshCommand(ip, command, maxRetries)
 
             console.log("📍Stopping ganache (if present) on machine " + ip + " ...")
-            command = `sudo systemctl stop ganache.service`
+            command = `sudo systemctl is-active --quiet ganache.service && sudo systemctl stop ganache.service`
             //command = `tmux send-keys -t matic-cli-ganache:0 'C-c' ENTER || echo 'ganache not running on current machine...'`
             await runSshCommand(ip, command, maxRetries)
 
@@ -222,12 +222,12 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType) {
             //await runSshCommand(ip, command, maxRetries)
         }
         console.log("📍Stopping heimdall (if present) on machine " + ip + " ...")
-        let command = `sudo systemctl stop heimdalld.service`
+        let command = `sudo systemctl is-active --quiet heimdalld.service && sudo systemctl stop heimdalld.service`
         //let command = `tmux send-keys -t matic-cli:0 'C-c' ENTER || echo 'heimdall not running on current machine...'`
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Stopping bor (if present) on machine " + ip + " ...")
-        command = `sudo systemctl stop bor.service`
+        command = `sudo systemctl is-active --quiet bor.service && sudo systemctl stop bor.service`
         //command = `tmux send-keys -t matic-cli:1 'C-c' ENTER || echo 'bor not running on current machine...'`
         await runSshCommand(ip, command, maxRetries)
 
