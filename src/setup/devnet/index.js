@@ -494,14 +494,14 @@ export class Devnet {
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                            `sudo systemctl start bor.service`
+                            `sudo systemctl start heimdalld.service`
                         ], {stdio: getRemoteStdio()})
 
                         await execa('ssh', [
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                            `sudo systemctl start heimdalld.service`
+                            `sudo systemctl start bor.service`
                         ], {stdio: getRemoteStdio()})
 
                         // Create a tmux session and start bor and heimdall services in it
