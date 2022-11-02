@@ -415,12 +415,12 @@ export class Devnet {
                             ], {stdio: getRemoteStdio()})
 
                             // TODO: Target location would vary depending on bor/heimdall version
-                            await execa('ssh', [
+                            /*await execa('ssh', [
                                 `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                                 `-i`, `~/cert.pem`,
                                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                                 `sudo mv /home/ubuntu/ganache.service /lib/systemd/system/`
-                            ], {stdio: getRemoteStdio()})
+                            ], {stdio: getRemoteStdio()})*/
  
                         }
                         else{
@@ -433,12 +433,12 @@ export class Devnet {
                         }
 
                         // TODO: Target location would vary depending on bor/heimdall version
-                        await execa('ssh', [
+                        /*await execa('ssh', [
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                             `sudo mv /home/ubuntu/bor.service /lib/systemd/system/`
-                        ], {stdio: getRemoteStdio()})
+                        ], {stdio: getRemoteStdio()})*/
                                                 
                         // TODO: Target location would vary depending on bor/heimdall version
                         await execa('ssh', [
