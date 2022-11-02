@@ -4,10 +4,10 @@ set -x #echo on
 
 DATA_DIR={{ obj.dbDirRemote }}
 
-ganache-cli --hardfork istanbul \
-  --blockTime 1 \
-  --db $DATA_DIR \
-  {% for acc in obj.config.accounts %}--account {{ acc.privateKey }},1000000000000000000000 {% endfor %}\
-  --gasLimit 8000000 \
-  --gasPrice 0 \
-  -p 9545 -h 0.0.0.0
+ganache --chain.hardfork istanbul \
+  --miner.blockTime 1 \
+  --database.dbPath $DATA_DIR \
+  {% for acc in obj.config.accounts %}--wallet.accounts {{ acc.privateKey }},1000000000000000000000 {% endfor %}\
+  --miner.blockGasLimit 8000000 \
+  --miner.defaultGasPrice 0 \
+  --server.port 9545 --server.host 0.0.0.0
