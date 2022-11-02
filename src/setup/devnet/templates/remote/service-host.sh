@@ -16,8 +16,10 @@ cat > ganache.service <<EOF
 [Unit]
     Description=ganache
 [Service]
+    WorkingDirectory=$HOME
     ExecStart=/bin/bash $HOME/ganache-start-remote.sh
-    User=$USER
+    User=ubuntu
+    Type=simple
     KillSignal=SIGINT
 EOF
 
