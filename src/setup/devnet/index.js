@@ -406,6 +406,13 @@ export class Devnet {
 
                     // Generate service files
                     for (let i = 0; i < this.totalNodes; i++) {
+                        await execa('scp', [
+                            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                            `-i`, `~/cert.pem`,
+                            `${this.config.targetDirectory}/service.sh`,
+                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/`
+                        ], {stdio: getRemoteStdio()})
+
                         if (i == 0) {
                             await execa('ssh', [
                                 `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
@@ -423,14 +430,14 @@ export class Devnet {
                             ], {stdio: getRemoteStdio()})
  
                         }
-                        else{
-                            await execa('ssh', [
-                                `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                                `-i`, `~/cert.pem`,
-                                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                                `bash ${this.config.targetDirectory}/service.sh`
-                            ], {stdio: getRemoteStdio()})
-                        }
+                        
+                        await execa('ssh', [
+                            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                            `-i`, `~/cert.pem`,
+                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                            `bash /home/${this.config.devnetBorUsers[i]}/service.sh`
+                        ], {stdio: getRemoteStdio()})
+                        
 
                         // TODO: Target location would vary depending on bor/heimdall version
                         await execa('ssh', [
