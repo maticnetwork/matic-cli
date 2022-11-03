@@ -1,0 +1,28 @@
+name: Security CI
+on: [push, pull_request]
+
+jobs:
+  snyk:
+    name: Snyk
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        with:
+          args: --org=${{ secrets.SNYK_ORG }} --severity-threshold=medium
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+  snyk-code:
+    name: Snyk Code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Run Snyk SAST to check for code vulnerabilities
+        uses: snyk/actions/node@master
+        with:
+          command: code test
+          args: --org=${{ secrets.SNYK_ORG }}
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
