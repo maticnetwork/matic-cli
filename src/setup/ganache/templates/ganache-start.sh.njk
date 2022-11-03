@@ -4,8 +4,7 @@ set -x #echo on
 
 DATA_DIR={{ obj.dbDir }}
 
-GANACHE = $(which ganache-cli)
-GANACHE --hardfork istanbul \
+ganache-cli --hardfork istanbul \
   --blockTime 1 \
   --db $DATA_DIR \
   {% for acc in obj.config.accounts %}--account {{ acc.privateKey }},1000000000000000000000 {% endfor %}\
