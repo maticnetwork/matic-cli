@@ -67,6 +67,9 @@ async function cleanupServices(doc) {
     }
 
     let cleanupServicesTasks = nodeIps.map(async(ip) => {
+        /*let command = `sudo ln -sf $HOME/go/bin/heimdalld /usr/bin/heimdalld`
+        await runSshCommand(ip, command, maxRetries)*/
+        
         if (isHostMap.get(ip)) {
             console.log("📍Cleaning up ganache on machine " + ip + " ...")
             let command = `rm -rf ~/data/ganache-db && rm -rf ~/matic-cli/devnet/data/ganache-db`
@@ -74,18 +77,15 @@ async function cleanupServices(doc) {
         }
 
         console.log("📍Cleaning up heimdall on machine " + ip + " ...")
-        let command = `sudo $HOME/go/bin/heimdalld unsafe-reset-all`
-        //let command = `tmux send-keys -t matic-cli:0 'heimdalld unsafe-reset-all' ENTER`
+         command = `heimdalld unsafe-reset-all`
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Purging queue for heimdall bridge on machine " + ip + " ...")
-        command = `$HOME/go/bin/heimdalld heimdall-bridge purge-queue`
-        //command = `tmux send-keys -t matic-cli:0 'heimdalld heimdall-bridge purge-queue' ENTER`
+        command = `heimdalld heimdall-bridge purge-queue`
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Resetting heimdall bridge on machine " + ip + " ...")
-        command = `$HOME/go/bin/heimdalld heimdall-bridge unsafe-reset-all`
-        //command = `tmux send-keys -t matic-cli:0 'heimdalld heimdall-bridge unsafe-reset-all' ENTER`
+        command = `heimdalld heimdall-bridge unsafe-reset-all`
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Cleaning up bridge storage on machine " + ip + " ...")

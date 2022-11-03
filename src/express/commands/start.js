@@ -214,26 +214,15 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType) {
 
             console.log("📍Stopping ganache (if present) on machine " + ip + " ...")
             command = `sudo systemctl stop ganache.service || echo 'ganache not running on current machine...'`
-            //command = `tmux send-keys -t matic-cli-ganache:0 'C-c' ENTER || echo 'ganache not running on current machine...'`
             await runSshCommand(ip, command, maxRetries)
-
-            //console.log("📍Killing ganache tmux session (if present) on machine " + ip + " ...")
-            //command = `tmux kill-session -t matic-cli-ganache || echo 'matic-cli-ganache tmux session does not exist on current machine...'`
-            //await runSshCommand(ip, command, maxRetries)
         }
         console.log("📍Stopping heimdall (if present) on machine " + ip + " ...")
         let command = `sudo systemctl stop heimdalld.service || echo 'heimdall not running on current machine...'`
-        //let command = `tmux send-keys -t matic-cli:0 'C-c' ENTER || echo 'heimdall not running on current machine...'`
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Stopping bor (if present) on machine " + ip + " ...")
         command = `sudo systemctl stop bor.service || echo 'ganache not running on current machine...'`
-        //command = `tmux send-keys -t matic-cli:1 'C-c' ENTER || echo 'bor not running on current machine...'`
         await runSshCommand(ip, command, maxRetries)
-
-        //console.log("📍Killing matic-cli tmux session (if present) on machine " + ip + " ...")
-        //command = `tmux kill-session -t matic-cli || echo 'matic-cli tmux session does not exist on current machine...'`
-        //await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Removing .bor folder (if present) on machine " + ip + " ...")
         command = `rm -rf ~/.bor`

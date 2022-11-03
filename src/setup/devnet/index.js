@@ -508,6 +508,13 @@ export class Devnet {
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                            `sudo ln -sf $HOME/go/bin/heimdalld /usr/bin/heimdalld`
+                        ], {stdio: getRemoteStdio()})
+
+                        await execa('ssh', [
+                            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                            `-i`, `~/cert.pem`,
+                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                             `sudo systemctl start heimdalld.service`
                         ], {stdio: getRemoteStdio()})
 
@@ -525,13 +532,6 @@ export class Devnet {
                             `sudo systemctl start bor.service`
                         ], {stdio: getRemoteStdio()})
 
-                        // Create a tmux session and start bor and heimdall services in it
-                        /*await execa('ssh', [
-                            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                            `-i`, `~/cert.pem`,
-                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                            `bash /home/${this.config.devnetBorUsers[i]}/node/heimdalld-setup.sh ENTER; heimdalld start --home /home/${this.config.devnetBorUsers[i]}/.heimdalld --chain=/home/${this.config.devnetBorUsers[i]}/.heimdalld/config/genesis.json --bridge --all --rest-server ENTER; bash /home/${this.config.devnetBorUsers[i]}/node/bor-setup.sh ENTER; bash /home/${this.config.devnetBorUsers[i]}/node/bor-start.sh ENTER`
-                        ], {stdio: getRemoteStdio()})*/
                     }
                 }
             }
