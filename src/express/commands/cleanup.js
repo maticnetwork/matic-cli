@@ -74,17 +74,17 @@ async function cleanupServices(doc) {
         }
 
         console.log("📍Cleaning up heimdall on machine " + ip + " ...")
-        let command = `heimdalld unsafe-reset-all`
+        let command = `$HOME/go/bin/heimdalld unsafe-reset-all`
         //let command = `tmux send-keys -t matic-cli:0 'heimdalld unsafe-reset-all' ENTER`
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Purging queue for heimdall bridge on machine " + ip + " ...")
-        command = `heimdalld heimdall-bridge purge-queue`
+        command = `$HOME/go/bin/heimdalld heimdall-bridge purge-queue`
         //command = `tmux send-keys -t matic-cli:0 'heimdalld heimdall-bridge purge-queue' ENTER`
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Resetting heimdall bridge on machine " + ip + " ...")
-        command = `heimdalld heimdall-bridge unsafe-reset-all`
+        command = `$HOME/go/bin/heimdalld heimdall-bridge unsafe-reset-all`
         //command = `tmux send-keys -t matic-cli:0 'heimdalld heimdall-bridge unsafe-reset-all' ENTER`
         await runSshCommand(ip, command, maxRetries)
 
@@ -147,8 +147,9 @@ async function startServices(doc) {
 
         console.log("📍Starting bor on machine " + ip + " ...")
         command = `sudo systemctl start bor.service`
+        await runSshCommand(ip, command, maxRetries)
         //command = `tmux send-keys -t matic-cli:1 'bash ~/node/bor-start.sh' ENTER`
-        //await runSshCommand(ip, command, maxRetries)
+        
     })
 
     await Promise.all(startServicesTasks)
