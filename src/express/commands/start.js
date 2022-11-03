@@ -221,7 +221,7 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType) {
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Stopping bor (if present) on machine " + ip + " ...")
-        command = `sudo systemctl stop bor.service || echo 'ganache not running on current machine...'`
+        command = `sudo systemctl stop bor.service || echo 'bor not running on current machine...'`
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Removing .bor folder (if present) on machine " + ip + " ...")
