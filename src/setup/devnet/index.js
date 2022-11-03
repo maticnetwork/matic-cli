@@ -426,7 +426,7 @@ export class Devnet {
                                 `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                                 `-i`, `~/cert.pem`,
                                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                                `sudo mv /home/ubuntu/ganache.service /lib/systemd/system/`
+                                `sudo mv ~/ganache.service /lib/systemd/system/`
                             ], {stdio: getRemoteStdio()})
  
                         }
@@ -444,7 +444,7 @@ export class Devnet {
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                            `sudo mv /home/ubuntu/bor.service /lib/systemd/system/`
+                            `sudo mv ~/bor.service /lib/systemd/system/`
                         ], {stdio: getRemoteStdio()})
                                                 
                         // TODO: Target location would vary depending on bor/heimdall version
@@ -452,7 +452,7 @@ export class Devnet {
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                            `sudo mv /home/ubuntu/heimdalld.service /lib/systemd/system/`
+                            `sudo mv ~/heimdalld.service /lib/systemd/system/`
                         ], {stdio: getRemoteStdio()})
      
                     }
