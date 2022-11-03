@@ -430,15 +430,15 @@ export class Devnet {
                             ], {stdio: getRemoteStdio()})
  
                         }
-                        
-                        await execa('ssh', [
-                            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                            `-i`, `~/cert.pem`,
-                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                            `bash /home/${this.config.devnetBorUsers[i]}/service.sh`
-                        ], {stdio: getRemoteStdio()})
-                        
-
+                        else {
+                            await execa('ssh', [
+                                `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                                `-i`, `~/cert.pem`,
+                                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                                `bash /home/${this.config.devnetBorUsers[i]}/service.sh`
+                            ], {stdio: getRemoteStdio()})
+                        }
+    
                         // TODO: Target location would vary depending on bor/heimdall version
                         await execa('ssh', [
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
