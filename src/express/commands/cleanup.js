@@ -74,7 +74,7 @@ async function cleanupServices(doc) {
         }
 
         console.log("📍Cleaning up heimdall on machine " + ip + " ...")
-        let command = `$HOME/go/bin/heimdalld unsafe-reset-all`
+        let command = `sudo $HOME/go/bin/heimdalld unsafe-reset-all`
         //let command = `tmux send-keys -t matic-cli:0 'heimdalld unsafe-reset-all' ENTER`
         await runSshCommand(ip, command, maxRetries)
 
