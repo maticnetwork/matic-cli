@@ -138,8 +138,8 @@ async function installHostSpecificPackages(ip) {
                     sudo ln -sf ~/.nvm/versions/node/v16.17.1/bin/npx /usr/bin/npx`
     await runSshCommand(ip, command, maxRetries)
 
-    console.log("📍Installing ganache-cli...")
-    command = `sudo npm install -g ganache-cli -y`
+    console.log("📍Installing ganache...")
+    command = `sudo npm install -g ganache -y`
     await runSshCommand(ip, command, maxRetries)
 }
 
