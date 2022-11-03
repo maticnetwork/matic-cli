@@ -421,7 +421,7 @@ export class Devnet {
                                 `bash ${this.config.targetDirectory}/service-host.sh`
                             ], {stdio: getRemoteStdio()})
 
-                            // TODO: Target location would vary depending on bor/heimdall version
+                            // NOTE: Target location would vary depending on bor/heimdall version. Currently the setup works with bor and heimdall v0.3.x
                             await execa('ssh', [
                                 `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                                 `-i`, `~/cert.pem`,
@@ -439,7 +439,7 @@ export class Devnet {
                             ], {stdio: getRemoteStdio()})
                         }
     
-                        // TODO: Target location would vary depending on bor/heimdall version
+                        // NOTE: Target location would vary depending on bor/heimdall version. Currently the setup works with bor and heimdall v0.3.x
                         await execa('ssh', [
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
@@ -447,7 +447,7 @@ export class Devnet {
                             `sudo mv ~/bor.service /lib/systemd/system/`
                         ], {stdio: getRemoteStdio()})
                                                 
-                        // TODO: Target location would vary depending on bor/heimdall version
+                        // NOTE: Target location would vary depending on bor/heimdall version. Currently the setup works with bor and heimdall v0.3.x
                         await execa('ssh', [
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
