@@ -43,7 +43,7 @@ async function installRequiredSoftwareOnRemoteMachines(ips, devnetType) {
 
         i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
     }
-    
+
     let requirementTasks = nodeIps.map(async(ip) => {
         user = splitAndGetHostIp(ip)
         await configureCertAndPermissions(user, ip)
@@ -117,7 +117,7 @@ async function installHostSpecificPackages(ip) {
                         export NVM_DIR="$HOME/.nvm"
                         [ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
                         [ -s "$NVM_DIR/bash_completion" ] && \\. "$NVM_DIR/bash_completion" && 
-                        nvm install 10.17.0`
+                        nvm install 16.17.1`
     await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Installing solc...")
@@ -133,9 +133,9 @@ async function installHostSpecificPackages(ip) {
     await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Creating symlink for npm and node...")
-    command = `sudo ln -sf ~/.nvm/versions/node/v10.17.0/bin/npm /usr/bin/npm &&
-                    sudo ln -sf ~/.nvm/versions/node/v10.17.0/bin/node /usr/bin/node &&
-                    sudo ln -sf ~/.nvm/versions/node/v10.17.0/bin/npx /usr/bin/npx`
+    command = `sudo ln -sf ~/.nvm/versions/node/v16.17.1/bin/npm /usr/bin/npm &&
+                    sudo ln -sf ~/.nvm/versions/node/v16.17.1/bin/node /usr/bin/node &&
+                    sudo ln -sf ~/.nvm/versions/node/v16.17.1/bin/npx /usr/bin/npx`
     await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Installing ganache-cli...")
@@ -207,7 +207,7 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType) {
     let cleanupTasks = nodeIps.map(async(ip) => {
 
         if (isHostMap.get(ip)) {
-            // Cleanup Host 
+            // Cleanup Host
             console.log("📍Removing old devnet (if present) on machine " + ip + " ...")
             let command = `rm -rf ~/matic-cli/devnet`
             await runSshCommand(ip, command, maxRetries)
