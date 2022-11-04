@@ -562,14 +562,14 @@ export class Devnet {
 
                     // create heimdall folder for all the nodes
                     for (let i = 0; i < this.totalNodes; i++) {
-                       shell.exec(`ssh -tt -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/cert.pem ${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}
-                                    sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`)
-                        /*await execa('ssh', [
+                       /*shell.exec(`ssh -tt -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/cert.pem ${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}
+                                    sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`)*/
+                        await execa('ssh', [
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                             `sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`
-                        ], {stdio: getRemoteStdio()})*/
+                        ], {stdio: getRemoteStdio()})
                         
                     }
 
