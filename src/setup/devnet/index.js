@@ -561,7 +561,7 @@ export class Devnet {
                     ];
 
                     // create heimdall folder for all the nodes
-                    /*for (let i = 0; i < this.totalNodes; i++) {
+                    for (let i = 0; i < this.totalNodes; i++) {
                        shell.exec(`ssh -tt -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/cert.pem ${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}
                                     sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`)
                         /*await execa('ssh', [
@@ -569,9 +569,9 @@ export class Devnet {
                             `-i`, `~/cert.pem`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                             `sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`
-                        ], {stdio: getRemoteStdio()})
+                        ], {stdio: getRemoteStdio()})*/
                         
-                    }*/
+                    }
 
                     // create testnet
                     await execa(heimdall.heimdalldCmd, args, {
@@ -586,13 +586,13 @@ export class Devnet {
                         /*shell.exec(`ssh -tt -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/cert.pem ${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}
                         sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`)*/
 
-                        console.log(this.config.devnetBorUsers[i]);
+                        /*console.log(this.config.devnetBorUsers[i]);
                         await execa('ssh', [
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                             `sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`
-                        ], {stdio: getRemoteStdio()})
+                        ], {stdio: getRemoteStdio()})*/
                         
                         fileReplacer(this.heimdallConfigFilePath(i))
                             .replace(/heimdall([^:]+):/gi, (d, index) => {
