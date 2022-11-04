@@ -24,7 +24,7 @@ bor server \
   --port 30303 \
   --bor.heimdall http://heimdall$INDEX:1317 \
   --http --http.addr '0.0.0.0' \
-  --ws --ws.port 8546 \
+  --ws --ws.addr '0.0.0.0' --ws.port 8546 --ws.api 'eth,txpool,net,web3,bor \
   --http.vhosts '*' \
   --http.corsdomain '*' \
   --ws.vhosts '*' \
