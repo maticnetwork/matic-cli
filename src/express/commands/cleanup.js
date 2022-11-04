@@ -63,10 +63,7 @@ async function cleanupServices(doc) {
         i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
     }
 
-    let cleanupServicesTasks = nodeIps.map(async(ip) => {
-        //let command = `sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/ `
-        //await runSshCommand(ip, command, maxRetries)
-        
+    let cleanupServicesTasks = nodeIps.map(async(ip) => {      
         if (isHostMap.get(ip)) {
             console.log("📍Cleaning up ganache on machine " + ip + " ...")
             let command = `rm -rf ~/data/ganache-db && rm -rf ~/matic-cli/devnet/data/ganache-db`

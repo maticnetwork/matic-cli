@@ -570,9 +570,7 @@ export class Devnet {
                         ], {stdio: getRemoteStdio()})
                         
                     }
-                    /*shell.exec(`sudo mkdir -p /var/lib/heimdall`)
-                    shell.exec(`sudo chmod 777 -R /var/lib/heimdall/`)*/
-
+                    
                     // create testnet
                     await execa(heimdall.heimdalldCmd, args, {
                         cwd: this.config.targetDirectory,
