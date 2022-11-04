@@ -560,7 +560,7 @@ export class Devnet {
                         "devnet",
                     ];
 
-                    // create heimdall folder
+                    // create heimdall folder for all the nodes
                     for (let i = 0; i < this.totalNodes; i++) {
                         await execa('ssh', [
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
@@ -570,7 +570,7 @@ export class Devnet {
                         ], {stdio: getRemoteStdio()})
                         
                     }
-                    
+
                     // create testnet
                     await execa(heimdall.heimdalldCmd, args, {
                         cwd: this.config.targetDirectory,
