@@ -410,10 +410,10 @@ export class Devnet {
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
                             `${this.config.targetDirectory}/service.sh`,
-                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/`
+                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:~/`
                         ], {stdio: getRemoteStdio()})
 
-                        if (i == 0) {
+                        if (i === 0) {
                             await execa('ssh', [
                                 `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                                 `-i`, `~/cert.pem`,
@@ -435,7 +435,7 @@ export class Devnet {
                                 `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                                 `-i`, `~/cert.pem`,
                                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                                `bash /home/${this.config.devnetBorUsers[i]}/service.sh`
+                                `bash ~/service.sh`
                             ], {stdio: getRemoteStdio()})
                         }
     
@@ -488,7 +488,7 @@ export class Devnet {
                         ], {stdio: getRemoteStdio()})
 
                         // Execute service files
-                        if (i == 0) {
+                        if (i === 0) {
                             await execa('ssh', [
                                 `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                                 `-i`, `~/cert.pem`,
@@ -501,14 +501,14 @@ export class Devnet {
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                            `bash /home/${this.config.devnetBorUsers[i]}/node/heimdalld-setup.sh`
+                            `bash ~/node/heimdalld-setup.sh`
                         ], {stdio: getRemoteStdio()})
 
                         await execa('ssh', [
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                            `sudo ln -sf $HOME/go/bin/heimdalld /usr/bin/heimdalld`
+                            `sudo ln -sf ~/go/bin/heimdalld /usr/bin/heimdalld`
                         ], {stdio: getRemoteStdio()})
 
                         await execa('ssh', [
@@ -522,7 +522,7 @@ export class Devnet {
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                            `bash /home/${this.config.devnetBorUsers[i]}/node/bor-setup.sh `
+                            `bash ~/node/bor-setup.sh `
                         ], {stdio: getRemoteStdio()})
 
                         await execa('ssh', [
@@ -561,17 +561,17 @@ export class Devnet {
                     ];
 
                     // create heimdall folder for all the nodes
-                    for (let i = 0; i < this.totalNodes; i++) {
-                        shell.exec(`ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/cert.pem ${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}
+                    /*for (let i = 0; i < this.totalNodes; i++) {
+                       shell.exec(`ssh -tt -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/cert.pem ${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}
                                     sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`)
                         /*await execa('ssh', [
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                             `sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`
-                        ], {stdio: getRemoteStdio()})*/
+                        ], {stdio: getRemoteStdio()})
                         
-                    }
+                    }*/
 
                     // create testnet
                     await execa(heimdall.heimdalldCmd, args, {
@@ -581,6 +581,11 @@ export class Devnet {
 
                     // set heimdall peers with devnet heimdall hosts
                     for (let i = 0; i < this.totalNodes; i++) {
+                        
+                        // create heimdall folder for all the nodes
+                        shell.exec(`ssh -tt -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/cert.pem ${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}
+                        sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`)
+                        
                         fileReplacer(this.heimdallConfigFilePath(i))
                             .replace(/heimdall([^:]+):/gi, (d, index) => {
                                 return `${this.config.devnetHeimdallHosts[index]}:`;
