@@ -586,6 +586,7 @@ export class Devnet {
                         /*shell.exec(`ssh -tt -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/cert.pem ${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}
                         sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`)*/
 
+                        console.log(this.config.devnetBorUsers[i]);
                         await execa('ssh', [
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
