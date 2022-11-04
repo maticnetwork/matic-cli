@@ -64,8 +64,8 @@ async function cleanupServices(doc) {
     }
 
     let cleanupServicesTasks = nodeIps.map(async(ip) => {
-        let command = `sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/ `
-        await runSshCommand(ip, command, maxRetries)
+        //let command = `sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/ `
+        //await runSshCommand(ip, command, maxRetries)
         
         if (isHostMap.get(ip)) {
             console.log("📍Cleaning up ganache on machine " + ip + " ...")
@@ -74,7 +74,7 @@ async function cleanupServices(doc) {
         }
 
         console.log("📍Cleaning up heimdall on machine " + ip + " ...")
-        command = `heimdalld unsafe-reset-all`
+        let command = `heimdalld unsafe-reset-all`
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Purging queue for heimdall bridge on machine " + ip + " ...")
