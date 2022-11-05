@@ -560,19 +560,6 @@ export class Devnet {
                         "devnet",
                     ];
 
-                    // create heimdall folder for all the nodes
-                    for (let i = 0; i < this.totalNodes; i++) {
-                       /*shell.exec(`ssh -tt -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/cert.pem ${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}
-                                    sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`)*/
-                        await execa('ssh', [
-                            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                            `-i`, `~/cert.pem`,
-                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                            `sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`
-                        ], {stdio: getRemoteStdio()})
-                        
-                    }
-
                     // create testnet
                     await execa(heimdall.heimdalldCmd, args, {
                         cwd: this.config.targetDirectory,
@@ -581,32 +568,38 @@ export class Devnet {
 
                     // set heimdall peers with devnet heimdall hosts
                     for (let i = 0; i < this.totalNodes; i++) {
-                        
-                        // create heimdall folder for all the nodes
-                        /*shell.exec(`ssh -tt -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/cert.pem ${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}
-                        sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`)*/
-
-                        /*console.log(this.config.devnetBorUsers[i]);
-                        await execa('ssh', [
-                            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                            `-i`, `~/cert.pem`,
-                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                            `sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`
-                        ], {stdio: getRemoteStdio()})*/
-                        
-                        fileReplacer(this.heimdallConfigFilePath(i))
-                            .replace(/heimdall([^:]+):/gi, (d, index) => {
-                                return `${this.config.devnetHeimdallHosts[index]}:`;
-                            })
-                            .replace(/moniker.+=.+/gi, `moniker = "heimdall${i}"`)
-                            .save();
-
-                        fileReplacer(this.heimdallGenesisFilePath(i))
-                            .replace(
-                                /"bor_chain_id"[ ]*:[ ]*".*"/gi,
-                                `"bor_chain_id": "${this.config.borChainId}"`
-                            )
-                            .save();
+                        if (this.config.devnetType === "docker" && i === 0) {
+                            // create heimdall folder for one node in docker setup
+                            await execa('ssh', [
+                                `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                                `-i`, `~/cert.pem`,
+                                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                                `sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`
+                            ], {stdio: getRemoteStdio()})
+                            break
+                        } else {
+                            // create heimdall folder for all the nodes in remote setup
+                            await execa('ssh', [
+                                `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                                `-i`, `~/cert.pem`,
+                                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                                `sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`
+                            ], {stdio: getRemoteStdio()})
+                            
+                            fileReplacer(this.heimdallConfigFilePath(i))
+                                .replace(/heimdall([^:]+):/gi, (d, index) => {
+                                    return `${this.config.devnetHeimdallHosts[index]}:`;
+                                })
+                                .replace(/moniker.+=.+/gi, `moniker = "heimdall${i}"`)
+                                .save();
+    
+                            fileReplacer(this.heimdallGenesisFilePath(i))
+                                .replace(
+                                    /"bor_chain_id"[ ]*:[ ]*".*"/gi,
+                                    `"bor_chain_id": "${this.config.borChainId}"`
+                                )
+                                .save();
+                        }
                     }
                 },
             },
@@ -897,6 +890,8 @@ export default async function (command) {
             if (devnetHeimdallHosts.length < totalValidators) {
                 devnetHeimdallHosts.push(`heimdall${i}`);
             }
+            
+            devnetBorUsers = devnetBorUsers.toString().split(",")
         });
     } else {
         let missing = [
