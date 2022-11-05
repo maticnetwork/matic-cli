@@ -4,8 +4,8 @@ NODE_DIR=$HOME/node
 BOR_HOME=$HOME/.bor
 BIN_DIR=$(go env GOPATH)/bin
 USER=$(whoami)
-NODE=$(which node)
-GO=$(which go)
+NODE=$(nvm which node)
+GO=$(go env GOROOT)/bin
 
 VALIDATOR_ADDRESS="`cat $BOR_HOME/address.txt`"
 
