@@ -305,14 +305,14 @@ async function runRemoteSetupWithMaticCLI(ips) {
     let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
     let ipsArray = splitToArray(ips)
     let ip = `${doc['ethHostUser']}@${ipsArray[0]}`
-
-    console.log("📍Creating heimdall folder...")
+    
+    /*console.log("📍Creating heimdall folder...")
     let command = `sudo mkdir -p /var/lib/heimdall`
     await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Assigning proper permissions for heimdall folder...")
     command = `sudo chmod 777 -R /var/lib/heimdall/`
-    await runSshCommand(ip, command, maxRetries)
+    await runSshCommand(ip, command, maxRetries)*/
 
     console.log("📍Creating devnet and removing default configs...")
     command = `cd ~/matic-cli && mkdir -p devnet && rm configs/devnet/remote-setup-config.yaml`

@@ -419,7 +419,7 @@ export class Devnet {
                                 `-i`, `~/cert.pem`,
                                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                                 `bash ${this.config.targetDirectory}/service-host.sh`
-                            ], {stdio: getRemoteStdio()})
+                            ], {stdio: getRemoteStdio(), cwd: this.config.targetDirectory})
 
                             // NOTE: Target location would vary depending on bor/heimdall version. Currently the setup works with bor and heimdall v0.3.x
                             await execa('ssh', [
@@ -585,21 +585,22 @@ export class Devnet {
                                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                                 `sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`
                             ], {stdio: getRemoteStdio()})
-                            
-                            fileReplacer(this.heimdallConfigFilePath(i))
+                        } 
+                           
+                        fileReplacer(this.heimdallConfigFilePath(i))
                                 .replace(/heimdall([^:]+):/gi, (d, index) => {
                                     return `${this.config.devnetHeimdallHosts[index]}:`;
                                 })
                                 .replace(/moniker.+=.+/gi, `moniker = "heimdall${i}"`)
                                 .save();
     
-                            fileReplacer(this.heimdallGenesisFilePath(i))
+                        fileReplacer(this.heimdallGenesisFilePath(i))
                                 .replace(
                                     /"bor_chain_id"[ ]*:[ ]*".*"/gi,
                                     `"bor_chain_id": "${this.config.borChainId}"`
                                 )
                                 .save();
-                        }
+                        
                     }
                 },
             },
