@@ -419,7 +419,7 @@ export class Devnet {
                                 `-i`, `~/cert.pem`,
                                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                                 `bash ${this.config.targetDirectory}/service-host.sh`
-                            ], {stdio: getRemoteStdio(), cwd: this.config.targetDirectory})
+                            ], {stdio: getRemoteStdio()})
 
                             // NOTE: Target location would vary depending on bor/heimdall version. Currently the setup works with bor and heimdall v0.3.x
                             await execa('ssh', [

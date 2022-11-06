@@ -4,6 +4,7 @@ NODE_DIR=$HOME/node
 BOR_HOME=$HOME/.bor
 BIN_DIR=$(go env GOPATH)/bin
 USER=$(whoami)
+source $HOME/.nvm/nvm.sh
 NODE=$(nvm which node)
 GO=$(go env GOROOT)/bin
 
