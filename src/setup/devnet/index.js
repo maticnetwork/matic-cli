@@ -410,7 +410,7 @@ export class Devnet {
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
                             `${this.config.targetDirectory}/service.sh`,
-                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:~/`
+                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:~/service.sh`
                         ], {stdio: getRemoteStdio()})
 
                         if (i === 0) {
@@ -567,41 +567,34 @@ export class Devnet {
                     });
 
                     // set heimdall peers with devnet heimdall hosts
-                    for (let i = 0; i < this.totalNodes; i++) {
-                        if (this.config.devnetType === "docker") {
-                            // create heimdall folder for one node in docker setup
-                            if (i===0) {
-                                await execa('ssh', [
-                                    `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                                    `-i`, `~/cert.pem`,
-                                    `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                                    `sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`
-                                ], {stdio: getRemoteStdio()})
-                            }
-                        } else {
-                            // create heimdall folder for all the nodes in remote setup
-                            await execa('ssh', [
-                                `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                                `-i`, `~/cert.pem`,
-                                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                                `sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`
-                            ], {stdio: getRemoteStdio()})
-                        } 
-                           
+                    for (let i = 0; i < this.totalNodes; i++) { 
+                        
+                        // create heimdall folder for all the nodes in remote setup
+                        await execa('ssh', [
+                            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                            `-i`, `~/cert.pem`,
+                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                            `sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`
+                        ], {stdio: getRemoteStdio()})
+                               
                         fileReplacer(this.heimdallConfigFilePath(i))
-                                .replace(/heimdall([^:]+):/gi, (d, index) => {
-                                    return `${this.config.devnetHeimdallHosts[index]}:`;
-                                })
-                                .replace(/moniker.+=.+/gi, `moniker = "heimdall${i}"`)
-                                .save();
+                            .replace(/heimdall([^:]+):/gi, (d, index) => {
+                                return `${this.config.devnetHeimdallHosts[index]}:`;
+                            })
+                            .replace(/moniker.+=.+/gi, `moniker = "heimdall${i}"`)
+                            .save();
     
                         fileReplacer(this.heimdallGenesisFilePath(i))
-                                .replace(
-                                    /"bor_chain_id"[ ]*:[ ]*".*"/gi,
-                                    `"bor_chain_id": "${this.config.borChainId}"`
-                                )
-                                .save();
+                            .replace(
+                                /"bor_chain_id"[ ]*:[ ]*".*"/gi,
+                                `"bor_chain_id": "${this.config.borChainId}"`
+                            )
+                            .save();
                         
+                        // Only one node in docker setup
+                        if (this.config.devnetType === "docker") {
+                            break
+                        }  
                     }
                 },
             },
