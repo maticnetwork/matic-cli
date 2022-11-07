@@ -568,15 +568,16 @@ export class Devnet {
 
                     // set heimdall peers with devnet heimdall hosts
                     for (let i = 0; i < this.totalNodes; i++) {
-                        if (this.config.devnetType === "docker" && i === 0) {
+                        if (this.config.devnetType === "docker") {
                             // create heimdall folder for one node in docker setup
-                            await execa('ssh', [
-                                `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                                `-i`, `~/cert.pem`,
-                                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                                `sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`
-                            ], {stdio: getRemoteStdio()})
-                            break
+                            if (i===0) {
+                                await execa('ssh', [
+                                    `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                                    `-i`, `~/cert.pem`,
+                                    `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                                    `sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`
+                                ], {stdio: getRemoteStdio()})
+                            }
                         } else {
                             // create heimdall folder for all the nodes in remote setup
                             await execa('ssh', [
