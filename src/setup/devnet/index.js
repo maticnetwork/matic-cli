@@ -586,7 +586,7 @@ export class Devnet {
                                 `sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`
                             ], {stdio: getRemoteStdio()})
                         } 
-                           
+                        throw console.error(this.config);   
                         fileReplacer(this.heimdallConfigFilePath(i))
                                 .replace(/heimdall([^:]+):/gi, (d, index) => {
                                     return `${this.config.devnetHeimdallHosts[index]}:`;
