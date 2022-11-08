@@ -560,6 +560,21 @@ export class Devnet {
                         "devnet",
                     ];
 
+                    // Create heimdall folders
+                    for (let i = 0; i < this.totalNodes; i++) {
+                        // create heimdall folder for all the nodes in remote setup
+                        await execa('ssh', [
+                            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                            `-i`, `~/cert.pem`,
+                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                            `sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`
+                        ], {stdio: getRemoteStdio()})
+
+                        // Only one node in docker setup
+                        if (this.config.devnetType === "docker") {
+                            break
+                        }
+                    }
                     // create testnet
                     await execa(heimdall.heimdalldCmd, args, {
                         cwd: this.config.targetDirectory,
@@ -568,15 +583,7 @@ export class Devnet {
 
                     // set heimdall peers with devnet heimdall hosts
                     for (let i = 0; i < this.totalNodes; i++) { 
-                        
-                        // create heimdall folder for all the nodes in remote setup
-                        await execa('ssh', [
-                            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                            `-i`, `~/cert.pem`,
-                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                            `sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`
-                        ], {stdio: getRemoteStdio()})
-                               
+                         
                         fileReplacer(this.heimdallConfigFilePath(i))
                             .replace(/heimdall([^:]+):/gi, (d, index) => {
                                 return `${this.config.devnetHeimdallHosts[index]}:`;
@@ -590,11 +597,6 @@ export class Devnet {
                                 `"bor_chain_id": "${this.config.borChainId}"`
                             )
                             .save();
-                        
-                        // Only one node in docker setup
-                        if (this.config.devnetType === "docker") {
-                            break
-                        }  
                     }
                 },
             },
