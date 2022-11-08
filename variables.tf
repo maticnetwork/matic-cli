@@ -15,6 +15,9 @@ variable "DISK_SIZE_GB" {
   default = "500"
 }
 
+variable "IOPS" {
+  default = 3000
+}
 variable "DOCKERIZED" {
   default = "no"
 }
