@@ -435,6 +435,19 @@ export class Devnet {
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:/home/${this.config.devnetBorUsers[i]}/go/bin/heimdallcli`
                         ], {stdio: getRemoteStdio()})
 
+                        // remove multiple keystore files from node[i]/bor/keystore
+                        let keystoreDir = path.join(this.testnetDir,`node${i}`,"bor", "keystore");
+                        fs.readdir(keystoreDir, async (err, files) => {
+                            if (err) throw err;
+                          
+                            for(var j=1; j<files.length; j++) {
+                                await fs.unlink(path.join(keystoreDir, files[j]), err => {
+                                    if (err) throw err;
+                                });
+                            }
+                        });
+                        await timer(2000);
+
                         await execa('scp', [
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`, `-r`,
                             `-i`, `~/cert.pem`,
