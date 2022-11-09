@@ -28,7 +28,8 @@ resource "aws_instance" "app_server" {
   ebs_block_device {
     device_name = "/dev/sda1"
     volume_size = var.DISK_SIZE_GB
-    volume_type = "gp2"
+    volume_type = "gp3"
+    iops = var.IOPS
   }
 
   tags = {

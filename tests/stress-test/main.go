@@ -136,7 +136,7 @@ func getRPCs() []string {
 	}
 
 	for _, rpc := range yamldoc.DevnetBorHosts {
-		rpcs = append(rpcs, "http://"+rpc+":8545")
+		rpcs = append(rpcs, "ws://"+rpc+":8546")
 	}
 	fmt.Println(rpcs)
 	return rpcs
@@ -245,7 +245,10 @@ func fundAccounts(ctx context.Context, client *ethclient.Client, genAccounts Acc
 	for i := 0; i < N; i++ {
 
 		time.Sleep(5 * time.Millisecond)
-		go runTransaction(ctx, client, genAccounts[i].addr, chainID, senderAddress, opts, Nonce+uint64(i), 2200000000000000000)
+		go runTransaction(ctx, client, genAccounts[i].addr, chainID, senderAddress, opts, Nonce+uint64(3*i), 2200000000000000000)
+		go runTransaction(ctx, client, genAccounts[i].addr, chainID, senderAddress, opts, Nonce+uint64((3*i)+1), 2200000000000000000)
+		go runTransaction(ctx, client, genAccounts[i].addr, chainID, senderAddress, opts, Nonce+uint64((3*i)+2), 2200000000000000000)
+
 	}
 }
 
