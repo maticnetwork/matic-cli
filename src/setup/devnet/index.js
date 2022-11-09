@@ -428,7 +428,7 @@ export class Devnet {
                                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                                 `sudo mv ~/ganache.service /lib/systemd/system/`
                             ], {stdio: getRemoteStdio()})
- 
+
                         }
                         else {
                             await execa('ssh', [
@@ -438,7 +438,7 @@ export class Devnet {
                                 `bash ~/service.sh`
                             ], {stdio: getRemoteStdio()})
                         }
-    
+
                         // NOTE: Target location would vary depending on bor/heimdall version. Currently the setup works with bor and heimdall v0.3.x
                         await execa('ssh', [
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
@@ -446,7 +446,7 @@ export class Devnet {
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                             `sudo mv ~/bor.service /lib/systemd/system/`
                         ], {stdio: getRemoteStdio()})
-                                                
+
                         // NOTE: Target location would vary depending on bor/heimdall version. Currently the setup works with bor and heimdall v0.3.x
                         await execa('ssh', [
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
@@ -454,7 +454,7 @@ export class Devnet {
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                             `sudo mv ~/heimdalld.service /lib/systemd/system/`
                         ], {stdio: getRemoteStdio()})
-     
+
                     }
 
                     for (let i = 0; i < this.totalNodes; i++) {
@@ -561,20 +561,19 @@ export class Devnet {
                     ];
 
                     // Create heimdall folders
-                    for (let i = 0; i < this.totalNodes; i++) {
+                    if (this.config.devnetType === "remote") {
                         // create heimdall folder for all the nodes in remote setup
-                        await execa('ssh', [
-                            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                            `-i`, `~/cert.pem`,
-                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                            `sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`
-                        ], {stdio: getRemoteStdio()})
+                        for (let i = 0; i < this.totalNodes; i++) {
+                                await execa('ssh', [
+                                    `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                                    `-i`, `~/cert.pem`,
+                                    `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                                    `sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`
+                                ], {stdio: getRemoteStdio()})
 
-                        // Only one node in docker setup
-                        if (this.config.devnetType === "docker") {
-                            break
                         }
                     }
+
                     // create testnet
                     await execa(heimdall.heimdalldCmd, args, {
                         cwd: this.config.targetDirectory,
@@ -582,15 +581,15 @@ export class Devnet {
                     });
 
                     // set heimdall peers with devnet heimdall hosts
-                    for (let i = 0; i < this.totalNodes; i++) { 
-                         
+                    for (let i = 0; i < this.totalNodes; i++) {
+
                         fileReplacer(this.heimdallConfigFilePath(i))
                             .replace(/heimdall([^:]+):/gi, (d, index) => {
                                 return `${this.config.devnetHeimdallHosts[index]}:`;
                             })
                             .replace(/moniker.+=.+/gi, `moniker = "heimdall${i}"`)
                             .save();
-    
+
                         fileReplacer(this.heimdallGenesisFilePath(i))
                             .replace(
                                 /"bor_chain_id"[ ]*:[ ]*".*"/gi,
@@ -879,17 +878,15 @@ export default async function (command) {
     let devnetHeimdallHosts = config.devnetHeimdallHosts || [];
     let devnetHeimdallUsers = config.devnetHeimdallUsers || [];
     const totalValidators = config.numOfValidators + config.numOfNonValidators;
+
+    // For docker, the devnetBorHosts conform to the subnet 172.20.1.0/24
     if (config.devnetType === "docker") {
-        [...Array(totalValidators).keys()].forEach((i) => {
-            if (devnetBorHosts.length < totalValidators) {
-                devnetBorHosts.push(`172.20.1.${i + 100}`);
-            }
-            if (devnetHeimdallHosts.length < totalValidators) {
-                devnetHeimdallHosts.push(`heimdall${i}`);
-            }
-            
-            devnetBorUsers = devnetBorUsers.toString().split(",")
-        });
+        devnetBorHosts = []
+        devnetHeimdallHosts = []
+        for (let i = 0; i < totalValidators; i++) {
+            devnetBorHosts.push(`172.20.1.${i + 100}`);
+            devnetHeimdallHosts.push(`heimdall${i}`);
+        }
     } else {
         let missing = [
             "devnetBorHosts",
