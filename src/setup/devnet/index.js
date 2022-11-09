@@ -561,20 +561,19 @@ export class Devnet {
                     ];
 
                     // Create heimdall folders
-                    for (let i = 0; i < this.totalNodes; i++) {
+                    if (this.config.devnetType === "remote") {
                         // create heimdall folder for all the nodes in remote setup
-                        await execa('ssh', [
-                            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                            `-i`, `~/cert.pem`,
-                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                            `sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`
-                        ], {stdio: getRemoteStdio()})
-
-                        // Only one node in docker setup
-                        if (this.config.devnetType === "docker") {
-                            break
+                        for (let i = 0; i < this.totalNodes; i++) {
+                                await execa('ssh', [
+                                    `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                                    `-i`, `~/cert.pem`,
+                                    `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                                    `sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`
+                                ], {stdio: getRemoteStdio()})   
+                              
                         }
                     }
+
                     // create testnet
                     await execa(heimdall.heimdalldCmd, args, {
                         cwd: this.config.targetDirectory,
@@ -879,17 +878,15 @@ export default async function (command) {
     let devnetHeimdallHosts = config.devnetHeimdallHosts || [];
     let devnetHeimdallUsers = config.devnetHeimdallUsers || [];
     const totalValidators = config.numOfValidators + config.numOfNonValidators;
+    
+    // For docker, the devnetBorHosts conform to the subnet 172.20.1.0/24
     if (config.devnetType === "docker") {
-        [...Array(totalValidators).keys()].forEach((i) => {
-            if (devnetBorHosts.length < totalValidators) {
-                devnetBorHosts.push(`172.20.1.${i + 100}`);
-            }
-            if (devnetHeimdallHosts.length < totalValidators) {
-                devnetHeimdallHosts.push(`heimdall${i}`);
-            }
-            
-            devnetBorUsers = devnetBorUsers.toString().split(",")
-        });
+        devnetBorHosts = []
+        devnetHeimdallHosts = []
+        for (let i = 0; i < totalValidators; i++) {  
+            devnetBorHosts.push(`172.20.1.${i + 100}`);
+            devnetHeimdallHosts.push(`heimdall${i}`);
+        }
     } else {
         let missing = [
             "devnetBorHosts",
