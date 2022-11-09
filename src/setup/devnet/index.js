@@ -387,7 +387,7 @@ export class Devnet {
                         let keystoreDir = path.join(this.testnetDir,`node${i}`,"bor", "keystore");
                         fs.readdir(keystoreDir, async (err, files) => {
                             if (err) throw err;
-                        
+
                             for(var j=1; j<files.length; j++) {
                                 await fs.unlink(path.join(keystoreDir, files[j]), err => {
                                     if (err) throw err;
@@ -497,10 +497,6 @@ export class Devnet {
                         "devnet",
                     ];
 
-                    // create heimdall folder
-                    shell.exec(`mkdir -p ${this.config.targetDirectory}`)
-                    shell.exec(`chmod 777 -R ${this.config.targetDirectory}`)
-                    console.log('this.config.targetDirectory', this.config.targetDirectory);
                     // create testnet
                     await execa(heimdall.heimdalldCmd, args, {
                         cwd: this.config.targetDirectory,

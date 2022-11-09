@@ -22,11 +22,9 @@ borCmd.action(bor);
 const ganacheCmd = new Command("ganache");
 ganacheCmd.action(ganache);
 
-console.log("hello123")
 const localnetCmd = new Command("localnet");
 localnetCmd.action(localnet);
 
-console.log("gatsby123")
 const devnetCmd = new Command("devnet");
 devnetCmd.action(devnet);
 
