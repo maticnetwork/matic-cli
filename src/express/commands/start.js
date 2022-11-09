@@ -213,23 +213,15 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType) {
             await runSshCommand(ip, command, maxRetries)
 
             console.log("📍Stopping ganache (if present) on machine " + ip + " ...")
-            command = `tmux send-keys -t matic-cli-ganache:0 'C-c' ENTER || echo 'ganache not running on current machine...'`
-            await runSshCommand(ip, command, maxRetries)
-
-            console.log("📍Killing ganache tmux session (if present) on machine " + ip + " ...")
-            command = `tmux kill-session -t matic-cli-ganache || echo 'matic-cli-ganache tmux session does not exist on current machine...'`
+            command = `sudo systemctl stop ganache.service || echo 'ganache not running on current machine...'`
             await runSshCommand(ip, command, maxRetries)
         }
         console.log("📍Stopping heimdall (if present) on machine " + ip + " ...")
-        let command = `tmux send-keys -t matic-cli:0 'C-c' ENTER || echo 'heimdall not running on current machine...'`
+        let command = `sudo systemctl stop heimdalld.service || echo 'heimdall not running on current machine...'`
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Stopping bor (if present) on machine " + ip + " ...")
-        command = `tmux send-keys -t matic-cli:1 'C-c' ENTER || echo 'bor not running on current machine...'`
-        await runSshCommand(ip, command, maxRetries)
-
-        console.log("📍Killing matic-cli tmux session (if present) on machine " + ip + " ...")
-        command = `tmux kill-session -t matic-cli || echo 'matic-cli tmux session does not exist on current machine...'`
+        command = `sudo systemctl stop bor.service || echo 'bor not running on current machine...'`
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Removing .bor folder (if present) on machine " + ip + " ...")
@@ -314,16 +306,8 @@ async function runRemoteSetupWithMaticCLI(ips) {
     let ipsArray = splitToArray(ips)
     let ip = `${doc['ethHostUser']}@${ipsArray[0]}`
 
-    console.log("📍Creating heimdall folder...")
-    let command = `sudo mkdir -p /var/lib/heimdall`
-    await runSshCommand(ip, command, maxRetries)
-
-    console.log("📍Assigning proper permissions for heimdall folder...")
-    command = `sudo chmod 777 -R /var/lib/heimdall/`
-    await runSshCommand(ip, command, maxRetries)
-
     console.log("📍Creating devnet and removing default configs...")
-    command = `cd ~/matic-cli && mkdir -p devnet && rm configs/devnet/remote-setup-config.yaml`
+    let command = `cd ~/matic-cli && mkdir -p devnet && rm configs/devnet/remote-setup-config.yaml`
     await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Copying remote matic-cli configurations...")

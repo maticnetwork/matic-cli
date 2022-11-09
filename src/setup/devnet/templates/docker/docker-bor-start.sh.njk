@@ -24,11 +24,10 @@ bor server \
   --port 30303 \
   --bor.heimdall http://heimdall$INDEX:1317 \
   --http --http.addr '0.0.0.0' \
-  --ws --ws.port 8546 \
+  --ws --ws.addr '0.0.0.0' --ws.port 8546 --ws.api 'eth,txpool,net,web3,bor' \
   --http.vhosts '*' \
   --http.corsdomain '*' \
-  --ws.vhosts '*' \
-  --ws.corsdomain '*' \
+  --ws.origins '*' \
   --http.port 8545 \
   --ipcpath $DATA_DIR/bor.ipc \
   --http.api 'personal,eth,net,web3,txpool,miner,admin,bor' \
@@ -47,4 +46,3 @@ bor server \
   --mine > /root/logs/bor.log 2>&1 &
 tail -f /root/logs/bor.log
 "
-
