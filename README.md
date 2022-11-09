@@ -8,7 +8,7 @@ test and monitor any devnet on AWS stacks from any local system.
 It currently supports **only** devnets running `v0.3.x` stacks.
 
 The `express-cli` interacts with `terraform` to create a fully working setup on AWS.  
-This setup is composed by a set of `EC2 VM` instances running a specific `ubuntu 22.04 ami`, mounted with `gp2 disks` ,
+This setup is composed by a set of `EC2 VM` instances running a specific `ubuntu 22.04 ami`, mounted with `gp3 disks` ,
 and a `public-subnet` with its `VPC`.  
 In case the infrastructure already exists, `matic-cli` can be used as a standalone tool to deploy Polygon stacks on
 pre-configured VMs.
