@@ -118,4 +118,32 @@ ignore:
     - '*':
         reason: 'As open source org, we have no issues with licenses'
         created: 2022-11-11T11:02:46.054Z
+  SNYK-JS-ANSIREGEX-1583908:
+    - '*':
+        reason: >-
+          Waiting for issue to be fixed. See
+          https://github.com/SamVerschueren/listr/issues/163
+        created: 2022-11-11T11:54:18.213Z
+  SNYK-JS-NODEFETCH-2342118:
+    - '*':
+        reason: >-
+          Waiting for issue to be fixed. See
+          https://github.com/nosuchip/truffle-privatekey-provider/issues/20
+        created: 2022-11-11T11:58:28.872Z
+  SNYK-JS-NODEFETCH-674311:
+    - '*':
+        reason: >-
+          Waiting for issue to be fixed. See
+          https://github.com/nosuchip/truffle-privatekey-provider/issues/20
+        created: 2022-11-11T11:58:28.872Z
+  SNYK-JS-WEB3-174533:
+    - '*':
+        reason: >-
+          No upgrade or patch available at the moment
+        created: 2022-11-11T11:58:28.872Z
+  SNYK-JS-WS-1296835:
+    - '*':
+        reason: >-
+          Sent an email to web3, as per their official guidelines. Waiting for patch.
+        created: 2022-11-11T11:59:28.872Z
 patch: {}
