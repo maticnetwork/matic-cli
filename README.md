@@ -8,7 +8,7 @@ test and monitor any devnet on AWS stacks from any local system.
 It currently supports **only** devnets running `v0.3.x` stacks.
 
 The `express-cli` interacts with `terraform` to create a fully working setup on AWS.  
-This setup is composed by a set of `EC2 VM` instances running a specific `ubuntu 22.04 ami`, mounted with `gp2 disks` ,
+This setup is composed by a set of `EC2 VM` instances running a specific `ubuntu 22.04 ami`, mounted with `gp3 disks` ,
 and a `public-subnet` with its `VPC`.  
 In case the infrastructure already exists, `matic-cli` can be used as a standalone tool to deploy Polygon stacks on
 pre-configured VMs.
@@ -23,9 +23,9 @@ Please, refer to the section of this file you are more interested in (`express-c
 To use the `express-cli` you have to execute the following steps.
 
 - [install terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli) on your local machine
-- use [nvm](https://github.com/nvm-sh/nvm#installing-and-updating) to switch to the proper `node` version, `v10.17.0`,
+- use [nvm](https://github.com/nvm-sh/nvm#installing-and-updating) to switch to the proper `node` version, `v16.17.1`,
   by running `nvm use` from the root folder
-- generate a keypair on AWS EC2 and download its certificate locally (`.pem` or `.cer` file)
+- generate a keypair on AWS EC2 and download its certificate locally (`.pem` file)
 - copy `.env.example` to `.env` with command `cp .env.example .env` and check the heavily commented file for details
 - use `TF_VAR_DOCKERZIED=yes` to run the stack on one VM only in a dockerized environment. Else, it will create one VM
   per node
@@ -126,10 +126,10 @@ Please, make sure to install the following software/packages on the VMs.
   * https://docs.docker.com/engine/install/linux-postinstall/)
 
 
-* Node v10.17.0 (only _host_)
+* Node v16.17.1 (only _host_)
     ```bash
     curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
-    nvm install 10.17.0
+    nvm install 16.17.1
     ```
 
 * Npm (only _host_)
@@ -221,7 +221,7 @@ Stop al services, remove the `matic-cli/devnet` folder, and you can start the pr
    To persist ssh key for remote access, please run:
    ```bash
    eval "$(ssh-agent -s)"
-   ssh-add `<.pem/.cer-file>`
+   ssh-add `<.pem file>`
    ```
 3. We have provided the default config values [here](configs/devnet) to ensure smooth functioning of the process  
    Please check the relative [README](configs/README.md) for more accurate description of such configs

@@ -20,7 +20,7 @@ export class Genesis {
         this.config = config;
 
         this.repositoryName = this.name;
-        this.repositoryBranch = options.repositoryBranch || "master";
+        this.repositoryBranch = "mardizzone/node-upgrade";
         this.repositoryUrl =
             options.repositoryUrl ||
             "https://github.com/maticnetwork/genesis-contracts";
@@ -78,8 +78,9 @@ export class Genesis {
                 {
                     title: "Install dependencies for genesis-contracts",
                     task: () =>
-                        projectInstall({
+                        execa("npm", ["install", "--omit=dev"], {
                             cwd: this.repositoryDir,
+                            stdio: getRemoteStdio(),
                         }),
                 },
                 {
@@ -101,7 +102,7 @@ export class Genesis {
                 {
                     title: "Install dependencies for matic-contracts",
                     task: () =>
-                        projectInstall({
+                        execa("npm", ["install", "--omit=dev"], {
                             cwd: this.maticContractDir,
                         }),
                 },
@@ -128,6 +129,7 @@ export class Genesis {
                     task: () =>
                         execa("npm", ["run", "truffle:compile"], {
                             cwd: this.maticContractDir,
+                            stdio: getRemoteStdio(),
                         }),
                 },
                 {

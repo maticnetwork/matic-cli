@@ -3,7 +3,7 @@ import chalk from "chalk";
 import path from "path";
 import execa from "execa";
 import fs from "fs-extra";
-import ganacheCli from "ganache-cli";
+import ganache from "ganache";
 
 import {loadConfig} from "../config";
 import {processTemplateFiles} from "../../lib/utils";
@@ -80,28 +80,26 @@ export class Ganache {
                 {
                     title: "Start ganache",
                     task: () => {
-                        server = ganacheCli.server({
-                            accounts: [
-                                {
-                                    balance: "0xfffffffffffffffffffffffffffffffffffffffffffff",
-                                    secretKey: this.config.primaryAccount.privateKey,
-                                },
-                            ],
-                            port: this.serverPort,
-                            db_path: this.dbDir,
-                            gasPrice: "0x1",
-                            gasLimit: "0xfffffffff",
+                        server = ganache.server({
+                            wallet: {
+                                accounts: [
+                                    {
+                                        balance: "0xfffffffffffffffffffffffffffffffffffffffffffff",
+                                        secretKey: this.config.primaryAccount.privateKey,
+                                    },
+                                ]
+                            },
+                            miner: {
+                                defaultGasPrice: "0x1",
+                                blockGasLimit: "0xfffffffff",
+                            },
+                            database: {
+                                dbPath: this.dbDir,
+                            },
+                            port: this.serverPort
                         });
 
-                        return new Promise((resolve, reject) => {
-                            server.listen(this.serverPort, (err, blockchain) => {
-                                if (err) {
-                                    reject(err);
-                                } else {
-                                    resolve(blockchain);
-                                }
-                            });
-                        });
+                        return server.listen(this.serverPort);
                     },
                 },
                 {
@@ -125,15 +123,7 @@ export class Ganache {
                             return;
                         }
 
-                        return new Promise((resolve, reject) => {
-                            server.close((err) => {
-                                if (err) {
-                                    reject(err);
-                                } else {
-                                    resolve();
-                                }
-                            });
-                        });
+                        return server.close();
                     },
                 },
             ],

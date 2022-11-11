@@ -43,7 +43,7 @@ async function installRequiredSoftwareOnRemoteMachines(ips, devnetType) {
 
         i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
     }
-    
+
     let requirementTasks = nodeIps.map(async(ip) => {
         user = splitAndGetHostIp(ip)
         await configureCertAndPermissions(user, ip)
@@ -117,7 +117,7 @@ async function installHostSpecificPackages(ip) {
                         export NVM_DIR="$HOME/.nvm"
                         [ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
                         [ -s "$NVM_DIR/bash_completion" ] && \\. "$NVM_DIR/bash_completion" && 
-                        nvm install 10.17.0`
+                        nvm install 16.17.1`
     await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Installing solc...")
@@ -133,13 +133,13 @@ async function installHostSpecificPackages(ip) {
     await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Creating symlink for npm and node...")
-    command = `sudo ln -sf ~/.nvm/versions/node/v10.17.0/bin/npm /usr/bin/npm &&
-                    sudo ln -sf ~/.nvm/versions/node/v10.17.0/bin/node /usr/bin/node &&
-                    sudo ln -sf ~/.nvm/versions/node/v10.17.0/bin/npx /usr/bin/npx`
+    command = `sudo ln -sf ~/.nvm/versions/node/v16.17.1/bin/npm /usr/bin/npm &&
+                    sudo ln -sf ~/.nvm/versions/node/v16.17.1/bin/node /usr/bin/node &&
+                    sudo ln -sf ~/.nvm/versions/node/v16.17.1/bin/npx /usr/bin/npx`
     await runSshCommand(ip, command, maxRetries)
 
-    console.log("📍Installing ganache-cli...")
-    command = `sudo npm install -g ganache-cli -y`
+    console.log("📍Installing ganache...")
+    command = `sudo npm install -g ganache -y`
     await runSshCommand(ip, command, maxRetries)
 }
 
@@ -207,29 +207,21 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType) {
     let cleanupTasks = nodeIps.map(async(ip) => {
 
         if (isHostMap.get(ip)) {
-            // Cleanup Host 
+            // Cleanup Host
             console.log("📍Removing old devnet (if present) on machine " + ip + " ...")
             let command = `rm -rf ~/matic-cli/devnet`
             await runSshCommand(ip, command, maxRetries)
 
             console.log("📍Stopping ganache (if present) on machine " + ip + " ...")
-            command = `tmux send-keys -t matic-cli-ganache:0 'C-c' ENTER || echo 'ganache not running on current machine...'`
-            await runSshCommand(ip, command, maxRetries)
-
-            console.log("📍Killing ganache tmux session (if present) on machine " + ip + " ...")
-            command = `tmux kill-session -t matic-cli-ganache || echo 'matic-cli-ganache tmux session does not exist on current machine...'`
+            command = `sudo systemctl stop ganache.service || echo 'ganache not running on current machine...'`
             await runSshCommand(ip, command, maxRetries)
         }
         console.log("📍Stopping heimdall (if present) on machine " + ip + " ...")
-        let command = `tmux send-keys -t matic-cli:0 'C-c' ENTER || echo 'heimdall not running on current machine...'`
+        let command = `sudo systemctl stop heimdalld.service || echo 'heimdall not running on current machine...'`
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Stopping bor (if present) on machine " + ip + " ...")
-        command = `tmux send-keys -t matic-cli:1 'C-c' ENTER || echo 'bor not running on current machine...'`
-        await runSshCommand(ip, command, maxRetries)
-
-        console.log("📍Killing matic-cli tmux session (if present) on machine " + ip + " ...")
-        command = `tmux kill-session -t matic-cli || echo 'matic-cli tmux session does not exist on current machine...'`
+        command = `sudo systemctl stop bor.service || echo 'bor not running on current machine...'`
         await runSshCommand(ip, command, maxRetries)
 
         console.log("📍Removing .bor folder (if present) on machine " + ip + " ...")
@@ -314,16 +306,8 @@ async function runRemoteSetupWithMaticCLI(ips) {
     let ipsArray = splitToArray(ips)
     let ip = `${doc['ethHostUser']}@${ipsArray[0]}`
 
-    console.log("📍Creating heimdall folder...")
-    let command = `sudo mkdir -p /var/lib/heimdall`
-    await runSshCommand(ip, command, maxRetries)
-
-    console.log("📍Assigning proper permissions for heimdall folder...")
-    command = `sudo chmod 777 -R /var/lib/heimdall/`
-    await runSshCommand(ip, command, maxRetries)
-
     console.log("📍Creating devnet and removing default configs...")
-    command = `cd ~/matic-cli && mkdir -p devnet && rm configs/devnet/remote-setup-config.yaml`
+    let command = `cd ~/matic-cli && mkdir -p devnet && rm configs/devnet/remote-setup-config.yaml`
     await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Copying remote matic-cli configurations...")
