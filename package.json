@@ -17,7 +17,7 @@
   "author": "Matic Tech Team <info@matic.network> (https://matic.network)",
   "license": "MIT",
   "dependencies": {
-    "aws-sdk": "^2.1236.0",
+    "aws-sdk": "^2.1237.0",
     "boxen": "^7.0.0",
     "chalk": "^2.4.2",
     "commander": "^5.0.0",
