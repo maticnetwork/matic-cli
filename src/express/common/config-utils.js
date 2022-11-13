@@ -1,6 +1,21 @@
 import yaml from "js-yaml";
 import fs from "fs";
 
+export async function loadConfig(devnetType, devnetId) {
+    let doc
+    if (devnetId !== -1) {
+        if (!fs.existsSync(`./deployments/devnet-${devnetId}/${devnetType}-setup-config.yaml`)) {
+            console.log("❌ Config file for the devnet Id doesn't exist")
+            process.exit(1)
+        }
+        doc = await yaml.load(fs.readFileSync(`./deployments/devnet-${devnetId}/${devnetType}-setup-config.yaml`, 'utf-8'))
+    } else {
+        doc = await yaml.load(fs.readFileSync(`./configs/devnet/${devnetType}-setup-config.yaml`, 'utf8'));
+    }
+
+    return doc
+}
+
 export async function editMaticCliRemoteYAMLConfig() {
 
     console.log("📍Editing matic-cli remote YAML configs...")
@@ -124,9 +139,9 @@ export function splitAndGetHostIp(value) {
     }
 }
 
-export async function checkAndReturnVMIndex(n) {
+export async function checkAndReturnVMIndex(n, doc) {
 
-    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'), undefined);
+    //let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'), undefined);
 
     if (typeof n === "boolean") {
         console.log("📍Targeting all VMs ...");

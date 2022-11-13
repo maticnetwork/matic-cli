@@ -1,17 +1,12 @@
-const yaml = require("js-yaml");
-const fs = require("fs");
+import { loadConfig } from "../common/config-utils";
+
 const {runScpCommand, runSshCommand, maxRetries} = require("../common/remote-worker");
 
-export async function sendStateSyncTx() {
+export async function sendStateSyncTx(devnetId) {
 
-    let doc
-
-    if (process.env.TF_VAR_DOCKERIZED === 'yes') {
-        doc = await yaml.load(fs.readFileSync('./configs/devnet/docker-setup-config.yaml', 'utf8'));
-    } else {
-        doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
-    }
-
+    let devnetType = process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
+    let doc = await loadConfig(devnetType, devnetId)
+ 
     if (doc['devnetBorHosts'].length > 0) {
         console.log("📍Monitoring the first node", doc['devnetBorHosts'][0]);
     } else {

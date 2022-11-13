@@ -6,6 +6,8 @@ devnet
 .terraform*
 terraform.tfstate
 terraform.tfstate.backup
+terraform.tfstate.*
+deployments/
 .idea
 contractAddresses.json
 signer-dump.json

@@ -1,6 +1,6 @@
+import { loadConfig } from "../common/config-utils";
+
 const fetch = require("node-fetch");
-const yaml = require("js-yaml");
-const fs = require("fs");
 const timer = ms => new Promise(res => setTimeout(res, ms))
 
 async function checkCheckpoint(ip) {
@@ -31,14 +31,10 @@ async function checkStateSyncTx(ip) {
     return undefined
 }
 
-export async function monitor() {
-    let doc
+export async function monitor(devnetId) {
 
-    if (process.env.TF_VAR_DOCKERIZED === 'yes') {
-        doc = await yaml.load(fs.readFileSync('./configs/devnet/docker-setup-config.yaml', 'utf8'));
-    } else {
-        doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
-    }
+    let devnetType = process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
+    let doc = await loadConfig(devnetType, devnetId)
 
     if (doc['devnetBorHosts'].length > 0) {
         console.log("📍Monitoring the first node", doc['devnetBorHosts'][0]);

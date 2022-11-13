@@ -1,8 +1,6 @@
-const yaml = require("js-yaml");
-const fs = require("fs");
 const {splitToArray} = require("../common/config-utils");
 const {runSshCommand, maxRetries} = require("../common/remote-worker");
-import {checkAndReturnVMIndex} from "../common/config-utils";
+import {checkAndReturnVMIndex, loadConfig} from "../common/config-utils";
 
 export async function pullAndRestartBor(ip, i, isPull) {
 
@@ -92,12 +90,16 @@ export async function pullAndRestartHeimdall(ip, i, isPull) {
     await runSshCommand(ip, command, maxRetries)
 }
 
-export async function updateAll(n) {
+export async function updateAll(n, devnetId) {
 
-    let vmIndex = await checkAndReturnVMIndex(n)
-    console.log("📍Will rebuild and rerun bor and heimdall with latest versions from given branches")
-
-    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
+    let doc = await loadConfig("remote", devnetId)
+    if (devnetId !== -1) {
+        console.log(`📍Will rebuild and rerun bor and heimdall on devnet-${devnetId} with latest versions from given branches`)
+    } else {
+        console.log(`📍Will rebuild and rerun bor and heimdall on the current deployment with latest versions from given branches`)
+    }
+    
+    let vmIndex = await checkAndReturnVMIndex(n, doc)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
     let nodeIps = []
     let hostToIndexMap = new Map()
@@ -126,12 +128,16 @@ export async function updateAll(n) {
     }
 }
 
-export async function updateBor(n) {
+export async function updateBor(n, devnetId) {
 
-    let vmIndex = await checkAndReturnVMIndex(n)
-    console.log("📍Will rebuild and rerun bor with latest version from given branch")
+    let doc = await loadConfig("remote", devnetId)
+    if (devnetId !== -1) {
+        console.log(`📍Will rebuild and rerun bor on devnet-${devnetId} with latest versions from given branches`)
+    } else {
+        console.log(`📍Will rebuild and rerun bor on the current deployment with latest versions from given branches`)
+    }
 
-    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
+    let vmIndex = await checkAndReturnVMIndex(n, doc)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
     let nodeIps = []
     let hostToIndexMap = new Map()
@@ -158,12 +164,16 @@ export async function updateBor(n) {
     }
 }
 
-export async function updateHeimdall(n) {
+export async function updateHeimdall(n, devnetId) {
 
-    let vmIndex = await checkAndReturnVMIndex(n)
-    console.log("📍Will rebuild and rerun heimdall with latest version from given branch")
+    let doc = await loadConfig("remote", devnetId)
+    if (devnetId !== -1) {
+        console.log(`📍Will rebuild and rerun heimdall on devnet-${devnetId} with latest versions from given branches`)
+    } else {
+        console.log(`📍Will rebuild and rerun heimdall on the current deployment with latest versions from given branches`)
+    }
 
-    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
+    let vmIndex = await checkAndReturnVMIndex(n, doc)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
     let nodeIps = []
     let hostToIndexMap = new Map()

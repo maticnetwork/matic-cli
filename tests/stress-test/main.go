@@ -45,7 +45,13 @@ func main() {
 		return
 	}
 
-	RPC_SERVERS = getRPCs()
+	devnetIdStr := os.Args[1]
+	devnetId, err := strconv.Atoi(devnetIdStr)
+	if err != nil {
+		fmt.Println("Invalid devnet Id: ", err)
+		return
+	}
+	RPC_SERVERS = getRPCs(devnetId)
 	if len(RPC_SERVERS) == 0 {
 		fmt.Println("Invalid RPC_SERVER flag")
 		return
@@ -119,13 +125,20 @@ type YamlFile struct {
 	DevnetBorHosts []string `yaml:"devnetBorHosts"`
 }
 
-func getRPCs() []string {
+func getRPCs(devnetId int) []string {
 
 	var yamldoc YamlFile
 
 	rpcs := []string{}
 
-	yamlFile, err := ioutil.ReadFile("../../configs/devnet/remote-setup-config.yaml")
+	var pathToConfig string
+	if devnetId != -1 {
+		pathToConfig = fmt.Sprintf("../../deployments/devnet-%v/remote-setup-config.yaml", devnetId)
+	} else {
+		pathToConfig = fmt.Sprintf("../../configs/devnet/remote-setup-config.yaml")
+	}
+
+	yamlFile, err := ioutil.ReadFile(pathToConfig)
 	if err != nil {
 		log.Printf("yamlFile.Get err   #%v ", err)
 	}
@@ -331,6 +344,7 @@ func startLoadbot(ctx context.Context, clients []*ethclient.Client, chainID *big
 	// Fire off transactions
 	period := 1 * time.Second / time.Duration(N)
 	ticker := time.NewTicker(period)
+	defer ticker.Stop()
 
 	resetChan := make(chan bool)
 

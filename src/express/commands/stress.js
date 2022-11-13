@@ -1,12 +1,12 @@
-const yaml = require("js-yaml");
-const fs = require("fs");
+import { loadConfig } from "../common/config-utils";
+
 const shell = require("shelljs");
 const {runScpCommand, maxRetries} = require("../common/remote-worker");
 
-export async function startStressTest(fund) {
+export async function startStressTest(fund, devnetId) {
+    let doc = await loadConfig("remote", devnetId)
 
-    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
-    if (doc['devnetBorHosts'].length > 0) {
+    if (doc['devnetBorHosts'].length > 1) {
         console.log("📍Monitoring the first node", doc['devnetBorHosts'][0]);
     }
     let machine0 = doc['devnetBorHosts'][0];
@@ -18,7 +18,7 @@ export async function startStressTest(fund) {
     shell.pushd("tests/stress-test");
     shell.exec(`go mod tidy`);
 
-    shell.exec(`go run main.go`, {
+    shell.exec(`go run main.go ${devnetId}`, {
         env: {
             ...process.env, FUND: fund
         }

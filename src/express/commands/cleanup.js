@@ -1,12 +1,11 @@
-import yaml from "js-yaml";
-import fs from "fs";
-import {splitToArray} from "../common/config-utils";
+import {loadConfig, splitToArray} from "../common/config-utils";
 import {maxRetries, runSshCommand} from "../common/remote-worker";
 
 const timer = ms => new Promise(res => setTimeout(res, ms))
 
-export async function cleanup() {
-    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
+export async function cleanup(devnetId) {
+    let doc = await loadConfig("remote", devnetId)
+
     await stopServices(doc)
     await cleanupServices(doc)
     await startServices(doc)

@@ -49,46 +49,65 @@ First off, you need to `--init` terraform on your local machine, by executing th
     - Initializes terraform and creates some git-ignored files locally. This step is mandatory before running any other
       command.
       Then, a remote devnet can be created with the `--start` command, as follows.
+
 - `./bin/express-cli --start`
     - Creates the desired remote setup, based on the preferences defined in the `.env` file
-    - `--start` command can be used also to target an existing AWS setup. If changes to `.env` file are detected, the
-      previous devnet will be destroyed and a new one created, reusing the same AWS VMs  
-      To destroy the remote devnet, you can execute the `--destroy` command.
-- `./bin/express-cli --destroy`
-    - Destroys the remote setup and delete the dedicated VMs
+    - `--start` command will store the config related to the previously deployed devnet (if any) in the
+      `deployments/devnet-<id>` folder and stores a monotonically increasing count `DEVNET_ID` in `.env` to
+       track the devnets being deployed. The `<id>` in `deployments/devnet-<id>` can be used to target the specific 
+       devnet in the commands mentioned below.
+
+- `./bin/express-cli --destroy --devnet-id <id>`
+    - Destroys the remote setup and delete the dedicated VMs associated to the `devnet-id <id>`. If `--devnet-id <id>`
+      isn't provided, the latest deployed devnet will be targeted.
       The `express-cli` also comes with additional utility commands, listed below. Some of them are only available for
       non-dockerized devnets.
-- `./bin/express-cli --update-all [index]`
+
+- `./bin/express-cli --update-all [index] --devnet-id <id>`
     - Fetches `heimdall` and `bor` branches defined as `HEIMDALL_BRANCH` and `BOR_BRANCH` in `.env` file, pulls relative
-      changes and restarts those services on the remote machines. If an integer `index` is used, the job will be
-      performed only on the VM corresponding to that index.
-- `./bin/express-cli --update-bor [index]`
+      changes and restarts those services on the remote machines associated to the `devnet-id <id>`. If `--devnet-id <id>`
+      isn't provided, the latest deployed devnet will be targeted. If an integer `index` is used, the job will be
+      performed only on the VM corresponding to that index on the given devnet.
+
+- `./bin/express-cli --update-bor [index] --devnet-id <id>`
     - Fetches `bor` branch defined as `BOR_BRANCH` in `.env` file, pulls relative changes and restarts it on the remote
-      machines. If an integer `index` is used, the job will be performed only on the VM corresponding to that index.
-- `./bin/express-cli --update-heimdall [index]`
+      machines associated to the `devnet-id <id>`. If `--devnet-id <id>` isn't provided, the latest deployed devnet will be targeted. If an integer `index` is used, the job will be performed only on the VM corresponding to that index on the given devnet.
+
+- `./bin/express-cli --update-heimdall [index] --devnet-id <id>`
     - Fetches `heimdall` branch defined as `HEIMDALL_BRANCH` in `.env` file, pulls relative changes and restarts it on
-      the remote machines. If an integer `index` is used, the job will be performed only on the VM corresponding to that
-      index.
-- `./bin/express-cli --restart-all [index]`
-    - Restarts `bor` and `heimdall` on all the remote machines. If an integer `index` is used, the job will be performed
-      only on the VM corresponding to that index.
-- `./bin/express-cli --restart-bor [index]`
-    - Restarts `bor` on all the remote machines. If an integer `index` is used, the job will be performed only on the VM
-      corresponding to that index.
-- `./bin/express-cli --restart-heimdall [index]`
-    - Restarts `heimdall` on all the remote machines. If an integer `index` is used, the job will be performed only on
-      the VM corresponding to that index.
-- `./bin/express-cli --cleanup`
-    - Cleans up `ganache`, `bor`, `heimdall` and `bridge`, redeploys all the contracts and restarts all the services
+      the remote machines associated to the `devnet-id <id>`. If `--devnet-id <id>` isn't provided, the latest deployed devnet will be targeted. If an integer `index` is used, the job will be performed only on the VM corresponding to that
+      index on the given devnet.
+
+- `./bin/express-cli --restart-all [index] --devnet-id <id>`
+    - Restarts `bor` and `heimdall` on all the remote machines associated to the `devnet-id <id>`. If `--devnet-id <id>`
+      isn't provided, the latest deployed devnet will be targeted. If an integer `index` is used, the job will be performed
+      only on the VM corresponding to that index on the given devnet.
+
+- `./bin/express-cli --restart-bor [index] --devnet-id <id>`
+    - Restarts `bor` on all the remote machines associated to the `devnet-id <id>`. If `--devnet-id <id>`
+      isn't provided, the latest deployed devnet will be targeted. If an integer `index` is used, the job will be performed only on the VM corresponding to that index on the given devnet.
+
+- `./bin/express-cli --restart-heimdall [index] --devnet-id <id>`
+    - Restarts `heimdall` on all the remote machines associated to the `devnet-id <id>`. If `--devnet-id <id>`
+      isn't provided, the latest deployed devnet will be targeted. If an integer `index` is used, the job will be performed only on the VM corresponding to that index on the given devnet.
+
+- `./bin/express-cli --cleanup --devnet-id <id>`
+    - Cleans up `ganache`, `bor`, `heimdall` and `bridge`, redeploys all the contracts and restarts all the services 
+      associated  to the `devnet-id <id>`. If `--devnet-id <id>` isn't provided, the latest deployed devnet will be targeted.
       The `express-cli` also provides additional testing commands, listed here.
-- `./bin/express-cli --send-state-sync`
-    - Create a `state-sync` transaction on the remote network
-- `./bin/express-cli --monitor`
-    - Monitors the reception of state-syncs and checkpoints to make sure the whole network is in a healthy state.
-      If `--send-state-sync` hasn't been used before, only checkpoints will be detected. The execution stops when
-      a `state-sync` is found
-- `./bin/express-cli --stress [fund]`
-    - Runs the stress tests on remote nodes. The string `fund` is needed when stress tests are ran for the first time,
+
+- `./bin/express-cli --send-state-sync --devnet-id <id>`
+    - Create a `state-sync` transaction on the remote network associated to the `devnet-id <id>`. If `--devnet-id <id>`
+      isn't provided, the latest deployed devnet will be targeted.
+
+- `./bin/express-cli --monitor --devnet-id <id>`
+    - Monitors the reception of state-syncs and checkpoints in the network associated to the `devnet-id <id>` to make sure 
+      the whole network is in a healthy state. If `--devnet-id <id>` isn't provided, the latest deployed devnet will be targeted.  If `--send-state-sync` hasn't been used before, only checkpoints will be detected. The execution stops when
+      a `state-sync` is found.
+
+- `./bin/express-cli --stress [fund] --devnet-id <id>`
+    - Runs the stress tests on remote nodes associated to the `devnet-id <id>`. If `--devnet-id <id>` isn't provided, the 
+      latest deployed devnet will be targeted. The string `fund` is needed when stress tests are ran for the first time,
       to fund the accounts
 
 
