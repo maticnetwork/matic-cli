@@ -9,7 +9,7 @@ jobs:
       - name: Checkout Source
         uses: actions/checkout@master
       - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/golang@master
+        uses: snyk/actions/node@master
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
@@ -28,7 +28,7 @@ jobs:
       - name: Checkout Source
         uses: actions/checkout@master
       - name: Run Snyk SAST to check for code vulnerabilities
-        uses: snyk/actions/golang@master
+        uses: snyk/actions/node@master
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
