@@ -4,6 +4,10 @@ import {maxRetries, runSshCommand} from "../common/remote-worker";
 const timer = ms => new Promise(res => setTimeout(res, ms))
 
 export async function cleanup(devnetId) {
+    if (process.env.TF_VAR_DOCKERIZED === 'yes' && devnetId === -1) {
+        console.log(`❌ Current setup is dockerized. Exiting...`)
+        process.exit(1)
+    }
     let doc = await loadConfig("remote", devnetId)
 
     await stopServices(doc)

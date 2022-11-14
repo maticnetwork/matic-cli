@@ -1,5 +1,6 @@
 import yaml from "js-yaml";
 import fs from "fs";
+import os from "os"
 
 export async function loadConfig(devnetType, devnetId) {
     let doc
@@ -77,6 +78,69 @@ export function setCommonConfigs(doc) {
     setConfigValue('heimdallDockerBuildContext', process.env.HEIMDALL_DOCKER_BUILD_CONTEXT, doc);
 }
 
+export function fetchAndUpdateDevnetId() {
+    let id = process.env.DEVNET_ID 
+    if (typeof id === "undefined") {
+        id = 0
+    }
+
+    process.env.DEVNET_ID = parseInt(id, 10) + 1
+
+    const ENV_VARS = fs.readFileSync(".env", "utf8").split(os.EOL);
+
+    const target = ENV_VARS.indexOf(ENV_VARS.find((line) => {
+     const keyValRegex = new RegExp(`(?<!#\\s*)DEVNET_ID(?==)`);
+        return line.match(keyValRegex);
+     }));
+
+    if (target !== -1) {
+        ENV_VARS.splice(target, 1, `DEVNET_ID=${process.env.DEVNET_ID} # Monotonically increasing count to track the devnets being deployed`);
+    } else {
+        ENV_VARS.push(`\nDEVNET_ID=${process.env.DEVNET_ID} # Monotonically increasing count to track the devnets being deployed`);
+    }
+
+    fs.writeFileSync(".env", ENV_VARS.join(os.EOL));
+
+    return id
+}
+
+export function fetchPrevDevnetType() {
+
+    const ENV_VARS = fs.readFileSync(".env", "utf8").split(os.EOL);
+
+    const target = ENV_VARS.indexOf(ENV_VARS.find((line) => {
+     const keyValRegex = new RegExp(`(?<!#\\s*)PREV_DEVNET_TYPE(?==)`);
+        return line.match(keyValRegex);
+     }));
+
+    if (target !== -1) {
+        return process.env.PREV_DEVNET_TYPE
+    } else {
+        ENV_VARS.push(`\nPREV_DEVNET_TYPE= # Track the devnet type. DO NOT EDIT THIS!`);
+        fs.writeFileSync(".env", ENV_VARS.join(os.EOL));
+        
+        return
+    }
+
+}
+
+export function updateDevnetType(devnetType) {
+    process.env.PREV_DEVNET_TYPE = devnetType
+    const ENV_VARS = fs.readFileSync(".env", "utf8").split(os.EOL);
+
+    const target = ENV_VARS.indexOf(ENV_VARS.find((line) => {
+     const keyValRegex = new RegExp(`(?<!#\\s*)PREV_DEVNET_TYPE(?==)`);
+        return line.match(keyValRegex);
+     }));
+
+    if (target !== -1) {
+        ENV_VARS.splice(target, 1, `PREV_DEVNET_TYPE=${process.env.PREV_DEVNET_TYPE} # Track the devnet type. DO NOT EDIT THIS!`);
+
+    }
+
+    fs.writeFileSync(".env", ENV_VARS.join(os.EOL));
+}
+
 export function setConfigValue(key, value, doc) {
     if (value !== undefined) {
         doc[key] = value;
@@ -140,8 +204,6 @@ export function splitAndGetHostIp(value) {
 }
 
 export async function checkAndReturnVMIndex(n, doc) {
-
-    //let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'), undefined);
 
     if (typeof n === "boolean") {
         console.log("📍Targeting all VMs ...");

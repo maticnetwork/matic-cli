@@ -52,10 +52,10 @@ First off, you need to `--init` terraform on your local machine, by executing th
 
 - `./bin/express-cli --start`
     - Creates the desired remote setup, based on the preferences defined in the `.env` file
-    - `--start` command, before deploying a new devnet, will store the config related to the currently deployed one (if any) in the
-      `deployments/devnet-<id>` folder and stores a monotonically increasing count `DEVNET_ID` in `.env` to
-       track the devnets being deployed. The `<id>` in `deployments/devnet-<id>` can be used to target the specific 
-       devnet in the commands mentioned below.
+    - `--start` command, before deploying a new devnet, will store the config related to the currently deployed one (if any) 
+       in the `deployments/devnet-<id>` folder and stores a monotonically increasing count `DEVNET_ID` in `.env` to
+       track the devnets being deployed. It also stores the currently deployed devnet type in `PREV_DEVNET_TYPE` variable
+       in `.env`. The `<id>` in `deployments/devnet-<id>` can be used to target the specific devnet in the commands mentioned below.
 
 - `./bin/express-cli --destroy --devnet-id <id>`
     - Destroys the remote setup and delete the dedicated VMs associated to the `devnet-id <id>`. If `--devnet-id <id>`

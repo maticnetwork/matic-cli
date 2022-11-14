@@ -4,6 +4,11 @@ const shell = require("shelljs");
 const {runScpCommand, maxRetries} = require("../common/remote-worker");
 
 export async function startStressTest(fund, devnetId) {
+    if (process.env.TF_VAR_DOCKERIZED === 'yes' && devnetId === -1) {
+        console.log(`❌ Current setup is dockerized. Exiting...`)
+        process.exit(1)
+    }
+
     let doc = await loadConfig("remote", devnetId)
 
     if (doc['devnetBorHosts'].length > 1) {

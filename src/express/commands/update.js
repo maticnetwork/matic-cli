@@ -96,6 +96,10 @@ export async function updateAll(n, devnetId) {
     if (devnetId !== -1) {
         console.log(`📍Will rebuild and rerun bor and heimdall on devnet-${devnetId} with latest versions from given branches`)
     } else {
+        if (process.env.TF_VAR_DOCKERIZED === 'yes') {
+            console.log(`❌ Current setup is dockerized. Exiting...`)
+            process.exit(1)
+        }
         console.log(`📍Will rebuild and rerun bor and heimdall on the current deployment with latest versions from given branches`)
     }
     
@@ -134,6 +138,10 @@ export async function updateBor(n, devnetId) {
     if (devnetId !== -1) {
         console.log(`📍Will rebuild and rerun bor on devnet-${devnetId} with latest versions from given branches`)
     } else {
+        if (process.env.TF_VAR_DOCKERIZED === 'yes') {
+            console.log(`❌ Current setup is dockerized. Exiting...`)
+            process.exit(1)
+        }
         console.log(`📍Will rebuild and rerun bor on the current deployment with latest versions from given branches`)
     }
 
@@ -170,6 +178,10 @@ export async function updateHeimdall(n, devnetId) {
     if (devnetId !== -1) {
         console.log(`📍Will rebuild and rerun heimdall on devnet-${devnetId} with latest versions from given branches`)
     } else {
+        if (process.env.TF_VAR_DOCKERIZED === 'yes') {
+            console.log(`❌ Current setup is dockerized. Exiting...`)
+            process.exit(1)
+        }
         console.log(`📍Will rebuild and rerun heimdall on the current deployment with latest versions from given branches`)
     }
 

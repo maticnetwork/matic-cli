@@ -1,7 +1,6 @@
 import yaml from "js-yaml";
 import fs from "fs";
-import os from "os"
-import {editMaticCliDockerYAMLConfig, editMaticCliRemoteYAMLConfig, splitAndGetHostIp, splitToArray} from "../common/config-utils";
+import {editMaticCliDockerYAMLConfig, editMaticCliRemoteYAMLConfig, fetchAndUpdateDevnetId, fetchPrevDevnetType, splitAndGetHostIp, splitToArray, updateDevnetType} from "../common/config-utils";
 import {maxRetries, runScpCommand, runSshCommand} from "../common/remote-worker";
 
 const shell = require("shelljs");
@@ -27,7 +26,7 @@ async function terraformOutput() {
     return stdout
 }
 
-async function storeDeploymentInfo(index, devnetType) {
+async function storeDeploymentInfo(devnetId, devnetType) {
     console.log("📍Saving the current deployment details...");
 
     let resources, out 
@@ -38,12 +37,12 @@ async function storeDeploymentInfo(index, devnetType) {
     }
     
     // Store the tf state files and configs
-    shell.exec(`mkdir -p deployments/devnet-${index}`)
-    shell.exec(`cp ./terraform.tfstate ./deployments/devnet-${index}/devnet${index}.terraform.tfstate`)
-    shell.exec(`cp configs/devnet/${devnetType}-setup-config.yaml ./deployments/devnet-${index}`)
+    shell.exec(`mkdir -p deployments/devnet-${devnetId}`)
+    shell.exec(`cp ./terraform.tfstate ./deployments/devnet-${devnetId}/devnet${devnetId}.terraform.tfstate`)
+    shell.exec(`cp configs/devnet/${devnetType}-setup-config.yaml ./deployments/devnet-${devnetId}`)
 
     // Create new tf workspace
-    shell.exec(`terraform workspace new -state=./deployments/devnet-${index}/devnet${index}.terraform.tfstate devnet-${index}`)
+    shell.exec(`terraform workspace new -state=./deployments/devnet-${devnetId}/devnet${devnetId}.terraform.tfstate devnet-${devnetId}`)
     
     // Switch back to default workspace
     shell.exec(`terraform workspace select default`)
@@ -361,33 +360,15 @@ async function runRemoteSetupWithMaticCLI(ips) {
 
 export async function start() {
 
-    // TODO(raneet10): Move this logic somewhere else
-    let index = process.env.DEVNET_ID 
-    if (typeof index === "undefined") {
-        index = 0
-    }
-
+    let previousDevnetType = fetchPrevDevnetType()
     let devnetType = process.env.TF_VAR_DOCKERIZED === "yes" ? "docker" : "remote"
-    //await storeDeploymentInfo(index, devnetType)
 
-    process.env.DEVNET_ID = parseInt(index, 10) + 1
-
-    const ENV_VARS = fs.readFileSync(".env", "utf8").split(os.EOL);
-
-    const target = ENV_VARS.indexOf(ENV_VARS.find((line) => {
-     const keyValRegex = new RegExp(`(?<!#\\s*)DEVNET_ID(?==)`);
-        return line.match(keyValRegex);
-     }));
-
-    if (target !== -1) {
-        ENV_VARS.splice(target, 1, `DEVNET_ID=${process.env.DEVNET_ID} # Monotonically increasing count to track the devnets being deployed`);
-    } else {
-        ENV_VARS.push(`\nDEVNET_ID=${process.env.DEVNET_ID} # Monotonically increasing count to track the devnets being deployed`);
+    if (typeof previousDevnetType === "undefined") {
+        previousDevnetType = devnetType
     }
+    let devnetId = fetchAndUpdateDevnetId()
 
-    fs.writeFileSync(".env", ENV_VARS.join(os.EOL));
-
-    await storeDeploymentInfo(index, devnetType) 
+    await storeDeploymentInfo(devnetId, previousDevnetType) 
 
     await terraformApply();
     let tfOutput = await terraformOutput();
@@ -400,15 +381,6 @@ export async function start() {
         await editMaticCliRemoteYAMLConfig();
     }
 
-
-    /*if (process.env.TF_VAR_DOCKERIZED === 'yes') {
-        await editMaticCliDockerYAMLConfig();
-        devnetType = "docker"
-    } else {
-        await editMaticCliRemoteYAMLConfig();
-        devnetType = "remote"
-    }*/
-
     console.log("📍Waiting 15s for the VMs to initialize...")
     await timer(15000)
 
@@ -418,9 +390,11 @@ export async function start() {
 
     await eventuallyCleanupPreviousDevnet(ips, devnetType)
 
-    if (process.env.TF_VAR_DOCKERIZED === 'yes') {
+    if (devnetType === "docker") {
         await runDockerSetupWithMaticCLI(ips);
     } else {
         await runRemoteSetupWithMaticCLI(ips);
     }
+    
+    updateDevnetType(devnetType)
 }
