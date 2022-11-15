@@ -209,6 +209,45 @@ export class Genesis {
                     }
                 },
                 {
+                    title: "Configure Sprint Size",
+                    task: () => {
+                        const sprintSizesArr = []
+                        const sprintSizes = this.config.sprintSize.split(",")
+                        const sprintSizeBlockNumbers = this.config.sprintSizeBlockNumber.split(",")
+
+                        for (let i = 0; i < sprintSizes.length; i++) {
+                            sprintSizesArr[i] = {
+                                number: sprintSizeBlockNumbers[i],
+                                sprintSize: sprintSizes[i]
+                            }
+
+                        }
+
+                        return Promise.resolve()
+                            .then(() => {
+                                const blockJsPath = path.join(
+                                    this.repositoryDir,
+                                    "sprintSizes.js"
+                                );
+                                if (!fs.existsSync(blockJsPath)) {
+                                    return;
+                                }
+
+                                // Backup of the block time config
+                                return execa("mv", ["sprintSizes.js", "sprintSizes.js.backup"], {
+                                    cwd: this.repositoryDir,
+                                    stdio: getRemoteStdio(),
+                                });
+                            })
+                            .then(() => {
+                                fs.writeFileSync(
+                                    path.join(this.repositoryDir, "sprintSizes.json"),
+                                    JSON.stringify(sprintSizesArr, null, 2)
+                                )
+                            })
+                    }
+                },
+                {
                     title: "Generate Bor validator set",
                     task: () =>
                         execa(
@@ -218,9 +257,7 @@ export class Genesis {
                                 "--bor-chain-id",
                                 this.config.borChainId,
                                 "--heimdall-chain-id",
-                                this.config.heimdallChainId,
-                                "--sprint-size",
-                                this.config.sprintSize
+                                this.config.heimdallChainId
                             ],
                             {
                                 cwd: this.repositoryDir,
@@ -238,9 +275,7 @@ export class Genesis {
                                 "--bor-chain-id",
                                 this.config.borChainId,
                                 "--heimdall-chain-id",
-                                this.config.heimdallChainId,
-                                "--sprint-size",
-                                this.config.sprintSize
+                                this.config.heimdallChainId
                             ],
                             {
                                 cwd: this.repositoryDir,
