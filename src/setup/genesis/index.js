@@ -242,7 +242,7 @@ export class Genesis {
                             .then(() => {
                                 fs.writeFileSync(
                                     path.join(this.repositoryDir, "sprintSizes.json"),
-                                    JSON.stringify(sprintSizesArr, null, 2)
+                                    JSON.stringify(sprintSizesArr, null, 64)
                                 )
                             })
                     }

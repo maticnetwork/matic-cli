@@ -50,8 +50,8 @@ export function setCommonConfigs(doc) {
     setConfigValue('borChainId', parseInt(process.env.BOR_CHAIN_ID), doc);
     setConfigValue('heimdallChainId', process.env.HEIMDALL_CHAIN_ID, doc);
     setConfigValue('sprintSize', process.env.SPRINT_SIZE, doc);
-    setConfigValue('blockNumber', process.env.BLOCK_NUMBER, doc);
     setConfigValue('sprintSizeBlockNumber', process.env.SPRINT_SIZE_BLOCK_NUMBER, doc);
+    setConfigValue('blockNumber', process.env.BLOCK_NUMBER, doc);
     setConfigValue('blockTime', process.env.BLOCK_TIME, doc);
     setConfigValue('borBranch', process.env.BOR_BRANCH, doc);
     setConfigValue('heimdallBranch', process.env.HEIMDALL_BRANCH, doc);
