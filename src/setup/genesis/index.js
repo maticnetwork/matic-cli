@@ -19,7 +19,7 @@ export class Genesis {
     this.config = config
 
     this.repositoryName = this.name
-    this.repositoryBranch = options.repositoryBranch || 'master'
+    this.repositoryBranch = 'arpit/pos-655-2'
     this.repositoryUrl = options.repositoryUrl || 'https://github.com/maticnetwork/genesis-contracts'
     this.maticContractsRepository = 'matic-contracts'
     this.maticContractsRepositoryUrl = 'https://github.com/maticnetwork/contracts'
@@ -206,7 +206,7 @@ export default async function (command) {
 
   // configuration
   await loadConfig({
-    targetDirectory: command.parent.directory, 
+    targetDirectory: command.parent.directory,
     fileName: command.parent.config,
     interactive: command.parent.interactive
   })
