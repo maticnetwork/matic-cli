@@ -53,6 +53,12 @@ export async function getNetworkParams(options = {}) {
             message: 'Please enter the sprint size',
             default: '64'
         })
+        questions.push({
+            type: 'input',
+            name: 'sprintSizeBlockNumber',
+            message: 'Please enter the corresponding block numbers(s) seperated by commas',
+            default: '0'
+        })
     }
 
     if (!options.blockTime) {
@@ -80,7 +86,8 @@ export async function getNetworkParams(options = {}) {
         return {
             "sprintSize": "64",
             "blockTime": "2",
-            "blockNumber": "0"
+            "blockNumber": "0",
+            "sprintSizeBlockNumber": "0"
         };
     }
 
