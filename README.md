@@ -232,6 +232,11 @@ Stop al services, remove the `matic-cli/devnet` folder, and you can start the pr
   git update-index --assume-unchanged configs/devnet/remote-setup-config.yaml
   git update-index --assume-unchanged configs/devnet/docker-setup-config.yaml
   ```
+   to undo, please use
+```bash
+  git update-index --no-assume-unchanged configs/devnet/remote-setup-config.yaml
+  git update-index --no-assume-unchanged configs/devnet/docker-setup-config.yaml
+```
 
 ## License
 
