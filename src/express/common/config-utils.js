@@ -55,6 +55,7 @@ export function setCommonConfigs(doc) {
     setConfigValue('borBranch', process.env.BOR_BRANCH, doc);
     setConfigValue('heimdallBranch', process.env.HEIMDALL_BRANCH, doc);
     setConfigValue('contractsBranch', process.env.CONTRACTS_BRANCH, doc);
+    setConfigValue('genesisContractsBranch', process.env.GENESIS_CONTRACTS_BRANCH, doc)
     setConfigValue('numOfValidators', parseInt(process.env.TF_VAR_VALIDATOR_COUNT), doc);
     setConfigValue('numOfNonValidators', parseInt(process.env.TF_VAR_SENTRY_COUNT), doc);
     setConfigValue('ethHostUser', process.env.ETH_HOST_USER, doc);
