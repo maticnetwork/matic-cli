@@ -24,7 +24,7 @@
     "covgen": "^3.1.0",
     "dotenv": "^16.0.3",
     "esm": "^3.2.18",
-    "eth-crypto": "^2.3.0",
+    "eth-crypto": "^2.4.0",
     "ethereumjs-util": "^7.1.5",
     "execa": "^1.0.0",
     "fs-extra": "^10.1.0",
