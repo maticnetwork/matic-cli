@@ -764,7 +764,7 @@ async function setupDevnet(config) {
     devnet.heimdall = new Heimdall(config, {
         repositoryBranch: config.heimdallBranch, dockerContext: config.heimdallDockerBuildContext
     });
-    devnet.genesis = new Genesis(config, {repositoryBranch: "master"});
+    devnet.genesis = new Genesis(config, {repositoryBranch: config.genesisContractsBranch});
 
     const tasks = await devnet.getTasks();
     await tasks.run();
