@@ -31,7 +31,7 @@ export async function cloneRepository(name, branch, url, targetDirectory) {
 
     // check if directory exists or not
     if (!fs.existsSync(repoPath)) {
-        result = await execa("git", ["clone", "-b", branch, url, name], {
+        result = await execa("git", ["clone", branch, url, name], {
             cwd: targetDirectory,
         });
     } else {
