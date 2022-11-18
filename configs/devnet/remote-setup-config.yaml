@@ -9,7 +9,7 @@ genesisContractsBranch: mardizzone/node-upgrade
 sprintSize: 64
 blockNumber: '0'
 blockTime: '2'
-numOfValidators: 2
+numOfValidators: 1
 numOfNonValidators: 1
 ethURL: http://172.20.1.100:9545
 ethHostUser: ubuntu
