@@ -381,8 +381,8 @@ export async function start() {
         await editMaticCliRemoteYAMLConfig();
     }
 
-    console.log("📍Waiting 15s for the VMs to initialize...")
-    await timer(15000)
+    console.log("📍Waiting 30s for the VMs to initialize...")
+    await timer(30000)
 
     await installRequiredSoftwareOnRemoteMachines(ips, devnetType)
 

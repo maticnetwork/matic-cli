@@ -29,22 +29,23 @@ export async function cloneRepository(name, branch, url, targetDirectory) {
     // create target directory
     await execa("mkdir", ["-p", targetDirectory]);
 
+    let cloneResult, fetchResult
     // check if directory exists or not
     if (!fs.existsSync(repoPath)) {
-        result = await execa("git", ["clone", "-b", branch, url, name], {
+        cloneResult = await execa("git", ["clone", url, name], {
             cwd: targetDirectory,
-        });
-    } else {
-        result = await execa("git", ["fetch"], {
-            cwd: repoPath,
-        }).then(() => {
-            return execa("git", ["checkout", branch], {
-                cwd: repoPath,
-            });
         });
     }
 
-    if (result && result.failed) {
+    fetchResult = await execa("git", ["fetch"], {
+        cwd: repoPath,
+    }).then(() => {
+        return execa("git", ["checkout", branch], {
+            cwd: repoPath,
+        });
+    });
+
+    if ((cloneResult && cloneResult.failed) || (fetchResult && fetchResult.failed)) {
         return Promise.reject(new Error(`Failed to clone or pull ${name}`));
     }
 }
