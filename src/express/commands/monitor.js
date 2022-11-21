@@ -22,8 +22,26 @@ const lastStateIdABI = [
 	}
 ]
 
+const currentHeaderBlockABI = [
+    {
+        "constant":true,
+        "inputs":[],
+        "name":"currentHeaderBlock",
+        "outputs":  [
+            {
+                "internalType":"uint256",
+                "name":"",
+                "type":"uint256"
+            }
+        ],
+        "payable":false,
+        "stateMutability":"view",
+        "type":"function"
+    }
+]
 
 var stateReceiverAddress = '0x0000000000000000000000000000000000001001'
+var rootChainProxyAddress = '0xCCE33CB465347d0EFAA3B26157B25e897a2Ebf1A'
 
 async function checkCheckpoint(ip) {
     let url = `http://${ip}:1317/checkpoints/count`;
@@ -77,6 +95,16 @@ async function lastStateIdFromBor(ip) {
     return lastStateId
 }
 
+async function getLatestCheckpointFromBor(ip){
+    let web3 = new Web3(`http://${ip}:9545`);
+    
+    let RootChainContract = await new web3.eth.Contract(currentHeaderBlockABI, rootChainProxyAddress);
+    let currentHeaderBlock = await RootChainContract.methods.currentHeaderBlock().call();
+    let lastestCheckpointFromBor = currentHeaderBlock.toString().slice(0, -4);
+
+    return lastestCheckpointFromBor
+}
+
 export async function monitor() {
     let doc
 
@@ -103,12 +131,18 @@ export async function monitor() {
 
         let checkpointCount = await checkCheckpoint(machine0);
         if (checkpointCount > 0) {
-            console.log("📍Checkpoint found ✅ ; Count: ", checkpointCount);
+            console.log("📍Checkpoint found on Heimdall ✅ ; Count: ", checkpointCount);
         } else {
-            console.log("📍Awaiting Checkpoint 🚌")
+            console.log("📍Awaiting Checkpoint on Heimdall 🚌")
         }
 
-        
+        var checkpointCountFromBor = await getLatestCheckpointFromBor(machine0);
+        if(checkpointCountFromBor > 0) {
+            console.log("📍Checkpoint found on Bor ✅ ; Count: ", checkpointCountFromBor);
+        } else {
+            console.log("📍Awaiting Checkpoint on Bor 🚌")
+        }
+
         var firstStateSyncTx = await checkStateSyncTx(machine0,1);
         if (firstStateSyncTx) {
             let timeOfFirstStateSyncTx = firstStateSyncTx.record_time
