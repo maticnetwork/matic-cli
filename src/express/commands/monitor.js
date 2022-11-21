@@ -1,7 +1,29 @@
 const fetch = require("node-fetch");
 const yaml = require("js-yaml");
 const fs = require("fs");
+const Web3 = require('web3');
 const timer = ms => new Promise(res => setTimeout(res, ms))
+
+const lastStateIdABI = [
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "lastStateId",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	}
+]
+
+
+var stateReceiverAddress = '0x0000000000000000000000000000000000001001'
 
 async function checkCheckpoint(ip) {
     let url = `http://${ip}:1317/checkpoints/count`;
@@ -16,19 +38,43 @@ async function checkCheckpoint(ip) {
     return 0
 }
 
-async function checkStateSyncTx(ip) {
-    let url = `http://${ip}:1317/clerk/event-record/1`;
+async function checkStateSyncTx(ip,id) {
+    let url = `http://${ip}:1317/clerk/event-record/${id}`;
     let response = await fetch(url);
     let responseJson = await response.json();
     if (responseJson.error) {
         return undefined
     } else {
         if (responseJson.result) {
-            return responseJson.result.tx_hash
+            return responseJson.result
         }
     }
 
     return undefined
+}
+
+async function getStateSyncTxList(ip,startTime,endTime) {
+    let url = `http://${ip}:1317/clerk/event-record/list?from-time=${startTime}&to-time=${endTime}&page=1&limit=200`;
+    let response = await fetch(url);
+    let responseJson = await response.json();
+    if (responseJson.error) {
+        return undefined
+    } else {
+        if (responseJson.result) {
+            return responseJson.result
+        }
+    }
+
+    return undefined
+}
+
+async function lastStateIdFromBor(ip) {
+    let web3 = new Web3(`http://${ip}:8545`);
+    
+    let StateReceiverContract = await new web3.eth.Contract(lastStateIdABI, stateReceiverAddress );
+    let lastStateId = await StateReceiverContract.methods.lastStateId().call();
+
+    return lastStateId
 }
 
 export async function monitor() {
@@ -62,15 +108,29 @@ export async function monitor() {
             console.log("📍Awaiting Checkpoint 🚌")
         }
 
-        let stateSyncTx = await checkStateSyncTx(machine0);
-        if (stateSyncTx) {
-            console.log("📍StateSync found ✅ ; Tx_Hash: ", stateSyncTx);
+        
+        var firstStateSyncTx = await checkStateSyncTx(machine0,1);
+        if (firstStateSyncTx) {
+            let timeOfFirstStateSyncTx = firstStateSyncTx.record_time
+            let firstEpochTime = parseInt(new Date(timeOfFirstStateSyncTx).getTime() / 1000);
+            let currentEpochTime = parseInt(new Date().getTime() / 1000);
+            let stateSyncTxList = await getStateSyncTxList(machine0,firstEpochTime,currentEpochTime);
+            if (stateSyncTxList) {
+                
+                let lastStateID =  stateSyncTxList.length
+                let lastStateSyncTxHash = stateSyncTxList[lastStateID-1].tx_hash
+                console.log("📍StateSyncs found on Heimdall ✅ ; Count: ", lastStateID, " ; Last Tx Hash: ", lastStateSyncTxHash);
+            }
+            
         } else {
             console.log("📍Awaiting StateSync 🚌")
         }
 
-        if (checkpointCount > 0 && stateSyncTx) {
-            break;
+        let lastStateId = await lastStateIdFromBor(machine0);
+        if(lastStateId){
+            console.log("📍LastStateId on Bor: ", lastStateId);
+        }else {
+            console.log("📍Unable to fetch LastStateId ")
         }
 
     }
