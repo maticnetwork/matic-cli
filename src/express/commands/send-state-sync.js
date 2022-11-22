@@ -4,16 +4,13 @@ import { loadConfig } from "../common/config-utils";
 
 const {runScpCommand, runSshCommand, maxRetries} = require("../common/remote-worker");
 
-export async function sendStateSyncTx(devnetId) {
+export async function sendStateSyncTx() {
 
-    let doc, devnetType
-    if (devnetId !== -1) {
-         devnetType = fs.existsSync(`./deployments/devnet-${devnetId}/docker-setup-config.yaml`) ? 'docker' : 'remote'
-    } else {
-        devnetType = process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
-    }
-
-    doc = await loadConfig(devnetType, devnetId)
+    let devnetId = getDevnetId()
+    require('dotenv').config({path: `${process.cwd()}/.env.devnet${devnetId}`})
+    let devnetType = process.env.TF_VAR_DOCKERIZED === "yes" ? "docker" : "remote"
+    
+    let doc = await loadConfig(devnetType)
  
     if (doc['devnetBorHosts'].length > 0) {
         console.log("📍Monitoring the first node", doc['devnetBorHosts'][0]);

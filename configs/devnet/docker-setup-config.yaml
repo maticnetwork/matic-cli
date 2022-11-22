@@ -1,21 +1,21 @@
 defaultStake: 10000
 defaultFee: 2000
-borChainId: 15005
+borChainId: 4052
 heimdallChainId: heimdall-4052
 borBranch: c5569e4da9ebe0ce4e63aec571966c71234f7cfc # todo change to develop once https://polygon.atlassian.net/browse/POS-979 is solved
 heimdallBranch: develop
-contractsBranch: mardizzone/node-upgrade # todo change to master once contracts team merges the PR
-genesisContractsBranch: mardizzone/node-upgrade # todo change to master once contracts team merges the PR
+contractsBranch: mardizzone/node-upgrade
+genesisContractsBranch: master
 sprintSize: 64
 blockNumber: '0'
 blockTime: '2'
-numOfValidators: 1
+numOfValidators: 2
 numOfNonValidators: 1
 ethURL: http://ganache:9545
 ethHostUser: ubuntu
 devnetType: docker
 borDockerBuildContext: https://github.com/maticnetwork/bor.git#c5569e4da9ebe0ce4e63aec571966c71234f7cfc # todo change to develop once https://polygon.atlassian.net/browse/POS-979 is solved
 heimdallDockerBuildContext: https://github.com/maticnetwork/heimdall.git#develop
-devnetBorUsers: ubuntu,ubuntu
+devnetBorUsers: ubuntu,ubuntu,ubuntu
 devnetBorHosts:
-  - 35.92.248.232
+  - 34.222.87.252

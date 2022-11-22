@@ -2,18 +2,8 @@ import yaml from "js-yaml";
 import fs from "fs";
 import os from "os"
 
-export async function loadConfig(devnetType, devnetId) {
-    let doc
-    if (devnetId !== -1) {
-        if (!fs.existsSync(`./deployments/devnet-${devnetId}/${devnetType}-setup-config.yaml`)) {
-            console.log("❌ Config file for the devnet Id doesn't exist")
-            process.exit(1)
-        }
-        doc = await yaml.load(fs.readFileSync(`./deployments/devnet-${devnetId}/${devnetType}-setup-config.yaml`, 'utf-8'))
-    } else {
-        doc = await yaml.load(fs.readFileSync(`./configs/devnet/${devnetType}-setup-config.yaml`, 'utf8'));
-    }
-
+export async function loadConfig(devnetType) {
+    let doc = await yaml.load(fs.readFileSync(`./${devnetType}-setup-config.yaml`, 'utf-8')) 
     return doc
 }
 
@@ -21,7 +11,7 @@ export async function editMaticCliRemoteYAMLConfig() {
 
     console.log("📍Editing matic-cli remote YAML configs...")
 
-    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'), undefined);
+    let doc = await yaml.load(fs.readFileSync(`${process.cwd()}/remote-setup-config.yaml`, 'utf8'), undefined);
 
     setCommonConfigs(doc)
     setConfigList('devnetBorHosts', process.env.DEVNET_BOR_HOSTS, doc);
@@ -30,7 +20,7 @@ export async function editMaticCliRemoteYAMLConfig() {
     setConfigList('devnetHeimdallUsers', process.env.DEVNET_BOR_USERS, doc);
     setConfigValue('devnetType', 'remote', doc)
 
-    fs.writeFile('./configs/devnet/remote-setup-config.yaml', yaml.dump(doc), (err) => {
+    fs.writeFile(`${process.cwd()}/remote-setup-config.yaml`, yaml.dump(doc), (err) => {
         if (err) {
             console.log("❌ Error while writing remote YAML configs: \n", err)
             process.exit(1)
@@ -42,7 +32,7 @@ export async function editMaticCliDockerYAMLConfig() {
 
     console.log("📍Editing matic-cli docker YAML configs...")
 
-    let doc = await yaml.load(fs.readFileSync('./configs/devnet/docker-setup-config.yaml', 'utf8'), undefined);
+    let doc = await yaml.load(fs.readFileSync(`${process.cwd()}/docker-setup-config.yaml`, 'utf8'), undefined);
 
     setCommonConfigs(doc)
     setEthHostUser('ubuntu', doc)
@@ -51,7 +41,7 @@ export async function editMaticCliDockerYAMLConfig() {
     setConfigValue('devnetType', 'docker', doc)
     setEthURL('ganache', doc);
 
-    fs.writeFile('./configs/devnet/docker-setup-config.yaml', yaml.dump(doc), (err) => {
+    fs.writeFile(`${process.cwd()}/docker-setup-config.yaml`, yaml.dump(doc), (err) => {
         if (err) {
             console.log("❌ Error while writing docker YAML configs: \n", err)
             process.exit(1)
@@ -221,4 +211,12 @@ export async function checkAndReturnVMIndex(n, doc) {
             process.exit(1)
         }
     }
+}
+
+export function getDevnetId() {
+    var arr = process.cwd().split("/")
+    var arr2 = arr[arr.length-1].split("-")
+    var devnetId = arr2[1]
+
+    return devnetId
 }

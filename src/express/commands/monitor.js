@@ -1,5 +1,4 @@
-import fs from "fs";
-import { loadConfig } from "../common/config-utils";
+import { getDevnetId, loadConfig } from "../common/config-utils";
 
 const fetch = require("node-fetch");
 const yaml = require("js-yaml");
@@ -82,14 +81,11 @@ async function lastStateIdFromBor(ip) {
 
 export async function monitor() {
 
-    let doc, devnetType
-    if (devnetId !== -1) {
-         devnetType = fs.existsSync(`./deployments/devnet-${devnetId}/docker-setup-config.yaml`) ? 'docker' : 'remote'
-    } else {
-        devnetType = process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
-    }
+    let devnetId = getDevnetId()
+    require('dotenv').config({path: `${process.cwd()}/.env.devnet${devnetId}`})
+    let devnetType = process.env.TF_VAR_DOCKERIZED === "yes" ? "docker" : "remote"
     
-    doc = await loadConfig(devnetType, devnetId)
+    let doc = await loadConfig(devnetType)
 
     if (doc['devnetBorHosts'].length > 0) {
         console.log("📍Monitoring the first node", doc['devnetBorHosts'][0]);

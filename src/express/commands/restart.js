@@ -3,19 +3,9 @@ import {checkAndReturnVMIndex, loadConfig} from "../common/config-utils";
 
 const {splitToArray} = require("../common/config-utils");
 
-export async function restartAll(n, devnetId) {
+export async function restartAll(n) {
 
-    let doc = await loadConfig("remote", devnetId)
-    if (devnetId !== -1) {
-        console.log(`📍Will restart bor and heimdall on devnet-${devnetId} with latest versions from given branches`)
-    } else {
-        if (process.env.TF_VAR_DOCKERIZED === 'yes') {
-            console.log(`❌ Current setup is dockerized. Exiting...`)
-            process.exit(1)
-        }
-        console.log(`📍Will restart bor and heimdall on the current deployment with latest versions from given branches`)
-    }
-
+    let doc = await loadConfig("remote")
     let vmIndex = await checkAndReturnVMIndex(n, doc)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
     let nodeIps = []
@@ -45,19 +35,9 @@ export async function restartAll(n, devnetId) {
     }
 }
 
-export async function restartBor(n, devnetId) {
+export async function restartBor(n) {
 
-    let doc = await loadConfig("remote", devnetId)
-    if (devnetId !== -1) {
-        console.log(`📍Will restart bor on devnet-${devnetId} with latest versions from given branches`)
-    } else {
-        if (process.env.TF_VAR_DOCKERIZED === 'yes') {
-            console.log(`❌ Current setup is dockerized. Exiting...`)
-            process.exit(1)
-        }
-        console.log(`📍Will restart bor on the current deployment with latest versions from given branches`)
-    }
-
+    let doc = await loadConfig("remote")
     let vmIndex = await checkAndReturnVMIndex(n, doc)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
     let nodeIps = []
@@ -85,19 +65,9 @@ export async function restartBor(n, devnetId) {
     }
 }
 
-export async function restartHeimdall(n, devnetId) {
+export async function restartHeimdall(n) {
 
-    let doc = await loadConfig("remote", devnetId)
-    if (devnetId !== -1) {
-        console.log(`📍Will restart heimdall on devnet-${devnetId} with latest versions from given branches`)
-    } else {
-        if (process.env.TF_VAR_DOCKERIZED === 'yes') {
-            console.log(`❌ Current setup is dockerized. Exiting...`)
-            process.exit(1)
-        }
-        console.log(`📍Will restart heimdall on the current deployment with latest versions from given branches`)
-    }
-
+    let doc = await loadConfig("remote")
     let vmIndex = await checkAndReturnVMIndex(n, doc)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
     let nodeIps = []

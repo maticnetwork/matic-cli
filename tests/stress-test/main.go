@@ -131,13 +131,7 @@ func getRPCs(devnetId int) []string {
 
 	rpcs := []string{}
 
-	var pathToConfig string
-	if devnetId != -1 {
-		pathToConfig = fmt.Sprintf("../../deployments/devnet-%v/remote-setup-config.yaml", devnetId)
-	} else {
-		pathToConfig = fmt.Sprintf("../../configs/devnet/remote-setup-config.yaml")
-	}
-
+	pathToConfig := fmt.Sprintf("../../deployments/devnet-%v/remote-setup-config.yaml", devnetId)
 	yamlFile, err := ioutil.ReadFile(pathToConfig)
 	if err != nil {
 		log.Printf("yamlFile.Get err   #%v ", err)

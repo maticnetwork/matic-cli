@@ -12,7 +12,7 @@ import pkg from "../package.json";
 
 const shell = require("shelljs");
 
-require('dotenv').config();
+//require('dotenv').config();
 
 const timer = ms => new Promise(res => setTimeout(res, ms))
 
@@ -20,7 +20,6 @@ program
     .option('-i, --init', 'Initiate the terraform setup')
     .option('-s, --start', 'Start the setup')
     .option('-d, --destroy', 'Destroy the setup')
-    .option('-dev, --devnet-id <id>', 'Id of the devnet being pointed to')
     .option('-uall, --update-all [index]', 'Update bor and heimdall on all machines. If an integer [index] is specified, it will only update the VM corresponding to that index')
     .option('-ubor, --update-bor [index]', 'Update bor on all machines. If an integer [index] is specified, it will only update the VM corresponding to that index')
     .option('-uheimdall, --update-heimdall [index]', 'Update heimdall on all machines. If an integer [index] is specified, it will only update the VM corresponding to that index')
@@ -54,124 +53,83 @@ export async function cli() {
     }
 
     else if (options.destroy) {
-        let devnetId = checkAndReturnDevnetId(options)
-        console.log("📍Command --destroy --devnet-id <id>");
-
-        if (devnetId !== -1) {
-            // Switch workspace
-            let out = shell.exec(`terraform workspace select devnet-${devnetId}`)
-            if (out.stderr != '') {
-                console.log("❌ Invalid devnet Id");
-                process.exit(1)
-            }
-            await terraformDestroy();
-
-            // Switch back to default workspace
-            shell.exec(`terraform workspace select default`)
-
-            // Delete workspace and remove configs
-            shell.exec(`terraform workspace delete devnet-${devnetId}`)
-            shell.exec(`rm -rf ./deployments/devnet-${devnetId}`)
-        } else {
-            // Ensure we're in default workspace
-            shell.exec(`terraform workspace select default`)
-            await terraformDestroy();
-
-        }
+        console.log("📍Command --destroy ");
+        await terraformDestroy();
     }
 
     else if (options.updateAll) {
-        let devnetId = checkAndReturnDevnetId(options)
-        console.log("📍Command --update-all [index] --devnet-id <id>");
+        console.log("📍Command --update-all [index] ");
         console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
         console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
         await timer(3000)
-        await updateAll(options.updateAll, devnetId)
+        await updateAll(options.updateAll)
     }
 
     else if (options.updateBor) {
-        let devnetId = checkAndReturnDevnetId(options)
-        console.log("📍Command --update-bor [index] --devnet-id <id>");
+        console.log("📍Command --update-bor [index] ");
         console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
         console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
         await timer(3000)
-        await updateBor(options.updateBor, devnetId);
+        await updateBor(options.updateBor);
     }
 
     else if (options.updateHeimdall) {
-        let devnetId = checkAndReturnDevnetId(options)
-        console.log("📍Command --update-heimdall [index] --devnet-id <id>");
+        console.log("📍Command --update-heimdall [index] ");
         console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
         await timer(3000)
-        await updateHeimdall(options.updateHeimdall, devnetId);
+        await updateHeimdall(options.updateHeimdall);
     }
 
     else if (options.restartAll) {
-        let devnetId = checkAndReturnDevnetId(options)
-        console.log("📍Command --restart-all [index] --devnet-id <id>");
+        console.log("📍Command --restart-all [index] ");
         console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
         console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
         await timer(3000)
-        await restartAll(options.restartAll, devnetId);
+        await restartAll(options.restartAll);
     }
 
     else if (options.restartBor) {
-        let devnetId = checkAndReturnDevnetId(options)
-        console.log("📍Command --restart-bor [index] --devnet-id <id>");
+        console.log("📍Command --restart-bor [index] ");
         console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
         console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
         await timer(3000)
-        await restartBor(options.restartBor, devnetId);
+        await restartBor(options.restartBor);
     }
 
     else if (options.restartHeimdall) {
-        let devnetId = checkAndReturnDevnetId(options)
-        console.log("📍Command --restart-heimdall [index] --devnet-id <id>");
+        console.log("📍Command --restart-heimdall [index] ");
         console.log("⛔ This command is only available for non-dockerized devnets...")
-        await restartHeimdall(options.restartHeimdall, devnetId);
+        await restartHeimdall(options.restartHeimdall);
     }
 
     else if (options.cleanup) {
-        let devnetId = checkAndReturnDevnetId(options)
-        console.log("📍Command --cleanup --devnet-id <id>");
+        console.log("📍Command --cleanup ");
         console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
         console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
         await timer(3000)
-        await cleanup(devnetId);
+        await cleanup();
     }
 
     else if (options.monitor) {
-        let devnetId = checkAndReturnDevnetId(options)
-        console.log("📍Command --monitor --devnet-id <id>");
+        console.log("📍Command --monitor ");
         await timer(3000)
-        await monitor(devnetId);
+        await monitor();
     }
 
     else if (options.stress) {
-        let devnetId = checkAndReturnDevnetId(options)
-        console.log("📍Command --stress --devnet-id <id>");
+        console.log("📍Command --stress ");
         console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
         await timer(3000)
         if (options.stress === "fund") {
-            await startStressTest(true, devnetId);
+            await startStressTest(true);
         } else {
-            await startStressTest(false, devnetId);
+            await startStressTest(false);
         }
     }
 
     else if (options.sendStateSync) {
-        let devnetId = checkAndReturnDevnetId(options)
-        console.log("📍Command --send-state-sync --devnet-id <id>");
+        console.log("📍Command --send-state-sync ");
         await timer(3000)
-        await sendStateSyncTx(devnetId);
+        await sendStateSyncTx();
     }
-}
-
-
-function checkAndReturnDevnetId(options) {
-    if (!options.devnetId) {
-        return -1
-    }
-    
-    return options.devnetId
 }
