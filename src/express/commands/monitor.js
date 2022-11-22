@@ -95,14 +95,14 @@ async function lastStateIdFromBor(ip) {
     return lastStateId
 }
 
-async function getLatestCheckpointFromBor(ip, rootChainProxyAddress){
+async function getLatestCheckpointFromRootChain(ip, rootChainProxyAddress){
     let web3 = new Web3(`http://${ip}:9545`);
     
     let RootChainContract = await new web3.eth.Contract(currentHeaderBlockABI, rootChainProxyAddress);
     let currentHeaderBlock = await RootChainContract.methods.currentHeaderBlock().call();
-    let lastestCheckpointFromBor = currentHeaderBlock.toString().slice(0, -4);
+    let lastestCheckpoint = currentHeaderBlock.toString().slice(0, -4);
 
-    return lastestCheckpointFromBor
+    return lastestCheckpoint
 }
 
 export async function monitor() {
@@ -144,11 +144,11 @@ export async function monitor() {
             console.log("📍Awaiting Checkpoint on Heimdall 🚌")
         }
 
-        var checkpointCountFromBor = await getLatestCheckpointFromBor(machine0, rootChainProxyAddress);
-        if(checkpointCountFromBor > 0) {
-            console.log("📍Checkpoint found on Bor ✅ ; Count: ", checkpointCountFromBor);
+        var checkpointCountFromRootChain = await getLatestCheckpointFromRootChain(machine0, rootChainProxyAddress);
+        if(checkpointCountFromRootChain > 0) {
+            console.log("📍Checkpoint found on Root chain ✅ ; Count: ", checkpointCountFromRootChain);
         } else {
-            console.log("📍Awaiting Checkpoint on Bor 🚌")
+            console.log("📍Awaiting Checkpoint on Root chain 🚌")
         }
 
         var firstStateSyncTx = await checkStateSyncTx(machine0,1);
