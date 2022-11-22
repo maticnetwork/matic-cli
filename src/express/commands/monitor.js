@@ -3,6 +3,7 @@ const yaml = require("js-yaml");
 const fs = require("fs");
 const Web3 = require('web3');
 const timer = ms => new Promise(res => setTimeout(res, ms))
+const {runScpCommand, maxRetries} = require("../common/remote-worker");
 
 const lastStateIdABI = [
 	{
@@ -41,7 +42,6 @@ const currentHeaderBlockABI = [
 ]
 
 var stateReceiverAddress = '0x0000000000000000000000000000000000001001'
-var rootChainProxyAddress = '0xCCE33CB465347d0EFAA3B26157B25e897a2Ebf1A'
 
 async function checkCheckpoint(ip) {
     let url = `http://${ip}:1317/checkpoints/count`;
@@ -95,7 +95,7 @@ async function lastStateIdFromBor(ip) {
     return lastStateId
 }
 
-async function getLatestCheckpointFromBor(ip){
+async function getLatestCheckpointFromBor(ip, rootChainProxyAddress){
     let web3 = new Web3(`http://${ip}:9545`);
     
     let RootChainContract = await new web3.eth.Contract(currentHeaderBlockABI, rootChainProxyAddress);
@@ -124,6 +124,14 @@ export async function monitor() {
     let machine0 = doc['devnetBorHosts'][0];
     console.log("📍Checking for StateSyncs && Checkpoints")
 
+    let src = `${doc['ethHostUser']}@${machine0}:~/matic-cli/devnet/code/contracts/contractAddresses.json`
+    let dest = `./contractAddresses.json`
+    await runScpCommand(src, dest, maxRetries)
+
+    let contractAddresses = require("../../../contractAddresses.json");
+
+    let rootChainProxyAddress = contractAddresses.root.RootChainProxy;
+
     while (true) {
 
         await timer(1000);
@@ -136,7 +144,7 @@ export async function monitor() {
             console.log("📍Awaiting Checkpoint on Heimdall 🚌")
         }
 
-        var checkpointCountFromBor = await getLatestCheckpointFromBor(machine0);
+        var checkpointCountFromBor = await getLatestCheckpointFromBor(machine0, rootChainProxyAddress);
         if(checkpointCountFromBor > 0) {
             console.log("📍Checkpoint found on Bor ✅ ; Count: ", checkpointCountFromBor);
         } else {
