@@ -57,7 +57,7 @@ func main() {
 		return
 	}
 
-	SK = getSecretKey()
+	SK = getSecretKey(devnetId)
 
 	TPS := os.Getenv("SPEED")
 	if len(TPS) == 0 {
@@ -97,8 +97,9 @@ type Signer struct {
 	PublicKey string `json:"pub_key"`
 }
 
-func getSecretKey() string {
-	filename := "../../signer-dump.json"
+func getSecretKey(devnetId int) string {
+	//filename := "../../signer-dump.json"
+	filename := fmt.Sprintf("../../deployments/devnet-%v/signer-dump.json", devnetId)
 	jsonFile, err := os.Open(filename)
 	if err != nil {
 		fmt.Printf("failed to open json file: %s, error: %v", filename, err)

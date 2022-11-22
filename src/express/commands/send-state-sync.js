@@ -23,7 +23,7 @@ export async function sendStateSyncTx() {
     let dest = `./contractAddresses.json`
     await runScpCommand(src, dest, maxRetries)
 
-    let contractAddresses = require("../../../contractAddresses.json");
+    let contractAddresses = require(`${process.cwd()}/contractAddresses.json`);
 
     let MaticToken = contractAddresses.root.tokens.MaticToken;
 
