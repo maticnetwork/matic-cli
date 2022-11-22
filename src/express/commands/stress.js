@@ -18,7 +18,7 @@ export async function startStressTest(fund) {
     let dest = `./signer-dump.json`
     await runScpCommand(src, dest, maxRetries)
 
-    shell.pushd("tests/stress-test");
+    shell.pushd("../../tests/stress-test");
     shell.exec(`go mod tidy`);
 
     shell.exec(`go run main.go ${devnetId}`, {

@@ -1,6 +1,4 @@
-import fs from "fs";
-
-import { loadConfig } from "../common/config-utils";
+import { loadConfig, getDevnetId } from "../common/config-utils";
 
 const {runScpCommand, runSshCommand, maxRetries} = require("../common/remote-worker");
 

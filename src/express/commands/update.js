@@ -92,6 +92,8 @@ export async function pullAndRestartHeimdall(ip, i, isPull) {
 
 export async function updateAll(n) {
     
+    let devnetId = getDevnetId()
+    require('dotenv').config({path: `${process.cwd()}/.env.devnet${devnetId}`})
     let doc = await loadConfig("remote")
     let vmIndex = await checkAndReturnVMIndex(n, doc)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
@@ -124,6 +126,8 @@ export async function updateAll(n) {
 
 export async function updateBor(n) {
 
+    let devnetId = getDevnetId()
+    require('dotenv').config({path: `${process.cwd()}/.env.devnet${devnetId}`})
     let doc = await loadConfig("remote")
     let vmIndex = await checkAndReturnVMIndex(n, doc)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
@@ -154,6 +158,8 @@ export async function updateBor(n) {
 
 export async function updateHeimdall(n) {
 
+    let devnetId = getDevnetId()
+    require('dotenv').config({path: `${process.cwd()}/.env.devnet${devnetId}`})
     let doc = await loadConfig("remote")
     let vmIndex = await checkAndReturnVMIndex(n, doc)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())

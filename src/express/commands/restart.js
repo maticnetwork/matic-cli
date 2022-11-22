@@ -1,10 +1,12 @@
 import {pullAndRestartBor, pullAndRestartHeimdall} from "./update";
-import {checkAndReturnVMIndex, loadConfig} from "../common/config-utils";
+import {checkAndReturnVMIndex, loadConfig, getDevnetId} from "../common/config-utils";
 
 const {splitToArray} = require("../common/config-utils");
 
 export async function restartAll(n) {
 
+    let devnetId = getDevnetId()
+    require('dotenv').config({path: `${process.cwd()}/.env.devnet${devnetId}`})
     let doc = await loadConfig("remote")
     let vmIndex = await checkAndReturnVMIndex(n, doc)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
@@ -37,6 +39,8 @@ export async function restartAll(n) {
 
 export async function restartBor(n) {
 
+    let devnetId = getDevnetId()
+    require('dotenv').config({path: `${process.cwd()}/.env.devnet${devnetId}`})
     let doc = await loadConfig("remote")
     let vmIndex = await checkAndReturnVMIndex(n, doc)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
@@ -67,6 +71,8 @@ export async function restartBor(n) {
 
 export async function restartHeimdall(n) {
 
+    let devnetId = getDevnetId()
+    require('dotenv').config({path: `${process.cwd()}/.env.devnet${devnetId}`})
     let doc = await loadConfig("remote")
     let vmIndex = await checkAndReturnVMIndex(n, doc)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())

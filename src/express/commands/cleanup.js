@@ -1,10 +1,12 @@
-import {loadConfig, splitToArray} from "../common/config-utils";
+import {loadConfig, splitToArray, getDevnetId} from "../common/config-utils";
 import {maxRetries, runSshCommand} from "../common/remote-worker";
 
 const timer = ms => new Promise(res => setTimeout(res, ms))
 
 export async function cleanup() {
    
+    let devnetId = getDevnetId()
+    require('dotenv').config({path: `${process.cwd()}/.env.devnet${devnetId}`})
     let doc = await loadConfig("remote")
     await stopServices(doc)
     await cleanupServices(doc)
