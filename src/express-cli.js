@@ -10,9 +10,6 @@ import { cleanup } from "./express/commands/cleanup";
 import { program } from "commander";
 import pkg from "../package.json";
 
-const shell = require("shelljs");
-
-//require('dotenv').config();
 
 const timer = ms => new Promise(res => setTimeout(res, ms))
 

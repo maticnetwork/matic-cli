@@ -98,7 +98,6 @@ type Signer struct {
 }
 
 func getSecretKey(devnetId int) string {
-	//filename := "../../signer-dump.json"
 	filename := fmt.Sprintf("../../deployments/devnet-%v/signer-dump.json", devnetId)
 	jsonFile, err := os.Open(filename)
 	if err != nil {
