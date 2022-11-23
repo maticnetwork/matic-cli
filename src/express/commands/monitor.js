@@ -3,6 +3,7 @@ const yaml = require("js-yaml");
 const fs = require("fs");
 const Web3 = require('web3');
 const timer = ms => new Promise(res => setTimeout(res, ms))
+const {runScpCommand, maxRetries} = require("../common/remote-worker");
 
 const lastStateIdABI = [
 	{
@@ -22,6 +23,23 @@ const lastStateIdABI = [
 	}
 ]
 
+const currentHeaderBlockABI = [
+    {
+        "constant":true,
+        "inputs":[],
+        "name":"currentHeaderBlock",
+        "outputs":  [
+            {
+                "internalType":"uint256",
+                "name":"",
+                "type":"uint256"
+            }
+        ],
+        "payable":false,
+        "stateMutability":"view",
+        "type":"function"
+    }
+]
 
 var stateReceiverAddress = '0x0000000000000000000000000000000000001001'
 
@@ -77,6 +95,16 @@ async function lastStateIdFromBor(ip) {
     return lastStateId
 }
 
+async function getLatestCheckpointFromRootChain(ip, rootChainProxyAddress){
+    let web3 = new Web3(`http://${ip}:9545`);
+    
+    let RootChainContract = await new web3.eth.Contract(currentHeaderBlockABI, rootChainProxyAddress);
+    let currentHeaderBlock = await RootChainContract.methods.currentHeaderBlock().call();
+    let lastestCheckpoint = currentHeaderBlock.toString().slice(0, -4);
+
+    return lastestCheckpoint
+}
+
 export async function monitor() {
     let doc
 
@@ -96,6 +124,14 @@ export async function monitor() {
     let machine0 = doc['devnetBorHosts'][0];
     console.log("📍Checking for StateSyncs && Checkpoints")
 
+    let src = `${doc['ethHostUser']}@${machine0}:~/matic-cli/devnet/code/contracts/contractAddresses.json`
+    let dest = `./contractAddresses.json`
+    await runScpCommand(src, dest, maxRetries)
+
+    let contractAddresses = require("../../../contractAddresses.json");
+
+    let rootChainProxyAddress = contractAddresses.root.RootChainProxy;
+
     while (true) {
 
         await timer(1000);
@@ -103,12 +139,18 @@ export async function monitor() {
 
         let checkpointCount = await checkCheckpoint(machine0);
         if (checkpointCount > 0) {
-            console.log("📍Checkpoint found ✅ ; Count: ", checkpointCount);
+            console.log("📍Checkpoint found on Heimdall ✅ ; Count: ", checkpointCount);
         } else {
-            console.log("📍Awaiting Checkpoint 🚌")
+            console.log("📍Awaiting Checkpoint on Heimdall 🚌")
         }
 
-        
+        var checkpointCountFromRootChain = await getLatestCheckpointFromRootChain(machine0, rootChainProxyAddress);
+        if(checkpointCountFromRootChain > 0) {
+            console.log("📍Checkpoint found on Root chain ✅ ; Count: ", checkpointCountFromRootChain);
+        } else {
+            console.log("📍Awaiting Checkpoint on Root chain 🚌")
+        }
+
         var firstStateSyncTx = await checkStateSyncTx(machine0,1);
         if (firstStateSyncTx) {
             let timeOfFirstStateSyncTx = firstStateSyncTx.record_time
