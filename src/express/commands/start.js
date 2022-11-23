@@ -7,11 +7,6 @@ const shell = require("shelljs");
 const timer = ms => new Promise(res => setTimeout(res, ms))
 
 async function terraformApply(devnetId) {
-    /*shell.exec('mkdir -p ./deployments/devnet-0')
-    shell.exec('cp ./.env ./deployments/devnet-0/.env.devnet0')
-    shell.exec('cp ./main.tf ./deployments/devnet-0/devnet0.main.tf')
-    shell.exec('cp ./variables.tf ./deployments/devnet-0/devnet0.var.tf')*/
-    //require('dotenv').config({path: '../../deployments/devnet-0/.env.devnet0'})
     console.log("📍Executing terraform apply...")
     shell.exec(`terraform -chdir=../../deployments/devnet-${devnetId} apply -auto-approve`, {
         env: {
@@ -22,7 +17,6 @@ async function terraformApply(devnetId) {
 
 async function terraformOutput() {
     console.log("📍Executing terraform output...")
-    //require('dotenv').config({path: '../../deployments/devnet-0/.env.devnet0'})
     const {stdout} = shell.exec(`terraform output --json`, {
         env: {
             ...process.env,
@@ -30,34 +24,6 @@ async function terraformOutput() {
     });
 
     return stdout
-}
-
-async function storeDeploymentInfo(devnetId, devnetType) {
-    console.log("📍Saving the current deployment details...");
-
-    let resources, out 
-    out = shell.exec(`terraform state list`)
-    if (out.stdout === '') {
-        console.log(`📍No current deployment. Skipping...`)
-        return
-    }
-    
-    // Store the tf state files and configs
-    shell.exec(`mkdir -p deployments/devnet-${devnetId}`)
-    shell.exec(`cp ./terraform.tfstate ./deployments/devnet-${devnetId}/devnet${devnetId}.terraform.tfstate`)
-    shell.exec(`cp configs/devnet/${devnetType}-setup-config.yaml ./deployments/devnet-${devnetId}`)
-
-    // Create new tf workspace
-    shell.exec(`terraform workspace new -state=./deployments/devnet-${devnetId}/devnet${devnetId}.terraform.tfstate devnet-${devnetId}`)
-    
-    // Switch back to default workspace
-    shell.exec(`terraform workspace select default`)
-    
-    // Unlink the current tf state
-    resources = out.stdout.split(/[\r\n|\n|\r]/).filter(String)
-    resources.forEach(resource => {
-        shell.exec(`terraform state rm ${resource}`)
-    })
 }
 
 async function installRequiredSoftwareOnRemoteMachines(ips, devnetType, devnetId) {
@@ -377,13 +343,6 @@ export async function start() {
     let ips = JSON.parse(tfOutput).instance_ips.value.toString();
     process.env.DEVNET_BOR_HOSTS = ips;
 
-    /*if (devnetType === "docker") {
-        await editMaticCliDockerYAMLConfig();
-    } else{
-        await editMaticCliRemoteYAMLConfig();
-    }*/
-
-    //await timer(5000)
     shell.exec(`cp ../../configs/devnet/${devnetType}-setup-config.yaml ../../deployments/devnet-${devnetId}`)
 
     if (devnetType === "docker") {

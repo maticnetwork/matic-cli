@@ -15,14 +15,6 @@ export async function terraformInit() {
     shell.exec(`terraform workspace new devnet-${nextDevId}`)
     shell.popd()
 
-    var out = shell.exec(`terraform state list`)
-    if (out !== '') {
-        var resources = out.stdout.split(/[\r\n|\n|\r]/).filter(String)
-        resources.forEach(resource => {
-            shell.exec(`terraform state rm ${resource}`)
-         })
-    }
-
     console.log("📍Executing terraform init...")
     shell.exec(`terraform -chdir=./deployments/devnet-${nextDevId} init`, {
         env: {
