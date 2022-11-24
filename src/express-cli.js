@@ -39,18 +39,31 @@ export async function cli() {
 
     if (options.init) {
         console.log("📍Command --init");
+        var match = checkDir(true)
+        if (match !== "matic-cli") {
+            console.log("❌ The command is supposed to be executed from the project root!");
+            process.exit(1)
+        }
         await terraformInit();
     }
 
     else if (options.start) {
         console.log("📍Command --start");
         console.log("⛔ If you are targeting an already existing devnet, this command will only work if all bor ipc sessions have been manually closed...")
+        if (!checkDir(false)) {
+            console.log("❌ The command is not called from the appropriate devnet directory!");
+            process.exit(1)
+        }
         await timer(3000)
         await start();
     }
 
     else if (options.destroy) {
         console.log("📍Command --destroy ");
+        if (!checkDir(false)) {
+            console.log("❌ The command is not called from the appropriate devnet directory!");
+            process.exit(1)
+        }
         await terraformDestroy();
     }
 
@@ -58,6 +71,10 @@ export async function cli() {
         console.log("📍Command --update-all [index] ");
         console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
         console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
+        if (!checkDir(false)) {
+            console.log("❌ The command is not called from the appropriate devnet directory!");
+            process.exit(1)
+        }
         await timer(3000)
         await updateAll(options.updateAll)
     }
@@ -66,6 +83,10 @@ export async function cli() {
         console.log("📍Command --update-bor [index] ");
         console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
         console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
+        if (!checkDir(false)) {
+            console.log("❌ The command is not called from the appropriate devnet directory!");
+            process.exit(1)
+        }
         await timer(3000)
         await updateBor(options.updateBor);
     }
@@ -73,6 +94,10 @@ export async function cli() {
     else if (options.updateHeimdall) {
         console.log("📍Command --update-heimdall [index] ");
         console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
+        if (!checkDir(false)) {
+            console.log("❌ The command is not called from the appropriate devnet directory!");
+            process.exit(1)
+        }
         await timer(3000)
         await updateHeimdall(options.updateHeimdall);
     }
@@ -81,6 +106,10 @@ export async function cli() {
         console.log("📍Command --restart-all [index] ");
         console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
         console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
+        if (!checkDir(false)) {
+            console.log("❌ The command is not called from the appropriate devnet directory!");
+            process.exit(1)
+        }
         await timer(3000)
         await restartAll(options.restartAll);
     }
@@ -89,6 +118,10 @@ export async function cli() {
         console.log("📍Command --restart-bor [index] ");
         console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
         console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
+        if (!checkDir(false)) {
+            console.log("❌ The command is not called from the appropriate devnet directory!");
+            process.exit(1)
+        }
         await timer(3000)
         await restartBor(options.restartBor);
     }
@@ -96,6 +129,10 @@ export async function cli() {
     else if (options.restartHeimdall) {
         console.log("📍Command --restart-heimdall [index] ");
         console.log("⛔ This command is only available for non-dockerized devnets...")
+        if (!checkDir(false)) {
+            console.log("❌ The command is not called from the appropriate devnet directory!");
+            process.exit(1)
+        }
         await restartHeimdall(options.restartHeimdall);
     }
 
@@ -103,12 +140,20 @@ export async function cli() {
         console.log("📍Command --cleanup ");
         console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
         console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
+        if (!checkDir(false)) {
+            console.log("❌ The command is not called from the appropriate devnet directory!");
+            process.exit(1)
+        }
         await timer(3000)
         await cleanup();
     }
 
     else if (options.monitor) {
         console.log("📍Command --monitor ");
+        if (!checkDir(false)) {
+            console.log("❌ The command is not called from the appropriate devnet directory!");
+            process.exit(1)
+        }
         await timer(3000)
         await monitor();
     }
@@ -116,6 +161,10 @@ export async function cli() {
     else if (options.stress) {
         console.log("📍Command --stress ");
         console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
+        if (!checkDir(false)) {
+            console.log("❌ The command is not called from the appropriate devnet directory!");
+            process.exit(1)
+        }
         await timer(3000)
         if (options.stress === "fund") {
             await startStressTest(true);
@@ -126,7 +175,25 @@ export async function cli() {
 
     else if (options.sendStateSync) {
         console.log("📍Command --send-state-sync ");
+        if (!checkDir(false)) {
+            console.log("❌ The command is not called from the appropriate devnet directory!");
+            process.exit(1)
+        }
         await timer(3000)
         await sendStateSyncTx();
     }
+}
+
+
+function checkDir(isInvokedFromRoot) {
+    var path = process.cwd()
+    var dirArr = path.split("/")
+    var dir = dirArr[dirArr.length - 1]
+
+    if (isInvokedFromRoot) {
+        return dir
+    } else {
+        return dir.match(/^devnet-(\d)/)
+    }
+
 }
