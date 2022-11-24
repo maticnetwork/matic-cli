@@ -129,7 +129,7 @@ export async function monitor() {
     let dest = `./contractAddresses.json`
     await runScpCommand(src, dest, maxRetries)
 
-    let contractAddresses = require("../../../contractAddresses.json");
+    let contractAddresses = require(`${process.cwd()}/contractAddresses.json`);
 
     let rootChainProxyAddress = contractAddresses.root.RootChainProxy;
 
