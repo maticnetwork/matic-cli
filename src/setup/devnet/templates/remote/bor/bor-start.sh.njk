@@ -29,7 +29,8 @@ bor server \
   --txpool.globalslots '20000'  \
   --txpool.lifetime '0h16m0s' \
   --maxpeers 200 \
-  --metrics \
+  --metrics --metrics.expensive \
+  --metrics.opencollector-endpoint="127.0.0.1:4317" \
   --unlock $ADDRESS \
   --miner.etherbase $ADDRESS \
   --keystore $BOR_HOME/keystore \
