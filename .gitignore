@@ -1,6 +1,7 @@
 node_modules
 test
 .DS_Store
+devnet
 .env
 .terraform*
 terraform.tfstate
