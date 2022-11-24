@@ -49,7 +49,14 @@ export async function setupDatadog() {
         console.log("📍Monitoring the node", host);
 
         var apiKey = process.env.DD_API_KEY
-        let command = `DD_API_KEY=${apiKey} DD_SITE="datadoghq.com" bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"`
+        var envName = process.env.TF_VAR_VM_NAME
+        if(envName === undefined) {
+            let x = parseInt(Math.random() * 1000000);
+            envName = `devnet-${x}`
+        }
+
+        console.log("📍Setting up datadog for", envName);
+        let command = `DD_API_KEY=${apiKey} DD_SITE="datadoghq.com" DD_HOST_TAGS="env:${envName}" bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"`
         await runSshCommand(`${user}@${host}`, command, maxRetries)
         console.log(`📍Datadog installed on ${host}`)
 
@@ -80,5 +87,7 @@ export async function setupDatadog() {
         // revert dd api key
         setDatadogAPIKey('${DD_API_KEY}', dd_doc)
     }
+
+    console.log("📍Datadog setup complete");
 
 }
