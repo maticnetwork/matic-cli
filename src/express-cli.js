@@ -187,6 +187,10 @@ export async function cli() {
 
     else if (options.setupDatadog) {
         console.log("📍Command --setup-datadog");
+        if (!checkDir(false)) {
+            console.log("❌ The command is not called from the appropriate devnet directory!");
+            process.exit(1)
+        }
         await timer(3000)
         await setupDatadog();
     }

@@ -344,6 +344,8 @@ export async function start() {
     process.env.DEVNET_BOR_HOSTS = ips;
 
     shell.exec(`cp ../../configs/devnet/${devnetType}-setup-config.yaml ../../deployments/devnet-${devnetId}`)
+    shell.exec(`cp ../../configs/devnet/openmetrics-conf.yaml ../../deployments/devnet-${devnetId}`)
+    shell.exec(`cp ../../configs/devnet/otel-config-dd.yaml ../../deployments/devnet-${devnetId}`)
 
     if (devnetType === "docker") {
         await editMaticCliDockerYAMLConfig();
