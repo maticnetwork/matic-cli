@@ -41,6 +41,7 @@ export async function setupDatadog() {
 
 
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
+    var envName
 
     for(let i = 0; i < doc['devnetBorHosts'].length ; i++) {
         var host = doc['devnetBorHosts'][i]
@@ -49,7 +50,7 @@ export async function setupDatadog() {
         console.log("📍Monitoring the node", host);
 
         var apiKey = process.env.DD_API_KEY
-        var envName = process.env.TF_VAR_VM_NAME
+        envName = process.env.TF_VAR_VM_NAME
         if(envName === undefined) {
             let x = parseInt(Math.random() * 1000000);
             envName = `devnet-${x}`
@@ -88,6 +89,7 @@ export async function setupDatadog() {
         setDatadogAPIKey('${DD_API_KEY}', dd_doc)
     }
 
+    console.log("📍Datadog devnet env : ", envName)
     console.log("📍Datadog setup complete");
 
 }
