@@ -7,6 +7,7 @@ import { sendStateSyncTx } from "./express/commands/send-state-sync";
 import { monitor } from "./express/commands/monitor";
 import { restartAll, restartBor, restartHeimdall } from "./express/commands/restart";
 import { cleanup } from "./express/commands/cleanup";
+import { setupDatadog } from "./express/commands/setup-datadog";
 import { program } from "commander";
 import pkg from "../package.json";
 
@@ -27,6 +28,7 @@ program
     .option('-m, --monitor', 'Monitor the setup')
     .option('-t, --stress [fund]', 'Start the stress test. If the string `fund` is specified, the account will be funded. This option is mandatory when the command is executed the first time on a devnet.')
     .option('-ss, --send-state-sync', 'Send state sync tx')
+    .option('-dd, --setup-datadog', 'Setup DataDog')
     .version(pkg.version);
 
 
@@ -181,6 +183,12 @@ export async function cli() {
         }
         await timer(3000)
         await sendStateSyncTx();
+    }
+
+    else if (options.setupDatadog) {
+        console.log("📍Command --setup-datadog");
+        await timer(3000)
+        await setupDatadog();
     }
 }
 

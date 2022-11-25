@@ -87,4 +87,7 @@ borDockerBuildContext: "https://github.com/maticnetwork/bor.git#c5569e4da9ebe0ce
 # Docker build context for heimdall. Used in docker setup. When specified, heimdallBranch will be ignored.
 heimdallDockerBuildContext: "https://github.com/maticnetwork/heimdall.git#develop"
 
+# Datadog api key required to setup datadog traces and metrics for the node.
+DD_API_KEY: <DATADOG API KEY> # Datadog API key
+
 ```
