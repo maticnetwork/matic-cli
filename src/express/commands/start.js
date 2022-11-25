@@ -143,7 +143,7 @@ async function installHostSpecificPackages(ip) {
     await runSshCommand(ip, command, maxRetries)
 }
 
-async function installDocker(ip, user) {
+export async function installDocker(ip, user) {
 
     console.log("📍Setting docker repository up...")
     let command = `sudo apt-get update -y && sudo apt install apt-transport-https ca-certificates curl software-properties-common -y`

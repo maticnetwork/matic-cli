@@ -90,6 +90,8 @@ First off, you need to `--init` terraform on your local machine, by executing th
 - `./bin/express-cli --stress [fund]`
     - Runs the stress tests on remote nodes. The string `fund` is needed when stress tests are ran for the first time,
       to fund the accounts
+- `./bin/express-cli --setup-datadog`
+    - Sets up datadog on the nodes and gets them ready to send metrics to Datadog Dashboard. `DD_API_KEY` env var is required for this.
 
 
 ## `matic-cli`
