@@ -21,11 +21,10 @@ export async function runSshCommand(ip, command, retries) {
                 ip, command + ` && exit`],
             {stdio: getRemoteStdio()})
     } catch (error) {
-        console.log("❌ Error while executing command: '" + command + "' : \n", error)
         if (retries - 1 > 0) {
             await runSshCommand(ip, command, retries - 1)
         } else {
-            console.log("❌ SSH command " + command + " failed too many times, exiting... \n")
+            console.log("❌ Command \n `" + command + "`\n failed too many times with error : \n", error)
             process.exit(1)
         }
     }

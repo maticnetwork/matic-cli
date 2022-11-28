@@ -2,7 +2,7 @@ defaultStake: 10000
 defaultFee: 2000
 borChainId: 15005
 heimdallChainId: heimdall-4052
-borBranch: develop
+borBranch: c5569e4da9ebe0ce4e63aec571966c71234f7cfc
 heimdallBranch: develop
 contractsBranch: mardizzone/node-upgrade
 genesisContractsBranch: mardizzone/node-upgrade
