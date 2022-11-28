@@ -1,11 +1,15 @@
 import yaml from "js-yaml";
 import fs from "fs";
 
+export async function loadConfig(devnetType) {
+    return yaml.load(fs.readFileSync(`./${devnetType}-setup-config.yaml`, 'utf-8'));
+}
+
 export async function editMaticCliRemoteYAMLConfig() {
 
     console.log("📍Editing matic-cli remote YAML configs...")
 
-    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'), undefined);
+    let doc = await yaml.load(fs.readFileSync(`${process.cwd()}/remote-setup-config.yaml`, 'utf8'), undefined);
 
     setCommonConfigs(doc)
     setConfigList('devnetBorHosts', process.env.DEVNET_BOR_HOSTS, doc);
@@ -14,7 +18,7 @@ export async function editMaticCliRemoteYAMLConfig() {
     setConfigList('devnetHeimdallUsers', process.env.DEVNET_BOR_USERS, doc);
     setConfigValue('devnetType', 'remote', doc)
 
-    fs.writeFile('./configs/devnet/remote-setup-config.yaml', yaml.dump(doc), (err) => {
+    fs.writeFile(`${process.cwd()}/remote-setup-config.yaml`, yaml.dump(doc), (err) => {
         if (err) {
             console.log("❌ Error while writing remote YAML configs: \n", err)
             process.exit(1)
@@ -26,7 +30,7 @@ export async function editMaticCliDockerYAMLConfig() {
 
     console.log("📍Editing matic-cli docker YAML configs...")
 
-    let doc = await yaml.load(fs.readFileSync('./configs/devnet/docker-setup-config.yaml', 'utf8'), undefined);
+    let doc = await yaml.load(fs.readFileSync(`${process.cwd()}/docker-setup-config.yaml`, 'utf8'), undefined);
 
     setCommonConfigs(doc)
     setEthHostUser('ubuntu', doc)
@@ -35,7 +39,7 @@ export async function editMaticCliDockerYAMLConfig() {
     setConfigValue('devnetType', 'docker', doc)
     setEthURL('ganache', doc);
 
-    fs.writeFile('./configs/devnet/docker-setup-config.yaml', yaml.dump(doc), (err) => {
+    fs.writeFile(`${process.cwd()}/docker-setup-config.yaml`, yaml.dump(doc), (err) => {
         if (err) {
             console.log("❌ Error while writing docker YAML configs: \n", err)
             process.exit(1)
@@ -112,7 +116,7 @@ export function splitToArray(value) {
         console.log("📍Exiting...");
         process.exit(1)
     }
-    
+
 }
 
 export function splitAndGetHostIp(value) {
@@ -125,9 +129,7 @@ export function splitAndGetHostIp(value) {
     }
 }
 
-export async function checkAndReturnVMIndex(n) {
-
-    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'), undefined);
+export async function checkAndReturnVMIndex(n, doc) {
 
     if (typeof n === "boolean") {
         console.log("📍Targeting all VMs ...");
@@ -144,4 +146,10 @@ export async function checkAndReturnVMIndex(n) {
             process.exit(1)
         }
     }
+}
+
+export function getDevnetId() {
+    const devnetFolders = process.cwd().split("/");
+    const ids = devnetFolders[devnetFolders.length - 1].split("-");
+    return ids[1]
 }
