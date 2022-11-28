@@ -1,0 +1,25 @@
+instances:
+-   metrics:
+    - geth*
+    - txpool*
+    - trie*
+    - system*
+    - state*
+    - rpc*
+    - p2p*
+    - les*
+    - eth*
+    - chain*
+    namespace: bor
+    openmetrics_endpoint: http://localhost:7071/debug/metrics/prometheus
+-   exclude_metrics:
+    - tendermint_p2p_peer_receive_bytes*
+    - tendermint_p2p_peer_send_bytes*
+    - tendermint_p2p_peer_pending_send_bytes*
+    metrics:
+    - tendermint_mempool*
+    - tendermint_consensus*
+    - process*
+    - go*
+    namespace: heimdalld
+    openmetrics_endpoint: http://localhost:26660/metrics
