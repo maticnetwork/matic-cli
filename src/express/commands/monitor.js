@@ -88,21 +88,17 @@ async function getStateSyncTxList(ip,startTime,endTime) {
 
 async function lastStateIdFromBor(ip) {
     let web3 = new Web3(`http://${ip}:8545`);
-    
-    let StateReceiverContract = await new web3.eth.Contract(lastStateIdABI, stateReceiverAddress );
-    let lastStateId = await StateReceiverContract.methods.lastStateId().call();
 
-    return lastStateId
+    let StateReceiverContract = await new web3.eth.Contract(lastStateIdABI, stateReceiverAddress );
+    return await StateReceiverContract.methods.lastStateId().call()
 }
 
 async function getLatestCheckpointFromRootChain(ip, rootChainProxyAddress){
     let web3 = new Web3(`http://${ip}:9545`);
-    
+
     let RootChainContract = await new web3.eth.Contract(currentHeaderBlockABI, rootChainProxyAddress);
     let currentHeaderBlock = await RootChainContract.methods.currentHeaderBlock().call();
-    let lastestCheckpoint = currentHeaderBlock.toString().slice(0, -4);
-
-    return lastestCheckpoint
+    return currentHeaderBlock.toString().slice(0, -4)
 }
 
 export async function monitor() {
@@ -132,7 +128,9 @@ export async function monitor() {
 
     let rootChainProxyAddress = contractAddresses.root.RootChainProxy;
 
-    while (true) {
+    let complete = false
+
+    while (!complete) {
 
         await timer(1000);
         console.log()
@@ -144,26 +142,26 @@ export async function monitor() {
             console.log("📍Awaiting Checkpoint on Heimdall 🚌")
         }
 
-        var checkpointCountFromRootChain = await getLatestCheckpointFromRootChain(machine0, rootChainProxyAddress);
+        const checkpointCountFromRootChain = await getLatestCheckpointFromRootChain(machine0, rootChainProxyAddress);
         if(checkpointCountFromRootChain > 0) {
             console.log("📍Checkpoint found on Root chain ✅ ; Count: ", checkpointCountFromRootChain);
         } else {
             console.log("📍Awaiting Checkpoint on Root chain 🚌")
         }
 
-        var firstStateSyncTx = await checkStateSyncTx(machine0,1);
+        const firstStateSyncTx = await checkStateSyncTx(machine0, 1);
+        let stateSyncTxList
         if (firstStateSyncTx) {
             let timeOfFirstStateSyncTx = firstStateSyncTx.record_time
             let firstEpochTime = parseInt(new Date(timeOfFirstStateSyncTx).getTime() / 1000);
             let currentEpochTime = parseInt(new Date().getTime() / 1000);
-            let stateSyncTxList = await getStateSyncTxList(machine0,firstEpochTime,currentEpochTime);
+            stateSyncTxList = await getStateSyncTxList(machine0,firstEpochTime,currentEpochTime);
             if (stateSyncTxList) {
-                
                 let lastStateID =  stateSyncTxList.length
                 let lastStateSyncTxHash = stateSyncTxList[lastStateID-1].tx_hash
                 console.log("📍StateSyncs found on Heimdall ✅ ; Count: ", lastStateID, " ; Last Tx Hash: ", lastStateSyncTxHash);
             }
-            
+
         } else {
             console.log("📍Awaiting StateSync 🚌")
         }
@@ -173,6 +171,10 @@ export async function monitor() {
             console.log("📍LastStateId on Bor: ", lastStateId);
         }else {
             console.log("📍Unable to fetch LastStateId ")
+        }
+
+        if(checkpointCount > 0 && checkpointCountFromRootChain > 0 && lastStateId && stateSyncTxList) {
+            complete = true
         }
 
     }
