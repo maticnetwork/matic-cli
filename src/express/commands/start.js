@@ -1,7 +1,7 @@
+import { editMaticCliDockerYAMLConfig, editMaticCliRemoteYAMLConfig, getDevnetId, splitAndGetHostIp, splitToArray } from "../common/config-utils";
+import { maxRetries, runScpCommand, runSshCommand } from "../common/remote-worker";
 import yaml from "js-yaml";
 import fs from "fs";
-import {editMaticCliDockerYAMLConfig, editMaticCliRemoteYAMLConfig, getDevnetId, splitAndGetHostIp, splitToArray} from "../common/config-utils";
-import {maxRetries, runScpCommand, runSshCommand} from "../common/remote-worker";
 
 const shell = require("shelljs");
 const timer = ms => new Promise(res => setTimeout(res, ms))
@@ -333,7 +333,7 @@ async function runRemoteSetupWithMaticCLI(ips, devnetId) {
 export async function start() {
 
     var devnetId = getDevnetId()
-    require('dotenv').config({path: `${process.cwd()}/.env.devnet${devnetId}`})
+    require('dotenv').config({path: `${process.cwd()}/.env`})
     shell.exec(`terraform workspace select devnet-${devnetId}`)
 
     let devnetType = process.env.TF_VAR_DOCKERIZED === "yes" ? "docker" : "remote"
@@ -367,5 +367,5 @@ export async function start() {
     } else {
         await runRemoteSetupWithMaticCLI(ips, devnetId);
     }
-    
+
 }

@@ -1,8 +1,9 @@
+import { loadConfig, splitToArray } from "../common/config-utils";
+
+const { runScpCommand, runSshCommand, maxRetries } = require("../common/remote-worker");
+const { installDocker } = require("./start.js")
 const yaml = require("js-yaml");
 const fs = require("fs");
-const {runScpCommand, runSshCommand, maxRetries} = require("../common/remote-worker");
-const {installDocker} = require("./start.js")
-import {getDevnetId, loadConfig, splitToArray} from "../common/config-utils";
 
 const timer = ms => new Promise(res => setTimeout(res, ms))
 
@@ -24,8 +25,7 @@ export async function setDatadogAPIKey(value, doc) {
 export async function setupDatadog() {
 
     let doc
-    var devnetId = getDevnetId()
-    require('dotenv').config({path: `${process.cwd()}/.env.devnet${devnetId}`})
+    require('dotenv').config({path: `${process.cwd()}/.env`})
 
     if (process.env.TF_VAR_DOCKERIZED === 'yes') {
         console.log("Not supported for datadog at the moment")

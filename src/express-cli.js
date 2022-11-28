@@ -8,6 +8,7 @@ import { monitor } from "./express/commands/monitor";
 import { restartAll, restartBor, restartHeimdall } from "./express/commands/restart";
 import { cleanup } from "./express/commands/cleanup";
 import { setupDatadog } from "./express/commands/setup-datadog";
+import { checkDir } from "./express/common/files-utils";
 import { program } from "commander";
 import pkg from "../package.json";
 
@@ -41,8 +42,7 @@ export async function cli() {
 
     if (options.init) {
         console.log("📍Command --init");
-        var match = checkDir(true)
-        if (match !== "matic-cli") {
+        if (!checkDir(true)) {
             console.log("❌ The command is supposed to be executed from the project root!");
             process.exit(1)
         }
@@ -51,11 +51,11 @@ export async function cli() {
 
     else if (options.start) {
         console.log("📍Command --start");
-        console.log("⛔ If you are targeting an already existing devnet, this command will only work if all bor ipc sessions have been manually closed...")
         if (!checkDir(false)) {
             console.log("❌ The command is not called from the appropriate devnet directory!");
             process.exit(1)
         }
+        console.log("⛔ If you are targeting an already existing devnet, this command will only work if all bor ipc sessions have been manually closed...")
         await timer(3000)
         await start();
     }
@@ -71,81 +71,81 @@ export async function cli() {
 
     else if (options.updateAll) {
         console.log("📍Command --update-all [index] ");
-        console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
-        console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
         if (!checkDir(false)) {
             console.log("❌ The command is not called from the appropriate devnet directory!");
             process.exit(1)
         }
+        console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
+        console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
         await timer(3000)
         await updateAll(options.updateAll)
     }
 
     else if (options.updateBor) {
         console.log("📍Command --update-bor [index] ");
-        console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
-        console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
         if (!checkDir(false)) {
             console.log("❌ The command is not called from the appropriate devnet directory!");
             process.exit(1)
         }
+        console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
+        console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
         await timer(3000)
         await updateBor(options.updateBor);
     }
 
     else if (options.updateHeimdall) {
         console.log("📍Command --update-heimdall [index] ");
-        console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
         if (!checkDir(false)) {
             console.log("❌ The command is not called from the appropriate devnet directory!");
             process.exit(1)
         }
+        console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
         await timer(3000)
         await updateHeimdall(options.updateHeimdall);
     }
 
     else if (options.restartAll) {
         console.log("📍Command --restart-all [index] ");
-        console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
-        console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
         if (!checkDir(false)) {
             console.log("❌ The command is not called from the appropriate devnet directory!");
             process.exit(1)
         }
+        console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
+        console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
         await timer(3000)
         await restartAll(options.restartAll);
     }
 
     else if (options.restartBor) {
         console.log("📍Command --restart-bor [index] ");
-        console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
-        console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
         if (!checkDir(false)) {
             console.log("❌ The command is not called from the appropriate devnet directory!");
             process.exit(1)
         }
+        console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
+        console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
         await timer(3000)
         await restartBor(options.restartBor);
     }
 
     else if (options.restartHeimdall) {
         console.log("📍Command --restart-heimdall [index] ");
-        console.log("⛔ This command is only available for non-dockerized devnets...")
         if (!checkDir(false)) {
             console.log("❌ The command is not called from the appropriate devnet directory!");
             process.exit(1)
         }
+        console.log("⛔ This command is only available for non-dockerized devnets...")
         await restartHeimdall(options.restartHeimdall);
     }
 
     else if (options.cleanup) {
         console.log("📍Command --cleanup ");
-        console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
-        console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
         if (!checkDir(false)) {
             console.log("❌ The command is not called from the appropriate devnet directory!");
             process.exit(1)
         }
+        console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
+        console.log("⛔ This will only work if all bor ipc sessions have been manually closed...")
         await timer(3000)
         await cleanup();
     }
@@ -162,11 +162,11 @@ export async function cli() {
 
     else if (options.stress) {
         console.log("📍Command --stress ");
-        console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
         if (!checkDir(false)) {
             console.log("❌ The command is not called from the appropriate devnet directory!");
             process.exit(1)
         }
+        console.log("⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...")
         await timer(3000)
         if (options.stress === "fund") {
             await startStressTest(true);
@@ -194,18 +194,4 @@ export async function cli() {
         await timer(3000)
         await setupDatadog();
     }
-}
-
-
-function checkDir(isInvokedFromRoot) {
-    var path = process.cwd()
-    var dirArr = path.split("/")
-    var dir = dirArr[dirArr.length - 1]
-
-    if (isInvokedFromRoot) {
-        return dir
-    } else {
-        return dir.match(/^devnet-(\d)/)
-    }
-
 }

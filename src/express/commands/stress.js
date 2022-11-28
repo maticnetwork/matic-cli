@@ -1,13 +1,13 @@
 import { getDevnetId, loadConfig } from "../common/config-utils";
 
-const shell = require("shelljs");
 const {runScpCommand, maxRetries} = require("../common/remote-worker");
+const shell = require("shelljs");
 
 export async function startStressTest(fund) {
-   
+
     let doc = await loadConfig("remote")
     let devnetId = getDevnetId()
-    require('dotenv').config({path: `${process.cwd()}/.env.devnet${devnetId}`})
+    require('dotenv').config({path: `${process.cwd()}/.env`})
 
     if (doc['devnetBorHosts'].length > 1) {
         console.log("📍Monitoring the first node", doc['devnetBorHosts'][0]);

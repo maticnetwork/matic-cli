@@ -1,8 +1,6 @@
-import { getDevnetId, loadConfig } from "../common/config-utils";
+import { loadConfig } from "../common/config-utils";
 
 const fetch = require("node-fetch");
-const yaml = require("js-yaml");
-const fs = require("fs");
 const Web3 = require('web3');
 const timer = ms => new Promise(res => setTimeout(res, ms))
 const {runScpCommand, maxRetries} = require("../common/remote-worker");
@@ -90,7 +88,7 @@ async function getStateSyncTxList(ip,startTime,endTime) {
 
 async function lastStateIdFromBor(ip) {
     let web3 = new Web3(`http://${ip}:8545`);
-    
+
     let StateReceiverContract = await new web3.eth.Contract(lastStateIdABI, stateReceiverAddress );
     let lastStateId = await StateReceiverContract.methods.lastStateId().call();
 
@@ -99,7 +97,7 @@ async function lastStateIdFromBor(ip) {
 
 async function getLatestCheckpointFromRootChain(ip, rootChainProxyAddress){
     let web3 = new Web3(`http://${ip}:9545`);
-    
+
     let RootChainContract = await new web3.eth.Contract(currentHeaderBlockABI, rootChainProxyAddress);
     let currentHeaderBlock = await RootChainContract.methods.currentHeaderBlock().call();
     let lastestCheckpoint = currentHeaderBlock.toString().slice(0, -4);
@@ -109,10 +107,9 @@ async function getLatestCheckpointFromRootChain(ip, rootChainProxyAddress){
 
 export async function monitor() {
 
-    let devnetId = getDevnetId()
-    require('dotenv').config({path: `${process.cwd()}/.env.devnet${devnetId}`})
+    require('dotenv').config({path: `${process.cwd()}/.env`})
     let devnetType = process.env.TF_VAR_DOCKERIZED === "yes" ? "docker" : "remote"
-    
+
     let doc = await loadConfig(devnetType)
 
     if (doc['devnetBorHosts'].length > 0) {
@@ -159,12 +156,12 @@ export async function monitor() {
             let currentEpochTime = parseInt(new Date().getTime() / 1000);
             let stateSyncTxList = await getStateSyncTxList(machine0,firstEpochTime,currentEpochTime);
             if (stateSyncTxList) {
-                
+
                 let lastStateID =  stateSyncTxList.length
                 let lastStateSyncTxHash = stateSyncTxList[lastStateID-1].tx_hash
                 console.log("📍StateSyncs found on Heimdall ✅ ; Count: ", lastStateID, " ; Last Tx Hash: ", lastStateSyncTxHash);
             }
-            
+
         } else {
             console.log("📍Awaiting StateSync 🚌")
         }

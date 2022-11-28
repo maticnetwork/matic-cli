@@ -1,10 +1,8 @@
 import yaml from "js-yaml";
 import fs from "fs";
-import os from "os"
 
 export async function loadConfig(devnetType) {
-    let doc = await yaml.load(fs.readFileSync(`./${devnetType}-setup-config.yaml`, 'utf-8')) 
-    return doc
+    return yaml.load(fs.readFileSync(`./${devnetType}-setup-config.yaml`, 'utf-8'));
 }
 
 export async function editMaticCliRemoteYAMLConfig() {
@@ -118,7 +116,7 @@ export function splitToArray(value) {
         console.log("📍Exiting...");
         process.exit(1)
     }
-    
+
 }
 
 export function splitAndGetHostIp(value) {
@@ -151,9 +149,7 @@ export async function checkAndReturnVMIndex(n, doc) {
 }
 
 export function getDevnetId() {
-    var arr = process.cwd().split("/")
-    var arr2 = arr[arr.length-1].split("-")
-    var devnetId = arr2[1]
-
-    return devnetId
+    const devnetFolders = process.cwd().split("/");
+    const ids = devnetFolders[devnetFolders.length - 1].split("-");
+    return ids[1]
 }
