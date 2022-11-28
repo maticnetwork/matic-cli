@@ -1,8 +1,10 @@
+import { splitToArray } from "../common/config-utils";
+
+const { runScpCommand, runSshCommand, maxRetries } = require("../common/remote-worker");
+const { installDocker } = require("./start.js")
+
 const yaml = require("js-yaml");
 const fs = require("fs");
-const {runScpCommand, runSshCommand, maxRetries} = require("../common/remote-worker");
-const {installDocker} = require("./start.js")
-import {splitToArray} from "../common/config-utils";
 
 const timer = ms => new Promise(res => setTimeout(res, ms))
 
@@ -41,18 +43,18 @@ export async function setupDatadog() {
 
 
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
-    var envName
+    let envName;
 
     for(let i = 0; i < doc['devnetBorHosts'].length ; i++) {
-        var host = doc['devnetBorHosts'][i]
-        var user = borUsers[i]
+        const host = doc['devnetBorHosts'][i];
+        const user = borUsers[i];
 
         console.log("📍Monitoring the node", host);
 
-        var apiKey = process.env.DD_API_KEY
+        const apiKey = process.env.DD_API_KEY;
         envName = process.env.TF_VAR_VM_NAME
         if(envName === undefined) {
-            let x = parseInt(Math.random() * 1000000);
+            let x = parseInt((Math.random() * 1000000).toString());
             envName = `devnet-${x}`
         }
 
@@ -65,7 +67,7 @@ export async function setupDatadog() {
         console.log(`📍Docker installed`)
 
         let dd_doc = await yaml.load(fs.readFileSync('./configs/devnet/otel-config-dd.yaml', 'utf8'), undefined);
-        setDatadogAPIKey(apiKey, dd_doc)
+        await setDatadogAPIKey(apiKey, dd_doc)
 
         let src = `./configs/devnet/otel-config-dd.yaml`
         let dest = `${user}@${host}:~/otel-config-dd.yaml`
@@ -86,7 +88,7 @@ export async function setupDatadog() {
         await runSshCommand(`${user}@${host}`, command, maxRetries)
 
         // revert dd api key
-        setDatadogAPIKey('${DD_API_KEY}', dd_doc)
+        await setDatadogAPIKey('${DD_API_KEY}', dd_doc)
     }
 
     console.log("📍Datadog devnet env : ", envName)

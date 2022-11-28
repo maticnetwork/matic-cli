@@ -41,7 +41,7 @@ const currentHeaderBlockABI = [
     }
 ]
 
-var stateReceiverAddress = '0x0000000000000000000000000000000000001001'
+const stateReceiverAddress = '0x0000000000000000000000000000000000001001';
 
 async function checkCheckpoint(ip) {
     let url = `http://${ip}:1317/checkpoints/count`;
