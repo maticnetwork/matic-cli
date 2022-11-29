@@ -1,47 +1,45 @@
-import { loadConfig } from "../common/config-utils";
-
 const fetch = require("node-fetch");
 const Web3 = require('web3');
 const timer = ms => new Promise(res => setTimeout(res, ms))
-const {runScpCommand, maxRetries} = require("../common/remote-worker");
+const { runScpCommand, maxRetries } = require("../common/remote-worker");
 
 const lastStateIdABI = [
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "lastStateId",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	}
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "lastStateId",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    }
 ]
 
 const currentHeaderBlockABI = [
     {
-        "constant":true,
-        "inputs":[],
-        "name":"currentHeaderBlock",
-        "outputs":  [
+        "constant": true,
+        "inputs": [],
+        "name": "currentHeaderBlock",
+        "outputs": [
             {
-                "internalType":"uint256",
-                "name":"",
-                "type":"uint256"
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
             }
         ],
-        "payable":false,
-        "stateMutability":"view",
-        "type":"function"
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
     }
 ]
 
-var stateReceiverAddress = '0x0000000000000000000000000000000000001001'
+const stateReceiverAddress = '0x0000000000000000000000000000000000001001';
 
 async function checkCheckpoint(ip) {
     let url = `http://${ip}:1317/checkpoints/count`;
@@ -56,7 +54,7 @@ async function checkCheckpoint(ip) {
     return 0
 }
 
-async function checkStateSyncTx(ip,id) {
+async function checkStateSyncTx(ip, id) {
     let url = `http://${ip}:1317/clerk/event-record/${id}`;
     let response = await fetch(url);
     let responseJson = await response.json();
@@ -71,7 +69,7 @@ async function checkStateSyncTx(ip,id) {
     return undefined
 }
 
-async function getStateSyncTxList(ip,startTime,endTime) {
+async function getStateSyncTxList(ip, startTime, endTime) {
     let url = `http://${ip}:1317/clerk/event-record/list?from-time=${startTime}&to-time=${endTime}&page=1&limit=200`;
     let response = await fetch(url);
     let responseJson = await response.json();
@@ -89,20 +87,16 @@ async function getStateSyncTxList(ip,startTime,endTime) {
 async function lastStateIdFromBor(ip) {
     let web3 = new Web3(`http://${ip}:8545`);
 
-    let StateReceiverContract = await new web3.eth.Contract(lastStateIdABI, stateReceiverAddress );
-    let lastStateId = await StateReceiverContract.methods.lastStateId().call();
-
-    return lastStateId
+    let StateReceiverContract = await new web3.eth.Contract(lastStateIdABI, stateReceiverAddress);
+    return await StateReceiverContract.methods.lastStateId().call()
 }
 
-async function getLatestCheckpointFromRootChain(ip, rootChainProxyAddress){
+async function getLatestCheckpointFromRootChain(ip, rootChainProxyAddress) {
     let web3 = new Web3(`http://${ip}:9545`);
 
     let RootChainContract = await new web3.eth.Contract(currentHeaderBlockABI, rootChainProxyAddress);
     let currentHeaderBlock = await RootChainContract.methods.currentHeaderBlock().call();
-    let lastestCheckpoint = currentHeaderBlock.toString().slice(0, -4);
-
-    return lastestCheckpoint
+    return currentHeaderBlock.toString().slice(0, -4)
 }
 
 export async function monitor() {
@@ -142,34 +136,33 @@ export async function monitor() {
             console.log("📍Awaiting Checkpoint on Heimdall 🚌")
         }
 
-        var checkpointCountFromRootChain = await getLatestCheckpointFromRootChain(machine0, rootChainProxyAddress);
-        if(checkpointCountFromRootChain > 0) {
+        const checkpointCountFromRootChain = await getLatestCheckpointFromRootChain(machine0, rootChainProxyAddress);
+        if (checkpointCountFromRootChain > 0) {
             console.log("📍Checkpoint found on Root chain ✅ ; Count: ", checkpointCountFromRootChain);
         } else {
             console.log("📍Awaiting Checkpoint on Root chain 🚌")
         }
 
-        var firstStateSyncTx = await checkStateSyncTx(machine0,1);
+        const firstStateSyncTx = await checkStateSyncTx(machine0, 1);
+        let stateSyncTxList
         if (firstStateSyncTx) {
             let timeOfFirstStateSyncTx = firstStateSyncTx.record_time
             let firstEpochTime = parseInt(new Date(timeOfFirstStateSyncTx).getTime() / 1000);
             let currentEpochTime = parseInt(new Date().getTime() / 1000);
-            let stateSyncTxList = await getStateSyncTxList(machine0,firstEpochTime,currentEpochTime);
+            stateSyncTxList = await getStateSyncTxList(machine0, firstEpochTime, currentEpochTime);
             if (stateSyncTxList) {
-
-                let lastStateID =  stateSyncTxList.length
-                let lastStateSyncTxHash = stateSyncTxList[lastStateID-1].tx_hash
+                let lastStateID = stateSyncTxList.length
+                let lastStateSyncTxHash = stateSyncTxList[lastStateID - 1].tx_hash
                 console.log("📍StateSyncs found on Heimdall ✅ ; Count: ", lastStateID, " ; Last Tx Hash: ", lastStateSyncTxHash);
             }
-
         } else {
             console.log("📍Awaiting StateSync 🚌")
         }
 
         let lastStateId = await lastStateIdFromBor(machine0);
-        if(lastStateId){
+        if (lastStateId) {
             console.log("📍LastStateId on Bor: ", lastStateId);
-        }else {
+        } else {
             console.log("📍Unable to fetch LastStateId ")
         }
 
