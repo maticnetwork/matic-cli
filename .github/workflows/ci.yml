@@ -22,7 +22,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          path: matic-cli
           ref: arpit/pos-655-2
 
       - name: Install dependencies on Linux
@@ -40,22 +39,21 @@ jobs:
           node-version: '10.17.0'
           cache: 'npm'
           cache-dependency-path: |
-            matic-cli/package-lock.json
-            matic-cli/devnet/code/contracts/package-lock.json
-            matic-cli/devnet/code/genesis-contracts/package-lock.json
-            matic-cli/devnet/code/genesis-contracts/matic-contracts/package-lock.json
+            package-lock.json
+            devnet/code/contracts/package-lock.json
+            devnet/code/genesis-contracts/package-lock.json
+            devnet/code/genesis-contracts/matic-contracts/package-lock.json
 
       - name: Bootstrap devnet
         run: |
-          cd matic-cli
           npm install --prefer-offline --no-audit --progress=false
           mkdir devnet
           cd devnet
-          ../bin/matic-cli setup devnet -c ../.github/matic-cli-config.yml
+          bin/matic-cli setup devnet -c .github/matic-cli-config.yml
 
       - name: Launch devnet
         run: |
-          cd matic-cli/devnet
+          cd devnet
           bash docker-ganache-start.sh
           bash docker-heimdall-start-all.sh
           bash docker-bor-setup.sh
@@ -69,10 +67,10 @@ jobs:
       - name: Run smoke tests
         run: |
           echo "Deposit 100 matic for each account to bor network"
-          cd matic-cli/devnet/code/contracts
+          cd devnet/code/contracts
           npm run truffle exec scripts/deposit.js -- --network development $(jq -r .root.tokens.MaticToken contractAddresses.json) 100000000000000000000
           cd -
-          timeout 20m bash matic-cli/.github/smoke_test.sh
+          timeout 20m bash .github/smoke_test.sh
 
       - name: Upload logs
         if: always()
@@ -80,17 +78,17 @@ jobs:
         with:
           name: logs_${{ github.run_id }}
           path: |
-            matic-cli/devnet/logs
+            devnet/logs
 
       - name: Package code and chain data
         if: always()
         run: |
-          cd matic-cli/devnet
+          cd devnet
           docker compose down --remove-orphans
           cd -
           mkdir -p ${{ github.run_id }}/matic-cli
           sudo mv bor ${{ github.run_id }}
-          sudo mv matic-cli/devnet ${{ github.run_id }}/matic-cli
+          sudo mv devnet ${{ github.run_id }}/matic-cli
           sudo tar czf code.tar.gz ${{ github.run_id }}
 
       - name: Upload code and chain data
