@@ -51,6 +51,8 @@ jobs:
           npm install --prefer-offline --no-audit --progress=false
           mkdir devnet
           cd devnet
+          pwd 
+          cat ../.github/matic-cli-config.yml
           ../bin/matic-cli setup devnet -c ../.github/matic-cli-config.yml
 
       - name: Launch devnet
