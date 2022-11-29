@@ -49,7 +49,7 @@ jobs:
           npm install --prefer-offline --no-audit --progress=false
           mkdir devnet
           cd devnet
-          bin/matic-cli setup devnet -c .github/matic-cli-config.yml
+          ./bin/matic-cli setup devnet -c ./.github/matic-cli-config.yml
 
       - name: Launch devnet
         run: |
@@ -67,10 +67,10 @@ jobs:
       - name: Run smoke tests
         run: |
           echo "Deposit 100 matic for each account to bor network"
-          cd devnet/code/contracts
+          cd ./devnet/code/contracts
           npm run truffle exec scripts/deposit.js -- --network development $(jq -r .root.tokens.MaticToken contractAddresses.json) 100000000000000000000
           cd -
-          timeout 20m bash .github/smoke_test.sh
+          timeout 20m bash ./.github/smoke_test.sh
 
       - name: Upload logs
         if: always()
@@ -78,12 +78,12 @@ jobs:
         with:
           name: logs_${{ github.run_id }}
           path: |
-            devnet/logs
+            ./devnet/logs
 
       - name: Package code and chain data
         if: always()
         run: |
-          cd devnet
+          cd ./devnet
           docker compose down --remove-orphans
           cd -
           mkdir -p ${{ github.run_id }}/matic-cli
