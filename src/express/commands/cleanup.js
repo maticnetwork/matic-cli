@@ -1,12 +1,12 @@
-import yaml from "js-yaml";
-import fs from "fs";
-import {splitToArray} from "../common/config-utils";
-import {maxRetries, runSshCommand} from "../common/remote-worker";
+import { loadConfig, splitToArray } from "../common/config-utils";
+import { maxRetries, runSshCommand } from "../common/remote-worker";
 
 const timer = ms => new Promise(res => setTimeout(res, ms))
 
 export async function cleanup() {
-    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
+
+    require('dotenv').config({path: `${process.cwd()}/.env`})
+    let doc = await loadConfig("remote")
     await stopServices(doc)
     await cleanupServices(doc)
     await startServices(doc)
@@ -63,7 +63,7 @@ async function cleanupServices(doc) {
         i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
     }
 
-    let cleanupServicesTasks = nodeIps.map(async(ip) => {      
+    let cleanupServicesTasks = nodeIps.map(async(ip) => {
         if (isHostMap.get(ip)) {
             console.log("📍Cleaning up ganache on machine " + ip + " ...")
             let command = `rm -rf ~/data/ganache-db && rm -rf ~/matic-cli/devnet/data/ganache-db`
@@ -140,11 +140,11 @@ async function startServices(doc) {
         console.log("📍Starting bor on machine " + ip + " ...")
         command = `sudo systemctl start bor.service`
         await runSshCommand(ip, command, maxRetries)
-        
+
     })
 
     await Promise.all(startServicesTasks)
-  
+
 }
 
 async function deployBorContractsAndStateSync(doc) {

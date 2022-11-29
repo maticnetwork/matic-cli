@@ -1,16 +1,13 @@
-const yaml = require("js-yaml");
-const fs = require("fs");
-const {runScpCommand, runSshCommand, maxRetries} = require("../common/remote-worker");
+import { loadConfig } from "../common/config-utils";
+
+const { runScpCommand, runSshCommand, maxRetries } = require("../common/remote-worker");
 
 export async function sendStateSyncTx() {
 
-    let doc
+    require('dotenv').config({path: `${process.cwd()}/.env`})
+    let devnetType = process.env.TF_VAR_DOCKERIZED === "yes" ? "docker" : "remote"
 
-    if (process.env.TF_VAR_DOCKERIZED === 'yes') {
-        doc = await yaml.load(fs.readFileSync('./configs/devnet/docker-setup-config.yaml', 'utf8'));
-    } else {
-        doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
-    }
+    let doc = await loadConfig(devnetType)
 
     if (doc['devnetBorHosts'].length > 0) {
         console.log("📍Monitoring the first node", doc['devnetBorHosts'][0]);
@@ -25,7 +22,7 @@ export async function sendStateSyncTx() {
     let dest = `./contractAddresses.json`
     await runScpCommand(src, dest, maxRetries)
 
-    let contractAddresses = require("../../../contractAddresses.json");
+    let contractAddresses = require(`${process.cwd()}/contractAddresses.json`);
 
     let MaticToken = contractAddresses.root.tokens.MaticToken;
 

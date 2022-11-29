@@ -45,13 +45,19 @@ func main() {
 		return
 	}
 
-	RPC_SERVERS = getRPCs()
+	devnetIdStr := os.Args[1]
+	devnetId, err := strconv.Atoi(devnetIdStr)
+	if err != nil {
+		fmt.Println("Invalid devnet Id: ", err)
+		return
+	}
+	RPC_SERVERS = getRPCs(devnetId)
 	if len(RPC_SERVERS) == 0 {
 		fmt.Println("Invalid RPC_SERVER flag")
 		return
 	}
 
-	SK = getSecretKey()
+	SK = getSecretKey(devnetId)
 
 	TPS := os.Getenv("SPEED")
 	if len(TPS) == 0 {
@@ -91,8 +97,8 @@ type Signer struct {
 	PublicKey string `json:"pub_key"`
 }
 
-func getSecretKey() string {
-	filename := "../../signer-dump.json"
+func getSecretKey(devnetId int) string {
+	filename := fmt.Sprintf("../../deployments/devnet-%v/signer-dump.json", devnetId)
 	jsonFile, err := os.Open(filename)
 	if err != nil {
 		fmt.Printf("failed to open json file: %s, error: %v", filename, err)
@@ -119,13 +125,14 @@ type YamlFile struct {
 	DevnetBorHosts []string `yaml:"devnetBorHosts"`
 }
 
-func getRPCs() []string {
+func getRPCs(devnetId int) []string {
 
 	var yamldoc YamlFile
 
 	rpcs := []string{}
 
-	yamlFile, err := ioutil.ReadFile("../../configs/devnet/remote-setup-config.yaml")
+	pathToConfig := fmt.Sprintf("../../deployments/devnet-%v/remote-setup-config.yaml", devnetId)
+	yamlFile, err := ioutil.ReadFile(pathToConfig)
 	if err != nil {
 		log.Printf("yamlFile.Get err   #%v ", err)
 	}
@@ -331,6 +338,7 @@ func startLoadbot(ctx context.Context, clients []*ethclient.Client, chainID *big
 	// Fire off transactions
 	period := 1 * time.Second / time.Duration(N)
 	ticker := time.NewTicker(period)
+	defer ticker.Stop()
 
 	resetChan := make(chan bool)
 

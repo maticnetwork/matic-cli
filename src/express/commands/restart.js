@@ -1,16 +1,13 @@
-import {pullAndRestartBor, pullAndRestartHeimdall} from "./update";
-import {checkAndReturnVMIndex} from "../common/config-utils";
+import { pullAndRestartBor, pullAndRestartHeimdall } from "./update";
+import { checkAndReturnVMIndex, loadConfig } from "../common/config-utils";
 
-const yaml = require("js-yaml");
-const fs = require("fs");
-const {splitToArray} = require("../common/config-utils");
+const { splitToArray } = require("../common/config-utils");
 
 export async function restartAll(n) {
 
-    let vmIndex = await checkAndReturnVMIndex(n)
-    console.log("📍Will restart bor and heimdall")
-
-    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
+    require('dotenv').config({path: `${process.cwd()}/.env`})
+    let doc = await loadConfig("remote")
+    let vmIndex = await checkAndReturnVMIndex(n, doc)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
     let nodeIps = []
     let hostToIndexMap = new Map()
@@ -41,10 +38,9 @@ export async function restartAll(n) {
 
 export async function restartBor(n) {
 
-    let vmIndex = await checkAndReturnVMIndex(n)
-    console.log("📍Will restart bor")
-
-    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
+    require('dotenv').config({path: `${process.cwd()}/.env`})
+    let doc = await loadConfig("remote")
+    let vmIndex = await checkAndReturnVMIndex(n, doc)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
     let nodeIps = []
     let hostToIndexMap = new Map()
@@ -73,10 +69,9 @@ export async function restartBor(n) {
 
 export async function restartHeimdall(n) {
 
-    let vmIndex = await checkAndReturnVMIndex(n)
-    console.log("📍Will restart heimdall")
-
-    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
+    require('dotenv').config({path: `${process.cwd()}/.env`})
+    let doc = await loadConfig("remote")
+    let vmIndex = await checkAndReturnVMIndex(n, doc)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
     let nodeIps = []
     let hostToIndexMap = new Map()
@@ -95,7 +90,7 @@ export async function restartHeimdall(n) {
         })
 
         await Promise.all(restartHeimdallTasks)
-        
+
     } else {
         vmIndex === 0 ? user = `${doc['ethHostUser']}` : user = `${borUsers[vmIndex]}`
         ip = `${user}@${doc['devnetBorHosts'][vmIndex]}`

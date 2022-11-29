@@ -1,14 +1,14 @@
+import { editMaticCliDockerYAMLConfig, editMaticCliRemoteYAMLConfig, getDevnetId, splitAndGetHostIp, splitToArray } from "../common/config-utils";
+import { maxRetries, runScpCommand, runSshCommand } from "../common/remote-worker";
 import yaml from "js-yaml";
 import fs from "fs";
-import {editMaticCliDockerYAMLConfig, editMaticCliRemoteYAMLConfig, splitAndGetHostIp, splitToArray} from "../common/config-utils";
-import {maxRetries, runScpCommand, runSshCommand} from "../common/remote-worker";
 
 const shell = require("shelljs");
 const timer = ms => new Promise(res => setTimeout(res, ms))
 
-async function terraformApply() {
+async function terraformApply(devnetId) {
     console.log("📍Executing terraform apply...")
-    shell.exec(`terraform apply -auto-approve`, {
+    shell.exec(`terraform -chdir=../../deployments/devnet-${devnetId} apply -auto-approve`, {
         env: {
             ...process.env,
         }
@@ -26,9 +26,9 @@ async function terraformOutput() {
     return stdout
 }
 
-async function installRequiredSoftwareOnRemoteMachines(ips, devnetType) {
+async function installRequiredSoftwareOnRemoteMachines(ips, devnetType, devnetId) {
 
-    let doc = await yaml.load(fs.readFileSync(`./configs/devnet/${devnetType}-setup-config.yaml`, 'utf8'));
+    let doc = await yaml.load(fs.readFileSync(`../../deployments/devnet-${devnetId}/${devnetType}-setup-config.yaml`, 'utf8'));
 
     let ipsArray = splitToArray(ips)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
@@ -164,9 +164,9 @@ export async function installDocker(ip, user) {
     await runSshCommand(ip, command, maxRetries)
 }
 
-async function prepareMaticCLI(ips, devnetType) {
+async function prepareMaticCLI(ips, devnetType, devnetId) {
 
-    let doc = await yaml.load(fs.readFileSync(`./configs/devnet/${devnetType}-setup-config.yaml`, 'utf8'));
+    let doc = await yaml.load(fs.readFileSync(`../../deployments/devnet-${devnetId}/${devnetType}-setup-config.yaml`, 'utf8'));
     let ipsArray = splitToArray(ips)
     let ip = `${doc['ethHostUser']}@${ipsArray[0]}`
 
@@ -186,9 +186,9 @@ async function prepareMaticCLI(ips, devnetType) {
     await runSshCommand(ip, command, maxRetries)
 }
 
-async function eventuallyCleanupPreviousDevnet(ips, devnetType) {
+async function eventuallyCleanupPreviousDevnet(ips, devnetType, devnetId) {
 
-    let doc = await yaml.load(fs.readFileSync(`./configs/devnet/${devnetType}-setup-config.yaml`, 'utf8'));
+    let doc = await yaml.load(fs.readFileSync(`../../deployments/devnet-${devnetId}/${devnetType}-setup-config.yaml`, 'utf8'));
 
     let ipsArray = splitToArray(ips)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
@@ -245,8 +245,8 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType) {
 
 }
 
-async function runDockerSetupWithMaticCLI(ips) {
-    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
+async function runDockerSetupWithMaticCLI(ips, devnetId) {
+    let doc = await yaml.load(fs.readFileSync(`../../deployments/devnet-${devnetId}/docker-setup-config.yaml`, 'utf8'));
     let ipsArray = splitToArray(ips)
     let ip = `${doc['ethHostUser']}@${ipsArray[0]}`
 
@@ -255,7 +255,7 @@ async function runDockerSetupWithMaticCLI(ips) {
     await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Copying docker matic-cli configurations...")
-    let src = `./configs/devnet/docker-setup-config.yaml`
+    let src = `../../deployments/devnet-${devnetId}/docker-setup-config.yaml`
     let dest = `${doc['ethHostUser']}@${ipsArray[0]}:~/matic-cli/configs/devnet/docker-setup-config.yaml`
     await runScpCommand(src, dest, maxRetries)
 
@@ -300,9 +300,9 @@ async function runDockerSetupWithMaticCLI(ips) {
     console.log("📍bor ipc tests executed...")
 }
 
-async function runRemoteSetupWithMaticCLI(ips) {
+async function runRemoteSetupWithMaticCLI(ips, devnetId) {
 
-    let doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
+    let doc = await yaml.load(fs.readFileSync(`../../deployments/devnet-${devnetId}/remote-setup-config.yaml`, 'utf8'));
     let ipsArray = splitToArray(ips)
     let ip = `${doc['ethHostUser']}@${ipsArray[0]}`
 
@@ -311,7 +311,7 @@ async function runRemoteSetupWithMaticCLI(ips) {
     await runSshCommand(ip, command, maxRetries)
 
     console.log("📍Copying remote matic-cli configurations...")
-    let src = `./configs/devnet/remote-setup-config.yaml`
+    let src = `../../deployments/devnet-${devnetId}/remote-setup-config.yaml`
     let dest = `${doc['ethHostUser']}@${ipsArray[0]}:~/matic-cli/configs/devnet/remote-setup-config.yaml`
     await runScpCommand(src, dest, maxRetries)
 
@@ -332,32 +332,40 @@ async function runRemoteSetupWithMaticCLI(ips) {
 
 export async function start() {
 
-    await terraformApply();
+    var devnetId = getDevnetId()
+    require('dotenv').config({path: `${process.cwd()}/.env`})
+    shell.exec(`terraform workspace select devnet-${devnetId}`)
+
+    let devnetType = process.env.TF_VAR_DOCKERIZED === "yes" ? "docker" : "remote"
+
+    await terraformApply(devnetId);
     let tfOutput = await terraformOutput();
     let ips = JSON.parse(tfOutput).instance_ips.value.toString();
     process.env.DEVNET_BOR_HOSTS = ips;
 
-    let devnetType
-    if (process.env.TF_VAR_DOCKERIZED === 'yes') {
+    shell.exec(`cp ../../configs/devnet/${devnetType}-setup-config.yaml ../../deployments/devnet-${devnetId}`)
+    shell.exec(`cp ../../configs/devnet/openmetrics-conf.yaml ../../deployments/devnet-${devnetId}`)
+    shell.exec(`cp ../../configs/devnet/otel-config-dd.yaml ../../deployments/devnet-${devnetId}`)
+
+    if (devnetType === "docker") {
         await editMaticCliDockerYAMLConfig();
-        devnetType = "docker"
-    } else {
+    } else{
         await editMaticCliRemoteYAMLConfig();
-        devnetType = "remote"
     }
 
     console.log("📍Waiting 30s for the VMs to initialize...")
     await timer(30000)
 
-    await installRequiredSoftwareOnRemoteMachines(ips, devnetType)
+    await installRequiredSoftwareOnRemoteMachines(ips, devnetType, devnetId)
 
-    await prepareMaticCLI(ips, devnetType)
+    await prepareMaticCLI(ips, devnetType, devnetId)
 
-    await eventuallyCleanupPreviousDevnet(ips, devnetType)
+    await eventuallyCleanupPreviousDevnet(ips, devnetType, devnetId)
 
-    if (process.env.TF_VAR_DOCKERIZED === 'yes') {
-        await runDockerSetupWithMaticCLI(ips);
+    if (devnetType === "docker") {
+        await runDockerSetupWithMaticCLI(ips, devnetId);
     } else {
-        await runRemoteSetupWithMaticCLI(ips);
+        await runRemoteSetupWithMaticCLI(ips, devnetId);
     }
+
 }

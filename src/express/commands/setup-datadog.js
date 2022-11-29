@@ -1,4 +1,4 @@
-import { splitToArray } from "../common/config-utils";
+import { loadConfig, splitToArray } from "../common/config-utils";
 
 const { runScpCommand, runSshCommand, maxRetries } = require("../common/remote-worker");
 const { installDocker } = require("./start.js")
@@ -13,7 +13,7 @@ export async function setDatadogAPIKey(value, doc) {
         doc['exporters']['datadog']['api']['key'] = value;
     }
 
-    fs.writeFile('./configs/devnet/otel-config-dd.yaml', yaml.dump(doc), (err) => {
+    fs.writeFile('./otel-config-dd.yaml', yaml.dump(doc), (err) => {
         if (err) {
             console.log("❌ Error while writing datadog YAML configs: \n", err)
             process.exit(1)
@@ -26,12 +26,13 @@ export async function setDatadogAPIKey(value, doc) {
 export async function setupDatadog() {
 
     let doc
+    require('dotenv').config({path: `${process.cwd()}/.env`})
 
     if (process.env.TF_VAR_DOCKERIZED === 'yes') {
         console.log("Not supported for datadog at the moment")
         return
     } else {
-        doc = await yaml.load(fs.readFileSync('./configs/devnet/remote-setup-config.yaml', 'utf8'));
+        doc = await loadConfig("remote");
     }
 
     if (doc['devnetBorHosts'].length > 0) {
@@ -69,11 +70,11 @@ export async function setupDatadog() {
         let dd_doc = await yaml.load(fs.readFileSync('./configs/devnet/otel-config-dd.yaml', 'utf8'), undefined);
         await setDatadogAPIKey(apiKey, dd_doc)
 
-        let src = `./configs/devnet/otel-config-dd.yaml`
+        let src = `./otel-config-dd.yaml`
         let dest = `${user}@${host}:~/otel-config-dd.yaml`
         await runScpCommand(src, dest, maxRetries)
 
-        src = `./configs/devnet/openmetrics-conf.yaml`
+        src = `./openmetrics-conf.yaml`
         dest = `${user}@${host}:~/conf.yaml`
         await runScpCommand(src, dest, maxRetries)
 
