@@ -13,3 +13,5 @@ contractAddresses.json
 signer-dump.json
 /configs/devnet/docker-setup-config.yaml
 /configs/devnet/remote-setup-config.yaml
+
+.dccache

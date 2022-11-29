@@ -37,7 +37,7 @@
     "pkg-install": "^1.0.0",
     "shelljs": "^0.8.5",
     "truffle-privatekey-provider": "^1.5.0",
-    "web3": "^1.7.4",
+    "web3": "^1.8.1",
     "yaml": "^1.10.2"
   },
   "files": [
