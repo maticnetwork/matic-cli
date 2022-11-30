@@ -1,11 +1,11 @@
-import { getDevnetId, loadConfig } from "../common/config-utils";
+import { getDevnetId, loadDevnetConfig } from "../common/config-utils";
 
 const {runScpCommand, maxRetries} = require("../common/remote-worker");
 const shell = require("shelljs");
 
 export async function startStressTest(fund) {
 
-    let doc = await loadConfig("remote")
+    let doc = await loadDevnetConfig("remote")
     let devnetId = getDevnetId()
     require('dotenv').config({path: `${process.cwd()}/.env`})
 
