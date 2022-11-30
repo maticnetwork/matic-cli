@@ -166,7 +166,7 @@ Please, make sure to install the following software/packages on the VMs.
 
 * Ganache CLI (only _host_)
     ```bash
-    sudo npm install -g ganache-cli
+    sudo npm install -g ganache
     ```
 
 ### Usage
