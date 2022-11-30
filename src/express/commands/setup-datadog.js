@@ -1,4 +1,4 @@
-import { loadConfig, splitToArray } from "../common/config-utils";
+import { loadDevnetConfig, splitToArray } from "../common/config-utils";
 
 const { runScpCommand, runSshCommand, maxRetries } = require("../common/remote-worker");
 const { installDocker } = require("./start.js")
@@ -32,7 +32,7 @@ export async function setupDatadog() {
         console.log("Not supported for datadog at the moment")
         return
     } else {
-        doc = await loadConfig("remote");
+        doc = await loadDevnetConfig("remote");
     }
 
     if (doc['devnetBorHosts'].length > 0) {
@@ -67,7 +67,7 @@ export async function setupDatadog() {
         await installDocker(`${user}@${host}`, user)
         console.log(`📍Docker installed`)
 
-        let dd_doc = await yaml.load(fs.readFileSync('./configs/devnet/otel-config-dd.yaml', 'utf8'), undefined);
+        let dd_doc = await yaml.load(fs.readFileSync('./otel-config-dd.yaml', 'utf8'), undefined);
         await setDatadogAPIKey(apiKey, dd_doc)
 
         let src = `./otel-config-dd.yaml`

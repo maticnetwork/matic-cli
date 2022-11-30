@@ -1,3 +1,5 @@
+import { loadDevnetConfig } from "../common/config-utils";
+
 const fetch = require("node-fetch");
 const Web3 = require('web3');
 const timer = ms => new Promise(res => setTimeout(res, ms))
@@ -104,7 +106,7 @@ export async function monitor() {
     require('dotenv').config({path: `${process.cwd()}/.env`})
     let devnetType = process.env.TF_VAR_DOCKERIZED === "yes" ? "docker" : "remote"
 
-    let doc = await loadConfig(devnetType)
+    let doc = await loadDevnetConfig(devnetType)
 
     if (doc['devnetBorHosts'].length > 0) {
         console.log("📍Monitoring the first node", doc['devnetBorHosts'][0]);
