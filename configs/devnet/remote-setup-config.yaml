@@ -4,7 +4,7 @@ borChainId: 15005
 heimdallChainId: heimdall-4052
 borBranch: c5569e4da9ebe0ce4e63aec571966c71234f7cfc
 heimdallBranch: develop
-contractsBranch: mardizzone/node-upgrade
+contractsBranch: c5569e4da9ebe0ce4e63aec571966c71234f7cfc
 genesisContractsBranch: mardizzone/node-upgrade
 sprintSize: 64
 blockNumber: '0'
