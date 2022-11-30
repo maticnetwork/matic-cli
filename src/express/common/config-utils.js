@@ -1,7 +1,7 @@
 import yaml from "js-yaml";
 import fs from "fs";
 
-export async function loadConfig(devnetType) {
+export async function loadDevnetConfig(devnetType) {
     return yaml.load(fs.readFileSync(`./${devnetType}-setup-config.yaml`, 'utf-8'));
 }
 
