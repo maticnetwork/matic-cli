@@ -28,40 +28,33 @@ jobs:
         continue-on-error: true
         run: |
           cd matic-cli
-          echo "Copying .env.example to .env ..."
           cp .env.example .env
-          echo "Setting specific .env vars ..."
           sed -i 's,YOUR_IDENTIFIER,matic-cli-ci,' .env
           sed -i 's,YOUR_AWS_ACCESS_KEY,TODO,' .env
           sed -i 's,YOUR_AWS_SECRET_KEY,TODO,' .env
           sed -i 's,aws-key,matic-cli-ci-key,' .env
-          sed -i 's,/absolute/path/to/your/,/home/runner/work/matic-cli/matic-cli/matic-cli/aws,' .env
+          sed -i 's,/absolute/path/to/your/,/home/runner/work/matic-cli/matic-cli/matic-cli/aws/,' .env
           sed -i 's,MATIC_CLI_BRANCH=master,MATIC_CLI_BRANCH=${{ github.head_ref || github.ref_name }},' .env
           sed -i 's,DATADOG_API_KEY,TODO,' .env
-          echo "Environment variables ready!"
           cat .env
 
-      - name: Setup AWS
+      - name: Setup aws
         continue-on-error: true
         run: |
           cd matic-cli
-          echo "Create aws folder"
           mkdir -p aws
-          cd aws 
-          pwd
-          echo "Downloading and installing aws-cli..."
           curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
           unzip awscliv2.zip
           sudo ./aws/install --update
-          echo "Configure aws..."
           aws configure set aws_access_key_id TODO 
           aws configure set aws_secret_access_key TODO
           aws configure set default.region us-west-2
-          echo "Generating aws ec2 key-pair..."
+
+      - name: Create aws key pair
+        continue-on-error: true
+        run: |
+          cd matic-cli/aws
           aws ec2 create-key-pair --key-name matic-cli-ci-key --key-type rsa --key-format pem --output text > matic-cli-ci-key.pem
-          echo "aws setup done!"
-          ls
-          cat matic-cli-ci-key.pem
 
       - name: Setup node
         continue-on-error: true
@@ -85,24 +78,20 @@ jobs:
         continue-on-error: true
         run: |
           cd matic-cli
-          echo "Running --init"
           ./bin/express-cli --init
 
       - name: Start devnet
         continue-on-error: true
         run: |
           cd matic-cli/deployments/devnet-1
-          echo "Running --start"
           ../../bin/express-cli --start
 
       - name: Run smoke tests
         continue-on-error: true
         run: |
           cd matic-cli/deployments/devnet-1
-          echo "Running --send-state-sync"
           ../../bin/express-cli --send-state-sync
           cd -
-          echo "Running smoke tests"
           timeout 20m bash matic-cli/.github/smoke_test.sh
 
       - name: Destroy devnet
@@ -112,3 +101,10 @@ jobs:
           cd matic-cli/deployments/devnet-1
           echo "Running --destroy"
           ../../bin/express-cli --destroy
+
+      - name: Delete aws key pair
+        continue-on-error: true
+        if: always()
+        run: |
+          cd matic-cli/aws
+          aws ec2 delete-key-pair --key-name matic-cli-ci-key
