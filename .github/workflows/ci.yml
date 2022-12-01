@@ -31,12 +31,12 @@ jobs:
           echo "Copying .env.example to .env ..."
           cp .env.example .env
           echo "Setting specific .env vars ..."
-          sed -i '' -e "s,YOUR_IDENTIFIER,matic-cli-ci," .env
-          sed -i '' -e "s,YOUR_AWS_ACCESS_KEY,TODO," .env
-          sed -i '' -e 's,YOUR_AWS_SECRET_KEY,TODO,' .env
-          sed -i '' -e 's,aws-key,matic-cli-ci-key,' .env
-          sed -i '' -e 's,/absolute/path/to/your/,./aws/,' .env
-          sed -i '' -e 's,MATIC_CLI_BRANCH=master,${{ github.head_ref || github.ref_name }},' .env
+          sed -i 's,YOUR_IDENTIFIER,matic-cli-ci,' .env
+          sed -i 's,YOUR_AWS_ACCESS_KEY,TODO,' .env
+          sed -i 's,YOUR_AWS_SECRET_KEY,TODO,' .env
+          sed -i 's,aws-key,matic-cli-ci-key,' .env
+          sed -i 's,/absolute/path/to/your/,./aws/,' .env
+          sed -i 's,MATIC_CLI_BRANCH=master,${{ github.head_ref || github.ref_name }},' .env
           echo "Environment variables ready!"
           cat .env
 
