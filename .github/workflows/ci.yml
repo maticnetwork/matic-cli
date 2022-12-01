@@ -63,6 +63,24 @@ jobs:
           ls
           cat matic-cli-ci-key.pem
 
+      - name: Setup node
+        continue-on-error: true
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.17.1'
+          cache: 'npm'
+          cache-dependency-path: |
+            matic-cli/package-lock.json
+            matic-cli/devnet/code/contracts/package-lock.json
+            matic-cli/devnet/code/genesis-contracts/package-lock.json
+            matic-cli/devnet/code/genesis-contracts/matic-contracts/package-lock.json
+
+      - name: Install npm dependencies
+        continue-on-error: true
+        run: |
+          cd matic-cli
+          npm install --prefer-offline --no-audit --progress=false
+
       - name: Init devnet
         continue-on-error: true
         run: |
