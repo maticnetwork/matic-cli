@@ -13,6 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # TODO adapt the whole integration tests to use https://www.notion.so/polygontechnology/No-More-Secrets-6382754faac745aa9bd049a3ed423218
   integration-tests:
     if: (github.event.action != 'closed' || github.event.pull_request.merged == true)
     strategy:
