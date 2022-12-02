@@ -1,4 +1,4 @@
-import {loadDevnetConfig} from "../common/config-utils";
+import { loadDevnetConfig } from "../common/config-utils";
 
 const fetch = require("node-fetch");
 const Web3 = require('web3');

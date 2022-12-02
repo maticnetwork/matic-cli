@@ -1,9 +1,6 @@
-variable "ACCESS_KEY" {
-  type = string
-}
-
-variable "SECRET_KEY" {
-  type = string
+variable "AWS_PROFILE" {
+  type    = string
+  default = "default"
 }
 
 variable "VM_NAME" {

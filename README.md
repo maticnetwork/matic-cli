@@ -22,22 +22,83 @@ Please, refer to the section of this file you are more interested in (`express-c
 
 To use the `express-cli` you have to execute the following steps.
 
+- [install aws cli](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 - [install terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli) on your local machine
 - use [nvm](https://github.com/nvm-sh/nvm#installing-and-updating) to switch to the proper `node` version, `v16.17.1`,
   by running `nvm use` from the root folder
+- install `express-cli` and `matic-cli` locally with command `npm i`
 - generate a keypair on AWS EC2 and download its certificate locally (`.pem` file)
 - copy `.env.example` to `.env` with command `cp .env.example .env` and check the heavily commented file for details
-- use `TF_VAR_DOCKERZIED=yes` to run the stack on one VM only in a dockerized environment. Else, it will create one VM
-  per node
-- replace `TF_VAR_ACCESS_KEY` and `TF_VAR_SECRET_KEY` with your own AWS keys
+- make sure `PEM_FILE_PATH` points to a correct AWS key certificate, the one you downloaded in the previous steps
 - define the number of nodes (`TF_VAR_VALIDATOR_COUNT` and `TF_VAR_SENTRY_COUNT`) and adjust the `DEVNET_BOR_USERS`
   accordingly
+- use `TF_VAR_DOCKERZIED=no` to have one VM per node, otherwise the stack will run on one VM only in a dockerized environment
 - (optional) replace `TF_VAR_VM_NAME` with your own identifier (it can be any string, default is "polygon-user")
 - (optional) replace `TF_VAR_DISK_SIZE_GB` with your preferred disk size in GB (default is 500 GB)
 - `VERBOSE=true` prints logs from the remote machines. If set to `false`, only `express-cli` and `matic-cli` logs will
   be shown
-- make sure `PEM_FILE_PATH` points to a correct AWS key certificate, the one you downloaded in the previous steps
-- install `express-cli` and `matic-cli` locally with command `npm i`
+- **If you are a Polygon employee**, please refer to [this page](https://www.notion.so/polygontechnology/Testing-Toolkit-d47e098641d14c80b2e9a90b3b1b88d9) for more info   
+
+### Auth Configuration
+
+As a prerequisite, you need to configure authentication on `aws`  
+This will create the folder `~/.aws` in your system
+To do so, please run  
+
+```bash
+aws configure sso
+```
+
+This command will interactively ask for some configs
+**If you are a Polygon employee**, please use the following  
+
+- SSO session name: leave empty
+- SSO start URL: https://polygon-technology.awsapps.com/start#/
+- SSO region: us-east-1
+
+The browser will open and authorize your request. Please allow it.
+
+In case there are multiple accounts available to you, please select
+> posv1-devnet
+
+Then, the command will ask for other configs, please use  
+- CLI default client Region: us-west-2
+- CLI default output format: json
+- CLI profile name: default
+
+Note that it's **mandatory** to use `CLI profile name: default`, as used by `terraform` in `express-cli` (for more context see [this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs))
+
+Here an output example
+```bash
+SSO session name (Recommended):
+WARNING: Configuring using legacy format (e.g. without an SSO session).
+Consider re-running "configure sso" command and providing a session name.
+SSO start URL [None]: https://polygon-technology.awsapps.com/start#/
+SSO region [None]: us-east-1
+Attempting to automatically open the SSO authorization page in your default browser.
+If the browser does not open or you wish to use a different device to authorize this request, open the following URL:
+
+https://device.sso.us-east-1.amazonaws.com/
+
+Then enter the code:
+
+<CODE-HERE>
+
+There are 2 AWS accounts available to you.
+
+Using the account ID <ACCOUNT_ID>
+The only role available to you is: <AWSRole> (<AWS_ROLE_ID>)   
+Using the role name "<AWS_ROLE>"
+CLI default client Region [None]: us-west-2
+CLI default output format [None]: json
+CLI profile name [<PROFILE_NAME_AND_ID>]: default
+
+To use this profile, specify the profile name using --profile, as shown:
+
+aws s3 ls --profile default
+```
+
+Now you're all set to use `express-cli` commands.  
 
 ### Commands
 
@@ -191,6 +252,11 @@ Adjust the [docker configs](configs/devnet/docker-setup-config.yaml) and run
 
 Once the setup is done, follow these steps for local docker deployment  
 
+* Move to devnet folder
+  ```bash
+  cd matic-cli/devnet
+  ```
+  
 * Start ganache
   ```bash
   bash docker-ganache-start.sh
@@ -211,6 +277,16 @@ Once the setup is done, follow these steps for local docker deployment
   bash docker-bor-start-all.sh
   ```
 
+* Deploy contracts on Child chain
+  ```bash
+  bash ganache-deployment-bor.sh
+  ```
+
+* Sync contract addresses to Main chain
+  ```bash
+  bash ganache-deployment-sync.sh
+  ```
+
 Logs will be stored under `logs/` folder
 
 Note: in case of docker setup, we have provided [some additional scripts](src/setup/devnet/templates/docker/README.md) which might be helpful.
@@ -227,6 +303,25 @@ Alternatively, this step can be executed interactively with
 ```bash
 ../bin/matic-cli setup devnet -i
 ```
+
+Once the setup is done, follow these steps for remote deployment  
+In this case, the stack is already running, you would just need to deploy/sync some contracts, as follows:  
+
+* Move to devnet folder
+  ```bash
+  cd matic-cli/devnet
+  ```
+  
+* Deploy contracts on Child chain
+  ```bash
+  bash ganache-deployment-bor.sh
+  ```
+
+* Sync contract addresses to Main chain
+  ```bash
+  bash ganache-deployment-sync.sh
+  ```
+
 
 #### Clean setup
 Stop al services, remove the `matic-cli/devnet` folder, and you can start the process once again

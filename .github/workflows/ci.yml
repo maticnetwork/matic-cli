@@ -1,0 +1,112 @@
+name: CI
+on:
+  push:
+    branches:
+      - "master"
+  pull_request:
+    branches:
+      - "**"
+    types: [opened, synchronize]
+
+concurrency:
+  group: build-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # TODO adapt the whole integration tests to use https://www.notion.so/polygontechnology/No-More-Secrets-6382754faac745aa9bd049a3ed423218
+  integration-tests:
+    if: (github.event.action != 'closed' || github.event.pull_request.merged == true)
+    strategy:
+      matrix:
+        os: [ ubuntu-20.04 ] # list of os: https://github.com/actions/virtual-environments
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: matic-cli
+
+      - name: Create .env file
+        continue-on-error: true
+        run: |
+          cd matic-cli
+          cp .env.example .env
+          sed -i 's,YOUR_IDENTIFIER,matic-cli-ci,' .env
+          sed -i 's,YOUR_AWS_ACCESS_KEY,TODO,' .env
+          sed -i 's,YOUR_AWS_SECRET_KEY,TODO,' .env
+          sed -i 's,aws-key,matic-cli-ci-key,' .env
+          sed -i 's,/absolute/path/to/your/,/home/runner/work/matic-cli/matic-cli/matic-cli/aws/,' .env
+          sed -i 's,MATIC_CLI_BRANCH=master,MATIC_CLI_BRANCH=${{ github.head_ref || github.ref_name }},' .env
+          sed -i 's,DATADOG_API_KEY,TODO,' .env
+          cat .env
+
+      - name: Setup aws
+        continue-on-error: true
+        run: |
+          cd matic-cli
+          mkdir -p aws
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install --update
+          aws configure set aws_access_key_id TODO 
+          aws configure set aws_secret_access_key TODO
+          aws configure set default.region us-west-2
+
+      - name: Create aws key pair
+        continue-on-error: true
+        run: |
+          cd matic-cli/aws
+          aws ec2 create-key-pair --key-name matic-cli-ci-key --key-type rsa --key-format pem --output text > matic-cli-ci-key.pem
+          chmod 600 matic-cli-ci-key.pem
+
+      - name: Setup node
+        continue-on-error: true
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.17.1'
+          cache: 'npm'
+          cache-dependency-path: |
+            matic-cli/package-lock.json
+            matic-cli/devnet/code/contracts/package-lock.json
+            matic-cli/devnet/code/genesis-contracts/package-lock.json
+            matic-cli/devnet/code/genesis-contracts/matic-contracts/package-lock.json
+
+      - name: Install npm dependencies
+        continue-on-error: true
+        run: |
+          cd matic-cli
+          npm install --prefer-offline --no-audit --progress=false
+
+      - name: Init devnet
+        continue-on-error: true
+        run: |
+          cd matic-cli
+          ./bin/express-cli --init
+
+      - name: Start devnet
+        continue-on-error: true
+        run: |
+          cd matic-cli/deployments/devnet-1
+          ../../bin/express-cli --start
+
+      - name: Run smoke tests
+        continue-on-error: true
+        run: |
+          cd matic-cli/deployments/devnet-1
+          ../../bin/express-cli --send-state-sync
+          cd -
+          timeout 20m bash matic-cli/.github/smoke_test.sh
+
+      - name: Destroy devnet
+        continue-on-error: true
+        if: always()
+        run: |
+          cd matic-cli/deployments/devnet-1
+          echo "Running --destroy"
+          ../../bin/express-cli --destroy
+
+      - name: Delete aws key pair
+        continue-on-error: true
+        if: always()
+        run: |
+          cd matic-cli/aws
+          aws ec2 delete-key-pair --key-name matic-cli-ci-key

@@ -133,27 +133,6 @@ export class Ganache {
         );
     }
 
-    async getBorContractDeploymentTask() {
-        return [
-            {
-                title: "Deploy contracts on Child chain",
-                task: () =>
-                    execa("bash", ["ganache-deployment-bor.sh"], {
-                        cwd: this.config.targetDirectory,
-                        stdio: getRemoteStdio(),
-                    }),
-            },
-            {
-                title: "Sync contract addresses to Main chain",
-                task: () =>
-                    execa("bash", ["ganache-deployment-sync.sh"], {
-                        cwd: this.config.targetDirectory,
-                        stdio: getRemoteStdio(),
-                    }),
-            },
-        ];
-    }
-
     async getTasks() {
         return new Listr(
             [
