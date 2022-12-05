@@ -136,7 +136,6 @@ export async function checkAndReturnVMIndex(n, doc, overrideLog) {
             console.log("📍Targeting all VMs ...");
         }
         return undefined
-
     }
 
     if (typeof n === "string") {
