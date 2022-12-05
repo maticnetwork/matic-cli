@@ -129,12 +129,10 @@ export function splitAndGetHostIp(value) {
     }
 }
 
-export async function checkAndReturnVMIndex(n, doc, overrideLog) {
+export async function checkAndReturnVMIndex(n, doc) {
 
     if (typeof n === "boolean") {
-        if (!overrideLog) {
-            console.log("📍Targeting all VMs ...");
-        }
+        console.log("📍Targeting all VMs ...");
         return undefined
     }
 

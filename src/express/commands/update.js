@@ -95,7 +95,7 @@ export async function updateAll(n) {
 
     require('dotenv').config({path: `${process.cwd()}/.env`})
     let doc = await loadDevnetConfig("remote")
-    let vmIndex = await checkAndReturnVMIndex(n, doc, false)
+    let vmIndex = await checkAndReturnVMIndex(n, doc)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
     let nodeIps = []
     let hostToIndexMap = new Map()
@@ -128,7 +128,7 @@ export async function updateBor(n) {
 
     require('dotenv').config({path: `${process.cwd()}/.env`})
     let doc = await loadDevnetConfig("remote")
-    let vmIndex = await checkAndReturnVMIndex(n, doc, false)
+    let vmIndex = await checkAndReturnVMIndex(n, doc)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
     let nodeIps = []
     let hostToIndexMap = new Map()
@@ -159,7 +159,7 @@ export async function updateHeimdall(n) {
 
     require('dotenv').config({path: `${process.cwd()}/.env`})
     let doc = await loadDevnetConfig("remote")
-    let vmIndex = await checkAndReturnVMIndex(n, doc, false)
+    let vmIndex = await checkAndReturnVMIndex(n, doc)
     let borUsers = splitToArray(doc['devnetBorUsers'].toString())
     let nodeIps = []
     let hostToIndexMap = new Map()

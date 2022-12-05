@@ -24,14 +24,13 @@ async function fundAccount(web3, sender, accounts, maxFeePerGas, maxPriorityFeeP
 
 async function runTest(web3, accounts, sender) {
     try {
-        console.log("Executing EIP-1559 test");
         const nonce = await web3.eth.getTransactionCount(sender.address, 'latest');
         console.log("Nonce: ", nonce);
 
         const burnContract = process.env.BURN_CONTRACT_ADDRESS;
 
         const latestBlock = await web3.eth.getBlock('latest');
-        const miner = latestBlock.miner;
+        var miner = latestBlock.miner;
         console.log("Coinbase account: ", miner);
 
         const maxPriorityFeePerGas = process.env.MAX_PRIORITY_FEE
@@ -39,7 +38,7 @@ async function runTest(web3, accounts, sender) {
 
         await fundAccount(web3, sender, accounts, maxFeePerGas, maxPriorityFeePerGas, nonce)
 
-        const initialMinerBal = await web3.eth.getBalance(miner);
+        var initialMinerBal = await web3.eth.getBalance(miner);
         console.log("Initial miner balance: ", initialMinerBal);
 
         const initialBurnContractBal = await web3.eth.getBalance(burnContract);
@@ -56,11 +55,18 @@ async function runTest(web3, accounts, sender) {
             maxPriorityFeePerGas: maxPriorityFeePerGas
         };
         const res = await web3.eth.sendTransaction(tx);
-        console.log("Transaction sent: ", res);
+        console.log("Transaction sent: ", res); 
         const gasUsed = res.gasUsed;
         const effectiveGasPrice = res.effectiveGasPrice;
         const block = await web3.eth.getBlock(res.blockNumber);
         const blockBaseFeePerGas = block.baseFeePerGas;
+
+        // In case a new sprint begins, block miner will change
+        if (block.miner !== miner) {
+            miner = block.miner
+            const prevBlock = await web3.eth.getBlock(block.number - 1)
+            initialMinerBal = await web3.eth.getBalance(miner, prevBlock.number)
+        }
 
         let priorityFee = effectiveGasPrice - blockBaseFeePerGas;
         console.log("Priority fee paid ", priorityFee);
@@ -89,9 +95,7 @@ async function runTest(web3, accounts, sender) {
         console.log("Actual total amount:  ", totalAmount);
         assert(expectedTotalAmount === totalAmount, "Expected burn amount not equal to actual burn amount!");
 
-
         console.log("All checks passed!");
-        process.exit(0)
     } catch (error) {
         console.log("Error while executing test: ", error);
         console.log("❌ Test Failed!");
@@ -113,9 +117,10 @@ async function initWeb3(machine) {
 
 export async function testEip1559(n) {
     try {
+        console.log("Executing EIP-1559 test");
         let devnetType = process.env.TF_VAR_DOCKERIZED === "yes" ? "docker" : "remote"
         let doc = await loadDevnetConfig(devnetType)
-        let vmIndex = await checkAndReturnVMIndex(n, doc, true)
+        let vmIndex = await checkAndReturnVMIndex(n, doc)
         let machine
         if (vmIndex === undefined) {
             machine = doc['devnetBorHosts'][0]
@@ -138,7 +143,12 @@ export async function testEip1559(n) {
 
         await web3.eth.accounts.wallet.add(sender.privateKey)
         let accounts = await web3.eth.getAccounts();
-        await runTest(web3, accounts, sender);
+       
+        for (let i = 0; i < process.env.COUNT; i++) {
+            await runTest(web3, accounts, sender);
+        }
+        console.log("All tests successfuly executed!");
+        process.exit(0)
     } catch (error) {
         console.log("❌ Error occurred while running eip-1559 tests: ", error);
         process.exit(1)
