@@ -1,30 +1,35 @@
 defaultStake: 10000
 defaultFee: 2000
-borChainId: 15005
+borChainId: 4052
 heimdallChainId: heimdall-4052
 borBranch: c5569e4da9ebe0ce4e63aec571966c71234f7cfc
 heimdallBranch: develop
-contractsBranch: c5569e4da9ebe0ce4e63aec571966c71234f7cfc
+contractsBranch: 8e95fa49300894caf7e59af837d62cff20768539
 genesisContractsBranch: mardizzone/node-upgrade
 sprintSize: 64
 blockNumber: '0'
 blockTime: '2'
-numOfValidators: 1
+numOfValidators: 2
 numOfNonValidators: 1
-ethURL: http://172.20.1.100:9545
+ethURL: http://34.210.88.34:9545
 ethHostUser: ubuntu
 devnetType: remote
 devnetBorHosts:
-  - 172.20.1.100
-  - 172.20.1.101
+  - 34.210.88.34
+  - 35.88.175.105
+  - 34.218.208.189
 devnetHeimdallHosts:
-  - 172.20.1.100
-  - 172.20.1.101
+  - 34.210.88.34
+  - 35.88.175.105
+  - 34.218.208.189
 devnetBorUsers:
+  - ubuntu
   - ubuntu
   - ubuntu
 devnetHeimdallUsers:
   - ubuntu
   - ubuntu
-borDockerBuildContext: https://github.com/maticnetwork/bor.git#develop
+  - ubuntu
+borDockerBuildContext: >-
+  https://github.com/maticnetwork/bor.git#c5569e4da9ebe0ce4e63aec571966c71234f7cfc
 heimdallDockerBuildContext: https://github.com/maticnetwork/heimdall.git#develop

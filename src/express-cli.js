@@ -11,6 +11,7 @@ import { setupDatadog } from "./express/commands/setup-datadog";
 import { checkDir } from "./express/common/files-utils";
 import { program } from "commander";
 import pkg from "../package.json";
+import { testEip1559 } from "../tests/test-eip-1559";
 
 
 const timer = ms => new Promise(res => setTimeout(res, ms))
@@ -29,6 +30,7 @@ program
     .option('-m, --monitor', 'Monitor the setup')
     .option('-t, --stress [fund]', 'Start the stress test. If the string `fund` is specified, the account will be funded. This option is mandatory when the command is executed the first time on a devnet.')
     .option('-ss, --send-state-sync', 'Send state sync tx')
+    .option('-e1559, --eip-1559-test [index]', 'Test EIP 1559 txs. In case of a non-dockerized devnet, if an integer [index] is specified, it will use that VM to send the tx. Otherwise, it will target the first VM.')
     .option('-dd, --setup-datadog', 'Setup DataDog')
     .version(pkg.version);
 
@@ -185,6 +187,15 @@ export async function cli() {
         await sendStateSyncTx();
     }
 
+    else if(options.eip1559Test) {
+        console.log("📍Command --eip-1559-test");
+        if (!checkDir(false)) {
+            console.log("❌ The command is not called from the appropriate devnet directory!");
+            process.exit(1)
+        }
+        
+        await testEip1559(options.eip1559Test)
+    }
     else if (options.setupDatadog) {
         console.log("📍Command --setup-datadog");
         if (!checkDir(false)) {
