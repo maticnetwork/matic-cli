@@ -165,9 +165,13 @@ First off, you need to `--init` terraform on your local machine, by executing th
 - `../../bin/express-cli --stress [fund]`
     - Runs the stress tests on remote nodes. The string `fund` is needed when stress tests are ran for the first time,
       to fund the accounts
+
 - `../../bin/express-cli --setup-datadog`
     - Sets up datadog on the nodes and gets them ready to send metrics to Datadog Dashboard. `DD_API_KEY` env var is required for this.
-
+    
+- `../../bin/express-cli --eip-1559-test [index]`
+    - Executes a test to send EIP 1559 tx. In case of a non-dockerized devnet, if an integer [index] is specified, it will use 
+      that VM to send the tx. Otherwise, it will target the first VM.
 
 ## `matic-cli`
 
