@@ -13,7 +13,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # TODO adapt the whole integration tests to use https://www.notion.so/polygontechnology/No-More-Secrets-6382754faac745aa9bd049a3ed423218
   integration-tests:
     if: (github.event.action != 'closed' || github.event.pull_request.merged == true)
     strategy:
@@ -31,25 +30,17 @@ jobs:
           cd matic-cli
           cp .env.example .env
           sed -i 's,YOUR_IDENTIFIER,matic-cli-ci,' .env
-          sed -i 's,YOUR_AWS_ACCESS_KEY,TODO,' .env
-          sed -i 's,YOUR_AWS_SECRET_KEY,TODO,' .env
           sed -i 's,aws-key,matic-cli-ci-key,' .env
           sed -i 's,/absolute/path/to/your/,/home/runner/work/matic-cli/matic-cli/matic-cli/aws/,' .env
           sed -i 's,MATIC_CLI_BRANCH=master,MATIC_CLI_BRANCH=${{ github.head_ref || github.ref_name }},' .env
-          sed -i 's,DATADOG_API_KEY,TODO,' .env
-          cat .env
 
-      - name: Setup aws
+      - name: Configure AWS credentials
         continue-on-error: true
-        run: |
-          cd matic-cli
-          mkdir -p aws
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          unzip awscliv2.zip
-          sudo ./aws/install --update
-          aws configure set aws_access_key_id TODO 
-          aws configure set aws_secret_access_key TODO
-          aws configure set default.region us-west-2
+        uses: aws-actions/configure-aws-credentials@master
+        with:
+         aws-region: us-west-2
+         role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/GithubActionsRole
+         role-session-name: GithubActionsSession
 
       - name: Create aws key pair
         continue-on-error: true
