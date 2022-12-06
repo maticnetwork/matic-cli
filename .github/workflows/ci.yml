@@ -33,6 +33,7 @@ jobs:
           sed -i 's,aws-key,matic-cli-ci-key,' .env
           sed -i 's,/absolute/path/to/your/,/home/runner/work/matic-cli/matic-cli/matic-cli/aws/,' .env
           sed -i 's,MATIC_CLI_BRANCH=master,MATIC_CLI_BRANCH=${{ github.head_ref || github.ref_name }},' .env
+          cat .env
 
       - name: Configure AWS credentials
         continue-on-error: true
@@ -45,9 +46,12 @@ jobs:
       - name: Create aws key pair
         continue-on-error: true
         run: |
-          cd matic-cli/aws
+          cd matic-cli
+          mkdir aws
+          cd aws
           aws ec2 create-key-pair --key-name matic-cli-ci-key --key-type rsa --key-format pem --output text > matic-cli-ci-key.pem
           chmod 600 matic-cli-ci-key.pem
+          ls -la
 
       - name: Setup node
         continue-on-error: true
