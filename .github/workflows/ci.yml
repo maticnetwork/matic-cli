@@ -33,11 +33,13 @@ jobs:
           sed -i 's,aws-key,matic-cli-ci-key,' .env
           sed -i 's,/absolute/path/to/your/,/home/runner/work/matic-cli/matic-cli/matic-cli/aws/,' .env
           sed -i 's,MATIC_CLI_BRANCH=master,MATIC_CLI_BRANCH=${{ github.head_ref || github.ref_name }},' .env
-          cat .env
 
       - name: Configure AWS credentials
         continue-on-error: true
         uses: aws-actions/configure-aws-credentials@master
+        permissions:
+          id-token: write
+          contents: read
         with:
          aws-region: us-west-2
          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/GithubActionsRole
