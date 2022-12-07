@@ -14,6 +14,9 @@ concurrency:
 
 jobs:
   integration-tests:
+    permissions:
+      id-token: write
+      contents: write
     if: (github.event.action != 'closed' || github.event.pull_request.merged == true)
     strategy:
       matrix:
@@ -37,9 +40,6 @@ jobs:
       - name: Configure AWS credentials
         continue-on-error: true
         uses: aws-actions/configure-aws-credentials@master
-        permissions:
-          id-token: write
-          contents: read
         with:
          aws-region: us-west-2
          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/GithubActionsRole
