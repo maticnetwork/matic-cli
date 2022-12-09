@@ -12,8 +12,24 @@ variable "DISK_SIZE_GB" {
   default = "500"
 }
 
+variable "ARCHIVE_DISK_SIZE_GB" {
+  default = "500"
+}
+
 variable "IOPS" {
   default = 3000
+}
+
+variable "ARCHIVE_IOPS" {
+  default = 3000
+}
+
+variable "VOLUME_TYPE" {
+  default = "gp3"
+}
+
+variable "ARCHIVE_VOLUME_TYPE" {
+  default = "io1"
 }
 variable "DOCKERIZED" {
   default = "no"
@@ -27,7 +43,14 @@ variable "SENTRY_COUNT" {
   default = "1"
 }
 
+variable "ARCHIVE_COUNT" {
+  default = "0"
+}
 variable "INSTANCE_TYPE" {
+  default = "t2.xlarge"
+}
+
+variable "ARCHIVE_INSTANCE_TYPE" {
   default = "t2.xlarge"
 }
 

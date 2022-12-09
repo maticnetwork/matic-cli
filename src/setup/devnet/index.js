@@ -62,7 +62,7 @@ export class Devnet {
     }
 
     get totalNodes() {
-        return this.config.numOfValidators + this.config.numOfNonValidators;
+        return this.config.numOfValidators + this.config.numOfNonValidators + this.config.numOfArchiveNodes;
     }
 
     nodeDir(index) {
@@ -421,6 +421,13 @@ export class Devnet {
                                 `bash ${this.config.targetDirectory}/service-host.sh`
                             ], {stdio: getRemoteStdio()})
 
+                            await execa('ssh', [
+                                `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                                `-i`, `~/cert.pem`,
+                                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                                `bash ${this.config.targetDirectory}/service-archive.sh`
+                            ], {stdio: getRemoteStdio()})
+
                             // NOTE: Target location would vary depending on bor/heimdall version. Currently the setup works with bor and heimdall v0.3.x
                             await execa('ssh', [
                                 `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
@@ -430,16 +437,37 @@ export class Devnet {
                             ], {stdio: getRemoteStdio()})
 
                         }
-                        else {
+                        else if (i >= this.config.numOfValidators + this.config.numOfNonValidators) {
+                            await execa('scp', [
+                                `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                                `-i`, `~/cert.pem`,
+                                `${this.config.targetDirectory}/service-archive.sh`,
+                                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:~/service-archive.sh`
+                            ], {stdio: getRemoteStdio()})
+
                             await execa('ssh', [
                                 `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                                 `-i`, `~/cert.pem`,
                                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                                `bash ~/service.sh`
+                                `bash ~/service-archive.sh`
                             ], {stdio: getRemoteStdio()})
-                        }
 
-                        // NOTE: Target location would vary depending on bor/heimdall version. Currently the setup works with bor and heimdall v0.3.x
+                            await execa('ssh', [
+                                `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                                `-i`, `~/cert.pem`,
+                                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                                `sudo mv ~/bor-archive.service /lib/systemd/system/`
+                            ], {stdio: getRemoteStdio()})
+                            
+                        }
+                        
+                        await execa('ssh', [
+                            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                            `-i`, `~/cert.pem`,
+                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                            `bash ~/service.sh`
+                        ], {stdio: getRemoteStdio()})
+
                         await execa('ssh', [
                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
                             `-i`, `~/cert.pem`,
@@ -525,12 +553,22 @@ export class Devnet {
                             `bash ~/node/bor-setup.sh `
                         ], {stdio: getRemoteStdio()})
 
-                        await execa('ssh', [
-                            `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-                            `-i`, `~/cert.pem`,
-                            `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                            `sudo systemctl start bor.service`
-                        ], {stdio: getRemoteStdio()})
+                        if (i >= this.config.numOfValidators + this.config.numOfNonValidators) {
+                            await execa('ssh', [
+                                `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                                `-i`, `~/cert.pem`,
+                                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                                `sudo systemctl start bor-archive.service`
+                            ], {stdio: getRemoteStdio()})
+    
+                        } else {
+                            await execa('ssh', [
+                                `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                                `-i`, `~/cert.pem`,
+                                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                                `sudo systemctl start bor.service`
+                            ], {stdio: getRemoteStdio()})
+                        }
 
                     }
                 }
@@ -551,7 +589,7 @@ export class Devnet {
                       "--v",
                         this.config.numOfValidators,
                         "--n",
-                        this.config.numOfNonValidators,
+                        this.config.numOfNonValidators + this.config.numOfArchiveNodes,
                         "--chain-id",
                         this.config.heimdallChainId,
                         "--node-host-prefix",
@@ -898,7 +936,7 @@ export default async function (command) {
     let devnetBorUsers = config.devnetBorUsers || [];
     let devnetHeimdallHosts = config.devnetHeimdallHosts || [];
     let devnetHeimdallUsers = config.devnetHeimdallUsers || [];
-    const totalValidators = config.numOfValidators + config.numOfNonValidators;
+    const totalValidators = config.numOfValidators + config.numOfNonValidators + config.numOfArchiveNodes;
 
     // For docker, the devnetBorHosts conform to the subnet 172.20.1.0/24
     if (config.devnetType === "docker") {

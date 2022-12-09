@@ -62,6 +62,7 @@ export function setCommonConfigs(doc) {
     setConfigValue('genesisContractsBranch', process.env.GENESIS_CONTRACTS_BRANCH, doc)
     setConfigValue('numOfValidators', parseInt(process.env.TF_VAR_VALIDATOR_COUNT), doc);
     setConfigValue('numOfNonValidators', parseInt(process.env.TF_VAR_SENTRY_COUNT), doc);
+    setConfigValue('numOfArchiveNodes', parseInt(process.env.TF_VAR_ARCHIVE_COUNT), doc);
     setConfigValue('ethHostUser', process.env.ETH_HOST_USER, doc);
     setConfigValue('borDockerBuildContext', process.env.BOR_DOCKER_BUILD_CONTEXT, doc);
     setConfigValue('heimdallDockerBuildContext', process.env.HEIMDALL_DOCKER_BUILD_CONTEXT, doc);
