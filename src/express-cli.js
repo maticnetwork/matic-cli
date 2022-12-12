@@ -45,7 +45,7 @@ export async function cli() {
     if (options.init) {
         console.log("📍Command --init");
         if (!checkDir(true)) {
-            console.log("❌ The command is supposed to be executed from the project root!");
+            console.log("❌ The init command is supposed to be executed from the project root directory, named 'matic-cli'!");
             process.exit(1)
         }
         await terraformInit();
