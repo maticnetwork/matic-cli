@@ -21,7 +21,7 @@ resource "aws_instance" "app_server" {
   instance_type          = (count.index >= var.VALIDATOR_COUNT + var.SENTRY_COUNT) ? var.ARCHIVE_INSTANCE_TYPE: var.INSTANCE_TYPE
   key_name               = var.PEM_FILE
   vpc_security_group_ids = [aws_security_group.internet_facing_alb.id]
-  subnet_id              = "${aws_subnet.public-subnet-1.id}"
+  subnet_id              = aws_subnet.public-subnet-1.id
 
   ebs_block_device {
     device_name = "/dev/sda1"
@@ -71,7 +71,7 @@ resource "aws_security_group" "internet_facing_alb" {
 # terraform aws create subnet
 resource "aws_subnet" "public-subnet-1" {
   vpc_id                  = aws_vpc.My_VPC.id
-  cidr_block              = "${var.Public_Subnet_1}"
+  cidr_block              = var.Public_Subnet_1
   availability_zone       = "us-west-2a"
   map_public_ip_on_launch = true
   tags                    = {
@@ -95,16 +95,16 @@ resource "aws_vpc" "My_VPC" {
 resource "aws_internet_gateway" "gw" { vpc_id = aws_vpc.My_VPC.id }
 
 resource "aws_route_table" "table" {
-  vpc_id = "${aws_vpc.My_VPC.id}"
+  vpc_id = aws_vpc.My_VPC.id
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = "${aws_internet_gateway.gw.id}"
+    gateway_id = aws_internet_gateway.gw.id
   }
 }
 
 resource "aws_main_route_table_association" "route_table_assoc" {
-  vpc_id         = "${aws_vpc.My_VPC.id}"
-  route_table_id = "${aws_route_table.table.id}"
+  vpc_id         = aws_vpc.My_VPC.id
+  route_table_id = aws_route_table.table.id
 }
 
 variable "Public_Subnet_1" {
