@@ -1,4 +1,7 @@
 // noinspection JSUnresolvedFunction,JSUnresolvedVariable
+/*
+   eslint-disable no-undef
+*/
 
 import inquirer from 'inquirer'
 import Listr from 'listr'
@@ -815,7 +818,7 @@ export default async function (command) {
   await printDependencyInstructions()
 
   // configuration
-  const config = await loadConfig({
+  await loadConfig({
     targetDirectory: command.parent.directory,
     fileName: command.parent.config,
     interactive: command.parent.interactive

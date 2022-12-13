@@ -1,4 +1,7 @@
 // noinspection JSUnresolvedFunction,JSUnresolvedVariable
+/*
+   eslint-disable no-undef
+*/
 
 import Listr from 'listr'
 import execa from 'execa'
@@ -212,7 +215,7 @@ export default async function (command) {
   await printDependencyInstructions()
 
   // configuration
-  const config = await loadConfig({
+  await loadConfig({
     targetDirectory: command.parent.directory,
     fileName: command.parent.config,
     interactive: command.parent.interactive

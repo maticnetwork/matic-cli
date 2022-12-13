@@ -1,4 +1,7 @@
 // noinspection JSUnresolvedVariable
+/*
+   eslint-disable no-undef
+*/
 
 import Listr from 'listr'
 import execa from 'execa'
@@ -26,7 +29,6 @@ export class Genesis {
             options.repositoryUrl ||
             'https://github.com/maticnetwork/genesis-contracts'
     this.maticContractsRepository = 'matic-contracts'
-
   }
 
   get name () {
@@ -323,7 +325,7 @@ export default async function (command) {
   await printDependencyInstructions()
 
   // configuration
-  const config = await loadConfig({
+  await loadConfig({
     targetDirectory: command.parent.directory,
     fileName: command.parent.config,
     interactive: command.parent.interactive
