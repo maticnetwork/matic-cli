@@ -127,7 +127,6 @@ export function getDevnetId () {
   return ids[1]
 }
 
-
 export async function loadDevnetConfig (devnetType) {
   return yaml.load(
     fs.readFileSync(`./${devnetType}-setup-config.yaml`, 'utf-8')

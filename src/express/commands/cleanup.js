@@ -145,12 +145,12 @@ async function deployBorContractsAndStateSync (doc) {
   const ip = `${user}@${doc.devnetBorHosts[0]}`
 
   console.log('📍Deploying contracts for bor on machine ' + ip + ' ...')
-  await timer(10000)
+  await timer(60000)
   let command = 'cd ~/matic-cli/devnet && bash ganache-deployment-bor.sh'
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Deploying state-sync contracts on machine ' + ip + ' ...')
-  await timer(10000)
+  await timer(60000)
   command = 'cd ~/matic-cli/devnet && bash ganache-deployment-sync.sh'
   await runSshCommand(ip, command, maxRetries)
 }
