@@ -80,7 +80,6 @@ jobs:
           cd aws
           aws ec2 create-key-pair --key-name matic-cli-ci-key --key-type rsa --key-format pem --output text > matic-cli-ci-key.pem
           chmod 600 matic-cli-ci-key.pem
-          ls -la
 
       - name: Setup node
         continue-on-error: true

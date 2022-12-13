@@ -1,4 +1,5 @@
 // noinspection JSUnresolvedFunction,JSUnresolvedVariable
+/* global config */
 
 import Listr from 'listr'
 import execa from 'execa'
@@ -378,7 +379,7 @@ async function setupHeimdall (config) {
 
 export default async function (command) {
   // configuration
-  const config = await loadConfig({
+  await loadConfig({
     targetDirectory: command.parent.directory,
     fileName: command.parent.config,
     interactive: command.parent.interactive

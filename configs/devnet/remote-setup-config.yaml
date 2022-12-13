@@ -4,7 +4,7 @@ borChainId: 15005
 heimdallChainId: heimdall-4052
 borBranch: c5569e4da9ebe0ce4e63aec571966c71234f7cfc
 heimdallBranch: develop
-contractsBranch: c5569e4da9ebe0ce4e63aec571966c71234f7cfc
+contractsBranch: 2ed59de3641c407c64def1b40bcd090cb9cc048a
 genesisContractsBranch: mardizzone/node-upgrade
 sprintSize: 64
 blockNumber: '0'
@@ -26,5 +26,5 @@ devnetBorUsers:
 devnetHeimdallUsers:
   - ubuntu
   - ubuntu
-borDockerBuildContext: https://github.com/maticnetwork/bor.git#develop
+borDockerBuildContext: https://github.com/maticnetwork/bor.git#c5569e4da9ebe0ce4e63aec571966c71234f7cfc
 heimdallDockerBuildContext: https://github.com/maticnetwork/heimdall.git#develop

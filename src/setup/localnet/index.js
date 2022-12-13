@@ -1,4 +1,5 @@
 // noinspection JSUnresolvedVariable
+/* global config */
 
 import Listr from 'listr'
 import chalk from 'chalk'
@@ -85,7 +86,7 @@ async function setupLocalnet (config) {
 
 export default async function (command) {
   // configuration
-  const config = await loadConfig({
+  await loadConfig({
     targetDirectory: command.parent.directory,
     fileName: command.parent.config,
     interactive: command.parent.interactive
