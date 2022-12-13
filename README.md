@@ -98,7 +98,13 @@ To use this profile, specify the profile name using --profile, as shown:
 aws s3 ls --profile default
 ```
 
-Now you're all set to use `express-cli` commands.  
+Now you can log into aws by running the following command. It needs to be executed every time the token expires.
+```bash
+aws sso login
+```
+
+
+Congrats! You're all set to use `express-cli` commands.  
 
 ### Commands
 

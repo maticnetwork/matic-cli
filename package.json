@@ -1,20 +1,22 @@
 {
   "name": "@maticnetwork/matic-cli",
-  "version": "0.0.4",
-  "description": "A CLI to setup and manage Matic validator nodes",
-  "main": "src/index.js",
-  "bin": "bin/matic-cli",
+  "version": "0.0.9",
+  "description": "A CLI to setup and manage Polygon networks",
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "npx eslint './**/**.js'"
+
   },
   "keywords": [
     "cli",
-    "matic-cli"
+    "matic-cli",
+    "express-cli",
+    "testing-toolkit"
   ],
-  "author": "Matic Tech Team <info@matic.network> (https://matic.network)",
+  "author": "Polygon PoS v1",
   "license": "MIT",
   "dependencies": {
     "@truffle/hdwallet-provider": "^2.1.2",
@@ -48,10 +50,12 @@
     "templates/"
   ],
   "devDependencies": {
-    "eslint": "^8.19.0",
-    "eslint-config-standard": "^14.1.1",
-    "eslint-plugin-import": "^2.20.2",
+    "eslint": "^8.29.0",
+    "eslint-config-semistandard": "^17.0.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^15.6.0",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^6.0.0"
+    "eslint-plugin-promise": "^6.1.1"
   }
 }

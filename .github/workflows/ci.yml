@@ -13,6 +13,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.17.1'
+          cache: 'npm'
+          cache-dependency-path: |
+            matic-cli/package-lock.json
+            matic-cli/devnet/code/contracts/package-lock.json
+            matic-cli/devnet/code/genesis-contracts/package-lock.json
+            matic-cli/devnet/code/genesis-contracts/matic-contracts/package-lock.json
+
+      - name: Install npm dependencies
+        run: |
+          cd matic-cli
+          npm install --prefer-offline --no-audit --progress=false
+
+      - name: Run lint
+        run: npm run lint
+
   integration-tests:
     permissions:
       id-token: write
