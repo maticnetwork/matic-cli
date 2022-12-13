@@ -3,7 +3,7 @@ import { checkAndReturnVMIndex, loadDevnetConfig } from '../common/config-utils'
 
 const { splitToArray } = require('../common/config-utils')
 
-export async function restartAll(n) {
+export async function restartAll (n) {
   require('dotenv').config({ path: `${process.cwd()}/.env` })
   const doc = await loadDevnetConfig('remote')
   const vmIndex = await checkAndReturnVMIndex(n, doc)
@@ -36,7 +36,7 @@ export async function restartAll(n) {
   }
 }
 
-export async function restartBor(n) {
+export async function restartBor (n) {
   require('dotenv').config({ path: `${process.cwd()}/.env` })
   const doc = await loadDevnetConfig('remote')
   const vmIndex = await checkAndReturnVMIndex(n, doc)
@@ -67,7 +67,7 @@ export async function restartBor(n) {
   }
 }
 
-export async function restartHeimdall(n) {
+export async function restartHeimdall (n) {
   require('dotenv').config({ path: `${process.cwd()}/.env` })
   const doc = await loadDevnetConfig('remote')
   const vmIndex = await checkAndReturnVMIndex(n, doc)

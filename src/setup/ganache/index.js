@@ -14,7 +14,7 @@ import { Contracts } from '../contracts'
 import { getRemoteStdio } from '../../express/common/remote-worker'
 
 export class Ganache {
-  constructor(config, options = {}) {
+  constructor (config, options = {}) {
     this.config = config
 
     this.dbName = options.dbName || 'ganache-db'
@@ -26,25 +26,25 @@ export class Ganache {
     })
   }
 
-  get name() {
+  get name () {
     return 'ganache'
   }
 
-  get taskTitle() {
+  get taskTitle () {
     return 'Setup contracts on Ganache'
   }
 
-  get dbDir() {
+  get dbDir () {
     return path.join(this.config.dataDir, this.dbName)
   }
 
-  async print() {
+  async print () {
     console.log(
       chalk.gray('Ganache db path') + ': ' + chalk.bold.green(this.dbDir)
     )
   }
 
-  async getStakeTasks() {
+  async getStakeTasks () {
     // stake
     return new Listr(
       [
@@ -63,7 +63,7 @@ export class Ganache {
     )
   }
 
-  async getContractDeploymentTasks() {
+  async getContractDeploymentTasks () {
     // server
     let server = null
 
@@ -131,7 +131,7 @@ export class Ganache {
     )
   }
 
-  async getTasks() {
+  async getTasks () {
     return new Listr(
       [
         ...this.contracts.cloneRepositoryTasks(),
@@ -166,7 +166,7 @@ export class Ganache {
   }
 }
 
-async function setupGanache(config) {
+async function setupGanache (config) {
   const ganache = new Ganache(config, {
     contractsBranch: config.contractsBranch
   })

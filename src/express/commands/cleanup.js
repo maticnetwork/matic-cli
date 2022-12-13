@@ -3,7 +3,7 @@ import { maxRetries, runSshCommand } from '../common/remote-worker'
 
 const timer = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
-export async function cleanup() {
+export async function cleanup () {
   require('dotenv').config({ path: `${process.cwd()}/.env` })
   const doc = await loadDevnetConfig('remote')
   await stopServices(doc)
@@ -12,7 +12,7 @@ export async function cleanup() {
   await deployBorContractsAndStateSync(doc)
 }
 
-async function stopServices(doc) {
+async function stopServices (doc) {
   const borUsers = splitToArray(doc.devnetBorUsers.toString())
   const nodeIps = []
   const isHostMap = new Map()
@@ -45,7 +45,7 @@ async function stopServices(doc) {
   await Promise.all(stopServiceTasks)
 }
 
-async function cleanupServices(doc) {
+async function cleanupServices (doc) {
   const borUsers = splitToArray(doc.devnetBorUsers.toString())
   const nodeIps = []
   const isHostMap = new Map()
@@ -91,7 +91,7 @@ async function cleanupServices(doc) {
   await Promise.all(cleanupServicesTasks)
 }
 
-async function startServices(doc) {
+async function startServices (doc) {
   const borUsers = splitToArray(doc.devnetBorUsers.toString())
   const nodeIps = []
   const isHostMap = new Map()
@@ -140,7 +140,7 @@ async function startServices(doc) {
   await Promise.all(startServicesTasks)
 }
 
-async function deployBorContractsAndStateSync(doc) {
+async function deployBorContractsAndStateSync (doc) {
   const user = `${doc.ethHostUser}`
   const ip = `${user}@${doc.devnetBorHosts[0]}`
 

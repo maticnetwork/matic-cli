@@ -3,7 +3,7 @@
 import fs from 'fs-extra'
 
 class FileReplacer {
-  constructor(f, options = {}) {
+  constructor (f, options = {}) {
     this.file = f
     this.options = options
 
@@ -11,12 +11,12 @@ class FileReplacer {
     this.data = fs.readFileSync(f, 'utf8')
   }
 
-  replace(...args) {
+  replace (...args) {
     this.data = this.data.replace(...args)
     return this
   }
 
-  save() {
+  save () {
     fs.writeFileSync(this.file, this.data, {
       mode: this.options.mode || 0o755
     })

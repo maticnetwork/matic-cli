@@ -3,13 +3,13 @@
 import yaml from 'js-yaml'
 import fs from 'fs'
 
-export async function loadDevnetConfig(devnetType) {
+export async function loadDevnetConfig (devnetType) {
   return yaml.load(
     fs.readFileSync(`./${devnetType}-setup-config.yaml`, 'utf-8')
   )
 }
 
-export async function editMaticCliRemoteYAMLConfig() {
+export async function editMaticCliRemoteYAMLConfig () {
   console.log('📍Editing matic-cli remote YAML configs...')
 
   const doc = await yaml.load(
@@ -36,7 +36,7 @@ export async function editMaticCliRemoteYAMLConfig() {
   )
 }
 
-export async function editMaticCliDockerYAMLConfig() {
+export async function editMaticCliDockerYAMLConfig () {
   console.log('📍Editing matic-cli docker YAML configs...')
 
   const doc = await yaml.load(
@@ -63,7 +63,7 @@ export async function editMaticCliDockerYAMLConfig() {
   )
 }
 
-export function setCommonConfigs(doc) {
+export function setCommonConfigs (doc) {
   setConfigValue('defaultStake', parseInt(process.env.DEFAULT_STAKE), doc)
   setConfigValue('defaultFee', parseInt(process.env.DEFAULT_FEE), doc)
   setConfigValue('borChainId', parseInt(process.env.BOR_CHAIN_ID), doc)
@@ -102,13 +102,13 @@ export function setCommonConfigs(doc) {
   )
 }
 
-export function setConfigValue(key, value, doc) {
+export function setConfigValue (key, value, doc) {
   if (value !== undefined) {
     doc[key] = value
   }
 }
 
-export function setConfigList(key, value, doc) {
+export function setConfigList (key, value, doc) {
   if (value !== undefined) {
     value = value.split(' ').join('')
     const valueArray = value.split(',')
@@ -130,20 +130,20 @@ export function setConfigList(key, value, doc) {
   }
 }
 
-export function setEthURL(value, doc) {
+export function setEthURL (value, doc) {
   if (value !== undefined) {
     doc.ethURL = 'http://' + value + ':9545'
     process.env.ETH_URL = doc.ethURL
   }
 }
 
-export function setEthHostUser(value, doc) {
+export function setEthHostUser (value, doc) {
   if (value !== undefined) {
     doc.ethHostUser = value
   }
 }
 
-export function splitToArray(value) {
+export function splitToArray (value) {
   try {
     return value.split(' ').join('').split(',')
   } catch (error) {
@@ -153,7 +153,7 @@ export function splitToArray(value) {
   }
 }
 
-export function splitAndGetHostIp(value) {
+export function splitAndGetHostIp (value) {
   try {
     return value.split('@')[0]
   } catch (error) {
@@ -163,7 +163,7 @@ export function splitAndGetHostIp(value) {
   }
 }
 
-export async function checkAndReturnVMIndex(n, doc) {
+export async function checkAndReturnVMIndex (n, doc) {
   if (typeof n === 'boolean') {
     console.log('📍Targeting all VMs ...')
     return undefined
@@ -181,7 +181,7 @@ export async function checkAndReturnVMIndex(n, doc) {
   }
 }
 
-export function getDevnetId() {
+export function getDevnetId () {
   const devnetFolders = process.cwd().split('/')
   const ids = devnetFolders[devnetFolders.length - 1].split('-')
   return ids[1]

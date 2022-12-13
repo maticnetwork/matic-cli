@@ -20,6 +20,6 @@ setupPrograms.forEach((p) => {
 })
 
 // start CLI
-export async function cli(args) {
+export async function cli (args) {
   program.parse(args)
 }

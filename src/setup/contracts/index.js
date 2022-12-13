@@ -8,7 +8,7 @@ import { cloneRepository } from '../../lib/utils'
 import { getRemoteStdio } from '../../express/common/remote-worker'
 
 export class Contracts {
-  constructor(config, options = {}) {
+  constructor (config, options = {}) {
     this.config = config
 
     this.repositoryName = 'contracts'
@@ -17,29 +17,29 @@ export class Contracts {
       options.repositoryUrl || 'https://github.com/maticnetwork/contracts'
   }
 
-  get name() {
+  get name () {
     return this.repositoryName
   }
 
-  get repositoryDir() {
+  get repositoryDir () {
     return path.join(this.config.codeDir, this.repositoryName)
   }
 
-  get localContractAddressesPath() {
+  get localContractAddressesPath () {
     return path.join(this.repositoryDir, 'contractAddresses.json')
   }
 
-  get contractAddressesPath() {
+  get contractAddressesPath () {
     return path.join(this.config.configDir, 'contractAddresses.json')
   }
 
-  get contractAddresses() {
+  get contractAddresses () {
     return require(this.contractAddressesPath)
   }
 
-  print() {}
+  print () {}
 
-  cloneRepositoryTasks() {
+  cloneRepositoryTasks () {
     return [
       {
         title: 'Clone matic contracts repository',
@@ -54,7 +54,7 @@ export class Contracts {
     ]
   }
 
-  compileTasks() {
+  compileTasks () {
     return [
       {
         title: 'Install dependencies for matic contracts',
@@ -93,7 +93,7 @@ export class Contracts {
     ]
   }
 
-  prepareContractAddressesTasks() {
+  prepareContractAddressesTasks () {
     return [
       {
         title: 'Prepare contract addresses',

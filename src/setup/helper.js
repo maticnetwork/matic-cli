@@ -4,7 +4,7 @@ import inquirer from 'inquirer'
 
 import { errorMissingConfigs, getNewPrivateKey } from '../lib/utils'
 
-export async function getChainIds(options = {}) {
+export async function getChainIds (options = {}) {
   const questions = []
   const randomBorChainId = Math.floor(Math.random() * 10000 + 1000)
 
@@ -42,7 +42,7 @@ export async function getChainIds(options = {}) {
   return await inquirer.prompt(questions)
 }
 
-export async function getDefaultBranch(options = {}) {
+export async function getDefaultBranch (options = {}) {
   const questions = []
 
   if (!options.borDockerBuildContext) {
@@ -93,7 +93,7 @@ export async function getDefaultBranch(options = {}) {
   return await inquirer.prompt(questions)
 }
 
-export async function getKeystoreDetails(options = {}) {
+export async function getKeystoreDetails (options = {}) {
   const questions = []
   const result = {}
 

@@ -61,7 +61,7 @@ program
   .option('-dd, --setup-datadog', 'Setup DataDog')
   .version(pkg.version)
 
-export async function cli() {
+export async function cli () {
   console.log(
     '\n📍Express CLI 🚀',
     '\nUse --help to see the available commands\n'
@@ -74,7 +74,7 @@ export async function cli() {
     console.log('📍Command --init')
     if (!checkDir(true)) {
       console.log(
-        `❌ The init command is supposed to be executed from the project root directory, named 'matic-cli'!`
+        '❌ The init command is supposed to be executed from the project root directory, named \'matic-cli\'!'
       )
       process.exit(1)
     }

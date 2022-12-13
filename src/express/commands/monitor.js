@@ -45,7 +45,7 @@ const currentHeaderBlockABI = [
 
 const stateReceiverAddress = '0x0000000000000000000000000000000000001001'
 
-async function checkCheckpoint(ip) {
+async function checkCheckpoint (ip) {
   const url = `http://${ip}:1317/checkpoints/count`
   const response = await fetch(url)
   const responseJson = await response.json()
@@ -58,7 +58,7 @@ async function checkCheckpoint(ip) {
   return 0
 }
 
-async function checkStateSyncTx(ip, id) {
+async function checkStateSyncTx (ip, id) {
   const url = `http://${ip}:1317/clerk/event-record/${id}`
   const response = await fetch(url)
   const responseJson = await response.json()
@@ -73,7 +73,7 @@ async function checkStateSyncTx(ip, id) {
   return undefined
 }
 
-async function getStateSyncTxList(ip, startTime, endTime) {
+async function getStateSyncTxList (ip, startTime, endTime) {
   const url = `http://${ip}:1317/clerk/event-record/list?from-time=${startTime}&to-time=${endTime}&page=1&limit=200`
   const response = await fetch(url)
   const responseJson = await response.json()
@@ -88,7 +88,7 @@ async function getStateSyncTxList(ip, startTime, endTime) {
   return undefined
 }
 
-async function lastStateIdFromBor(ip) {
+async function lastStateIdFromBor (ip) {
   const web3 = new Web3(`http://${ip}:8545`)
 
   const StateReceiverContract = await new web3.eth.Contract(
@@ -98,7 +98,7 @@ async function lastStateIdFromBor(ip) {
   return await StateReceiverContract.methods.lastStateId().call()
 }
 
-async function getLatestCheckpointFromRootChain(ip, rootChainProxyAddress) {
+async function getLatestCheckpointFromRootChain (ip, rootChainProxyAddress) {
   const web3 = new Web3(`http://${ip}:9545`)
 
   const RootChainContract = await new web3.eth.Contract(
@@ -111,7 +111,7 @@ async function getLatestCheckpointFromRootChain(ip, rootChainProxyAddress) {
   return currentHeaderBlock.toString().slice(0, -4)
 }
 
-export async function monitor() {
+export async function monitor () {
   require('dotenv').config({ path: `${process.cwd()}/.env` })
   const devnetType =
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'

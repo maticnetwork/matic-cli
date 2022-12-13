@@ -14,7 +14,7 @@ const assert = require('assert')
 
 require('dotenv').config({ path: `${process.cwd()}/.env` })
 
-async function fundAccount(
+async function fundAccount (
   web3,
   sender,
   accounts,
@@ -34,7 +34,7 @@ async function fundAccount(
   await web3.eth.sendTransaction(tx)
 }
 
-async function runTest(web3, accounts, sender) {
+async function runTest (web3, accounts, sender) {
   try {
     const nonce = await web3.eth.getTransactionCount(sender.address, 'latest')
     console.log('Nonce: ', nonce)
@@ -143,7 +143,7 @@ async function runTest(web3, accounts, sender) {
   }
 }
 
-async function initWeb3(machine) {
+async function initWeb3 (machine) {
   const provider = new HDWalletProvider({
     mnemonic: {
       phrase: process.env.MNEMONIC
@@ -154,7 +154,7 @@ async function initWeb3(machine) {
   return new Web3(provider)
 }
 
-export async function testEip1559(n) {
+export async function testEip1559 (n) {
   try {
     console.log('Executing EIP-1559 test')
     const devnetType =

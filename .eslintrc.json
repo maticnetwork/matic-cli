@@ -1,0 +1,7 @@
+{
+  "rules": {
+    "prettier": {
+      "space-before-function-paren": ["error", "never"]
+    }
+  }
+}

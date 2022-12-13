@@ -8,7 +8,7 @@ const {
   maxRetries
 } = require('../common/remote-worker')
 
-export async function sendStateSyncTx() {
+export async function sendStateSyncTx () {
   require('dotenv').config({ path: `${process.cwd()}/.env` })
   const devnetType =
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'

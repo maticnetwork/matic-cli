@@ -14,7 +14,7 @@ import { Ganache } from '../ganache'
 import { Bor } from '../bor'
 import { processTemplateFiles } from '../../lib/utils'
 
-async function setupLocalnet(config) {
+async function setupLocalnet (config) {
   const ganache = new Ganache(config, {
     contractsBranch: config.contractsBranch
   })
