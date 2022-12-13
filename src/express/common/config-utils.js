@@ -188,9 +188,33 @@ export async function editMaticCliDockerYAMLConfig () {
 }
 
 export async function validateRemoteConfig () {
-  // TODO
+  const doc = await yaml.load(
+    fs.readFileSync(`${process.cwd()}/remote-setup-config.yaml`, 'utf8'),
+    undefined
+  )
+  // TODO validate the following
+  // 1. all branches must be valid
+  // 2. sprintSize, blockNumber and blockTime must be valid
+  // 3. numOfValidators and numOfNonValidators must be numbers
+  // 4. numOfValidators + numOfNonValidators = length(devnetBorHosts) = length(devnetBorUsers) = length(devnetHeimdallHosts) = length(devnetHeimdallUsers)
+  // 5. all users must be called ubuntu
+  // 6. devnetType must be remote
+  // 7. ethURL must be first IP of devnetBorHosts
 }
 
 export async function validateDockerConfig () {
-  // TODO
+  const doc = await yaml.load(
+    fs.readFileSync(`${process.cwd()}/docker-setup-config.yaml`, 'utf8'),
+    undefined
+  )
+  // TODO validate the following
+  // 1. all branches must be valid
+  // 2. sprintSize, blockNumber and blockTime must be valid
+  // 3. numOfValidators and numOfNonValidators must be numbers
+  // 4. ? numOfValidators + numOfNonValidators = length(devnetBorHosts) = length(devnetBorUsers) = length(devnetHeimdallHosts) = length(devnetHeimdallUsers)
+  // 5. all users must be called ubuntu
+  // 6. devnetType must be remote
+  // 7. ethURL must be first IP of devnetBorHosts
+  // 8. length(devnetBorHosts) = 1
+  // 9. borDockerBuildContext and heimdallDockerBuildContext must have borBranch and heimdallBranch after #
 }

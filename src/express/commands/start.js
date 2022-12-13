@@ -375,12 +375,12 @@ async function runRemoteSetupWithMaticCLI (ips, devnetId) {
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Deploying contracts for bor on machine ' + ip + ' ...')
-  await timer(120000)
+  await timer(180000)
   command = 'cd ~/matic-cli/devnet && bash ganache-deployment-bor.sh'
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Deploying state-sync contracts on machine ' + ip + ' ...')
-  await timer(120000)
+  await timer(180000)
   command = 'cd ~/matic-cli/devnet && bash ganache-deployment-sync.sh'
   await runSshCommand(ip, command, maxRetries)
 }
