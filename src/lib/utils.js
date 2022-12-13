@@ -23,7 +23,7 @@ env.addFilter('publicKey', (privateKey) => {
 
 const web3 = new Web3()
 
-export async function cloneRepository (name, branch, url, targetDirectory) {
+export async function cloneRepository(name, branch, url, targetDirectory) {
   const repoPath = path.join(targetDirectory, name)
 
   // create target directory
@@ -45,12 +45,15 @@ export async function cloneRepository (name, branch, url, targetDirectory) {
     })
   })
 
-  if ((cloneResult && cloneResult.failed) || (fetchResult && fetchResult.failed)) {
+  if (
+    (cloneResult && cloneResult.failed) ||
+    (fetchResult && fetchResult.failed)
+  ) {
     return Promise.reject(new Error(`Failed to clone or pull ${name}`))
   }
 }
 
-export async function processTemplateFiles (dir, obj = {}) {
+export async function processTemplateFiles(dir, obj = {}) {
   // promises
   const p = []
 
@@ -78,7 +81,7 @@ export async function processTemplateFiles (dir, obj = {}) {
 }
 
 // returns key store file
-export function getKeystoreFile (privateKeyString, password) {
+export function getKeystoreFile(privateKeyString, password) {
   const ts = new Date()
   const w = web3.eth.accounts.privateKeyToAccount(privateKeyString)
   return {
@@ -93,26 +96,26 @@ export function getKeystoreFile (privateKeyString, password) {
 }
 
 // return new generated private key
-export function getNewPrivateKey () {
+export function getNewPrivateKey() {
   return web3.eth.accounts.create()
 }
 
 // return new account from private key
-export function getAccountFromPrivateKey (pk) {
+export function getAccountFromPrivateKey(pk) {
   return web3.eth.accounts.privateKeyToAccount(pk)
 }
 
 // return public key from private key
-export function privateKeyToPublicKey (pk) {
+export function privateKeyToPublicKey(pk) {
   return bufferToHex(privateToPublic(toBuffer(pk)))
 }
 
 // return compressed public key
-export function compressedPublicKey (pk) {
+export function compressedPublicKey(pk) {
   return '0x' + ethCrypto.publicKey.compress(pk.replace('0x', ''))
 }
 
-export function errorMissingConfigs (configNames) {
+export function errorMissingConfigs(configNames) {
   if (configNames && configNames.length > 0) {
     console.error('Missing the following config attributes: \n')
     configNames.forEach((name) => {

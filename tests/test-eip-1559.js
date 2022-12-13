@@ -1,6 +1,9 @@
 // noinspection HttpUrlsUsage,JSCheckFunctionSignatures,JSUnresolvedVariable
 
-import { checkAndReturnVMIndex, loadDevnetConfig } from '../src/express/common/config-utils'
+import {
+  checkAndReturnVMIndex,
+  loadDevnetConfig
+} from '../src/express/common/config-utils'
 import fs from 'fs'
 import { maxRetries, runScpCommand } from '../src/express/common/remote-worker'
 
@@ -11,7 +14,14 @@ const assert = require('assert')
 
 require('dotenv').config({ path: `${process.cwd()}/.env` })
 
-async function fundAccount (web3, sender, accounts, maxFeePerGas, maxPriorityFeePerGas, nonce) {
+async function fundAccount(
+  web3,
+  sender,
+  accounts,
+  maxFeePerGas,
+  maxPriorityFeePerGas,
+  nonce
+) {
   const tx = {
     from: sender.address,
     to: accounts[0],
@@ -24,7 +34,7 @@ async function fundAccount (web3, sender, accounts, maxFeePerGas, maxPriorityFee
   await web3.eth.sendTransaction(tx)
 }
 
-async function runTest (web3, accounts, sender) {
+async function runTest(web3, accounts, sender) {
   try {
     const nonce = await web3.eth.getTransactionCount(sender.address, 'latest')
     console.log('Nonce: ', nonce)
@@ -38,7 +48,14 @@ async function runTest (web3, accounts, sender) {
     const maxPriorityFeePerGas = process.env.MAX_PRIORITY_FEE
     const maxFeePerGas = process.env.MAX_FEE
 
-    await fundAccount(web3, sender, accounts, maxFeePerGas, maxPriorityFeePerGas, nonce)
+    await fundAccount(
+      web3,
+      sender,
+      accounts,
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+      nonce
+    )
 
     let initialMinerBal = await web3.eth.getBalance(miner)
     console.log('Initial miner balance: ', initialMinerBal)
@@ -46,7 +63,10 @@ async function runTest (web3, accounts, sender) {
     const initialBurnContractBal = await web3.eth.getBalance(burnContract)
     console.log('Initial BurnContract balance: ', initialBurnContractBal)
 
-    const senderNonce = await web3.eth.getTransactionCount(accounts[0], 'latest')
+    const senderNonce = await web3.eth.getTransactionCount(
+      accounts[0],
+      'latest'
+    )
     const tx = {
       from: accounts[0],
       to: accounts[1],
@@ -72,29 +92,48 @@ async function runTest (web3, accounts, sender) {
 
     const priorityFee = effectiveGasPrice - blockBaseFeePerGas
     console.log('Priority fee paid ', priorityFee)
-    const minPriorityFee = Math.min(maxFeePerGas - blockBaseFeePerGas, maxPriorityFeePerGas)
-    assert(minPriorityFee === priorityFee, 'Expected priority fee not equal to actual priority fee!')
+    const minPriorityFee = Math.min(
+      maxFeePerGas - blockBaseFeePerGas,
+      maxPriorityFeePerGas
+    )
+    assert(
+      minPriorityFee === priorityFee,
+      'Expected priority fee not equal to actual priority fee!'
+    )
 
     const burntAmount = gasUsed * blockBaseFeePerGas
     console.log('Burnt amount queried from transaction: ', burntAmount)
     const finalBurnContractBal = await web3.eth.getBalance(burnContract)
-    const actualBurntAmount = (bigInt(finalBurnContractBal).subtract(initialBurnContractBal)).valueOf()
+    const actualBurntAmount = bigInt(finalBurnContractBal)
+      .subtract(initialBurnContractBal)
+      .valueOf()
     console.log('Burnt amount queried from burn contract: ', actualBurntAmount)
-    assert(actualBurntAmount === burntAmount, 'Expected burn amount equal to actual burn amount!')
+    assert(
+      actualBurntAmount === burntAmount,
+      'Expected burn amount equal to actual burn amount!'
+    )
 
     const minerReward = gasUsed * (effectiveGasPrice - blockBaseFeePerGas)
     console.log('Miner amount queried from transaction: ', minerReward)
     const finalMinerBal = await web3.eth.getBalance(miner)
     console.log('Final Miner Balance: ', finalMinerBal)
-    const actualMinerReward = (bigInt(finalMinerBal).subtract(initialMinerBal)).valueOf()
+    const actualMinerReward = bigInt(finalMinerBal)
+      .subtract(initialMinerBal)
+      .valueOf()
     console.log('Miner amount queried from miner account: ', actualMinerReward)
-    assert(actualMinerReward === minerReward, 'Expected miner reward not equal to actual miner reward!')
+    assert(
+      actualMinerReward === minerReward,
+      'Expected miner reward not equal to actual miner reward!'
+    )
 
     const expectedTotalAmount = burntAmount + minerReward
     console.log('Expected total amount: ', expectedTotalAmount)
     const totalAmount = actualBurntAmount + actualMinerReward
     console.log('Actual total amount:  ', totalAmount)
-    assert(expectedTotalAmount === totalAmount, 'Expected burn amount not equal to actual burn amount!')
+    assert(
+      expectedTotalAmount === totalAmount,
+      'Expected burn amount not equal to actual burn amount!'
+    )
 
     console.log('All checks passed!')
   } catch (error) {
@@ -104,7 +143,7 @@ async function runTest (web3, accounts, sender) {
   }
 }
 
-async function initWeb3 (machine) {
+async function initWeb3(machine) {
   const provider = new HDWalletProvider({
     mnemonic: {
       phrase: process.env.MNEMONIC
@@ -115,16 +154,19 @@ async function initWeb3 (machine) {
   return new Web3(provider)
 }
 
-export async function testEip1559 (n) {
+export async function testEip1559(n) {
   try {
     console.log('Executing EIP-1559 test')
-    const devnetType = process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
+    const devnetType =
+      process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
     const doc = await loadDevnetConfig(devnetType)
     const vmIndex = await checkAndReturnVMIndex(n, doc)
     let machine
     if (vmIndex === undefined) {
       machine = doc.devnetBorHosts[0]
-      console.log(`📍No index provided. Targeting the first VM by default: ${doc.devnetBorHosts[0]}...`)
+      console.log(
+        `📍No index provided. Targeting the first VM by default: ${doc.devnetBorHosts[0]}...`
+      )
     } else {
       machine = doc.devnetBorHosts[vmIndex]
     }
@@ -139,7 +181,10 @@ export async function testEip1559 (n) {
     const signerAddr = JSON.parse(signer)
     const sender = web3.eth.accounts.privateKeyToAccount(signerAddr[0].priv_key)
     console.log('Signer address: ', sender.address)
-    console.log('Signer account balance: ', await web3.eth.getBalance(sender.address))
+    console.log(
+      'Signer account balance: ',
+      await web3.eth.getBalance(sender.address)
+    )
 
     await web3.eth.accounts.wallet.add(sender.privateKey)
     const accounts = await web3.eth.getAccounts()

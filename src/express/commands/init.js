@@ -5,15 +5,21 @@ import fs from 'fs'
 
 const shell = require('shelljs')
 
-export async function terraformInit () {
-  const nextDevnetId = !fs.existsSync('./deployments') ? 1 : findMaxDevnetId() + 1
+export async function terraformInit() {
+  const nextDevnetId = !fs.existsSync('./deployments')
+    ? 1
+    : findMaxDevnetId() + 1
 
   shell.exec(`mkdir -p ./deployments/devnet-${nextDevnetId}`)
   shell.exec(`cp ./.env ./deployments/devnet-${nextDevnetId}/.env`)
   shell.exec(`cp ./main.tf ./deployments/devnet-${nextDevnetId}/main.tf`)
-  shell.exec(`cp ./variables.tf ./deployments/devnet-${nextDevnetId}/variables.tf`)
+  shell.exec(
+    `cp ./variables.tf ./deployments/devnet-${nextDevnetId}/variables.tf`
+  )
 
-  require('dotenv').config({ path: `./deployments/devnet-${nextDevnetId}/.env` })
+  require('dotenv').config({
+    path: `./deployments/devnet-${nextDevnetId}/.env`
+  })
 
   shell.pushd(`./deployments/devnet-${nextDevnetId}`)
   shell.exec(`terraform workspace new devnet-${nextDevnetId}`)

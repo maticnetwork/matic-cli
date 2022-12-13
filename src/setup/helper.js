@@ -4,9 +4,9 @@ import inquirer from 'inquirer'
 
 import { errorMissingConfigs, getNewPrivateKey } from '../lib/utils'
 
-export async function getChainIds (options = {}) {
+export async function getChainIds(options = {}) {
   const questions = []
-  const randomBorChainId = Math.floor((Math.random() * 10000) + 1000)
+  const randomBorChainId = Math.floor(Math.random() * 10000 + 1000)
 
   if (!options.borChainId) {
     questions.push({
@@ -42,7 +42,7 @@ export async function getChainIds (options = {}) {
   return await inquirer.prompt(questions)
 }
 
-export async function getDefaultBranch (options = {}) {
+export async function getDefaultBranch(options = {}) {
   const questions = []
 
   if (!options.borDockerBuildContext) {
@@ -93,7 +93,7 @@ export async function getDefaultBranch (options = {}) {
   return await inquirer.prompt(questions)
 }
 
-export async function getKeystoreDetails (options = {}) {
+export async function getKeystoreDetails(options = {}) {
   const questions = []
   const result = {}
 
@@ -106,7 +106,7 @@ export async function getKeystoreDetails (options = {}) {
         type: 'confirm',
         name: 'hasPrivateKey',
         message:
-                    'Do you have private key? (If not, we will generate it for you)'
+          'Do you have private key? (If not, we will generate it for you)'
       })
 
       // set answer
@@ -122,8 +122,8 @@ export async function getKeystoreDetails (options = {}) {
         validate: (input) => {
           if (
             !input ||
-                        input.length !== 66 ||
-                        !/0x[0-9a-fA-F]{64}/.test(input)
+            input.length !== 66 ||
+            !/0x[0-9a-fA-F]{64}/.test(input)
           ) {
             return 'Private key must be valid hex string (with 0x prefix)'
           }

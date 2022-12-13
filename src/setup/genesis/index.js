@@ -16,30 +16,31 @@ import { getRemoteStdio } from '../../express/common/remote-worker'
 const DEFAULT_BALANCE = 1000000000 // 1 Billion - Without 10^18
 
 export class Genesis {
-  constructor (config, options = {}) {
+  constructor(config, options = {}) {
     this.config = config
 
     this.repositoryName = this.name
-    this.repositoryBranch = options.repositoryBranch || 'mardizzone/node-upgrade'
+    this.repositoryBranch =
+      options.repositoryBranch || 'mardizzone/node-upgrade'
     this.repositoryUrl =
-            options.repositoryUrl ||
-            'https://github.com/maticnetwork/genesis-contracts'
+      options.repositoryUrl ||
+      'https://github.com/maticnetwork/genesis-contracts'
     this.maticContractsRepository = 'matic-contracts'
   }
 
-  get name () {
+  get name() {
     return 'genesis-contracts'
   }
 
-  get taskTitle () {
+  get taskTitle() {
     return 'Setup genesis contracts'
   }
 
-  get repositoryDir () {
+  get repositoryDir() {
     return path.join(this.config.codeDir, this.repositoryName)
   }
 
-  get maticContractDir () {
+  get maticContractDir() {
     return path.join(
       this.config.codeDir,
       this.repositoryName,
@@ -47,20 +48,20 @@ export class Genesis {
     )
   }
 
-  get borGenesisFilePath () {
+  get borGenesisFilePath() {
     return path.join(this.repositoryDir, 'genesis.json')
   }
 
-  async print () {
+  async print() {
     console.log(
       chalk.gray('Bor genesis path') +
-            ': ' +
-            chalk.bold.green(this.borGenesisFilePath)
+        ': ' +
+        chalk.bold.green(this.borGenesisFilePath)
     )
   }
 
   // get genesis contact tasks
-  async getTasks () {
+  async getTasks() {
     return new Listr(
       [
         {
@@ -183,10 +184,7 @@ export class Genesis {
 
             return Promise.resolve()
               .then(() => {
-                const blockJsPath = path.join(
-                  this.repositoryDir,
-                  'blocks.js'
-                )
+                const blockJsPath = path.join(this.repositoryDir, 'blocks.js')
                 if (!fs.existsSync(blockJsPath)) {
                   return
                 }
@@ -253,7 +251,7 @@ export class Genesis {
   }
 }
 
-export async function getGenesisAddresses (config) {
+export async function getGenesisAddresses(config) {
   const questions = []
 
   if (!config.genesisAddresses) {
@@ -298,7 +296,7 @@ export async function getGenesisAddresses (config) {
   })
 }
 
-async function setupGenesis (config) {
+async function setupGenesis(config) {
   const genesis = new Genesis(config)
 
   // load genesis addresses

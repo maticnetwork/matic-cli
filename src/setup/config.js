@@ -13,7 +13,7 @@ import { getRemoteStdio } from '../express/common/remote-worker'
 const defaultConfigFileName = 'config.json'
 
 export default class Config {
-  constructor (options = {}) {
+  constructor(options = {}) {
     if (!options.fileName || !options.targetDirectory) {
       throw new Error('Filename and target directory needed')
     }
@@ -30,7 +30,7 @@ export default class Config {
     this.set(options)
   }
 
-  set (options = {}) {
+  set(options = {}) {
     for (const prop in options) {
       // eslint-disable-next-line no-prototype-builtins
       if (options.hasOwnProperty(prop)) {
@@ -43,32 +43,32 @@ export default class Config {
     }
   }
 
-  get configFilePath () {
+  get configFilePath() {
     return path.join(this.targetDirectory, this.fileName)
   }
 
-  get codeDir () {
+  get codeDir() {
     return path.join(this.targetDirectory, this.codeDirectory)
   }
 
-  get dataDir () {
+  get dataDir() {
     return path.join(this.targetDirectory, this.dataDirectory)
   }
 
-  get configDir () {
+  get configDir() {
     return path.join(this.targetDirectory, this.configDirectory)
   }
 
-  get primaryAccount () {
+  get primaryAccount() {
     return this.accounts[0]
   }
 
-  async loadChainIds () {
+  async loadChainIds() {
     const answers = await getChainIds(this)
     this.set(answers)
   }
 
-  async loadAccounts () {
+  async loadAccounts() {
     if (!this.privateKey || !this.keystorePassword) {
       const keystoreDetails = await getKeystoreDetails(this)
       this.accounts.push(getAccountFromPrivateKey(keystoreDetails.privateKey))
@@ -79,11 +79,11 @@ export default class Config {
     this.genesisAddresses = [this.primaryAccount.address]
   }
 
-  print () {
+  print() {
     console.log(
       chalk.gray('Config json file') +
-      ': ' +
-      chalk.bold.green(this.configFilePath)
+        ': ' +
+        chalk.bold.green(this.configFilePath)
     )
     console.log(
       chalk.gray('Code directory') + ': ' + chalk.bold.green(this.codeDir)
@@ -93,21 +93,21 @@ export default class Config {
     )
     console.log(
       chalk.gray('Address') +
-      ': ' +
-      chalk.bold.green(this.primaryAccount.address)
+        ': ' +
+        chalk.bold.green(this.primaryAccount.address)
     )
     console.log(
       chalk.gray('Bor Chain ID') + ': ' + chalk.bold.green(this.borChainId)
     )
     console.log(
       chalk.gray('Heimdall Chain ID') +
-      ': ' +
-      chalk.bold.green(this.heimdallChainId)
+        ': ' +
+        chalk.bold.green(this.heimdallChainId)
     )
   }
 }
 
-export async function loadConfig (options = {}) {
+export async function loadConfig(options = {}) {
   let { targetDirectory, fileName } = options
   targetDirectory = targetDirectory || process.cwd()
   fileName = fileName || defaultConfigFileName

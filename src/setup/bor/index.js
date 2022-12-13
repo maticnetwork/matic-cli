@@ -7,7 +7,11 @@ import path from 'path'
 import fs from 'fs-extra'
 
 import { loadConfig } from '../config'
-import { cloneRepository, getKeystoreFile, processTemplateFiles } from '../../lib/utils'
+import {
+  cloneRepository,
+  getKeystoreFile,
+  processTemplateFiles
+} from '../../lib/utils'
 import { getDefaultBranch } from '../helper'
 import { Genesis } from '../genesis'
 import { getRemoteStdio } from '../../express/common/remote-worker'
@@ -20,46 +24,46 @@ export const KEYSTORE_PASSWORD = 'hello'
 //
 
 export class Bor {
-  constructor (config, options = {}) {
+  constructor(config, options = {}) {
     this.config = config
 
     this.repositoryName = 'bor'
     this.repositoryBranch = options.repositoryBranch || 'develop'
     this.repositoryUrl =
-            options.repositoryUrl || 'https://github.com/maticnetwork/bor'
+      options.repositoryUrl || 'https://github.com/maticnetwork/bor'
 
     this.genesis = new Genesis(config)
   }
 
-  get name () {
+  get name() {
     return 'bor'
   }
 
-  get taskTitle () {
+  get taskTitle() {
     return 'Setup Bor'
   }
 
-  get repositoryDir () {
+  get repositoryDir() {
     return path.join(this.config.codeDir, this.repositoryName)
   }
 
-  get borDataDir () {
+  get borDataDir() {
     return path.join(this.config.dataDir, 'bor')
   }
 
-  get keystoreDir () {
+  get keystoreDir() {
     return path.join(this.config.dataDir, 'keystore')
   }
 
-  get passwordFilePath () {
+  get passwordFilePath() {
     return path.join(this.config.dataDir, 'password.txt')
   }
 
-  get keystorePassword () {
+  get keystorePassword() {
     return this.config.keystorePassword || KEYSTORE_PASSWORD
   }
 
-  async print () {
+  async print() {
     console.log(
       chalk.gray('Bor data') + ': ' + chalk.bold.green(this.borDataDir)
     )
@@ -68,22 +72,22 @@ export class Bor {
     )
     console.log(
       chalk.gray('Setup bor chain') +
-            ': ' +
-            chalk.bold.green('bash bor-setup.sh')
+        ': ' +
+        chalk.bold.green('bash bor-setup.sh')
     )
     console.log(
       chalk.gray('Start bor chain') +
-            ': ' +
-            chalk.bold.green('bash bor-start.sh')
+        ': ' +
+        chalk.bold.green('bash bor-start.sh')
     )
     console.log(
       chalk.gray('Clean bor chain') +
-            ': ' +
-            chalk.bold.green('bash bor-clean.sh')
+        ': ' +
+        chalk.bold.green('bash bor-clean.sh')
     )
   }
 
-  async getTasks () {
+  async getTasks() {
     // noinspection JSUnresolvedVariable
     return new Listr(
       [
@@ -135,7 +139,7 @@ export class Bor {
               const p = [
                 fs.writeFile(
                   this.passwordFilePath,
-                                    `${this.config.keystorePassword}\n`
+                  `${this.config.keystorePassword}\n`
                 ),
                 fs.writeFile(
                   path.join(this.keystoreDir, keystoreFileObj.keystoreFilename),
@@ -174,7 +178,7 @@ export class Bor {
   }
 }
 
-async function setupBor (config) {
+async function setupBor(config) {
   const bor = new Bor(config)
 
   const tasks = new Listr(

@@ -1,9 +1,9 @@
 import { loadDevnetConfig, splitToArray } from '../common/config-utils'
 import { maxRetries, runSshCommand } from '../common/remote-worker'
 
-const timer = ms => new Promise(resolve => setTimeout(resolve, ms))
+const timer = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
-export async function cleanup () {
+export async function cleanup() {
   require('dotenv').config({ path: `${process.cwd()}/.env` })
   const doc = await loadDevnetConfig('remote')
   await stopServices(doc)
@@ -12,14 +12,14 @@ export async function cleanup () {
   await deployBorContractsAndStateSync(doc)
 }
 
-async function stopServices (doc) {
+async function stopServices(doc) {
   const borUsers = splitToArray(doc.devnetBorUsers.toString())
   const nodeIps = []
   const isHostMap = new Map()
   let user, ip
 
   for (let i = 0; i < doc.devnetBorHosts.length; i++) {
-    i === 0 ? user = `${doc.ethHostUser}` : user = `${borUsers[i]}`
+    i === 0 ? (user = `${doc.ethHostUser}`) : (user = `${borUsers[i]}`)
     ip = `${user}@${doc.devnetBorHosts[i]}`
     nodeIps.push(ip)
 
@@ -45,14 +45,14 @@ async function stopServices (doc) {
   await Promise.all(stopServiceTasks)
 }
 
-async function cleanupServices (doc) {
+async function cleanupServices(doc) {
   const borUsers = splitToArray(doc.devnetBorUsers.toString())
   const nodeIps = []
   const isHostMap = new Map()
   let user, ip
 
   for (let i = 0; i < doc.devnetBorHosts.length; i++) {
-    i === 0 ? user = `${doc.ethHostUser}` : user = `${borUsers[i]}`
+    i === 0 ? (user = `${doc.ethHostUser}`) : (user = `${borUsers[i]}`)
     ip = `${user}@${doc.devnetBorHosts[i]}`
     nodeIps.push(ip)
 
@@ -62,7 +62,8 @@ async function cleanupServices (doc) {
   const cleanupServicesTasks = nodeIps.map(async (ip) => {
     if (isHostMap.get(ip)) {
       console.log('📍Cleaning up ganache on machine ' + ip + ' ...')
-      const command = 'rm -rf ~/data/ganache-db && rm -rf ~/matic-cli/devnet/data/ganache-db'
+      const command =
+        'rm -rf ~/data/ganache-db && rm -rf ~/matic-cli/devnet/data/ganache-db'
       await runSshCommand(ip, command, maxRetries)
     }
 
@@ -90,14 +91,14 @@ async function cleanupServices (doc) {
   await Promise.all(cleanupServicesTasks)
 }
 
-async function startServices (doc) {
+async function startServices(doc) {
   const borUsers = splitToArray(doc.devnetBorUsers.toString())
   const nodeIps = []
   const isHostMap = new Map()
   let user, ip
 
   for (let i = 0; i < doc.devnetBorHosts.length; i++) {
-    i === 0 ? user = `${doc.ethHostUser}` : user = `${borUsers[i]}`
+    i === 0 ? (user = `${doc.ethHostUser}`) : (user = `${borUsers[i]}`)
     ip = `${user}@${doc.devnetBorHosts[i]}`
     nodeIps.push(ip)
 
@@ -139,7 +140,7 @@ async function startServices (doc) {
   await Promise.all(startServicesTasks)
 }
 
-async function deployBorContractsAndStateSync (doc) {
+async function deployBorContractsAndStateSync(doc) {
   const user = `${doc.ethHostUser}`
   const ip = `${user}@${doc.devnetBorHosts[0]}`
 

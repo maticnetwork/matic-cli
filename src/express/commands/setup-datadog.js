@@ -2,15 +2,19 @@
 
 import { loadDevnetConfig, splitToArray } from '../common/config-utils'
 
-const { runScpCommand, runSshCommand, maxRetries } = require('../common/remote-worker')
+const {
+  runScpCommand,
+  runSshCommand,
+  maxRetries
+} = require('../common/remote-worker')
 const { installDocker } = require('./start.js')
 
 const yaml = require('js-yaml')
 const fs = require('fs')
 
-const timer = ms => new Promise(resolve => setTimeout(resolve, ms))
+const timer = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
-export async function setDatadogAPIKey (value, doc) {
+export async function setDatadogAPIKey(value, doc) {
   if (value !== undefined) {
     doc.exporters.datadog.api.key = value
   }
@@ -25,7 +29,7 @@ export async function setDatadogAPIKey (value, doc) {
   await timer(1000)
 }
 
-export async function setupDatadog () {
+export async function setupDatadog() {
   let doc
   require('dotenv').config({ path: `${process.cwd()}/.env` })
 
@@ -67,7 +71,10 @@ export async function setupDatadog () {
     await installDocker(`${user}@${host}`, user)
     console.log('📍Docker installed')
 
-    const datadogConfig = await yaml.load(fs.readFileSync('./otel-config-dd.yaml', 'utf8'), undefined)
+    const datadogConfig = await yaml.load(
+      fs.readFileSync('./otel-config-dd.yaml', 'utf8'),
+      undefined
+    )
     await setDatadogAPIKey(apiKey, datadogConfig)
 
     let src = './otel-config-dd.yaml'
@@ -78,10 +85,12 @@ export async function setupDatadog () {
     dest = `${user}@${host}:~/conf.yaml`
     await runScpCommand(src, dest, maxRetries)
 
-    command = 'sudo mv ~/conf.yaml /etc/datadog-agent/conf.d/openmetrics.d/conf.yaml'
+    command =
+      'sudo mv ~/conf.yaml /etc/datadog-agent/conf.d/openmetrics.d/conf.yaml'
     await runSshCommand(`${user}@${host}`, command, maxRetries)
 
-    command = 'sudo docker run -d --net=host -v ~/otel-config-dd.yaml:/otel-local-config.yaml otel/opentelemetry-collector-contrib --config otel-local-config.yaml'
+    command =
+      'sudo docker run -d --net=host -v ~/otel-config-dd.yaml:/otel-local-config.yaml otel/opentelemetry-collector-contrib --config otel-local-config.yaml'
     await runSshCommand(`${user}@${host}`, command, maxRetries)
     console.log(`📍OpenCollector started on ${host}`)
 

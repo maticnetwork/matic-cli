@@ -2,11 +2,16 @@
 
 import { loadDevnetConfig } from '../common/config-utils'
 
-const { runScpCommand, runSshCommand, maxRetries } = require('../common/remote-worker')
+const {
+  runScpCommand,
+  runSshCommand,
+  maxRetries
+} = require('../common/remote-worker')
 
-export async function sendStateSyncTx () {
+export async function sendStateSyncTx() {
   require('dotenv').config({ path: `${process.cwd()}/.env` })
-  const devnetType = process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
+  const devnetType =
+    process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
 
   const doc = await loadDevnetConfig(devnetType)
 

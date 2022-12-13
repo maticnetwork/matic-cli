@@ -8,107 +8,118 @@ import fs from 'fs-extra'
 
 import fileReplacer from '../../lib/file-replacer'
 import { loadConfig } from '../config'
-import { cloneRepository, compressedPublicKey, privateKeyToPublicKey, processTemplateFiles } from '../../lib/utils'
+import {
+  cloneRepository,
+  compressedPublicKey,
+  privateKeyToPublicKey,
+  processTemplateFiles
+} from '../../lib/utils'
 import { getDefaultBranch } from '../helper'
 import { Ganache } from '../ganache'
 import { getRemoteStdio } from '../../express/common/remote-worker'
 
 export class Heimdall {
-  constructor (config, options = {}) {
+  constructor(config, options = {}) {
     this.config = config
 
     this.repositoryName = this.name
     this.repositoryBranch = options.repositoryBranch || 'develop'
-    this.repositoryUrl = options.repositoryUrl || 'https://github.com/maticnetwork/heimdall'
-    this.dockerContext = options.dockerContext || 'https://github.com/maticnetwork/heimdall.git#develop'
+    this.repositoryUrl =
+      options.repositoryUrl || 'https://github.com/maticnetwork/heimdall'
+    this.dockerContext =
+      options.dockerContext ||
+      'https://github.com/maticnetwork/heimdall.git#develop'
   }
 
-  get name () {
+  get name() {
     return 'heimdall'
   }
 
-  get taskTitle () {
+  get taskTitle() {
     return 'Setup heimdall'
   }
 
-  get validatorKeyFile () {
+  get validatorKeyFile() {
     return 'priv_validator_key.json'
   }
 
-  get configValidatorKeyFilePath () {
+  get configValidatorKeyFilePath() {
     return path.join(this.config.configDir, this.validatorKeyFile)
   }
 
-  get repositoryDir () {
-    if (this.dockerContext !== undefined && !this.dockerContext.startsWith('http')) {
+  get repositoryDir() {
+    if (
+      this.dockerContext !== undefined &&
+      !this.dockerContext.startsWith('http')
+    ) {
       return this.dockerContext
     } else {
       return path.join(this.config.codeDir, this.repositoryName)
     }
   }
 
-  get buildDir () {
+  get buildDir() {
     return path.join(this.repositoryDir, 'build')
   }
 
-  get heimdalldCmd () {
+  get heimdalldCmd() {
     return path.join(this.buildDir, 'heimdalld')
   }
 
-  get heimdallDataDir () {
+  get heimdallDataDir() {
     return path.join(this.config.dataDir, this.name)
   }
 
-  get heimdallConfigDir () {
+  get heimdallConfigDir() {
     return path.join(this.heimdallDataDir, 'config')
   }
 
-  get heimdallGenesisFilePath () {
+  get heimdallGenesisFilePath() {
     return path.join(this.heimdallConfigDir, 'genesis.json')
   }
 
-  get heimdallHeimdallConfigFilePath () {
+  get heimdallHeimdallConfigFilePath() {
     return path.join(this.heimdallConfigDir, 'heimdall-config.toml')
   }
 
-  get heimdallValidatorKeyFilePath () {
+  get heimdallValidatorKeyFilePath() {
     return path.join(this.heimdallConfigDir, this.validatorKeyFile)
   }
 
-  async print () {
+  async print() {
     // print details
     console.log(
       chalk.gray('Heimdall home') +
-            ': ' +
-            chalk.bold.green(this.heimdallDataDir)
+        ': ' +
+        chalk.bold.green(this.heimdallDataDir)
     )
     console.log(
       chalk.gray('Heimdall genesis') +
-            ': ' +
-            chalk.bold.green(this.heimdallGenesisFilePath)
+        ': ' +
+        chalk.bold.green(this.heimdallGenesisFilePath)
     )
     console.log(
       chalk.gray('Heimdall validator key') +
-            ': ' +
-            chalk.bold.green(this.heimdallValidatorKeyFilePath)
+        ': ' +
+        chalk.bold.green(this.heimdallValidatorKeyFilePath)
     )
     console.log(
       chalk.gray('Heimdall repo') + ': ' + chalk.bold.green(this.repositoryDir)
     )
     console.log(
       chalk.gray('Setup heimdall') +
-            ': ' +
-            chalk.bold.green('bash heimdall-start.sh')
+        ': ' +
+        chalk.bold.green('bash heimdall-start.sh')
     )
     console.log(
       chalk.gray('Reset heimdall') +
-            ': ' +
-            chalk.bold.green('bash heimdall-clean.sh')
+        ': ' +
+        chalk.bold.green('bash heimdall-clean.sh')
     )
   }
 
   // returns content of validator key
-  async generateValidatorKey () {
+  async generateValidatorKey() {
     return execa(
       this.heimdalldCmd,
       [
@@ -126,7 +137,7 @@ export class Heimdall {
     })
   }
 
-  async getProcessGenesisFileTasks () {
+  async getProcessGenesisFileTasks() {
     return new Listr(
       [
         {
@@ -135,11 +146,11 @@ export class Heimdall {
             fileReplacer(this.heimdallGenesisFilePath)
               .replace(
                 /"chain_id":[ ]*".*"/gi,
-                                `"chain_id": "${this.config.heimdallChainId}"`
+                `"chain_id": "${this.config.heimdallChainId}"`
               )
               .replace(
                 /"bor_chain_id":[ ]*".*"/gi,
-                                `"bor_chain_id": "${this.config.borChainId}"`
+                `"bor_chain_id": "${this.config.borChainId}"`
               )
               .save()
           }
@@ -150,27 +161,27 @@ export class Heimdall {
             fileReplacer(this.heimdallGenesisFilePath)
               .replace(
                 /"address":[ ]*".*"/gi,
-                                `"address": "${this.config.primaryAccount.address}"`
+                `"address": "${this.config.primaryAccount.address}"`
               )
               .replace(
                 /"signer":[ ]*".*"/gi,
-                                `"signer": "${this.config.primaryAccount.address}"`
+                `"signer": "${this.config.primaryAccount.address}"`
               )
               .replace(
                 /"pub_key":[ ]*".*"/gi,
-                                `"pub_key": "${compressedPublicKey(
-                                    privateKeyToPublicKey(
-                                        this.config.primaryAccount.privateKey
-                                    ).replace('0x', '0x04')
-                                )}"`
+                `"pub_key": "${compressedPublicKey(
+                  privateKeyToPublicKey(
+                    this.config.primaryAccount.privateKey
+                  ).replace('0x', '0x04')
+                )}"`
               )
               .replace(
                 /"power":[ ]*".*"/gi,
-                                `"power": "${this.config.defaultStake}"`
+                `"power": "${this.config.defaultStake}"`
               )
               .replace(
                 /"user":[ ]*".*"/gi,
-                                `"user": "${this.config.primaryAccount.address}"`
+                `"user": "${this.config.primaryAccount.address}"`
               )
               .save()
           }
@@ -184,23 +195,23 @@ export class Heimdall {
             fileReplacer(this.heimdallGenesisFilePath)
               .replace(
                 /"matic_token_address":[ ]*".*"/gi,
-                                `"matic_token_address": "${rootContracts.tokens.TestToken}"`
+                `"matic_token_address": "${rootContracts.tokens.TestToken}"`
               )
               .replace(
                 /"staking_manager_address":[ ]*".*"/gi,
-                                `"staking_manager_address": "${rootContracts.StakeManagerProxy}"`
+                `"staking_manager_address": "${rootContracts.StakeManagerProxy}"`
               )
               .replace(
                 /"root_chain_address":[ ]*".*"/gi,
-                                `"root_chain_address": "${rootContracts.RootChainProxy}"`
+                `"root_chain_address": "${rootContracts.RootChainProxy}"`
               )
               .replace(
                 /"staking_info_address":[ ]*".*"/gi,
-                                `"staking_info_address": "${rootContracts.StakingInfo}"`
+                `"staking_info_address": "${rootContracts.StakingInfo}"`
               )
               .replace(
                 /"state_sender_address":[ ]*".*"/gi,
-                                `"state_sender_address": "${rootContracts.StateSender}"`
+                `"state_sender_address": "${rootContracts.StateSender}"`
               )
               .save()
           },
@@ -215,7 +226,7 @@ export class Heimdall {
     )
   }
 
-  cloneRepositoryTask () {
+  cloneRepositoryTask() {
     return {
       title: 'Clone Heimdall repository',
       task: () =>
@@ -228,7 +239,7 @@ export class Heimdall {
     }
   }
 
-  buildTask () {
+  buildTask() {
     return {
       title: 'Build Heimdall',
       task: () =>
@@ -239,7 +250,7 @@ export class Heimdall {
     }
   }
 
-  async getTasks () {
+  async getTasks() {
     return new Listr(
       [
         this.cloneRepositoryTask(),
@@ -324,8 +335,10 @@ export class Heimdall {
   }
 }
 
-async function setupHeimdall (config) {
-  const ganache = new Ganache(config, { contractsBranch: config.contractsBranch })
+async function setupHeimdall(config) {
+  const ganache = new Ganache(config, {
+    contractsBranch: config.contractsBranch
+  })
   const heimdall = new Heimdall(config, {
     repositoryBranch: config.heimdallBranch,
     dockerContext: config.heimdallDockerBuildContext
