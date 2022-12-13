@@ -31,10 +31,14 @@ jobs:
           npm install --prefer-offline --no-audit --progress=false
 
       - name: Run prettier
-        run: npm run pretty
+        run: |
+          cd matic-cli
+          npm run pretty
 
       - name: Run lint
-        run: npm run lint
+        run: |
+          cd matic-cli
+          npm run lint
 
   integration-tests:
     permissions:
