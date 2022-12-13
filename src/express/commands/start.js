@@ -408,8 +408,10 @@ export async function start () {
 
   if (devnetType === 'docker') {
     await editMaticCliDockerYAMLConfig()
+    await validateDockerConfig()
   } else {
     await editMaticCliRemoteYAMLConfig()
+    await validateRemoteConfig()
   }
 
   console.log('📍Waiting 30s for the VMs to initialize...')
