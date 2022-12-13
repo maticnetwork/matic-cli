@@ -326,17 +326,17 @@ async function runDockerSetupWithMaticCLI (ips, devnetId) {
   command = 'cd ~/matic-cli/devnet && bash docker-bor-start-all.sh'
   await runSshCommand(ip, command, maxRetries)
 
-  await timer(180000)
+  await timer(60000)
   console.log('📍Deploying contracts for bor...')
   command = 'cd ~/matic-cli/devnet && bash ganache-deployment-bor.sh'
   await runSshCommand(ip, command, maxRetries)
 
-  await timer(180000)
+  await timer(60000)
   console.log('📍Deploying state-sync contracts...')
   command = 'cd ~/matic-cli/devnet && bash ganache-deployment-sync.sh'
   await runSshCommand(ip, command, maxRetries)
 
-  await timer(120000)
+  await timer(60000)
   console.log('📍Executing bor ipc tests...')
   console.log('📍1. Fetching admin.peers...')
   command =
@@ -375,12 +375,12 @@ async function runRemoteSetupWithMaticCLI (ips, devnetId) {
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Deploying contracts for bor on machine ' + ip + ' ...')
-  await timer(180000)
+  await timer(60000)
   command = 'cd ~/matic-cli/devnet && bash ganache-deployment-bor.sh'
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Deploying state-sync contracts on machine ' + ip + ' ...')
-  await timer(180000)
+  await timer(60000)
   command = 'cd ~/matic-cli/devnet && bash ganache-deployment-sync.sh'
   await runSshCommand(ip, command, maxRetries)
 }

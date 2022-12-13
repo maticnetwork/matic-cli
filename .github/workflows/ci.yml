@@ -37,6 +37,7 @@ jobs:
           npm run prettier
 
       - name: Run lint
+        continue-on-error: true
         run: |
           cd matic-cli
           npm run lint

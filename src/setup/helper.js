@@ -51,7 +51,7 @@ export async function getDefaultBranch (options = {}) {
         type: 'input',
         name: 'borBranch',
         message: 'Please enter Bor docker tag',
-        default: 'v0.2.16'
+        default: 'develop'
       })
     }
   }
@@ -62,7 +62,7 @@ export async function getDefaultBranch (options = {}) {
         type: 'input',
         name: 'heimdallBranch',
         message: 'Please enter Heimdall docker tag',
-        default: 'v0.2.10'
+        default: 'develop'
       })
     }
   }
@@ -72,7 +72,7 @@ export async function getDefaultBranch (options = {}) {
       type: 'input',
       name: 'contractsBranch',
       message: 'Please enter Contracts branch',
-      default: 'jc/v0.3.1-backport'
+      default: 'master'
     })
   }
 
