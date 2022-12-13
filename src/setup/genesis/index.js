@@ -1,7 +1,4 @@
 // noinspection JSUnresolvedVariable
-/*
-   eslint-disable no-undef
-*/
 
 import Listr from 'listr'
 import execa from 'execa'
@@ -13,7 +10,6 @@ import { isValidAddress } from 'ethereumjs-util'
 
 import { loadConfig } from '../config'
 import { cloneRepository, errorMissingConfigs } from '../../lib/utils'
-import { printDependencyInstructions } from '../helper'
 import { getRemoteStdio } from '../../express/common/remote-worker'
 
 // balance
@@ -322,10 +318,8 @@ async function setupGenesis (config) {
 }
 
 export default async function (command) {
-  await printDependencyInstructions()
-
   // configuration
-  await loadConfig({
+  const config = await loadConfig({
     targetDirectory: command.parent.directory,
     fileName: command.parent.config,
     interactive: command.parent.interactive

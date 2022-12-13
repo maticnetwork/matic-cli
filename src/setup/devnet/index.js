@@ -1,7 +1,4 @@
 // noinspection JSUnresolvedFunction,JSUnresolvedVariable
-/*
-   eslint-disable no-undef
-*/
 
 import inquirer from 'inquirer'
 import Listr from 'listr'
@@ -16,7 +13,7 @@ import { Heimdall } from '../heimdall'
 import { Bor } from '../bor'
 import { Ganache } from '../ganache'
 import { Genesis } from '../genesis'
-import { getDefaultBranch, printDependencyInstructions } from '../helper'
+import { getDefaultBranch } from '../helper'
 import {
   errorMissingConfigs,
   getAccountFromPrivateKey,
@@ -815,10 +812,8 @@ export async function getUsers (n) {
 }
 
 export default async function (command) {
-  await printDependencyInstructions()
-
   // configuration
-  await loadConfig({
+  const config = await loadConfig({
     targetDirectory: command.parent.directory,
     fileName: command.parent.config,
     interactive: command.parent.interactive

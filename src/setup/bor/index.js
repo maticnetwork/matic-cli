@@ -1,7 +1,4 @@
 // noinspection JSUnresolvedFunction,JSUnresolvedVariable
-/*
-   eslint-disable no-undef
-*/
 
 import Listr from 'listr'
 import execa from 'execa'
@@ -11,7 +8,7 @@ import fs from 'fs-extra'
 
 import { loadConfig } from '../config'
 import { cloneRepository, getKeystoreFile, processTemplateFiles } from '../../lib/utils'
-import { getDefaultBranch, printDependencyInstructions } from '../helper'
+import { getDefaultBranch } from '../helper'
 import { Genesis } from '../genesis'
 import { getRemoteStdio } from '../../express/common/remote-worker'
 
@@ -212,10 +209,8 @@ async function setupBor (config) {
 }
 
 export default async function (command) {
-  await printDependencyInstructions()
-
   // configuration
-  await loadConfig({
+  const config = await loadConfig({
     targetDirectory: command.parent.directory,
     fileName: command.parent.config,
     interactive: command.parent.interactive

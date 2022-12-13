@@ -1,7 +1,4 @@
 // noinspection JSCheckFunctionSignatures
-/*
-   eslint-disable no-undef
-*/
 
 import Listr from 'listr'
 import chalk from 'chalk'
@@ -12,7 +9,7 @@ import ganache from 'ganache'
 
 import { loadConfig } from '../config'
 import { processTemplateFiles } from '../../lib/utils'
-import { getDefaultBranch, printDependencyInstructions } from '../helper'
+import { getDefaultBranch } from '../helper'
 import { Contracts } from '../contracts'
 import { getRemoteStdio } from '../../express/common/remote-worker'
 
@@ -186,10 +183,8 @@ async function setupGanache (config) {
 }
 
 export default async function (command) {
-  await printDependencyInstructions()
-
   // configuration
-  await loadConfig({
+  const config = await loadConfig({
     targetDirectory: command.parent.directory,
     fileName: command.parent.config,
     interactive: command.parent.interactive

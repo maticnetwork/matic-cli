@@ -1,7 +1,4 @@
 // noinspection JSUnresolvedFunction,JSUnresolvedVariable
-/*
-   eslint-disable no-undef
-*/
 
 import Listr from 'listr'
 import execa from 'execa'
@@ -12,7 +9,7 @@ import fs from 'fs-extra'
 import fileReplacer from '../../lib/file-replacer'
 import { loadConfig } from '../config'
 import { cloneRepository, compressedPublicKey, privateKeyToPublicKey, processTemplateFiles } from '../../lib/utils'
-import { getDefaultBranch, printDependencyInstructions } from '../helper'
+import { getDefaultBranch } from '../helper'
 import { Ganache } from '../ganache'
 import { getRemoteStdio } from '../../express/common/remote-worker'
 
@@ -367,10 +364,8 @@ async function setupHeimdall (config) {
 }
 
 export default async function (command) {
-  await printDependencyInstructions()
-
   // configuration
-  await loadConfig({
+  const config = await loadConfig({
     targetDirectory: command.parent.directory,
     fileName: command.parent.config,
     interactive: command.parent.interactive

@@ -32,7 +32,8 @@ export default class Config {
 
   set (options = {}) {
     for (const prop in options) {
-      if (Object.prototype.hasOwnProperty.call(prop)) {
+      // eslint-disable-next-line no-prototype-builtins
+      if (options.hasOwnProperty(prop)) {
         Object.defineProperty(this, prop, {
           value: options[prop],
           writable: true,

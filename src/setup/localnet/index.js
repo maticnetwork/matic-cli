@@ -1,14 +1,11 @@
 // noinspection JSUnresolvedVariable
-/*
-   eslint-disable no-undef
-*/
 
 import Listr from 'listr'
 import chalk from 'chalk'
 import path from 'path'
 import fs from 'fs-extra'
 
-import { getDefaultBranch, printDependencyInstructions } from '../helper'
+import { getDefaultBranch } from '../helper'
 import { loadConfig } from '../config'
 
 import { Genesis } from '../genesis'
@@ -87,10 +84,8 @@ async function setupLocalnet (config) {
 }
 
 export default async function (command) {
-  await printDependencyInstructions()
-
   // configuration
-  await loadConfig({
+  const config = await loadConfig({
     targetDirectory: command.parent.directory,
     fileName: command.parent.config,
     interactive: command.parent.interactive

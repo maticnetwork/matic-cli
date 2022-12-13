@@ -4,9 +4,6 @@ import inquirer from 'inquirer'
 
 import { errorMissingConfigs, getNewPrivateKey } from '../lib/utils'
 
-export async function printDependencyInstructions () {
-}
-
 export async function getChainIds (options = {}) {
   const questions = []
   const randomBorChainId = Math.floor((Math.random() * 10000) + 1000)
