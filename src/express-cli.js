@@ -74,7 +74,7 @@ export async function cli() {
     console.log('📍Command --init')
     if (!checkDir(true)) {
       console.log(
-        '❌ The command is supposed to be executed from the project root!'
+        `❌ The init command is supposed to be executed from the project root directory, named 'matic-cli'!`
       )
       process.exit(1)
     }
