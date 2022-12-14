@@ -388,20 +388,6 @@ export async function start() {
   const devnetId = getDevnetId()
   require('dotenv').config({ path: `${process.cwd()}/.env` })
 
-  const tfOutputFake = `{    "value": [
-      "35.89.151.83",
-      "35.92.244.147",
-      "18.236.126.181"
-    ]
-  }
-`
-  const ipsFake = JSON.parse(tfOutputFake).value.toString()
-  process.env.DEVNET_BOR_HOSTS = ipsFake
-
-  await validateEnvVariables()
-
-  process.exit(0)
-
   shell.exec(`terraform workspace select devnet-${devnetId}`)
 
   const devnetType =

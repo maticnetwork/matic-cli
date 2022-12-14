@@ -34,7 +34,7 @@ export async function setupDatadog() {
   require('dotenv').config({ path: `${process.cwd()}/.env` })
 
   if (process.env.TF_VAR_DOCKERIZED === 'yes') {
-    console.log('Not supported for datadog at the moment')
+    console.log('📍Not supported for datadog at the moment')
     return
   } else {
     doc = await loadDevnetConfig('remote')

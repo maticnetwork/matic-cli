@@ -29,6 +29,7 @@
     "commander": "^5.0.0",
     "covgen": "^3.1.0",
     "dotenv": "^16.0.3",
+    "envalid": "^7.3.1",
     "esm": "^3.2.18",
     "eth-crypto": "^2.4.0",
     "ethereumjs-util": "^7.1.5",
