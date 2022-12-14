@@ -2,7 +2,7 @@
 
 set -x
 
-DATA_DIR={{ obj.dbDirRemote }}
+DATA_DIR={{ obj.dbDir }}
 
 ganache --chain.hardfork istanbul \
   --miner.blockTime 1 \
