@@ -1,6 +1,6 @@
 import fs from 'fs'
 
-export function findMaxDevnetId () {
+export function findMaxDevnetId() {
   const deployments = './deployments'
   let max = 0
 
@@ -19,7 +19,7 @@ export function findMaxDevnetId () {
   return max
 }
 
-export function checkDir (isInvokedFromRoot) {
+export function checkDir(isInvokedFromRoot) {
   const path = process.cwd()
   const dirArr = path.split('/')
   const dir = dirArr[dirArr.length - 1]

@@ -1,3 +1,13 @@
 module.exports = {
-  extends: ['standard']
+  extends: 'standard',
+  rules: {
+    'space-before-function-paren': [
+      'error',
+      {
+        anonymous: 'always',
+        named: 'never',
+        asyncArrow: 'always'
+      }
+    ]
+  }
 }

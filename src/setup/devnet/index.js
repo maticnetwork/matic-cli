@@ -46,88 +46,88 @@ const getAllFiles = function (dirPath, arrayOfFiles) {
 }
 
 export class Devnet {
-  constructor (config) {
+  constructor(config) {
     this.config = config
   }
 
-  get testnetDir () {
+  get testnetDir() {
     return path.join(this.config.targetDirectory, 'devnet')
   }
 
-  get signerDumpPath () {
+  get signerDumpPath() {
     return path.join(this.testnetDir, 'signer-dump.json')
   }
 
-  get signerDumpData () {
+  get signerDumpData() {
     return require(this.signerDumpPath)
   }
 
-  get totalNodes () {
+  get totalNodes() {
     // noinspection JSUnresolvedVariable
     return this.config.numOfValidators + this.config.numOfNonValidators
   }
 
-  nodeDir (index) {
+  nodeDir(index) {
     return path.join(this.testnetDir, `node${index}`)
   }
 
-  heimdallDir (index) {
+  heimdallDir(index) {
     return path.join(this.nodeDir(index), 'heimdalld')
   }
 
-  heimdallConfigFilePath (index) {
+  heimdallConfigFilePath(index) {
     return path.join(this.heimdallDir(index), 'config', 'config.toml')
   }
 
-  heimdallGenesisFilePath (index) {
+  heimdallGenesisFilePath(index) {
     return path.join(this.heimdallDir(index), 'config', 'genesis.json')
   }
 
-  heimdallHeimdallConfigFilePath (index) {
+  heimdallHeimdallConfigFilePath(index) {
     return path.join(this.heimdallDir(index), 'config', 'heimdall-config.toml')
   }
 
-  borDir (index) {
+  borDir(index) {
     return path.join(this.nodeDir(index), 'bor')
   }
 
-  borDataDir (index) {
+  borDataDir(index) {
     return path.join(this.borDir(index), 'data')
   }
 
-  borKeystoreDir (index) {
+  borKeystoreDir(index) {
     return path.join(this.borDir(index), 'keystore')
   }
 
-  borGenesisFilePath (index) {
+  borGenesisFilePath(index) {
     return path.join(this.borDir(index), 'genesis.json')
   }
 
-  borPasswordFilePath (index) {
+  borPasswordFilePath(index) {
     return path.join(this.borDir(index), 'password.txt')
   }
 
-  borPrivateKeyFilePath (index) {
+  borPrivateKeyFilePath(index) {
     return path.join(this.borDir(index), 'privatekey.txt')
   }
 
-  borAddressFilePath (index) {
+  borAddressFilePath(index) {
     return path.join(this.borDir(index), 'address.txt')
   }
 
-  borNodeKeyPath (index) {
+  borNodeKeyPath(index) {
     return path.join(this.borDir(index), 'nodekey')
   }
 
-  borEnodeFilePath (index) {
+  borEnodeFilePath(index) {
     return path.join(this.borDir(index), 'enode.txt')
   }
 
-  borStaticNodesPath (index) {
+  borStaticNodesPath(index) {
     return path.join(this.borDir(index), 'static-nodes.json')
   }
 
-  async getEnodeTask () {
+  async getEnodeTask() {
     return {
       title: 'Setup enode',
       task: async () => {
@@ -171,7 +171,7 @@ export class Devnet {
     }
   }
 
-  async getDockerTasks () {
+  async getDockerTasks() {
     const enodeTask = await this.getEnodeTask()
     return [
       enodeTask,
@@ -265,7 +265,7 @@ export class Devnet {
     ]
   }
 
-  async getRemoteTasks () {
+  async getRemoteTasks() {
     const enodeTask = await this.getEnodeTask()
     return [
       enodeTask,
@@ -675,7 +675,7 @@ export class Devnet {
     ]
   }
 
-  async getCreateTestnetTask (heimdall) {
+  async getCreateTestnetTask(heimdall) {
     return [
       heimdall.cloneRepositoryTask(),
       heimdall.buildTask(),
@@ -746,7 +746,7 @@ export class Devnet {
     ]
   }
 
-  async getTasks () {
+  async getTasks() {
     const ganache = this.ganache
     const heimdall = this.heimdall
     const bor = this.bor
@@ -906,7 +906,7 @@ export class Devnet {
   }
 }
 
-async function setupDevnet (config) {
+async function setupDevnet(config) {
   const devnet = new Devnet(config)
   devnet.ganache = new Ganache(config, {
     contractsBranch: config.contractsBranch
@@ -925,7 +925,7 @@ async function setupDevnet (config) {
   console.log('%s Devnet is ready', chalk.green.bold('DONE'))
 }
 
-export async function getHosts (n) {
+export async function getHosts(n) {
   const answers = await inquirer.prompt([
     {
       type: 'input',
@@ -950,7 +950,7 @@ export async function getHosts (n) {
   })
 }
 
-export async function getUsers (n) {
+export async function getUsers(n) {
   const answers = await inquirer.prompt([
     {
       type: 'input',

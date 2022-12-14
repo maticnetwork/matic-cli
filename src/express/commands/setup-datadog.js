@@ -14,7 +14,7 @@ const fs = require('fs')
 
 const timer = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
-export async function setDatadogAPIKey (value, doc) {
+export async function setDatadogAPIKey(value, doc) {
   if (value !== undefined) {
     doc.exporters.datadog.api.key = value
   }
@@ -29,7 +29,7 @@ export async function setDatadogAPIKey (value, doc) {
   await timer(1000)
 }
 
-export async function setupDatadog () {
+export async function setupDatadog() {
   let doc
   require('dotenv').config({ path: `${process.cwd()}/.env` })
 

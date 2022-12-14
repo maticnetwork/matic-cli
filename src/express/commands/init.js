@@ -5,7 +5,7 @@ import fs from 'fs'
 
 const shell = require('shelljs')
 
-export async function terraformInit () {
+export async function terraformInit() {
   const nextDevnetId = !fs.existsSync('./deployments')
     ? 1
     : findMaxDevnetId() + 1

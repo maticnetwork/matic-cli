@@ -20,7 +20,7 @@ import fs from 'fs'
 const shell = require('shelljs')
 const timer = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
-async function terraformApply (devnetId) {
+async function terraformApply(devnetId) {
   console.log('📍Executing terraform apply...')
   shell.exec(
     `terraform -chdir=../../deployments/devnet-${devnetId} apply -auto-approve`,
@@ -32,7 +32,7 @@ async function terraformApply (devnetId) {
   )
 }
 
-async function terraformOutput () {
+async function terraformOutput() {
   console.log('📍Executing terraform output...')
   const { stdout } = shell.exec('terraform output --json', {
     env: {
@@ -43,7 +43,7 @@ async function terraformOutput () {
   return stdout
 }
 
-async function installRequiredSoftwareOnRemoteMachines (
+async function installRequiredSoftwareOnRemoteMachines(
   ips,
   devnetType,
   devnetId
@@ -87,7 +87,7 @@ async function installRequiredSoftwareOnRemoteMachines (
   await Promise.all(requirementTasks)
 }
 
-async function configureCertAndPermissions (user, ip) {
+async function configureCertAndPermissions(user, ip) {
   console.log('📍Allowing user not to use password...')
   let command = `echo "${user} ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers`
   await runSshCommand(ip, command, maxRetries)
@@ -107,7 +107,7 @@ async function configureCertAndPermissions (user, ip) {
   await runSshCommand(ip, command, maxRetries)
 }
 
-async function installCommonPackages (ip) {
+async function installCommonPackages(ip) {
   console.log('📍Installing required software on remote machine ' + ip + '...')
 
   console.log('📍Running apt update...')
@@ -134,7 +134,7 @@ async function installCommonPackages (ip) {
   await runSshCommand(ip, command, maxRetries)
 }
 
-async function installHostSpecificPackages (ip) {
+async function installHostSpecificPackages(ip) {
   console.log('📍Installing nvm...')
   let command = `curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash &&
                         export NVM_DIR="$HOME/.nvm"
@@ -166,7 +166,7 @@ async function installHostSpecificPackages (ip) {
   await runSshCommand(ip, command, maxRetries)
 }
 
-export async function installDocker (ip, user) {
+export async function installDocker(ip, user) {
   console.log('📍Setting docker repository up...')
   let command =
     'sudo apt-get update -y && sudo apt install apt-transport-https ca-certificates curl software-properties-common -y'
@@ -189,7 +189,7 @@ export async function installDocker (ip, user) {
   await runSshCommand(ip, command, maxRetries)
 }
 
-async function prepareMaticCLI (ips, devnetType, devnetId) {
+async function prepareMaticCLI(ips, devnetType, devnetId) {
   const doc = await yaml.load(
     fs.readFileSync(
       `../../deployments/devnet-${devnetId}/${devnetType}-setup-config.yaml`,
@@ -217,7 +217,7 @@ async function prepareMaticCLI (ips, devnetType, devnetId) {
   await runSshCommand(ip, command, maxRetries)
 }
 
-async function eventuallyCleanupPreviousDevnet (ips, devnetType, devnetId) {
+async function eventuallyCleanupPreviousDevnet(ips, devnetType, devnetId) {
   const doc = await yaml.load(
     fs.readFileSync(
       `../../deployments/devnet-${devnetId}/${devnetType}-setup-config.yaml`,
@@ -285,7 +285,7 @@ async function eventuallyCleanupPreviousDevnet (ips, devnetType, devnetId) {
   await Promise.all(cleanupTasks)
 }
 
-async function runDockerSetupWithMaticCLI (ips, devnetId) {
+async function runDockerSetupWithMaticCLI(ips, devnetId) {
   const doc = await yaml.load(
     fs.readFileSync(
       `../../deployments/devnet-${devnetId}/docker-setup-config.yaml`,
@@ -349,7 +349,7 @@ async function runDockerSetupWithMaticCLI (ips, devnetId) {
   console.log('📍bor ipc tests executed...')
 }
 
-async function runRemoteSetupWithMaticCLI (ips, devnetId) {
+async function runRemoteSetupWithMaticCLI(ips, devnetId) {
   const doc = await yaml.load(
     fs.readFileSync(
       `../../deployments/devnet-${devnetId}/remote-setup-config.yaml`,
@@ -385,7 +385,7 @@ async function runRemoteSetupWithMaticCLI (ips, devnetId) {
   await runSshCommand(ip, command, maxRetries)
 }
 
-export async function start () {
+export async function start() {
   const devnetId = getDevnetId()
   require('dotenv').config({ path: `${process.cwd()}/.env` })
   shell.exec(`terraform workspace select devnet-${devnetId}`)

@@ -24,7 +24,7 @@ export const KEYSTORE_PASSWORD = 'hello'
 //
 
 export class Bor {
-  constructor (config, options = {}) {
+  constructor(config, options = {}) {
     this.config = config
 
     this.repositoryName = 'bor'
@@ -35,35 +35,35 @@ export class Bor {
     this.genesis = new Genesis(config)
   }
 
-  get name () {
+  get name() {
     return 'bor'
   }
 
-  get taskTitle () {
+  get taskTitle() {
     return 'Setup Bor'
   }
 
-  get repositoryDir () {
+  get repositoryDir() {
     return path.join(this.config.codeDir, this.repositoryName)
   }
 
-  get borDataDir () {
+  get borDataDir() {
     return path.join(this.config.dataDir, 'bor')
   }
 
-  get keystoreDir () {
+  get keystoreDir() {
     return path.join(this.config.dataDir, 'keystore')
   }
 
-  get passwordFilePath () {
+  get passwordFilePath() {
     return path.join(this.config.dataDir, 'password.txt')
   }
 
-  get keystorePassword () {
+  get keystorePassword() {
     return this.config.keystorePassword || KEYSTORE_PASSWORD
   }
 
-  async print () {
+  async print() {
     console.log(
       chalk.gray('Bor data') + ': ' + chalk.bold.green(this.borDataDir)
     )
@@ -87,7 +87,7 @@ export class Bor {
     )
   }
 
-  async getTasks () {
+  async getTasks() {
     // noinspection JSUnresolvedVariable
     return new Listr(
       [
@@ -178,7 +178,7 @@ export class Bor {
   }
 }
 
-async function setupBor (config) {
+async function setupBor(config) {
   const bor = new Bor(config)
 
   const tasks = new Listr(

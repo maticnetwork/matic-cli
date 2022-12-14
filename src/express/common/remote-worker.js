@@ -2,14 +2,14 @@ import execa from 'execa'
 
 export const maxRetries = 3
 
-export function getRemoteStdio () {
+export function getRemoteStdio() {
   if (process.env.VERBOSE === 'false') {
     return 'ignore'
   }
   return 'inherit'
 }
 
-export async function runSshCommand (ip, command, retries) {
+export async function runSshCommand(ip, command, retries) {
   if (retries < 0) {
     console.log(
       '❌ runSshCommand called with negative retries number: ',
@@ -47,7 +47,7 @@ export async function runSshCommand (ip, command, retries) {
   }
 }
 
-export async function runScpCommand (src, dest, retries) {
+export async function runScpCommand(src, dest, retries) {
   if (retries < 0) {
     console.log(
       '❌ runScpCommand called with negative retries number: ',

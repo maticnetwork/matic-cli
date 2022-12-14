@@ -19,7 +19,7 @@ import { Ganache } from '../ganache'
 import { getRemoteStdio } from '../../express/common/remote-worker'
 
 export class Heimdall {
-  constructor (config, options = {}) {
+  constructor(config, options = {}) {
     this.config = config
 
     this.repositoryName = this.name
@@ -31,23 +31,23 @@ export class Heimdall {
       'https://github.com/maticnetwork/heimdall.git#develop'
   }
 
-  get name () {
+  get name() {
     return 'heimdall'
   }
 
-  get taskTitle () {
+  get taskTitle() {
     return 'Setup heimdall'
   }
 
-  get validatorKeyFile () {
+  get validatorKeyFile() {
     return 'priv_validator_key.json'
   }
 
-  get configValidatorKeyFilePath () {
+  get configValidatorKeyFilePath() {
     return path.join(this.config.configDir, this.validatorKeyFile)
   }
 
-  get repositoryDir () {
+  get repositoryDir() {
     if (
       this.dockerContext !== undefined &&
       !this.dockerContext.startsWith('http')
@@ -58,35 +58,35 @@ export class Heimdall {
     }
   }
 
-  get buildDir () {
+  get buildDir() {
     return path.join(this.repositoryDir, 'build')
   }
 
-  get heimdalldCmd () {
+  get heimdalldCmd() {
     return path.join(this.buildDir, 'heimdalld')
   }
 
-  get heimdallDataDir () {
+  get heimdallDataDir() {
     return path.join(this.config.dataDir, this.name)
   }
 
-  get heimdallConfigDir () {
+  get heimdallConfigDir() {
     return path.join(this.heimdallDataDir, 'config')
   }
 
-  get heimdallGenesisFilePath () {
+  get heimdallGenesisFilePath() {
     return path.join(this.heimdallConfigDir, 'genesis.json')
   }
 
-  get heimdallHeimdallConfigFilePath () {
+  get heimdallHeimdallConfigFilePath() {
     return path.join(this.heimdallConfigDir, 'heimdall-config.toml')
   }
 
-  get heimdallValidatorKeyFilePath () {
+  get heimdallValidatorKeyFilePath() {
     return path.join(this.heimdallConfigDir, this.validatorKeyFile)
   }
 
-  async print () {
+  async print() {
     // print details
     console.log(
       chalk.gray('Heimdall home') +
@@ -119,7 +119,7 @@ export class Heimdall {
   }
 
   // returns content of validator key
-  async generateValidatorKey () {
+  async generateValidatorKey() {
     return execa(
       this.heimdalldCmd,
       [
@@ -137,7 +137,7 @@ export class Heimdall {
     })
   }
 
-  async getProcessGenesisFileTasks () {
+  async getProcessGenesisFileTasks() {
     return new Listr(
       [
         {
@@ -226,7 +226,7 @@ export class Heimdall {
     )
   }
 
-  cloneRepositoryTask () {
+  cloneRepositoryTask() {
     return {
       title: 'Clone Heimdall repository',
       task: () =>
@@ -239,7 +239,7 @@ export class Heimdall {
     }
   }
 
-  buildTask () {
+  buildTask() {
     return {
       title: 'Build Heimdall',
       task: () =>
@@ -250,7 +250,7 @@ export class Heimdall {
     }
   }
 
-  async getTasks () {
+  async getTasks() {
     return new Listr(
       [
         this.cloneRepositoryTask(),
@@ -335,7 +335,7 @@ export class Heimdall {
   }
 }
 
-async function setupHeimdall (config) {
+async function setupHeimdall(config) {
   const ganache = new Ganache(config, {
     contractsBranch: config.contractsBranch
   })

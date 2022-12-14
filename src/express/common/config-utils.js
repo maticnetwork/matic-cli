@@ -3,7 +3,7 @@
 import yaml from 'js-yaml'
 import fs from 'fs'
 
-function setCommonConfigs (doc) {
+function setCommonConfigs(doc) {
   setConfigValue('defaultStake', parseInt(process.env.DEFAULT_STAKE), doc)
   setConfigValue('defaultFee', parseInt(process.env.DEFAULT_FEE), doc)
   setConfigValue('borChainId', parseInt(process.env.BOR_CHAIN_ID), doc)
@@ -42,13 +42,13 @@ function setCommonConfigs (doc) {
   )
 }
 
-function setConfigValue (key, value, doc) {
+function setConfigValue(key, value, doc) {
   if (value !== undefined) {
     doc[key] = value
   }
 }
 
-function setConfigList (key, value, doc) {
+function setConfigList(key, value, doc) {
   if (value !== undefined) {
     value = value.split(' ').join('')
     const valueArray = value.split(',')
@@ -70,20 +70,20 @@ function setConfigList (key, value, doc) {
   }
 }
 
-function setEthURL (value, doc) {
+function setEthURL(value, doc) {
   if (value !== undefined) {
     doc.ethURL = 'http://' + value + ':9545'
     process.env.ETH_URL = doc.ethURL
   }
 }
 
-function setEthHostUser (value, doc) {
+function setEthHostUser(value, doc) {
   if (value !== undefined) {
     doc.ethHostUser = value
   }
 }
 
-export function splitToArray (value) {
+export function splitToArray(value) {
   try {
     return value.split(' ').join('').split(',')
   } catch (error) {
@@ -93,7 +93,7 @@ export function splitToArray (value) {
   }
 }
 
-export function splitAndGetHostIp (value) {
+export function splitAndGetHostIp(value) {
   try {
     return value.split('@')[0]
   } catch (error) {
@@ -103,7 +103,7 @@ export function splitAndGetHostIp (value) {
   }
 }
 
-export async function checkAndReturnVMIndex (n, doc) {
+export async function checkAndReturnVMIndex(n, doc) {
   if (typeof n === 'boolean') {
     console.log('📍Targeting all VMs ...')
     return undefined
@@ -121,19 +121,19 @@ export async function checkAndReturnVMIndex (n, doc) {
   }
 }
 
-export function getDevnetId () {
+export function getDevnetId() {
   const devnetFolders = process.cwd().split('/')
   const ids = devnetFolders[devnetFolders.length - 1].split('-')
   return ids[1]
 }
 
-export async function loadDevnetConfig (devnetType) {
+export async function loadDevnetConfig(devnetType) {
   return yaml.load(
     fs.readFileSync(`./${devnetType}-setup-config.yaml`, 'utf-8')
   )
 }
 
-export async function editMaticCliRemoteYAMLConfig () {
+export async function editMaticCliRemoteYAMLConfig() {
   console.log('📍Editing matic-cli remote YAML configs...')
 
   const doc = await yaml.load(
@@ -160,7 +160,7 @@ export async function editMaticCliRemoteYAMLConfig () {
   )
 }
 
-export async function editMaticCliDockerYAMLConfig () {
+export async function editMaticCliDockerYAMLConfig() {
   console.log('📍Editing matic-cli docker YAML configs...')
 
   const doc = await yaml.load(
@@ -187,7 +187,7 @@ export async function editMaticCliDockerYAMLConfig () {
   )
 }
 
-export async function validateRemoteConfig () {
+export async function validateRemoteConfig() {
   const doc = await yaml.load(
     fs.readFileSync(`${process.cwd()}/remote-setup-config.yaml`, 'utf8'),
     undefined
@@ -202,7 +202,7 @@ export async function validateRemoteConfig () {
   // 7. ethURL must be first IP of devnetBorHosts
 }
 
-export async function validateDockerConfig () {
+export async function validateDockerConfig() {
   const doc = await yaml.load(
     fs.readFileSync(`${process.cwd()}/docker-setup-config.yaml`, 'utf8'),
     undefined
