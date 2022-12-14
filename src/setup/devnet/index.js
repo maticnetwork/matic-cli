@@ -397,8 +397,8 @@ export class Devnet {
               'UserKnownHostsFile=/dev/null',
               '-i',
               '~/cert.pem',
-              `${this.config.targetDirectory}/ganache-start-remote.sh`,
-              `${ganacheUser}@${ganacheURL.hostname}:~/ganache-start-remote.sh`
+              `${this.config.targetDirectory}/ganache-start.sh`,
+              `${ganacheUser}@${ganacheURL.hostname}:~/ganache-start.sh`
             ],
             { stdio: getRemoteStdio() }
           )
