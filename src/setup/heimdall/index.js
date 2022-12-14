@@ -340,6 +340,7 @@ async function setupHeimdall(config) {
     contractsBranch: config.contractsBranch
   })
   const heimdall = new Heimdall(config, {
+    repositoryUrl: config.heimdallRepo,
     repositoryBranch: config.heimdallBranch,
     dockerContext: config.heimdallDockerBuildContext
   })

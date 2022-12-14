@@ -7,8 +7,10 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prettier": "prettier --check './**/*.*' --ignore-unknown",
-    "lint": "npx eslint './**/**.js'"
+    "prettier:check": "prettier --check './**/*.*' --ignore-unknown",
+    "prettier:fix": "prettier --write './**/*.*' --ignore-unknown",
+    "lint:check": "npx eslint './**/**.js'",
+    "lint:fix": "npx eslint './**/**.js' --fix"
   },
   "keywords": [
     "cli",

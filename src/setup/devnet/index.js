@@ -911,12 +911,18 @@ async function setupDevnet(config) {
   devnet.ganache = new Ganache(config, {
     contractsBranch: config.contractsBranch
   })
-  devnet.bor = new Bor(config, { repositoryBranch: config.borBranch })
+  devnet.bor = new Bor(config, {
+    repositoryUrl: config.borRepo,
+    repositoryBranch: config.borBranch,
+    dockerContext: config.borDockerBuildContext
+  })
   devnet.heimdall = new Heimdall(config, {
+    repositoryUrl: config.heimdallRepo,
     repositoryBranch: config.heimdallBranch,
     dockerContext: config.heimdallDockerBuildContext
   })
   devnet.genesis = new Genesis(config, {
+    repositoryUrl: config.genesisContractsRepo,
     repositoryBranch: config.genesisContractsBranch
   })
 

@@ -1,7 +1,8 @@
-// noinspection JSCheckFunctionSignatures
+// noinspection JSCheckFunctionSignatures, JSUnresolvedFunction
 
 import yaml from 'js-yaml'
 import fs from 'fs'
+const shell = require('shelljs')
 
 function setCommonConfigs(doc) {
   setConfigValue('defaultStake', parseInt(process.env.DEFAULT_STAKE), doc)
@@ -11,9 +12,17 @@ function setCommonConfigs(doc) {
   setConfigValue('sprintSize', parseInt(process.env.SPRINT_SIZE), doc)
   setConfigValue('blockNumber', process.env.BLOCK_NUMBER, doc)
   setConfigValue('blockTime', process.env.BLOCK_TIME, doc)
+  setConfigValue('borRepo', process.env.BOR_REPO, doc)
   setConfigValue('borBranch', process.env.BOR_BRANCH, doc)
+  setConfigValue('heimdallRepo', process.env.HEIMDALL_REPO, doc)
   setConfigValue('heimdallBranch', process.env.HEIMDALL_BRANCH, doc)
+  setConfigValue('contractsRepo', process.env.CONTRACTS_REPO, doc)
   setConfigValue('contractsBranch', process.env.CONTRACTS_BRANCH, doc)
+  setConfigValue(
+    'genesisContractsRepo',
+    process.env.GENESIS_CONTRACTS_REPO,
+    doc
+  )
   setConfigValue(
     'genesisContractsBranch',
     process.env.GENESIS_CONTRACTS_BRANCH,
@@ -187,27 +196,75 @@ export async function editMaticCliDockerYAMLConfig() {
   )
 }
 
-export async function validateRemoteConfig() {
-  const doc = await yaml.load(
-    fs.readFileSync(`${process.cwd()}/remote-setup-config.yaml`, 'utf8'),
-    undefined
+export async function validateEnvVariables() {
+  console.log('📍Validating repos, branches and commit hashes...')
+  console.log('📍Validating bor...')
+  shell.exec(
+    `git ls-remote --exit-code --heads --tags ${process.env.BOR_REPO} ${process.env.BOR_BRANCH} || 
+    git fetch ${process.env.BOR_REPO} ${process.env.BOR_BRANCH}`
   )
-  // TODO validate the following
-  // 1. all branches must be valid
+  if (shell.error() != null) {
+    console.log(
+      '❌ Error while test-cloning bor repo, please check your configs!'
+    )
+    process.exit(1)
+  }
+  console.log('📍Validating heimdall...')
+  shell.exec(
+    `git ls-remote --exit-code --heads --tags ${process.env.HEIMDALL_REPO} ${process.env.HEIMDALL_BRANCH} || 
+    git fetch ${process.env.HEIMDALL_REPO} ${process.env.HEIMDALL_BRANCH}`
+  )
+  if (shell.error() != null) {
+    console.log(
+      '❌ Error while test-cloning heimdall repo, please check your configs!'
+    )
+    process.exit(1)
+  }
+  console.log('📍Validating matic-cli...')
+  shell.exec(
+    `git ls-remote --exit-code --heads --tags ${process.env.MATIC_CLI_REPO} ${process.env.MATIC_CLI_BRANCH} || 
+    git fetch ${process.env.MATIC_CLI_REPO} ${process.env.MATIC_CLI_BRANCH}`
+  )
+  if (shell.error() != null) {
+    console.log(
+      '❌ Error while test-cloning matic-cli repo, please check your configs!'
+    )
+    process.exit(1)
+  }
+  console.log('📍Validating contracts...')
+  shell.exec(
+    `git ls-remote --exit-code --heads --tags ${process.env.CONTRACTS_REPO} ${process.env.CONTRACTS_BRANCH} || 
+    git fetch ${process.env.CONTRACTS_REPO} ${process.env.CONTRACTS_BRANCH}`
+  )
+  if (shell.error() != null) {
+    console.log(
+      '❌ Error while test-cloning contracts repo, please check your configs!'
+    )
+    process.exit(1)
+  }
+  console.log('📍Validating genesis-contracts...')
+  shell.exec(
+    `git ls-remote --exit-code --heads --tags ${process.env.GENESIS_CONTRACTS_REPO} ${process.env.GENESIS_CONTRACTS_BRANCH} || 
+    git fetch ${process.env.GENESIS_CONTRACTS_REPO} ${process.env.GENESIS_CONTRACTS_BRANCH}`
+  )
+  if (shell.error() != null) {
+    console.log(
+      '❌ Error while cloning genesis-contracts repo, please check your configs!'
+    )
+    process.exit(1)
+  }
+
+  // TODO validate the following remote
+  // 2. all hosts must be valid
+  //        all named ubuntu
   // 2. sprintSize, blockNumber and blockTime must be valid
   // 3. numOfValidators and numOfNonValidators must be numbers
   // 4. numOfValidators + numOfNonValidators = length(devnetBorHosts) = length(devnetBorUsers) = length(devnetHeimdallHosts) = length(devnetHeimdallUsers)
   // 5. all users must be called ubuntu
   // 6. devnetType must be remote
   // 7. ethURL must be first IP of devnetBorHosts
-}
 
-export async function validateDockerConfig() {
-  const doc = await yaml.load(
-    fs.readFileSync(`${process.cwd()}/docker-setup-config.yaml`, 'utf8'),
-    undefined
-  )
-  // TODO validate the following
+  // TODO validate the following docker
   // 1. all branches must be valid
   // 2. sprintSize, blockNumber and blockTime must be valid
   // 3. numOfValidators and numOfNonValidators must be numbers

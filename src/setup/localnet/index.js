@@ -18,11 +18,21 @@ async function setupLocalnet(config) {
   const ganache = new Ganache(config, {
     contractsBranch: config.contractsBranch
   })
-  const bor = new Bor(config, { repositoryBranch: config.borBranch })
-  const heimdall = new Heimdall(config, {
-    repositoryBranch: config.heimdallBranch
+  const bor = new Bor(config, {
+    repositoryUrl: config.borRepo || 'https://github.com/maticnetwork/bor',
+    repositoryBranch: config.borBranch || 'develop'
   })
-  const genesis = new Genesis(config, { repositoryBranch: 'master' })
+  const heimdall = new Heimdall(config, {
+    repositoryUrl:
+      config.heimdallRepo || 'https://github.com/maticnetwork/heimdall',
+    repositoryBranch: config.heimdallBranch || 'develop'
+  })
+  const genesis = new Genesis(config, {
+    repositoryUrl:
+      config.genesisContractsRepo ||
+      'https://github.com/maticnetwork/genesis-contracts',
+    repositoryBranch: config.genesisContractsBranch || 'master'
+  })
 
   const tasks = new Listr(
     [
