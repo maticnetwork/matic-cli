@@ -335,7 +335,7 @@ export async function validateEnvVariables() {
   borUsers.forEach((user) => {
     if (user !== 'ubuntu') {
       console.log(
-        '❌ DEVNET_BOR_USERS must all be named \'ubuntu\', please check your configs!'
+        "❌ DEVNET_BOR_USERS must all be named 'ubuntu', please check your configs!"
       )
       process.exit(1)
     }
