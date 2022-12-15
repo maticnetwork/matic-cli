@@ -1,7 +1,7 @@
 // noinspection JSCheckFunctionSignatures,JSUnresolvedFunction,JSUnresolvedVariable
 
 import {
-  validateEnvVariables,
+  validateConfigs,
   editMaticCliDockerYAMLConfig,
   editMaticCliRemoteYAMLConfig,
   getDevnetId,
@@ -398,7 +398,7 @@ export async function start() {
   const ips = JSON.parse(tfOutput).instance_ips.value.toString()
   process.env.DEVNET_BOR_HOSTS = ips
 
-  await validateEnvVariables()
+  await validateConfigs()
 
   shell.exec(
     `cp ../../configs/devnet/${devnetType}-setup-config.yaml ../../deployments/devnet-${devnetId}`
