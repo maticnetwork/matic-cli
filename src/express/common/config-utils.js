@@ -18,8 +18,13 @@ const validAmiStr = makeValidator((x) => {
 })
 
 const validCertPathStr = makeValidator((x) => {
-  if (x !== undefined && x !== null && x !== '' && !x.startsWith('~') &&
-    (x.endsWith('.pem') || (x.endsWith('.cer')))) {
+  if (
+    x !== undefined &&
+    x !== null &&
+    x !== '' &&
+    !x.startsWith('~') &&
+    (x.endsWith('.pem') || x.endsWith('.cer'))
+  ) {
     return x
   } else throw new Error(x + 'is not valid, please check your configs!')
 })
@@ -130,7 +135,8 @@ function validateEnvVars() {
 function validateAwsKeyAndCertificate() {
   const certFilePath = process.env.PEM_FILE_PATH
   const certName = certFilePath
-    .substring(certFilePath.lastIndexOf('/') + 1).split('.')[0]
+    .substring(certFilePath.lastIndexOf('/') + 1)
+    .split('.')[0]
   if (!certName === process.env.TF_VAR_PEM_FILE) {
     console.log(
       '❌ PEM_FILE_PATH and TF_VAR_PEM_FILE are inconsistent, please check your configs!'
@@ -152,14 +158,14 @@ function validateUsersAndHosts() {
   ) {
     console.log(
       '❌ DEVNET_BOR_USERS or DEVNET_BOR_HOSTS lengths are not equal to the nodes count ' +
-      '(TF_VAR_VALIDATOR_COUNT+TF_VAR_SENTRY_COUNT), please check your configs!'
+        '(TF_VAR_VALIDATOR_COUNT+TF_VAR_SENTRY_COUNT), please check your configs!'
     )
     process.exit(1)
   }
   borUsers.forEach((user) => {
     if (user !== 'ubuntu') {
       console.log(
-        '❌ DEVNET_BOR_USERS must all be named \'ubuntu\', please check your configs!'
+        "❌ DEVNET_BOR_USERS must all be named 'ubuntu', please check your configs!"
       )
       process.exit(1)
     }
