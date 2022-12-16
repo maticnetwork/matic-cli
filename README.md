@@ -167,6 +167,8 @@ First off, you need to `--init` terraform on your local machine, by executing th
       to fund the accounts
 - `../../bin/express-cli --setup-datadog`
     - Sets up datadog on the nodes and gets them ready to send metrics to Datadog Dashboard. `DD_API_KEY` env var is required for this.
+- `../../bin/express-cli --chaos [intensity]`
+    - Adds dedicated chaos(de-peering) to the network. The `intensity` parameter is optional and can be set from `1` to `10`. If not set, `5` is used.
 
 
 ## `matic-cli`
