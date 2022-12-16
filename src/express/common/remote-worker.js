@@ -30,6 +30,25 @@ export async function runSshCommand(ip, command, retries) {
     }
 }
 
+export async function runSshCommandWithoutExit(ip, command, retries) {
+    if (retries < 0) {
+        console.log("❌ runSshCommand called with negative retries number: ", retries)
+    }
+    try {
+        await execa('ssh',
+            [`-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
+                `-i`, `${process.env.PEM_FILE_PATH}`,
+                ip, command + ` && exit`],
+            {stdio: getRemoteStdio()})
+    } catch (error) {
+        if (retries - 1 > 0) {
+            await runSshCommand(ip, command, retries - 1)
+        } else {
+            console.log("Command  `" + command + "` failed (Not Serious)")
+        }
+    }
+}
+
 export async function runScpCommand(src, dest, retries) {
     if (retries < 0) {
         console.log("❌ runScpCommand called with negative retries number: ", retries)

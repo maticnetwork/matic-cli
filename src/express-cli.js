@@ -8,6 +8,7 @@ import { monitor } from "./express/commands/monitor";
 import { restartAll, restartBor, restartHeimdall } from "./express/commands/restart";
 import { cleanup } from "./express/commands/cleanup";
 import { setupDatadog } from "./express/commands/setup-datadog";
+import { chaos } from "./express/commands/chaos";
 import { checkDir } from "./express/common/files-utils";
 import { program } from "commander";
 import pkg from "../package.json";
@@ -30,6 +31,7 @@ program
     .option('-t, --stress [fund]', 'Start the stress test. If the string `fund` is specified, the account will be funded. This option is mandatory when the command is executed the first time on a devnet.')
     .option('-ss, --send-state-sync', 'Send state sync tx')
     .option('-dd, --setup-datadog', 'Setup DataDog')
+    .option('-xxx, --chaos [intensity]', 'Start Chaos')
     .version(pkg.version);
 
 
@@ -193,5 +195,19 @@ export async function cli() {
         }
         await timer(3000)
         await setupDatadog();
+    }
+
+    else if (options.chaos) {
+        console.log("📍Command --chaos");
+        if (!checkDir(false)) {
+            console.log("❌ The command is not called from the appropriate devnet directory!");
+            process.exit(1)
+        }
+        if(options.chaos === true) {
+            options.chaos = 5
+        }
+
+        await timer(3000)
+        await chaos(options.chaos);
     }
 }
