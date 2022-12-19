@@ -2,10 +2,10 @@ name: CI
 on:
   push:
     branches:
-      - "master"
+      - 'master'
   pull_request:
     branches:
-      - "**"
+      - '**'
     types: [opened, synchronize]
 
 concurrency:
@@ -13,12 +13,41 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # TODO adapt the whole integration tests to use https://www.notion.so/polygontechnology/No-More-Secrets-6382754faac745aa9bd049a3ed423218
+  lint:
+    name: Prettier and Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: matic-cli
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.17.1'
+
+      - name: Install npm dependencies
+        run: |
+          cd matic-cli
+          npm install --prefer-offline --no-audit --progress=false
+
+      - name: Run prettier
+        run: |
+          cd matic-cli
+          npm run prettier:check
+
+      - name: Run lint
+        run: |
+          cd matic-cli
+          npm run lint:check
+
   integration-tests:
+    permissions:
+      id-token: write
+      contents: write
     if: (github.event.action != 'closed' || github.event.pull_request.merged == true)
     strategy:
       matrix:
-        os: [ ubuntu-20.04 ] # list of os: https://github.com/actions/virtual-environments
+        os: [ubuntu-20.04] # list of os: https://github.com/actions/virtual-environments
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -31,30 +60,24 @@ jobs:
           cd matic-cli
           cp .env.example .env
           sed -i 's,YOUR_IDENTIFIER,matic-cli-ci,' .env
-          sed -i 's,YOUR_AWS_ACCESS_KEY,TODO,' .env
-          sed -i 's,YOUR_AWS_SECRET_KEY,TODO,' .env
           sed -i 's,aws-key,matic-cli-ci-key,' .env
           sed -i 's,/absolute/path/to/your/,/home/runner/work/matic-cli/matic-cli/matic-cli/aws/,' .env
           sed -i 's,MATIC_CLI_BRANCH=master,MATIC_CLI_BRANCH=${{ github.head_ref || github.ref_name }},' .env
-          sed -i 's,DATADOG_API_KEY,TODO,' .env
-          cat .env
 
-      - name: Setup aws
+      - name: Configure AWS credentials
         continue-on-error: true
-        run: |
-          cd matic-cli
-          mkdir -p aws
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          unzip awscliv2.zip
-          sudo ./aws/install --update
-          aws configure set aws_access_key_id TODO 
-          aws configure set aws_secret_access_key TODO
-          aws configure set default.region us-west-2
+        uses: aws-actions/configure-aws-credentials@master
+        with:
+          aws-region: us-west-2
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/GithubActionsRole
+          role-session-name: GithubActionsSession
 
       - name: Create aws key pair
         continue-on-error: true
         run: |
-          cd matic-cli/aws
+          cd matic-cli
+          mkdir aws
+          cd aws
           aws ec2 create-key-pair --key-name matic-cli-ci-key --key-type rsa --key-format pem --output text > matic-cli-ci-key.pem
           chmod 600 matic-cli-ci-key.pem
 
@@ -63,12 +86,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '16.17.1'
-          cache: 'npm'
-          cache-dependency-path: |
-            matic-cli/package-lock.json
-            matic-cli/devnet/code/contracts/package-lock.json
-            matic-cli/devnet/code/genesis-contracts/package-lock.json
-            matic-cli/devnet/code/genesis-contracts/matic-contracts/package-lock.json
 
       - name: Install npm dependencies
         continue-on-error: true
