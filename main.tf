@@ -1,5 +1,3 @@
-# main.tf
-
 terraform {
   required_providers {
     aws = {
@@ -35,6 +33,18 @@ resource "aws_instance" "app_server" {
   }
 }
 
+resource "aws_eip" "eip" {
+  vpc = true
+  count = (var.DOCKERIZED == "yes") ? 1 : (var.VALIDATOR_COUNT + var.SENTRY_COUNT)
+  instance                  = aws_instance.app_server[count.index].id
+  depends_on                = [aws_internet_gateway.gw]
+}
+
+resource "aws_eip_association" "eip_assoc" {
+  count = (var.DOCKERIZED == "yes") ? 1 : (var.VALIDATOR_COUNT + var.SENTRY_COUNT)
+  instance_id   = aws_instance.app_server[count.index].id
+  allocation_id = aws_eip.eip[count.index].id
+}
 
 resource "aws_security_group" "internet_facing_alb" {
   name        = "internetfacing-loadbalancer-sg"
@@ -114,5 +124,10 @@ variable "Public_Subnet_1" {
 }
 
 output "instance_ips" {
-  value = aws_instance.app_server.*.public_ip
+  # value = aws_instance.app_server.*.public_ip
+  value = aws_eip.eip.*.public_ip
+}
+
+output "instance_ids" {
+  value = aws_instance.app_server.*.id
 }

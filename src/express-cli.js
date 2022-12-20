@@ -16,6 +16,8 @@ import { checkDir } from './express/common/files-utils'
 import { program } from 'commander'
 import pkg from '../package.json'
 import { testEip1559 } from '../tests/test-eip-1559'
+import { stopInstances } from './express/commands/instances-stop'
+import { startInstances } from './express/commands/instances-start'
 
 const timer = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -59,6 +61,8 @@ program
     'Test EIP 1559 txs. In case of a non-dockerized devnet, if an integer [index] is specified, it will use that VM to send the tx. Otherwise, it will target the first VM.'
   )
   .option('-dd, --setup-datadog', 'Setup DataDog')
+  .option('-istop, --instances-stop', 'Stop aws ec2 instances')
+  .option('-istart, --instances-start', 'Start aws ec2 instances')
   .version(pkg.version)
 
 export async function cli() {
@@ -263,5 +267,25 @@ export async function cli() {
     }
     await timer(3000)
     await setupDatadog()
+  } else if (options.instancesStop) {
+    console.log('📍Command --instances-stop')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    await timer(3000)
+    await stopInstances()
+  } else if (options.instancesStart) {
+    console.log('📍Command --instances-start')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    await timer(3000)
+    await startInstances()
   }
 }
