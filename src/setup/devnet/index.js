@@ -568,7 +568,7 @@ export class Devnet {
                 '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
                 '-i', '~/cert.pem',
                     `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                    'echo "--gcmode \'archive\' \ " | tee -a ~/node/bor-start.sh'
+                    'echo "--gcmode \'archive\'" | tee -a ~/node/bor-start.sh'
               ], { stdio: getRemoteStdio() })
             }
 
