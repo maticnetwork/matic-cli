@@ -32,8 +32,16 @@ export async function startInstances() {
     console.log(`📍Instances ${doc.instancesIds.toString()} are starting...`)
   }
 
-  console.log('📍Waiting 30s before restarting all services...')
-  await timer(30000)
-  await startGanache(doc)
-  await restartAll(true)
+  if (devnetType === 'remote') {
+    console.log('📍Waiting 30s before restarting all services...')
+    await timer(30000)
+    await startGanache(doc)
+    await restartAll(true)
+  } else {
+    console.log('📍Waiting 20s to ensure instances are started...')
+    await timer(20000)
+    console.log(
+      '📍You can now ssh into the machine and restart the dockerized services...'
+    )
+  }
 }
