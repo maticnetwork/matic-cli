@@ -568,7 +568,16 @@ export class Devnet {
                 '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
                 '-i', '~/cert.pem',
                     `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                    'echo "--gcmode \'archive\'" | tee -a ~/node/bor-start.sh'
+                    // eslint-disable-next-line
+                    `sed -i '$s,$, \\\\,' node/bor-start.sh`
+              ], { stdio: getRemoteStdio() })
+
+              await execa('ssh', [
+                '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
+                '-i', '~/cert.pem',
+                    `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                    // eslint-disable-next-line
+                    `printf %s "  --gcmode 'archive'" >> ~/node/bor-start.sh `
               ], { stdio: getRemoteStdio() })
             }
 
