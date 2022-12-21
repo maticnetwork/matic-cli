@@ -5,6 +5,7 @@ import { loadDevnetConfig } from '../common/config-utils'
 const shell = require('shelljs')
 
 const timer = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
 export async function stopInstances() {
   console.log('📍Stopping instances...')
   require('dotenv').config({ path: `${process.cwd()}/.env` })

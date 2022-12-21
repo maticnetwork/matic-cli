@@ -124,7 +124,6 @@ variable "Public_Subnet_1" {
 }
 
 output "instance_ips" {
-  # value = aws_instance.app_server.*.public_ip
   value = aws_eip.eip.*.public_ip
 }
 
