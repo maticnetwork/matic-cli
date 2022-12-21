@@ -132,8 +132,8 @@ First off, you need to `--init` terraform on your local machine, by executing th
 - `../../bin/express-cli --destroy`
 
   - Destroys the remote setup and delete the dedicated VMs
-    The `express-cli` also comes with additional utility commands, listed below. Some of them are only available for
-    non-dockerized devnets.
+
+The `express-cli` also comes with additional utility commands, listed below. Some of them are only available for non-dockerized devnets.
 
 - `../../bin/express-cli --update-all [index]`
 
@@ -181,6 +181,14 @@ First off, you need to `--init` terraform on your local machine, by executing th
   - Monitors the reception of state-syncs and checkpoints to make sure the whole network is in a healthy state.
     If `--send-state-sync` hasn't been used before, only checkpoints will be detected. The execution stops when
     a `state-sync` is found
+
+- ` ../../bin/express-cli --instances-stop`
+
+  - Stop the AWS EC2 VM instances associated with the deployed devnet.
+
+- ` ../../bin/express-cli --instances-start`
+
+  - Start the (previously stopped) AWS EC2 VM instances associated with the deployed devnet. Also, it starts all services, such as ganache, heimdall, and bor
 
 - `../../bin/express-cli --stress [fund]`
 
