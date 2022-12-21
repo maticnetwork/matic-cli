@@ -151,14 +151,15 @@ function validateUsersAndHosts() {
   const borHosts = process.env.DEVNET_BOR_HOSTS.split(',')
   const valCount = Number(process.env.TF_VAR_VALIDATOR_COUNT)
   const senCount = Number(process.env.TF_VAR_SENTRY_COUNT)
+  const archiveCount = Number(process.env.TF_VAR_ARCHIVE_COUNT)
   if (
     borUsers.length !== borHosts.length ||
-    borUsers.length !== valCount + senCount ||
-    borHosts.length !== valCount + senCount
+    borUsers.length !== valCount + senCount + archiveCount ||
+    borHosts.length !== valCount + senCount + archiveCount
   ) {
     console.log(
       '❌ DEVNET_BOR_USERS or DEVNET_BOR_HOSTS lengths are not equal to the nodes count ' +
-        '(TF_VAR_VALIDATOR_COUNT+TF_VAR_SENTRY_COUNT), please check your configs!'
+        '(TF_VAR_VALIDATOR_COUNT+TF_VAR_SENTRY_COUNT+TF_VAR_ARCHIVE_COUNT), please check your configs!'
     )
     process.exit(1)
   }
@@ -280,6 +281,11 @@ function setCommonConfigs(doc) {
   setConfigValue(
     'numOfNonValidators',
     parseInt(process.env.TF_VAR_SENTRY_COUNT),
+    doc
+  )
+  setConfigValue(
+    'numOfArchiveNodes',
+    parseInt(process.env.TF_VAR_ARCHIVE_COUNT),
     doc
   )
   setConfigValue('ethHostUser', process.env.ETH_HOST_USER, doc)
