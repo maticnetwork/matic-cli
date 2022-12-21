@@ -35,13 +35,13 @@ resource "aws_instance" "app_server" {
 
 resource "aws_eip" "eip" {
   vpc = true
-  count = (var.DOCKERIZED == "yes") ? 1 : (var.VALIDATOR_COUNT + var.SENTRY_COUNT)
+  count = (var.DOCKERIZED == "yes") ? 1 : (var.VALIDATOR_COUNT + var.SENTRY_COUNT + var.ARCHIVE_COUNT)
   instance                  = aws_instance.app_server[count.index].id
   depends_on                = [aws_internet_gateway.gw]
 }
 
 resource "aws_eip_association" "eip_assoc" {
-  count = (var.DOCKERIZED == "yes") ? 1 : (var.VALIDATOR_COUNT + var.SENTRY_COUNT)
+  count = (var.DOCKERIZED == "yes") ? 1 : (var.VALIDATOR_COUNT + var.SENTRY_COUNT + var.ARCHIVE_COUNT)
   instance_id   = aws_instance.app_server[count.index].id
   allocation_id = aws_eip.eip[count.index].id
 }
