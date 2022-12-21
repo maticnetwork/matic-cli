@@ -14,18 +14,18 @@ provider "aws" {
 }
 
 resource "aws_instance" "app_server" {
-  count = (var.DOCKERIZED == "yes") ? 1 : (var.VALIDATOR_COUNT + var.SENTRY_COUNT)
+  count = (var.DOCKERIZED == "yes") ? 1 : (var.VALIDATOR_COUNT + var.SENTRY_COUNT + var.ARCHIVE_COUNT)
   ami                    = var.INSTANCE_AMI
-  instance_type          = var.INSTANCE_TYPE
+  instance_type          = (count.index >= var.VALIDATOR_COUNT + var.SENTRY_COUNT) ? var.ARCHIVE_INSTANCE_TYPE: var.INSTANCE_TYPE
   key_name               = var.PEM_FILE
   vpc_security_group_ids = [aws_security_group.internet_facing_alb.id]
   subnet_id              = aws_subnet.public-subnet-1.id
 
   ebs_block_device {
     device_name = "/dev/sda1"
-    volume_size = var.DISK_SIZE_GB
-    volume_type = "gp3"
-    iops = var.IOPS
+    volume_size = (count.index >= var.VALIDATOR_COUNT + var.SENTRY_COUNT) ? var.ARCHIVE_DISK_SIZE_GB : var.DISK_SIZE_GB
+    volume_type = (count.index >= var.VALIDATOR_COUNT + var.SENTRY_COUNT) ? var.ARCHIVE_VOLUME_TYPE : var.VOLUME_TYPE
+    iops = (count.index >= var.VALIDATOR_COUNT + var.SENTRY_COUNT ) ? var.ARCHIVE_IOPS : var.IOPS
   }
 
   tags = {
