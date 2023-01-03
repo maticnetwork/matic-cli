@@ -193,12 +193,11 @@ First off, you need to `--init` terraform on your local machine, by executing th
 
 - `../../bin/express-cli --chaos [intensity]`
 
-    - Adds dedicated chaos(de-peering) to the network. The `intensity` parameter is optional and can be set from `1` to `10`. If not set, `5` is used.
+  - Adds dedicated chaos(de-peering) to the network. The `intensity` parameter is optional and can be set from `1` to `10`. If not set, `5` is used.
 
 - `../../bin/express-cli --eip-1559-test [index]`
   - Executes a test to send EIP 1559 tx. In case of a non-dockerized devnet, if an integer [index] is specified, it will use
     that VM to send the tx. Otherwise, it will target the first VM.
-
 
 ## `matic-cli`
 

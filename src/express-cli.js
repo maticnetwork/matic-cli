@@ -269,7 +269,9 @@ export async function cli() {
   } else if (options.chaos) {
     console.log('📍Command --chaos')
     if (!checkDir(false)) {
-      console.log('❌ The command is not called from the appropriate devnet directory!')
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
       process.exit(1)
     }
     if (options.chaos === true) {
