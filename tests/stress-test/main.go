@@ -9,7 +9,7 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"math/big"
 	"os"
@@ -27,14 +27,14 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var RPC_SERVERS []string
+var RpcServers []string
 var MNEMONIC string
 var SK string
 var N int
-var MAX_ACCOUNTS int
-var DEBUG_LOGS bool
+var MaxAccounts int
+var DebugLogs bool
 
-var CURRENT_ITERATIONS int = 0
+var CurrentIterations = 0
 var Nonce uint64 = 0
 
 func main() {
@@ -51,8 +51,8 @@ func main() {
 		fmt.Println("Invalid devnet Id: ", err)
 		return
 	}
-	RPC_SERVERS = getRPCs(devnetId)
-	if len(RPC_SERVERS) == 0 {
+	RpcServers = getRPCs(devnetId)
+	if len(RpcServers) == 0 {
 		fmt.Println("Invalid RPC_SERVER flag")
 		return
 	}
@@ -79,14 +79,14 @@ func main() {
 			fmt.Println("Invalid MAX_ACCOUNTS flag")
 			return
 		}
-		MAX_ACCOUNTS = i
+		MaxAccounts = i
 	}
 
-	fmt.Println("RPC_SERVER: ", RPC_SERVERS)
+	fmt.Println("RPC_SERVER: ", RpcServers)
 	fmt.Println("MNEMONIC: ", MNEMONIC)
 	fmt.Println("SK: ", SK)
 	fmt.Println("N: ", N)
-	fmt.Println("MAX_ACCOUNTS: ", MAX_ACCOUNTS)
+	fmt.Println("MAX_ACCOUNTS: ", MaxAccounts)
 
 	main1()
 }
@@ -104,9 +104,11 @@ func getSecretKey(devnetId int) string {
 		fmt.Printf("failed to open json file: %s, error: %v", filename, err)
 		return ""
 	}
-	defer jsonFile.Close()
+	defer func(jsonFile *os.File) {
+		_ = jsonFile.Close()
+	}(jsonFile)
 
-	jsonData, err := ioutil.ReadAll(jsonFile)
+	jsonData, err := io.ReadAll(jsonFile)
 	if err != nil {
 		fmt.Printf("failed to read json file, error: %v", err)
 		return ""
@@ -129,10 +131,10 @@ func getRPCs(devnetId int) []string {
 
 	var yamldoc YamlFile
 
-	rpcs := []string{}
+	var rpcs []string
 
 	pathToConfig := fmt.Sprintf("../../deployments/devnet-%v/remote-setup-config.yaml", devnetId)
-	yamlFile, err := ioutil.ReadFile(pathToConfig)
+	yamlFile, err := os.ReadFile(pathToConfig)
 	if err != nil {
 		log.Printf("yamlFile.Get err   #%v ", err)
 	}
@@ -153,11 +155,11 @@ func main1() {
 
 	fmt.Printf("script started \n")
 
-	cls := []*ethclient.Client{}
+	var cls []*ethclient.Client
 
 	ctx := context.Background()
 
-	for _, rpc := range RPC_SERVERS {
+	for _, rpc := range RpcServers {
 		cl, err := ethclient.Dial(rpc)
 		if err != nil {
 			log.Println("Error in dial connection: ", err)
@@ -192,17 +194,17 @@ func main1() {
 	}
 	fmt.Println("Nonce: ", Nonce)
 
-	generatedAccounts := generateAccountsUsingMnemonic(ctx, cls[0])
+	generatedAccounts := generateAccountsUsingMnemonic()
 
 	fund := os.Getenv("FUND")
 	if fund == "true" {
-		fundAccounts(ctx, cls[0], generatedAccounts, chainID, add, ksOpts)
+		fundAccounts(ctx, cls[0], generatedAccounts, add, ksOpts)
 	}
 
-	debug_logs_str := os.Getenv("STRESS_DEBUG_LOGS")
-	DEBUG_LOGS, err = strconv.ParseBool(debug_logs_str)
+	debugLogsStr := os.Getenv("STRESS_DEBUG_LOGS")
+	DebugLogs, err = strconv.ParseBool(debugLogsStr)
 	if err != nil {
-		DEBUG_LOGS = false
+		DebugLogs = false
 	}
 
 	fmt.Println("Preparing")
@@ -224,14 +226,14 @@ type Account struct {
 
 type Accounts []Account
 
-func generateAccountsUsingMnemonic(ctx context.Context, client *ethclient.Client) (accounts Accounts) {
+func generateAccountsUsingMnemonic() (accounts Accounts) {
 	wallet, err := hdwallet.NewFromMnemonic(MNEMONIC)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	for i := 1; i <= N; i++ {
-		var dpath string = "m/44'/60'/0'/0/" + strconv.Itoa(i)
+		var dpath = "m/44'/60'/0'/0/" + strconv.Itoa(i)
 		path := hdwallet.MustParseDerivationPath(dpath)
 		account, err := wallet.Derive(path, false)
 		if err != nil {
@@ -247,20 +249,19 @@ func generateAccountsUsingMnemonic(ctx context.Context, client *ethclient.Client
 	return accounts
 }
 
-func fundAccounts(ctx context.Context, client *ethclient.Client, genAccounts Accounts, chainID *big.Int,
-	senderAddress common.Address, opts *bind.TransactOpts) {
+func fundAccounts(ctx context.Context, client *ethclient.Client, genAccounts Accounts, senderAddress common.Address, opts *bind.TransactOpts) {
 	for i := 0; i < N; i++ {
 
 		time.Sleep(5 * time.Millisecond)
-		go runTransaction(ctx, client, genAccounts[i].addr, chainID, senderAddress, opts, Nonce+uint64(3*i), 2200000000000000000)
-		go runTransaction(ctx, client, genAccounts[i].addr, chainID, senderAddress, opts, Nonce+uint64((3*i)+1), 2200000000000000000)
-		go runTransaction(ctx, client, genAccounts[i].addr, chainID, senderAddress, opts, Nonce+uint64((3*i)+2), 2200000000000000000)
+		go runTransaction(ctx, client, genAccounts[i].addr, senderAddress, opts, Nonce+uint64(3*i), 2200000000000000000)
+		go runTransaction(ctx, client, genAccounts[i].addr, senderAddress, opts, Nonce+uint64((3*i)+1), 2200000000000000000)
+		go runTransaction(ctx, client, genAccounts[i].addr, senderAddress, opts, Nonce+uint64((3*i)+2), 2200000000000000000)
 
 	}
 }
 
-func runTransaction(ctx context.Context, Client *ethclient.Client, recipient common.Address, chainID *big.Int,
-	senderAddress common.Address, opts *bind.TransactOpts, nonce uint64, value int64) {
+//goland:noinspection GoDeprecation
+func runTransaction(ctx context.Context, Client *ethclient.Client, recipient common.Address, senderAddress common.Address, opts *bind.TransactOpts, nonce uint64, value int64) {
 
 	var data []byte
 	gasLimit := uint64(21000)
@@ -277,7 +278,7 @@ func runTransaction(ctx context.Context, Client *ethclient.Client, recipient com
 		log.Fatal("Error in signing tx: ", err)
 	}
 	err = Client.SendTransaction(ctx, signedTx)
-	if err != nil && DEBUG_LOGS {
+	if err != nil && DebugLogs {
 		fmt.Println("Error in sending tx: ", err, "nonce : ", nonce)
 	}
 }
@@ -323,7 +324,7 @@ func startLoadbot(ctx context.Context, clients []*ethclient.Client, chainID *big
 
 		go func(i int, a Account, m *sync.Mutex) {
 			nonce, err := clients[0].PendingNonceAt(ctx, a.addr)
-			if err != nil && DEBUG_LOGS {
+			if err != nil && DebugLogs {
 				fmt.Printf("failed to retrieve pending nonce for account %s: %v", a.addr.String(), err)
 			}
 			m.Lock()
@@ -346,10 +347,10 @@ func startLoadbot(ctx context.Context, clients []*ethclient.Client, chainID *big
 		select {
 		case <-ticker.C:
 
-			if CURRENT_ITERATIONS%100 == 0 && CURRENT_ITERATIONS > 0 {
-				fmt.Println("TX_SENT: ", CURRENT_ITERATIONS)
+			if CurrentIterations%100 == 0 && CurrentIterations > 0 {
+				fmt.Println("TX_SENT: ", CurrentIterations)
 			}
-			if MAX_ACCOUNTS > 0 && CURRENT_ITERATIONS >= MAX_ACCOUNTS {
+			if MaxAccounts > 0 && CurrentIterations >= MaxAccounts {
 				os.Exit(0)
 			}
 
@@ -358,45 +359,47 @@ func startLoadbot(ctx context.Context, clients []*ethclient.Client, chainID *big
 			sender := genAccounts[sendIdx%N] //cfg.Accounts[sendIdx%len(cfg.Accounts)]
 			nonce := noncesStruct.nonces[sendIdx%N]
 
-			go func(sender Account, nonce uint64, resetChan chan bool) error {
+			go func() {
+				_ = func(sender Account, nonce uint64, resetChan chan bool) error {
 
-				recpointer := createAccount()
-				recipient := recpointer.addr
+					recpointer := createAccount()
+					recipient := recpointer.addr
 
-				recpointer2 := createAccount()
-				recipient2 := recpointer2.addr
+					recpointer2 := createAccount()
+					recipient2 := recpointer2.addr
 
-				totalClients := uint64(len(clients))
-				err := runBotTransaction(ctx, clients[nonce%totalClients], recipient, chainID, sender, nonce, 1)
-				if err != nil {
-					err1 := strings.Split(err.Error(), " ")
-					if err1[0] == "Post" {
-						ticker.Stop()
-						resetChan <- true
-						ctx.Done()
+					totalClients := uint64(len(clients))
+					err := runBotTransaction(ctx, clients[nonce%totalClients], recipient, chainID, sender, nonce, 1)
+					if err != nil {
+						err1 := strings.Split(err.Error(), " ")
+						if err1[0] == "Post" {
+							ticker.Stop()
+							resetChan <- true
+							ctx.Done()
+						}
 					}
-				}
 
-				err = runBotTransaction(ctx, clients[nonce%totalClients], recipient2, chainID, sender, nonce+1, 1)
-				if err != nil {
-					err1 := strings.Split(err.Error(), " ")
-					if err1[0] == "Post" {
-						ticker.Stop()
-						resetChan <- true
-						ctx.Done()
+					err = runBotTransaction(ctx, clients[nonce%totalClients], recipient2, chainID, sender, nonce+1, 1)
+					if err != nil {
+						err1 := strings.Split(err.Error(), " ")
+						if err1[0] == "Post" {
+							ticker.Stop()
+							resetChan <- true
+							ctx.Done()
+						}
 					}
-				}
-				if err != nil {
-					return err
-				}
-				return nil
+					if err != nil {
+						return err
+					}
+					return nil
 
-			}(sender, nonce, resetChan)
+				}(sender, nonce, resetChan)
+			}()
 			noncesStruct.nonces[sendIdx%N] = noncesStruct.nonces[sendIdx%N] + 2
 
 		case <-resetChan:
 			fmt.Println("Machine not able to take load... resetting.!")
-			os.Setenv("FUND", "false")
+			_ = os.Setenv("FUND", "false")
 			for {
 				fmt.Println("RPCs overloaded... waiting for 2 seconds")
 
@@ -425,11 +428,11 @@ func genRandomGas(min int64, max int64) *big.Int {
 }
 
 func isConnAlive() bool {
-	cls := []*ethclient.Client{}
+	var cls []*ethclient.Client
 
 	ctx := context.Background()
 
-	for _, rpc := range RPC_SERVERS {
+	for _, rpc := range RpcServers {
 		cl, err := ethclient.Dial(rpc)
 		if err != nil {
 			log.Println("Error in dial connection: ", err)
@@ -446,6 +449,7 @@ func isConnAlive() bool {
 	return err == nil
 }
 
+//goland:noinspection GoDeprecation
 func runBotTransaction(ctx context.Context, Clients *ethclient.Client, recipient common.Address, chainID *big.Int,
 	sender Account, nonce uint64, value int64) error {
 
@@ -487,11 +491,11 @@ func runBotTransaction(ctx context.Context, Clients *ethclient.Client, recipient
 	}
 
 	err = Clients.SendTransaction(ctx, signedTx)
-	if err != nil && DEBUG_LOGS {
+	if err != nil && DebugLogs {
 		fmt.Printf("Error in sending tx: %s, From : %s, To : %s\n", err, sender.addr, recipient.Hash())
 	}
 	// Nonce++
-	CURRENT_ITERATIONS++
+	CurrentIterations++
 
 	return err
 }

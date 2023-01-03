@@ -20,9 +20,10 @@ Please complete this section if any breaking changes have been made, otherwise d
 - [ ] I will be resolving comments - if any - by pushing each fix in a separate commit and linking the commit hash in the comment reply
 
 # Cross repository changes
+
 #### It should never be the case...
 
-- [ ] This PR requires changes to bor 
+- [ ] This PR requires changes to bor
   - In case link the PR here:
 - [ ] This PR requires changes to heimdall
   - In case link the PR here:
