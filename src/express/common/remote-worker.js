@@ -58,14 +58,14 @@ export async function runSshCommandWithoutExit(ip, command, retries) {
     await execa(
       'ssh',
       [
-        `-o`,
-        `StrictHostKeyChecking=no`,
-        `-o`,
-        `UserKnownHostsFile=/dev/null`,
-        `-i`,
+        '-o',
+        'StrictHostKeyChecking=no',
+        '-o',
+        'UserKnownHostsFile=/dev/null',
+        '-i',
         `${process.env.PEM_FILE_PATH}`,
         ip,
-        command + ` && exit`
+        command + ' && exit'
       ],
       { stdio: getRemoteStdio() }
     )
