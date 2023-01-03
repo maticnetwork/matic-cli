@@ -49,7 +49,8 @@ export async function chaos(intensity) {
   console.log('📍Command --chaos [intensity]', intensity)
 
   require('dotenv').config({ path: `${process.cwd()}/.env` })
-  const devnetType = process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
+  const devnetType =
+    process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
 
   const doc = await loadDevnetConfig(devnetType)
 
@@ -94,7 +95,9 @@ export async function chaos(intensity) {
     let tasks = []
     const ips = []
     for (let i = 0; i < N; i++) {
-      const randomIndex = Math.floor(Math.random() * doc['devnetBorHosts'].length)
+      const randomIndex = Math.floor(
+        Math.random() * doc['devnetBorHosts'].length
+      )
       const ip = `${borUsers[randomIndex]}@${borHosts[randomIndex]}`
       ips.push(ip)
 
