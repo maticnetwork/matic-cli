@@ -4,7 +4,7 @@ import Listr from 'listr'
 import execa from 'execa'
 import chalk from 'chalk'
 import path from 'path'
-import fs from 'fs-extra'
+import fs, { truncate } from 'fs-extra'
 
 import fileReplacer from '../../lib/file-replacer'
 import { loadConfig } from '../config'
@@ -221,7 +221,8 @@ export class Heimdall {
         }
       ],
       {
-        exitOnError: true
+        exitOnError: true,
+        concurrent: true
       }
     )
   }
