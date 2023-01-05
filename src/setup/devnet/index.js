@@ -1,7 +1,7 @@
 // noinspection JSUnresolvedFunction,JSUnresolvedVariable
 
 import inquirer from 'inquirer'
-import Listr from 'listr'
+import { Listr } from 'listr2'
 import path from 'path'
 import chalk from 'chalk'
 import execa from 'execa'

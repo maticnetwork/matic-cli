@@ -1,6 +1,6 @@
 // noinspection JSUnresolvedVariable
 
-import Listr from 'listr'
+import { Listr } from 'listr2'
 import chalk from 'chalk'
 import path from 'path'
 import fs from 'fs-extra'
