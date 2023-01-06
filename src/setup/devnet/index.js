@@ -784,7 +784,7 @@ export class Devnet {
                           "--v",
                             this.config.numOfValidators,
                             "--n",
-                            this.config.numOfNonValidators,
+                            this.config.numOfNonValidators + this.config.numOfArchiveNodes,
                             "--chain-id",
                             this.config.heimdallChainId,
                             "--node-host-prefix",
