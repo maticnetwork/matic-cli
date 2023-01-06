@@ -384,117 +384,7 @@ export class Devnet {
     const initRemoteTasks = await this.initRemoteTasks()
     await initRemoteTasks.run()
 
-    //const enodeTask = await this.getEnodeTask()
     return [
-      // enodeTask,
-      // {
-      //   title: 'Process Heimdall configs',
-      //   task: async () => {
-      //     // set heimdall
-      //     for (let i = 0; i < this.totalNodes; i++) {
-      //       fileReplacer(this.heimdallHeimdallConfigFilePath(i))
-      //         .replace(
-      //           /eth_rpc_url[ ]*=[ ]*".*"/gi,
-      //           `eth_rpc_url = "${this.config.ethURL}"`
-      //         )
-      //         .replace(
-      //           /bor_rpc_url[ ]*=[ ]*".*"/gi,
-      //           'bor_rpc_url = "http://localhost:8545"'
-      //         )
-      //         .replace(
-      //           /amqp_url[ ]*=[ ]*".*"/gi,
-      //           'amqp_url = "amqp://guest:guest@localhost:5672/"'
-      //         )
-      //         .save()
-      //     }
-      //   }
-      // },
-      // {
-      //   title: 'Process contract addresses',
-      //   task: () => {
-      //     // get root contracts
-      //     const rootContracts = this.config.contractAddresses.root
-
-      //     // set heimdall peers with devnet heimdall hosts
-      //     for (let i = 0; i < this.totalNodes; i++) {
-      //       fileReplacer(this.heimdallGenesisFilePath(i))
-      //         .replace(
-      //           /"matic_token_address":[ ]*".*"/gi,
-      //           `"matic_token_address": "${rootContracts.tokens.TestToken}"`
-      //         )
-      //         .replace(
-      //           /"staking_manager_address":[ ]*".*"/gi,
-      //           `"staking_manager_address": "${rootContracts.StakeManagerProxy}"`
-      //         )
-      //         .replace(
-      //           /"root_chain_address":[ ]*".*"/gi,
-      //           `"root_chain_address": "${rootContracts.RootChainProxy}"`
-      //         )
-      //         .replace(
-      //           /"staking_info_address":[ ]*".*"/gi,
-      //           `"staking_info_address": "${rootContracts.StakingInfo}"`
-      //         )
-      //         .replace(
-      //           /"state_sender_address":[ ]*".*"/gi,
-      //           `"state_sender_address": "${rootContracts.StateSender}"`
-      //         )
-      //         .save()
-      //     }
-      //   },
-      //   enabled: () => {
-      //     return this.config.contractAddresses
-      //   }
-      // },
-      // {
-      //   title: 'Process templates',
-      //   task: async () => {
-      //     const templateDir = path.resolve(
-      //       new URL(import.meta.url).pathname,
-      //       '../templates'
-      //     )
-
-      //     // copy remote related templates
-      //     await fs.copy(
-      //       path.join(templateDir, 'remote'),
-      //       this.config.targetDirectory
-      //     )
-
-      //     // promises
-      //     const p = []
-      //     const signerDumpData = this.signerDumpData
-      //     // process njk files
-      //     for (const file of getAllFiles(this.config.targetDirectory, [])) {
-      //       if (file.indexOf('.njk') !== -1) {
-      //         const fp = path.join(this.config.targetDirectory, file)
-
-      //         // process all njk files and copy to each node directory
-      //         for (let i = 0; i < this.totalNodes; i++) {
-      //           const file2array = file.split('/')
-      //           const file2 = file2array[file2array.length - 1]
-      //           fs.writeFileSync(
-      //             path.join(this.nodeDir(i), file2.replace('.njk', '')),
-      //             nunjucks.render(file, {
-      //               obj: this,
-      //               node: i,
-      //               signerData: signerDumpData[i]
-      //             })
-      //           )
-      //         }
-
-      //         // remove njk file
-      //         p.push(
-      //           execa('rm', ['-rf', fp], {
-      //             cwd: this.config.targetDirectory,
-      //             stdio: getRemoteStdio()
-      //           })
-      //         )
-      //       }
-      //     }
-
-      //     // fulfill all promises
-      //     await Promise.all(p)
-      //   }
-      // },
       {
         title: 'Copy files to remote servers',
         task: async () => {
@@ -832,66 +722,6 @@ export class Devnet {
                     },
                 },
             ])
-        // return [
-        //     heimdall.cloneRepositoryTask(),
-        //     heimdall.buildTask(),
-        //     {
-        //         title: "Create testnet files for Heimdall",
-        //         task: async () => {
-        //             const args = [
-        //               "create-testnet",
-        //               "--home", "devnet",
-        //               "--v",
-        //                 this.config.numOfValidators,
-        //                 "--n",
-        //                 this.config.numOfNonValidators,
-        //                 "--chain-id",
-        //                 this.config.heimdallChainId,
-        //                 "--node-host-prefix",
-        //                 "heimdall",
-        //                 "--output-dir",
-        //                 "devnet",
-        //             ];
-
-        //             // Create heimdall folders
-        //             if (this.config.devnetType === "remote") {
-        //                 // create heimdall folder for all the nodes in remote setup
-        //                 for (let i = 0; i < this.totalNodes; i++) {
-        //                         await execa('ssh', [
-        //                             `-o`, `StrictHostKeyChecking=no`, `-o`, `UserKnownHostsFile=/dev/null`,
-        //                             `-i`, `~/cert.pem`,
-        //                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-        //                             `sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/`
-        //                         ], {stdio: getRemoteStdio()})
-
-        //                 }
-        //             }
-
-        //             // create testnet
-        //             await execa(heimdall.heimdalldCmd, args, {
-        //                 cwd: this.config.targetDirectory,
-        //                 stdio: getRemoteStdio(),
-        //             });
-
-        //             // set heimdall peers with devnet heimdall hosts
-        //             for (let i = 0; i < this.totalNodes; i++) {
-        //                 fileReplacer(this.heimdallConfigFilePath(i))
-        //                     .replace(/heimdall([^:]+):/gi, (d, index) => {
-        //                         return `${this.config.devnetHeimdallHosts[index]}:`;
-        //                     })
-        //                     .replace(/moniker.+=.+/gi, `moniker = "heimdall${i}"`)
-        //                     .save();
-
-        //                 fileReplacer(this.heimdallGenesisFilePath(i))
-        //                     .replace(
-        //                         /"bor_chain_id"[ ]*:[ ]*".*"/gi,
-        //                         `"bor_chain_id": "${this.config.borChainId}"`
-        //                     )
-        //                     .save();
-        //             }
-        //         },
-        //     },
-        // ];
     }
 
     async borTask(bor) {
@@ -974,9 +804,6 @@ export class Devnet {
         const createTestnetTasks = await this.getCreateTestnetTask(heimdall);
         await createTestnetTasks.run()
 
-        //const borTasks = await this.borTask(bor)
-        //await borTasks.run()
-
         const accountTasks = await this.accountTask()
         await accountTasks.run()
 
@@ -984,29 +811,6 @@ export class Devnet {
         await genesisTasks.run()
 
         return new Listr([
-            //...createTestnetTasks,
-            // {
-            //     title: "Setup accounts",
-            //     task: () => {
-            //         // set validator addresses
-            //         const genesisAddresses = [];
-            //         const signerDumpData = this.signerDumpData;
-            //         for (let i = 0; i < this.config.numOfValidators; i++) {
-            //             const d = signerDumpData[i];
-            //             genesisAddresses.push(d.address);
-            //         }
-
-            //         // set genesis addresses
-            //         this.config.genesisAddresses = genesisAddresses;
-
-            //         // setup accounts from signer dump data (based on number of validators)
-            //         this.config.accounts = this.signerDumpData
-            //             .slice(0, this.config.numOfValidators)
-            //             .map((s) => {
-            //                 return getAccountFromPrivateKey(s.priv_key);
-            //             });
-            //     },
-            // },
             {
                 title: bor.taskTitle,
                 task: () => {
@@ -1016,13 +820,6 @@ export class Devnet {
                     return this.config.devnetType === "remote";
                 },
             },
-            // {
-            //     title: genesis.taskTitle,
-            //     task: () => {
-            //         // get genesis tasks
-            //         return genesis.getTasks();
-            //     },
-            // },
             {
                 title: "Setup Bor keystore and genesis files",
                 task: async () => {
@@ -1110,26 +907,6 @@ export class Devnet {
                     return this.config.devnetType === "docker" || "remote";
                 },
             },
-            // {
-            //     title: "Docker",
-            //     task: async () => {
-            //         const tasks = await this.getDockerTasks();
-            //         return new Listr(tasks);
-            //     },
-            //     enabled: () => {
-            //         return this.config.devnetType === "docker";
-            //     },
-            // },
-            // {
-            //     title: "Remote",
-            //     task: async () => {
-            //         const tasks = await this.getRemoteTasks();
-            //         return new Listr(tasks);
-            //     },
-            //     enabled: () => {
-            //         return this.config.devnetType === "remote";
-            //     },
-            // },
         ],
         {
             concurrent: true

@@ -149,16 +149,6 @@ export class Bor {
         await setupTask.run()
         return new Listr(
             [
-                // {
-                //     title: "Clone Bor repository",
-                //     task: () =>
-                //         cloneRepository(
-                //             this.repositoryName,
-                //             this.repositoryBranch,
-                //             this.repositoryUrl,
-                //             this.config.codeDir
-                //         ),
-                // },
                 {
                     title: "Build Bor",
                     task: () =>
@@ -167,19 +157,6 @@ export class Bor {
                             stdio: getRemoteStdio(),
                         }),
                 },
-                // {
-                //     title: "Prepare data directory",
-                //     task: () => {
-                //         return execa(
-                //             "mkdir",
-                //             ["-p", this.config.dataDir, this.borDataDir, this.keystoreDir],
-                //             {
-                //                 cwd: this.config.targetDirectory,
-                //                 stdio: getRemoteStdio(),
-                //             }
-                //         );
-                //     },
-                // },
                 {
                     title: "Prepare keystore and password.txt",
                     task: () => {
@@ -208,26 +185,6 @@ export class Bor {
                         });
                     },
                 },
-                // {
-                //     title: "Process template scripts",
-                //     task: async () => {
-                //         if (this.config.devnetType === "remote") {
-                //             return;
-                //         }
-                //         const templateDir = path.resolve(
-                //             new URL(import.meta.url).pathname,
-                //             "../templates"
-                //         );
-
-                //         // copy all templates to target directory
-                //         await fs.copy(templateDir, this.config.targetDirectory);
-
-                //         // process all njk templates
-                //         await processTemplateFiles(this.config.targetDirectory, {
-                //             obj: this,
-                //         });
-                //     },
-                // },
             ],
             {
                 exitOnError: true,

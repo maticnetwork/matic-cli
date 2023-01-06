@@ -152,17 +152,24 @@ function validateUsersAndHosts() {
   const valCount = Number(process.env.TF_VAR_VALIDATOR_COUNT)
   const senCount = Number(process.env.TF_VAR_SENTRY_COUNT)
   const archiveCount = Number(process.env.TF_VAR_ARCHIVE_COUNT)
-  if (
-    borUsers.length !== borHosts.length ||
-    borUsers.length !== valCount + senCount + archiveCount ||
-    borHosts.length !== valCount + senCount + archiveCount
-  ) {
+  if (process.env.TF_VAR_DOCKERIZED === "yes" && borUsers.length !== valCount + senCount + archiveCount) {
     console.log(
-      '❌ DEVNET_BOR_USERS or DEVNET_BOR_HOSTS lengths are not equal to the nodes count ' +
+      '❌ DEVNET_BOR_USERS lengths are not equal to the nodes count ' +
         '(TF_VAR_VALIDATOR_COUNT+TF_VAR_SENTRY_COUNT+TF_VAR_ARCHIVE_COUNT), please check your configs!'
     )
     process.exit(1)
+  } else if((process.env.TF_VAR_DOCKERIZED === "no") &&
+    (borUsers.length !== borHosts.length ||
+    borUsers.length !== valCount + senCount + archiveCount ||
+    borHosts.length !== valCount + senCount + archiveCount)
+  ) {
+      console.log(
+        '❌ DEVNET_BOR_USERS or DEVNET_BOR_HOSTS lengths are not equal to the nodes count ' +
+          '(TF_VAR_VALIDATOR_COUNT+TF_VAR_SENTRY_COUNT+TF_VAR_ARCHIVE_COUNT), please check your configs!'
+      )
+      process.exit(1)
   }
+  
   borUsers.forEach((user) => {
     if (user !== 'ubuntu') {
       console.log(
