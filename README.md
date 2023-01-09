@@ -196,7 +196,13 @@ The `express-cli` also comes with additional utility commands, listed below. Som
     to fund the accounts
 
 - `../../bin/express-cli --setup-datadog`
+
   - Sets up datadog on the nodes and gets them ready to send metrics to Datadog Dashboard. `DD_API_KEY` env var is required for this.
+
+- `../../bin/express-cli --chaos [intensity]`
+
+  - Adds dedicated chaos(de-peering) to the network. The `intensity` parameter is optional and can be set from `1` to `10`. If not set, `5` is used.
+
 - `../../bin/express-cli --eip-1559-test [index]`
   - Executes a test to send EIP 1559 tx. In case of a non-dockerized devnet, if an integer [index] is specified, it will use
     that VM to send the tx. Otherwise, it will target the first VM.
