@@ -106,6 +106,9 @@ function validateEnvVars() {
     }),
     MATIC_CLI_BRANCH: validStr({ default: 'master' }),
     DEVNET_BOR_USERS: validStr({ default: 'ubuntu,ubuntu' }),
+    INSTANCES_IDS: validStr({
+      default: 'i-02a1f3a2884c9edbc,i-03b2d4b3014a4becd'
+    }),
     BOR_DOCKER_BUILD_CONTEXT: url({
       default: 'https://github.com/maticnetwork/bor.git#develop'
     }),
@@ -299,6 +302,7 @@ function setCommonConfigs(doc) {
     process.env.HEIMDALL_DOCKER_BUILD_CONTEXT,
     doc
   )
+  setConfigList('instancesIds', process.env.INSTANCES_IDS, doc)
 }
 
 function setConfigValue(key, value, doc) {
