@@ -12,6 +12,7 @@ import {
 } from './express/commands/restart'
 import { cleanup } from './express/commands/cleanup'
 import { setupDatadog } from './express/commands/setup-datadog'
+import { chaos } from './express/commands/chaos'
 import { checkDir } from './express/common/files-utils'
 import { program } from 'commander'
 import pkg from '../package.json'
@@ -59,6 +60,7 @@ program
     'Test EIP 1559 txs. In case of a non-dockerized devnet, if an integer [index] is specified, it will use that VM to send the tx. Otherwise, it will target the first VM.'
   )
   .option('-dd, --setup-datadog', 'Setup DataDog')
+  .option('-xxx, --chaos [intensity]', 'Start Chaos')
   .version(pkg.version)
 
 export async function cli() {
@@ -261,7 +263,22 @@ export async function cli() {
       )
       process.exit(1)
     }
+
     await timer(3000)
     await setupDatadog()
+  } else if (options.chaos) {
+    console.log('📍Command --chaos')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    if (options.chaos === true) {
+      options.chaos = 5
+    }
+
+    await timer(3000)
+    await chaos(options.chaos)
   }
 }
