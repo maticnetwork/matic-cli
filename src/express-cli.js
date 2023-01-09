@@ -285,24 +285,24 @@ export async function cli() {
     await timer(3000)
     await chaos(options.chaos)
   } else if (options.instancesStop) {
-  console.log('📍Command --instances-stop')
-  if (!checkDir(false)) {
-    console.log(
-      '❌ The command is not called from the appropriate devnet directory!'
-    )
-    process.exit(1)
+    console.log('📍Command --instances-stop')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    await timer(3000)
+    await stopInstances()
+  } else if (options.instancesStart) {
+    console.log('📍Command --instances-start')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    await timer(3000)
+    await startInstances()
   }
-  await timer(3000)
-  await stopInstances()
-} else if (options.instancesStart) {
-  console.log('📍Command --instances-start')
-  if (!checkDir(false)) {
-    console.log(
-      '❌ The command is not called from the appropriate devnet directory!'
-    )
-    process.exit(1)
-  }
-  await timer(3000)
-  await startInstances()
-}
 }
