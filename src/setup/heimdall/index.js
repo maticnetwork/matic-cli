@@ -4,7 +4,7 @@ import { Listr } from 'listr2'
 import execa from 'execa'
 import chalk from 'chalk'
 import path from 'path'
-import fs, { truncate } from 'fs-extra'
+import fs from 'fs-extra'
 
 import fileReplacer from '../../lib/file-replacer'
 import { loadConfig } from '../config'
