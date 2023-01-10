@@ -21,7 +21,7 @@
   "author": "Polygon PoS v1",
   "license": "MIT",
   "dependencies": {
-    "@truffle/hdwallet-provider": "^2.1.2",
+    "@truffle/hdwallet-provider": "^2.1.4",
     "aws-sdk": "^2.1252.0",
     "big-integer": "^1.6.51",
     "boxen": "^7.0.0",
