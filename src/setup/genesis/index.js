@@ -189,101 +189,105 @@ export class Genesis {
                   return
                 }
 
-                                // Backup of the block time config
-                                return execa("mv", ["blocks.js", "blocks.js.backup"], {
-                                    cwd: this.repositoryDir,
-                                    stdio: getRemoteStdio(),
-                                });
-                            })
-                            .then(() => {
-                                fs.writeFileSync(
-                                    path.join(this.repositoryDir, "blocks.json"),
-                                    JSON.stringify(blocks, null, 2)
-                                )
-                            })
-                    }
-                },
-                {
-                    title: "Configure Sprint Size",
-                    task: () => {
-                        const sprintSizesArr = []
-                        const sprintSizes = this.config.sprintSize.split(",")
-                        const sprintSizeBlockNumbers = this.config.sprintSizeBlockNumber.split(",")
+                // Backup of the block time config
+                return execa('mv', ['blocks.js', 'blocks.js.backup'], {
+                  cwd: this.repositoryDir,
+                  stdio: getRemoteStdio()
+                })
+              })
+              .then(() => {
+                fs.writeFileSync(
+                  path.join(this.repositoryDir, 'blocks.json'),
+                  JSON.stringify(blocks, null, 2)
+                )
+              })
+          }
+        },
+        {
+          title: 'Configure Sprint Size',
+          task: () => {
+            const sprintSizesArr = []
+            const sprintSizes = this.config.sprintSize.split(',')
+            const sprintSizeBlockNumbers =
+              this.config.sprintSizeBlockNumber.split(',')
 
-                        for (let i = 0; i < sprintSizes.length; i++) {
-                            sprintSizesArr[i] = {
-                                number: sprintSizeBlockNumbers[i],
-                                sprintSize: sprintSizes[i]
-                            }
-
-                        }
-
-                        return Promise.resolve()
-                            .then(() => {
-                                const blockJsPath = path.join(
-                                    this.repositoryDir,
-                                    "sprintSizes.js"
-                                );
-                                if (!fs.existsSync(blockJsPath)) {
-                                    return;
-                                }
-
-                                // Backup of the block time config
-                                return execa("mv", ["sprintSizes.js", "sprintSizes.js.backup"], {
-                                    cwd: this.repositoryDir,
-                                    stdio: getRemoteStdio(),
-                                });
-                            })
-                            .then(() => {
-                                fs.writeFileSync(
-                                    path.join(this.repositoryDir, "sprintSizes.json"),
-                                    JSON.stringify(sprintSizesArr, null, 64)
-                                )
-                            })
-                    }
-                },
-                {
-                    title: "Generate Bor validator set",
-                    task: () =>
-                        execa(
-                            "node",
-                            [
-                                "generate-borvalidatorset.js",
-                                "--bor-chain-id",
-                                this.config.borChainId,
-                                "--heimdall-chain-id",
-                                this.config.heimdallChainId
-                            ],
-                            {
-                                cwd: this.repositoryDir,
-                                stdio: getRemoteStdio(),
-                            }
-                        ),
-                },
-                {
-                    title: "Generate genesis.json",
-                    task: () =>
-                        execa(
-                            "node",
-                            [
-                                "generate-genesis.js",
-                                "--bor-chain-id",
-                                this.config.borChainId,
-                                "--heimdall-chain-id",
-                                this.config.heimdallChainId
-                            ],
-                            {
-                                cwd: this.repositoryDir,
-                                stdio: getRemoteStdio(),
-                            }
-                        ),
-                },
-            ],
-            {
-                exitOnError: true,
+            for (let i = 0; i < sprintSizes.length; i++) {
+              sprintSizesArr[i] = {
+                number: sprintSizeBlockNumbers[i],
+                sprintSize: sprintSizes[i]
+              }
             }
-        );
-    }
+
+            return Promise.resolve()
+              .then(() => {
+                const blockJsPath = path.join(
+                  this.repositoryDir,
+                  'sprintSizes.js'
+                )
+                if (!fs.existsSync(blockJsPath)) {
+                  return
+                }
+
+                // Backup of the block time config
+                return execa(
+                  'mv',
+                  ['sprintSizes.js', 'sprintSizes.js.backup'],
+                  {
+                    cwd: this.repositoryDir,
+                    stdio: getRemoteStdio()
+                  }
+                )
+              })
+              .then(() => {
+                fs.writeFileSync(
+                  path.join(this.repositoryDir, 'sprintSizes.json'),
+                  JSON.stringify(sprintSizesArr, null, 64)
+                )
+              })
+          }
+        },
+        {
+          title: 'Generate Bor validator set',
+          task: () =>
+            execa(
+              'node',
+              [
+                'generate-borvalidatorset.js',
+                '--bor-chain-id',
+                this.config.borChainId,
+                '--heimdall-chain-id',
+                this.config.heimdallChainId
+              ],
+              {
+                cwd: this.repositoryDir,
+                stdio: getRemoteStdio()
+              }
+            )
+        },
+        {
+          title: 'Generate genesis.json',
+          task: () =>
+            execa(
+              'node',
+              [
+                'generate-genesis.js',
+                '--bor-chain-id',
+                this.config.borChainId,
+                '--heimdall-chain-id',
+                this.config.heimdallChainId
+              ],
+              {
+                cwd: this.repositoryDir,
+                stdio: getRemoteStdio()
+              }
+            )
+        }
+      ],
+      {
+        exitOnError: true
+      }
+    )
+  }
 }
 
 export async function getGenesisAddresses(config) {
