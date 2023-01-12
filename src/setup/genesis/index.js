@@ -1,6 +1,6 @@
 // noinspection JSUnresolvedVariable
 
-import Listr from 'listr'
+import { Listr } from 'listr2'
 import execa from 'execa'
 import chalk from 'chalk'
 import inquirer from 'inquirer'

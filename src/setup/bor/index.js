@@ -1,6 +1,6 @@
 // noinspection JSUnresolvedFunction,JSUnresolvedVariable
 
-import Listr from 'listr'
+import { Listr } from 'listr2'
 import execa from 'execa'
 import chalk from 'chalk'
 import path from 'path'
@@ -47,6 +47,10 @@ export class Bor {
     return path.join(this.config.codeDir, this.repositoryName)
   }
 
+  get buildDir() {
+    return path.join(this.repositoryDir, 'build')
+  }
+
   get borDataDir() {
     return path.join(this.config.dataDir, 'bor')
   }
@@ -87,8 +91,7 @@ export class Bor {
     )
   }
 
-  async getTasks() {
-    // noinspection JSUnresolvedVariable
+  async cloneRepositoryAndProcessTemplates() {
     return new Listr(
       [
         {
@@ -102,14 +105,6 @@ export class Bor {
             )
         },
         {
-          title: 'Build Bor',
-          task: () =>
-            execa('make', ['bor'], {
-              cwd: this.repositoryDir,
-              stdio: getRemoteStdio()
-            })
-        },
-        {
           title: 'Prepare data directory',
           task: () => {
             return execa(
@@ -121,6 +116,46 @@ export class Bor {
               }
             )
           }
+        },
+        {
+          title: 'Process template scripts',
+          task: async () => {
+            if (this.config.devnetType === 'remote') {
+              return
+            }
+            const templateDir = path.resolve(
+              new URL(import.meta.url).pathname,
+              '../templates'
+            )
+
+            // copy all templates to target directory
+            await fs.copy(templateDir, this.config.targetDirectory)
+
+            // process all njk templates
+            await processTemplateFiles(this.config.targetDirectory, {
+              obj: this
+            })
+          }
+        }
+      ],
+      {
+        concurrent: true
+      }
+    )
+  }
+
+  async getTasks() {
+    const setupTask = await this.cloneRepositoryAndProcessTemplates()
+    await setupTask.run()
+    return new Listr(
+      [
+        {
+          title: 'Build Bor',
+          task: () =>
+            execa('make', ['bor'], {
+              cwd: this.repositoryDir,
+              stdio: getRemoteStdio()
+            })
         },
         {
           title: 'Prepare keystore and password.txt',
@@ -147,26 +182,6 @@ export class Bor {
                 )
               ]
               return Promise.all(p)
-            })
-          }
-        },
-        {
-          title: 'Process template scripts',
-          task: async () => {
-            if (this.config.devnetType === 'remote') {
-              return
-            }
-            const templateDir = path.resolve(
-              new URL(import.meta.url).pathname,
-              '../templates'
-            )
-
-            // copy all templates to target directory
-            await fs.copy(templateDir, this.config.targetDirectory)
-
-            // process all njk templates
-            await processTemplateFiles(this.config.targetDirectory, {
-              obj: this
             })
           }
         }

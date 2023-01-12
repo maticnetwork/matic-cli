@@ -1,6 +1,6 @@
 // noinspection JSUnresolvedFunction,JSUnresolvedVariable
 
-import Listr from 'listr'
+import { Listr } from 'listr2'
 import execa from 'execa'
 import chalk from 'chalk'
 import path from 'path'
@@ -221,7 +221,8 @@ export class Heimdall {
         }
       ],
       {
-        exitOnError: true
+        exitOnError: true,
+        concurrent: true
       }
     )
   }

@@ -1,7 +1,7 @@
 // noinspection JSUnresolvedFunction,JSUnresolvedVariable
 
 import inquirer from 'inquirer'
-import Listr from 'listr'
+import { Listr } from 'listr2'
 import path from 'path'
 import chalk from 'chalk'
 import execa from 'execa'
@@ -265,10 +265,9 @@ export class Devnet {
     ]
   }
 
-  async getRemoteTasks() {
-    const enodeTask = await this.getEnodeTask()
-    return [
-      enodeTask,
+  async initRemoteTasks() {
+    return new Listr([
+      await this.getEnodeTask(),
       {
         title: 'Process Heimdall configs',
         task: async () => {
@@ -376,7 +375,17 @@ export class Devnet {
           // fulfill all promises
           await Promise.all(p)
         }
-      },
+      }],
+    {
+      concurrent: true
+    })
+  }
+
+  async getRemoteTasks() {
+    const initRemoteTasks = await this.initRemoteTasks()
+    await initRemoteTasks.run()
+
+    return [
       {
         title: 'Copy files to remote servers',
         task: async () => {
@@ -654,7 +663,7 @@ export class Devnet {
   }
 
   async getCreateTestnetTask(heimdall) {
-    return [
+    return new Listr([
       heimdall.cloneRepositoryTask(),
       heimdall.buildTask(),
       {
@@ -662,8 +671,7 @@ export class Devnet {
         task: async () => {
           const args = [
             'create-testnet',
-            '--home',
-            'devnet',
+            '--home', 'devnet',
             '--v',
             this.config.numOfValidators,
             '--n',
@@ -680,20 +688,12 @@ export class Devnet {
           if (this.config.devnetType === 'remote') {
             // create heimdall folder for all the nodes in remote setup
             for (let i = 0; i < this.totalNodes; i++) {
-              await execa(
-                'ssh',
-                [
-                  '-o',
-                  'StrictHostKeyChecking=no',
-                  '-o',
-                  'UserKnownHostsFile=/dev/null',
-                  '-i',
-                  '~/cert.pem',
-                  `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                  'sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/'
-                ],
-                { stdio: getRemoteStdio() }
-              )
+              await execa('ssh', [
+                '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
+                '-i', '~/cert.pem',
+                                        `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                                        'sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/'
+              ], { stdio: getRemoteStdio() })
             }
           }
 
@@ -715,13 +715,83 @@ export class Devnet {
             fileReplacer(this.heimdallGenesisFilePath(i))
               .replace(
                 /"bor_chain_id"[ ]*:[ ]*".*"/gi,
-                `"bor_chain_id": "${this.config.borChainId}"`
+                                    `"bor_chain_id": "${this.config.borChainId}"`
               )
               .save()
           }
         }
       }
-    ]
+    ])
+  }
+
+  async borTask(bor) {
+    return new Listr([{
+      title: bor.taskTitle,
+      task: () => {
+        return bor.getTasks()
+      },
+      enabled: () => {
+        return this.config.devnetType === 'remote'
+      }
+    }])
+  }
+
+  async genesisTask(genesis) {
+    return new Listr([{
+      title: genesis.taskTitle,
+      task: () => {
+        // get genesis tasks
+        return genesis.getTasks()
+      }
+    }])
+  }
+
+  async accountTask() {
+    return new Listr([{
+      title: 'Setup accounts',
+      task: () => {
+        // set validator addresses
+        const genesisAddresses = []
+        const signerDumpData = this.signerDumpData
+        for (let i = 0; i < this.config.numOfValidators; i++) {
+          const d = signerDumpData[i]
+          genesisAddresses.push(d.address)
+        }
+
+        // set genesis addresses
+        this.config.genesisAddresses = genesisAddresses
+
+        // setup accounts from signer dump data (based on number of validators)
+        this.config.accounts = this.signerDumpData
+          .slice(0, this.config.numOfValidators)
+          .map((s) => {
+            return getAccountFromPrivateKey(s.priv_key)
+          })
+      }
+    }])
+  }
+
+  async getDockerOrRemoteTask() {
+    return new Listr([{
+      title: 'Docker',
+      task: async () => {
+        const tasks = await this.getDockerTasks()
+        return new Listr(tasks, { concurrent: true })
+      },
+      enabled: () => {
+        return this.config.devnetType === 'docker'
+      }
+    },
+    {
+      title: 'Remote',
+      task: async () => {
+        const tasks = await this.getRemoteTasks()
+        return new Listr(tasks)
+      },
+      enabled: () => {
+        return this.config.devnetType === 'remote'
+      }
+    }])
   }
 
   async getTasks() {
@@ -732,31 +802,15 @@ export class Devnet {
 
     // create testnet tasks
     const createTestnetTasks = await this.getCreateTestnetTask(heimdall)
+    await createTestnetTasks.run()
+
+    const accountTasks = await this.accountTask()
+    await accountTasks.run()
+
+    const genesisTasks = await this.genesisTask(genesis)
+    await genesisTasks.run()
 
     return new Listr([
-      ...createTestnetTasks,
-      {
-        title: 'Setup accounts',
-        task: () => {
-          // set validator addresses
-          const genesisAddresses = []
-          const signerDumpData = this.signerDumpData
-          for (let i = 0; i < this.config.numOfValidators; i++) {
-            const d = signerDumpData[i]
-            genesisAddresses.push(d.address)
-          }
-
-          // set genesis addresses
-          this.config.genesisAddresses = genesisAddresses
-
-          // setup accounts from signer dump data (based on number of validators)
-          this.config.accounts = this.signerDumpData
-            .slice(0, this.config.numOfValidators)
-            .map((s) => {
-              return getAccountFromPrivateKey(s.priv_key)
-            })
-        }
-      },
       {
         title: bor.taskTitle,
         task: () => {
@@ -764,13 +818,6 @@ export class Devnet {
         },
         enabled: () => {
           return this.config.devnetType === 'remote'
-        }
-      },
-      {
-        title: genesis.taskTitle,
-        task: () => {
-          // get genesis tasks
-          return genesis.getTasks()
         }
       },
       {
@@ -848,7 +895,7 @@ export class Devnet {
               if (err) throw err
 
               for (let j = 1; j < files.length; j++) {
-                await fs.unlink(path.join(keystoreDir, files[j]), (err) => {
+                await fs.unlink(path.join(keystoreDir, files[j]), err => {
                   if (err) throw err
                 })
               }
@@ -859,28 +906,11 @@ export class Devnet {
         enabled: () => {
           return this.config.devnetType === 'docker' || 'remote'
         }
-      },
-      {
-        title: 'Docker',
-        task: async () => {
-          const tasks = await this.getDockerTasks()
-          return new Listr(tasks)
-        },
-        enabled: () => {
-          return this.config.devnetType === 'docker'
-        }
-      },
-      {
-        title: 'Remote',
-        task: async () => {
-          const tasks = await this.getRemoteTasks()
-          return new Listr(tasks)
-        },
-        enabled: () => {
-          return this.config.devnetType === 'remote'
-        }
       }
-    ])
+    ],
+    {
+      concurrent: true
+    })
   }
 }
 
@@ -906,6 +936,10 @@ async function setupDevnet(config) {
 
   const tasks = await devnet.getTasks()
   await tasks.run()
+
+  const dockerOrRemoteTasks = await devnet.getDockerOrRemoteTask()
+  await dockerOrRemoteTasks.run()
+
   console.log('%s Devnet is ready', chalk.green.bold('DONE'))
 }
 

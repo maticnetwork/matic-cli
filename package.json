@@ -38,7 +38,7 @@
     "ganache": "^7.5.0",
     "inquirer": "^6.2.2",
     "js-yaml": "^4.1.0",
-    "listr": "^0.14.3",
+    "listr2": "^4.0.5",
     "node-fetch": "^2.6.7",
     "nunjucks": "^3.2.1",
     "pkg-install": "^1.0.0",
