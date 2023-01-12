@@ -156,9 +156,19 @@ function validateUsersAndHosts() {
   const senCount = Number(process.env.TF_VAR_SENTRY_COUNT)
   const archiveCount = Number(process.env.TF_VAR_ARCHIVE_COUNT)
   if (
-    borUsers.length !== borHosts.length ||
-    borUsers.length !== valCount + senCount + archiveCount ||
-    borHosts.length !== valCount + senCount + archiveCount
+    process.env.TF_VAR_DOCKERIZED === 'yes' &&
+    borUsers.length !== valCount + senCount + archiveCount
+  ) {
+    console.log(
+      '❌ DEVNET_BOR_USERS lengths are not equal to the nodes count ' +
+        '(TF_VAR_VALIDATOR_COUNT+TF_VAR_SENTRY_COUNT+TF_VAR_ARCHIVE_COUNT), please check your configs!'
+    )
+    process.exit(1)
+  } else if (
+    process.env.TF_VAR_DOCKERIZED === 'no' &&
+    (borUsers.length !== borHosts.length ||
+      borUsers.length !== valCount + senCount + archiveCount ||
+      borHosts.length !== valCount + senCount + archiveCount)
   ) {
     console.log(
       '❌ DEVNET_BOR_USERS or DEVNET_BOR_HOSTS lengths are not equal to the nodes count ' +
@@ -166,6 +176,7 @@ function validateUsersAndHosts() {
     )
     process.exit(1)
   }
+
   borUsers.forEach((user) => {
     if (user !== 'ubuntu') {
       console.log(
@@ -258,6 +269,7 @@ function setCommonConfigs(doc) {
   setConfigValue('borChainId', parseInt(process.env.BOR_CHAIN_ID), doc)
   setConfigValue('heimdallChainId', process.env.HEIMDALL_CHAIN_ID, doc)
   setConfigValue('sprintSize', parseInt(process.env.SPRINT_SIZE), doc)
+  setConfigValue('sprintSizeBlockNumber', process.env.SPRINT_SIZE_BLOCK_NUMBER, doc);
   setConfigValue('blockNumber', process.env.BLOCK_NUMBER, doc)
   setConfigValue('blockTime', process.env.BLOCK_TIME, doc)
   setConfigValue('borRepo', process.env.BOR_REPO, doc)
