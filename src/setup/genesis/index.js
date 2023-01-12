@@ -172,8 +172,8 @@ export class Genesis {
           title: 'Configure Block time',
           task: () => {
             const blocks = []
-            const blockTimes = this.config.blockTime.split(',')
-            const blockNumbers = this.config.blockNumber.split(',')
+            const blockTimes = this.config.blockTime.toString().split(',')
+            const blockNumbers = this.config.blockNumber.toString().split(',')
 
             for (let i = 0; i < blockTimes.length; i++) {
               blocks[i] = {
@@ -209,7 +209,7 @@ export class Genesis {
             const sprintSizesArr = []
             const sprintSizes = this.config.sprintSize.toString().split(',')
             const sprintSizeBlockNumbers =
-              this.config.sprintSizeBlockNumber.split(',')
+              this.config.sprintSizeBlockNumber.toString().split(',')
 
             for (let i = 0; i < sprintSizes.length; i++) {
               sprintSizesArr[i] = {

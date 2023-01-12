@@ -268,14 +268,14 @@ function setCommonConfigs(doc) {
   setConfigValue('defaultFee', parseInt(process.env.DEFAULT_FEE), doc)
   setConfigValue('borChainId', parseInt(process.env.BOR_CHAIN_ID), doc)
   setConfigValue('heimdallChainId', process.env.HEIMDALL_CHAIN_ID, doc)
-  setConfigValue('sprintSize', parseInt(process.env.SPRINT_SIZE), doc)
-  setConfigValue(
+  setConfigList('sprintSize',process.env.SPRINT_SIZE, doc)
+  setConfigList(
     'sprintSizeBlockNumber',
     process.env.SPRINT_SIZE_BLOCK_NUMBER,
     doc
   )
-  setConfigValue('blockNumber', process.env.BLOCK_NUMBER, doc)
-  setConfigValue('blockTime', process.env.BLOCK_TIME, doc)
+  setConfigList('blockNumber', process.env.BLOCK_NUMBER, doc)
+  setConfigList('blockTime', process.env.BLOCK_TIME, doc)
   setConfigValue('borRepo', process.env.BOR_REPO, doc)
   setConfigValue('borBranch', process.env.BOR_BRANCH, doc)
   setConfigValue('heimdallRepo', process.env.HEIMDALL_REPO, doc)
