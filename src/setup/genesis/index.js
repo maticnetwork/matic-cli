@@ -208,8 +208,9 @@ export class Genesis {
           task: () => {
             const sprintSizesArr = []
             const sprintSizes = this.config.sprintSize.toString().split(',')
-            const sprintSizeBlockNumbers =
-              this.config.sprintSizeBlockNumber.toString().split(',')
+            const sprintSizeBlockNumbers = this.config.sprintSizeBlockNumber
+              .toString()
+              .split(',')
 
             for (let i = 0; i < sprintSizes.length; i++) {
               sprintSizesArr[i] = {

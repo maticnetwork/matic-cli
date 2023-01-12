@@ -268,7 +268,7 @@ function setCommonConfigs(doc) {
   setConfigValue('defaultFee', parseInt(process.env.DEFAULT_FEE), doc)
   setConfigValue('borChainId', parseInt(process.env.BOR_CHAIN_ID), doc)
   setConfigValue('heimdallChainId', process.env.HEIMDALL_CHAIN_ID, doc)
-  setConfigList('sprintSize',process.env.SPRINT_SIZE, doc)
+  setConfigList('sprintSize', process.env.SPRINT_SIZE, doc)
   setConfigList(
     'sprintSizeBlockNumber',
     process.env.SPRINT_SIZE_BLOCK_NUMBER,
