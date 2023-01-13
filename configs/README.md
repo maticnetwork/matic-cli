@@ -1,7 +1,7 @@
 # Configurations
 
 `express-cli` and `matic-cli` use these config files to bootstrap the devnet.
-In case of `express-cli`, these configs are dynamically changes based on the `.env` file.  
+In case of `express-cli`, these configs are dynamically changes based on the `.env` file.
 For `mati-cli`, the configs are directly used to spin the network up.
 
 ## Usage
@@ -27,6 +27,9 @@ heimdallChainId:
 
 # Sprint size (number of blocks for each bor sprint)
 sprintSize:
+
+# Block numbers (comma separated values defining the block heights of bor where sprint size must change)
+sprintSizeBlockNumber:
 
 # Block numbers (comma separated values defining the block heights of bor where block time must change)
 blockNumber:
