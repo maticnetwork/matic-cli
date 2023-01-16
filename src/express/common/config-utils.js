@@ -11,6 +11,11 @@ const validStr = makeValidator((x) => {
   else throw new Error(x + 'is not valid, please check your configs!')
 })
 
+const validOrEmptyStr = makeValidator((x) => {
+  if (x !== undefined && x !== null) return x
+  else throw new Error(x + 'is not valid, please check your configs!')
+})
+
 const validAmiStr = makeValidator((x) => {
   if (x !== undefined && x !== null && x !== '' && x.startsWith('ami-')) {
     return x
@@ -80,8 +85,8 @@ function validateEnvVars() {
     PEM_FILE_PATH: validCertPathStr({ default: '/home/ubuntu/aws-key.pem' }),
     DEFAULT_STAKE: num({ default: 10000 }),
     DEFAULT_FEE: num({ default: 2000 }),
-    BOR_CHAIN_ID: validStr({ default: '15005' }),
-    HEIMDALL_CHAIN_ID: validStr({ default: 'heimdall-4052' }),
+    BOR_CHAIN_ID: validOrEmptyStr({ default: '15005' }),
+    HEIMDALL_CHAIN_ID: validOrEmptyStr({ default: 'heimdall-4052' }),
     SPRINT_SIZE: num({ default: 64 }),
     BLOCK_NUMBER: validStr({ default: '0,64' }),
     BLOCK_TIME: validStr({ default: '3,2' }),
