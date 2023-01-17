@@ -271,8 +271,32 @@ function validateGitConfigs() {
 function setCommonConfigs(doc) {
   setConfigValue('defaultStake', parseInt(process.env.DEFAULT_STAKE), doc)
   setConfigValue('defaultFee', parseInt(process.env.DEFAULT_FEE), doc)
-  setConfigValue('borChainId', parseInt(process.env.BOR_CHAIN_ID), doc)
-  setConfigValue('heimdallChainId', process.env.HEIMDALL_CHAIN_ID, doc)
+
+  let borChainId
+  if (!process.env.BOR_CHAIN_ID && !process.env.HEIMDALL_CHAIN_ID) {
+    borChainId = Math.floor(Math.random() * 10000 + 1000)
+    setConfigValue('borChainId', parseInt(borChainId), doc)
+    setConfigValue('heimdallChainId', 'heimdall-' + borChainId, doc)
+  } else if (!process.env.BOR_CHAIN_ID) {
+    try {
+      borChainId = process.env.HEIMDALL_CHAIN_ID.split('-')[1]
+      setConfigValue('borChainId', parseInt(borChainId), doc)
+      setConfigValue('heimdallChainId', process.env.HEIMDALL_CHAIN_ID, doc)
+    } catch (error) {
+      console.log(
+        '❌ Error occured while processing heimdall chain id (Heimdall chain id should be like: heimdall-4052)!'
+      )
+      process.exit(1)
+    }
+  } else if (!process.env.HEIMDALL_CHAIN_ID) {
+    borChainId = process.env.BOR_CHAIN_ID
+    setConfigValue('borChainId', parseInt(process.env.BOR_CHAIN_ID), doc)
+    setConfigValue('heimdallChainId', 'heimdall-' + borChainId, doc)
+  } else {
+    setConfigValue('borChainId', parseInt(process.env.BOR_CHAIN_ID), doc)
+    setConfigValue('heimdallChainId', process.env.HEIMDALL_CHAIN_ID, doc)
+  }
+
   setConfigList('sprintSize', process.env.SPRINT_SIZE, doc)
   setConfigList(
     'sprintSizeBlockNumber',
