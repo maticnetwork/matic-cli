@@ -17,7 +17,13 @@ const validBorChainId = makeValidator((x) => {
 })
 
 const validHeimdallChainId = makeValidator((x) => {
-  if (x !== undefined && x !== null && (x.match(/^$|heimdall-\d+$/g) || x > 0)) { return x } else throw new Error(x + 'is not valid, please check your configs!')
+  if (
+    x !== undefined &&
+    x !== null &&
+    (x.match(/^$|heimdall-\d+$/g) || x > 0)
+  ) {
+    return x
+  } else throw new Error(x + 'is not valid, please check your configs!')
 })
 
 const validAmiStr = makeValidator((x) => {
