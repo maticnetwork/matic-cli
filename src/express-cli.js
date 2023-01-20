@@ -14,13 +14,12 @@ import { cleanup } from './express/commands/cleanup'
 import { setupDatadog } from './express/commands/setup-datadog'
 import { chaos } from './express/commands/chaos'
 import { checkDir } from './express/common/files-utils'
+import { timer } from './express/common/time-utils'
 import { program } from 'commander'
 import pkg from '../package.json'
 import { testEip1559 } from '../tests/test-eip-1559'
 import { stopInstances } from './express/commands/instances-stop'
 import { startInstances } from './express/commands/instances-start'
-
-const timer = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 program
   .option('-i, --init', 'Initiate the terraform setup')

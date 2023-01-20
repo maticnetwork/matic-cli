@@ -1,10 +1,9 @@
 // noinspection JSUnresolvedFunction
 
 import { loadDevnetConfig } from '../common/config-utils'
+import { timer } from '../common/time-utils'
 
 const shell = require('shelljs')
-
-const timer = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export async function stopInstances() {
   console.log('📍Stopping instances...')

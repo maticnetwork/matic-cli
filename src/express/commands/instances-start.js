@@ -3,10 +3,9 @@
 import { loadDevnetConfig } from '../common/config-utils'
 import { restartAll } from './restart'
 import { maxRetries, runSshCommand } from '../common/remote-worker'
+import { timer } from '../common/time-utils';
 
 const shell = require('shelljs')
-
-const timer = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 async function startGanache(doc) {
   const ip = `${doc.ethHostUser}@${doc.devnetBorHosts[0]}`
