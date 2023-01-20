@@ -1,10 +1,10 @@
 // noinspection JSCheckFunctionSignatures,JSUnresolvedFunction,JSUnresolvedVariable
 
 import { loadDevnetConfig } from '../common/config-utils'
+import { timer } from '../common/time-utils'
 
 const fetch = require('node-fetch')
 const Web3 = require('web3')
-const timer = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 const { runScpCommand, maxRetries } = require('../common/remote-worker')
 
 const lastStateIdABI = [
