@@ -1,25 +1,18 @@
 import { loadDevnetConfig, splitToArray } from '../common/config-utils'
-import Web3 from 'web3'
 const {
   runSshCommand,
+  runSshCommandWithReturn,
   maxRetries
 } = require('../common/remote-worker')
-const web3 = new Web3()
-
-// return hex from decimal
-export function decToHex(dec) {
-  return web3.utils.toHex(dec)
-}
 
 export async function rewind(num) {
   //   num = number of blocks to rewind
   if (num > 128) {
     console.log(
-      '📍number of blocks to rewind should should be less than 128, set to 127'
+      '📍number of blocks to rewind should should be less than equal to 128, setting to 128'
     )
     num = 128
   }
-  console.log('📍Command --chaos [numberOfBlocks]', num)
 
   require('dotenv').config({ path: `${process.cwd()}/.env` })
   const devnetType =
@@ -40,15 +33,20 @@ export async function rewind(num) {
   const ip = `${borUsers[0]}@${borHosts[0]}`
 
   const getBlockNumberCommand = `/home/ubuntu/go/bin/bor attach ~/.bor/data/bor.ipc --exec "eth.blockNumber"`
-  console.log(`📍rewinding chain by ${num} blocks, \ncurrent block number:`)
-  await runSshCommand(ip, getBlockNumberCommand, maxRetries)
+  
+  const intitalBlockNumber = await runSshCommandWithReturn(ip, getBlockNumberCommand, maxRetries)
+  console.log(`⏪ rewinding chain by ${num} blocks, \n⛓ current block number: ${intitalBlockNumber}`)
 
-  const rewindCommand = `/home/ubuntu/go/bin/bor attach ~/.bor/data/bor.ipc --exec "debug.setHead(web3.toHex(eth.blockNumber - ${num}))"`
+  const rewindCommand = `/home/ubuntu/go/bin/bor attach ~/.bor/data/bor.ipc --exec "debug.setHead(web3.toHex(${intitalBlockNumber} - ${num}))"`
   await runSshCommand(ip, rewindCommand, maxRetries)
 
   const restartCommand = `sudo service bor restart`  
   await runSshCommand(ip, restartCommand, maxRetries)
 
-  console.log(`📍rewinded chain by ${num} blocks, \ncurrent block number`)
-  await runSshCommand(ip, getBlockNumberCommand, maxRetries)
+  const rewindedBlockNumber = await runSshCommandWithReturn(ip, getBlockNumberCommand, maxRetries)
+  console.log(`⏪ rewinded chain by ${intitalBlockNumber - rewindedBlockNumber} blocks, \n⛓ current block number ${rewindedBlockNumber}`)
+
+  console.log('NOTE: minor difference in block number is expected due to small block time')
+
+  console.log('📍Done! Exiting...')
 }

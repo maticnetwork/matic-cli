@@ -314,9 +314,6 @@ export async function cli() {
       )
       process.exit(1)
     }
-
-    console.log(options.rewind)
-
     if (options.rewind === true) {
       options.rewind = 100
     }
