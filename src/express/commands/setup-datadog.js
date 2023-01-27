@@ -98,8 +98,8 @@ export async function setupDatadog() {
     await runSshCommand(`${user}@${host}`, command, maxRetries)
 
     // revert dd api key
-    // eslint-disable-next-line no-undef
-    await setDatadogAPIKey(`${DD_API_KEY}`, datadogConfig)
+    // eslint-disable-next-line no-undef, no-template-curly-in-string
+    await setDatadogAPIKey('${DD_API_KEY}', dd_doc)
   }
 
   console.log('📍Datadog devnet env : ', envName)
