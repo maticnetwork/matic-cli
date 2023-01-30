@@ -99,7 +99,7 @@ export async function setupDatadog() {
 
     // revert dd api key
     // eslint-disable-next-line no-undef, no-template-curly-in-string
-    await setDatadogAPIKey('${DD_API_KEY}', dd_doc)
+    await setDatadogAPIKey('${DD_API_KEY}', datadogConfig)
   }
 
   console.log('📍Datadog devnet env : ', envName)
