@@ -319,6 +319,6 @@ export async function cli() {
     }
 
     await timer(3000)
-    await rewind(options.rewind) 
+    await rewind(options.rewind)
   }
 }

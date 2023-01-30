@@ -56,19 +56,16 @@ export async function runSshCommandWithReturn(ip, command, retries) {
     process.exit(1)
   }
   try {
-    const { stdout } = await execa(
-      'ssh',
-      [
-        '-o',
-        'StrictHostKeyChecking=no',
-        '-o',
-        'UserKnownHostsFile=/dev/null',
-        '-i',
-        `${process.env.PEM_FILE_PATH}`,
-        ip,
-        command + ' && exit'
-      ]
-    )
+    const { stdout } = await execa('ssh', [
+      '-o',
+      'StrictHostKeyChecking=no',
+      '-o',
+      'UserKnownHostsFile=/dev/null',
+      '-i',
+      `${process.env.PEM_FILE_PATH}`,
+      ip,
+      command + ' && exit'
+    ])
 
     return stdout
   } catch (error) {
