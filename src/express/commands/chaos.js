@@ -1,13 +1,13 @@
 /* eslint-disable dot-notation */
 import { loadDevnetConfig, splitToArray } from '../common/config-utils'
+import { timer } from '../common/time-utils'
+
 const {
   runScpCommand,
   runSshCommand,
   maxRetries,
   runSshCommandWithoutExit
 } = require('../common/remote-worker')
-
-const timer = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 async function removeAllPeers(ip, staticNodes) {
   let command = 'mv ~/.bor/static-nodes.json ~/.bor/static-nodes.json_bkp'

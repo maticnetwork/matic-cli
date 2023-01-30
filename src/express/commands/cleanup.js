@@ -1,7 +1,6 @@
 import { loadDevnetConfig, splitToArray } from '../common/config-utils'
 import { maxRetries, runSshCommand } from '../common/remote-worker'
-
-const timer = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+import { timer } from '../common/time-utils'
 
 export async function cleanup() {
   require('dotenv').config({ path: `${process.cwd()}/.env` })

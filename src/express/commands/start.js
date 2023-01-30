@@ -13,11 +13,11 @@ import {
   runScpCommand,
   runSshCommand
 } from '../common/remote-worker'
+import { timer } from '../common/time-utils'
 import yaml from 'js-yaml'
 import fs from 'fs'
 
 const shell = require('shelljs')
-const timer = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 async function terraformApply(devnetId) {
   console.log('📍Executing terraform apply...')

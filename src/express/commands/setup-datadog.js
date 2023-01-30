@@ -1,6 +1,7 @@
 // noinspection JSCheckFunctionSignatures,JSUnresolvedVariable
 
 import { loadDevnetConfig, splitToArray } from '../common/config-utils'
+import { timer } from '../common/time-utils'
 
 const {
   runScpCommand,
@@ -11,8 +12,6 @@ const { installDocker } = require('./start.js')
 
 const yaml = require('js-yaml')
 const fs = require('fs')
-
-const timer = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export async function setDatadogAPIKey(value, doc) {
   if (value !== undefined) {
