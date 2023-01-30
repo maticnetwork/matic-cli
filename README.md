@@ -33,7 +33,7 @@ To use the `express-cli` you have to execute the following steps.
   accordingly
 - use `TF_VAR_DOCKERZIED=no` to have one VM per node, otherwise the stack will run on one VM only in a dockerized environment
 - (optional) replace `TF_VAR_VM_NAME` with your own identifier (it can be any string, default is "polygon-user")
-- (optional) replace `TF_VAR_DISK_SIZE_GB` with your preferred disk size in GB (default is 500 GB)
+- (optional) replace `TF_VAR_DISK_SIZE_GB` with your preferred disk size in GB (default is 100 GB)
 - `VERBOSE=true` prints logs from the remote machines. If set to `false`, only `express-cli` and `matic-cli` logs will
   be shown
 - **If you are a Polygon employee**, please refer to [this page](https://www.notion.so/polygontechnology/Testing-Toolkit-d47e098641d14c80b2e9a90b3b1b88d9) for more info
