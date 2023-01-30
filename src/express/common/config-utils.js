@@ -11,9 +11,19 @@ const validStr = makeValidator((x) => {
   else throw new Error(x + 'is not valid, please check your configs!')
 })
 
-const validOrEmptyStr = makeValidator((x) => {
-  if (x !== undefined && x !== null) return x
+const validBorChainId = makeValidator((x) => {
+  if (x !== undefined && x !== null && (x.match(/^$/g) || x > 0)) return x
   else throw new Error(x + 'is not valid, please check your configs!')
+})
+
+const validHeimdallChainId = makeValidator((x) => {
+  if (
+    x !== undefined &&
+    x !== null &&
+    (x.match(/^$|heimdall-\d+$/g) || x > 0)
+  ) {
+    return x
+  } else throw new Error(x + 'is not valid, please check your configs!')
 })
 
 const validAmiStr = makeValidator((x) => {
@@ -85,8 +95,8 @@ function validateEnvVars() {
     PEM_FILE_PATH: validCertPathStr({ default: '/home/ubuntu/aws-key.pem' }),
     DEFAULT_STAKE: num({ default: 10000 }),
     DEFAULT_FEE: num({ default: 2000 }),
-    BOR_CHAIN_ID: validOrEmptyStr({ default: '15005' }),
-    HEIMDALL_CHAIN_ID: validOrEmptyStr({ default: 'heimdall-4052' }),
+    BOR_CHAIN_ID: validBorChainId({ default: '15005' }),
+    HEIMDALL_CHAIN_ID: validHeimdallChainId({ default: 'heimdall-4052' }),
     SPRINT_SIZE: num({ default: 64 }),
     BLOCK_NUMBER: validStr({ default: '0,64' }),
     BLOCK_TIME: validStr({ default: '3,2' }),
@@ -271,8 +281,45 @@ function validateGitConfigs() {
 function setCommonConfigs(doc) {
   setConfigValue('defaultStake', parseInt(process.env.DEFAULT_STAKE), doc)
   setConfigValue('defaultFee', parseInt(process.env.DEFAULT_FEE), doc)
-  setConfigValue('borChainId', parseInt(process.env.BOR_CHAIN_ID), doc)
-  setConfigValue('heimdallChainId', process.env.HEIMDALL_CHAIN_ID, doc)
+
+  let borChainId, heimdallChainId
+
+  if (!process.env.BOR_CHAIN_ID && !process.env.HEIMDALL_CHAIN_ID) {
+    borChainId = Math.floor(Math.random() * 10000 + 1000)
+    setConfigValue('borChainId', parseInt(borChainId), doc)
+    setConfigValue('heimdallChainId', 'heimdall-' + borChainId, doc)
+  } else if (!process.env.BOR_CHAIN_ID) {
+    try {
+      if (process.env.HEIMDALL_CHAIN_ID > 0) {
+        borChainId = process.env.HEIMDALL_CHAIN_ID
+        heimdallChainId = 'heimdall-' + process.env.HEIMDALL_CHAIN_ID
+      } else {
+        borChainId = process.env.HEIMDALL_CHAIN_ID.split('-')[1]
+      }
+
+      setConfigValue('borChainId', parseInt(borChainId), doc)
+      setConfigValue('heimdallChainId', heimdallChainId, doc)
+    } catch (error) {
+      console.log(
+        '❌ Error occured while processing heimdall chain id (Heimdall chain id should be like: heimdall-4052)!'
+      )
+      process.exit(1)
+    }
+  } else if (!process.env.HEIMDALL_CHAIN_ID) {
+    borChainId = process.env.BOR_CHAIN_ID
+    setConfigValue('borChainId', parseInt(process.env.BOR_CHAIN_ID), doc)
+    setConfigValue('heimdallChainId', 'heimdall-' + borChainId, doc)
+  } else {
+    if (process.env.HEIMDALL_CHAIN_ID > 0) {
+      heimdallChainId = 'heimdall-' + process.env.HEIMDALL_CHAIN_ID
+    } else {
+      heimdallChainId = process.env.HEIMDALL_CHAIN_ID
+    }
+
+    setConfigValue('heimdallChainId', heimdallChainId, doc)
+    setConfigValue('borChainId', parseInt(process.env.BOR_CHAIN_ID), doc)
+  }
+
   setConfigList('sprintSize', process.env.SPRINT_SIZE, doc)
   setConfigList(
     'sprintSizeBlockNumber',
