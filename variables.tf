@@ -9,11 +9,11 @@ variable "VM_NAME" {
 }
 
 variable "DISK_SIZE_GB" {
-  default = "500"
+  default = "100"
 }
 
 variable "ARCHIVE_DISK_SIZE_GB" {
-  default = "500"
+  default = "100"
 }
 
 variable "IOPS" {
