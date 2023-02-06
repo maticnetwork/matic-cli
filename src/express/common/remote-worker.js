@@ -47,6 +47,42 @@ export async function runSshCommand(ip, command, retries) {
   }
 }
 
+export async function runSshCommandWithReturn(ip, command, retries) {
+  if (retries < 0) {
+    console.log(
+      '❌ runSshCommand called with negative retries number: ',
+      retries
+    )
+    process.exit(1)
+  }
+  try {
+    const { stdout } = await execa('ssh', [
+      '-o',
+      'StrictHostKeyChecking=no',
+      '-o',
+      'UserKnownHostsFile=/dev/null',
+      '-i',
+      `${process.env.PEM_FILE_PATH}`,
+      ip,
+      command + ' && exit'
+    ])
+
+    return stdout
+  } catch (error) {
+    if (retries - 1 > 0) {
+      await runSshCommandWithReturn(ip, command, retries - 1)
+    } else {
+      console.log(
+        '❌ Command \n `' +
+          command +
+          '`\n failed too many times with error : \n',
+        error
+      )
+      process.exit(1)
+    }
+  }
+}
+
 export async function runSshCommandWithoutExit(ip, command, retries) {
   if (retries < 0) {
     console.log(

@@ -20,6 +20,7 @@ import pkg from '../package.json'
 import { testEip1559 } from '../tests/test-eip-1559'
 import { stopInstances } from './express/commands/instances-stop'
 import { startInstances } from './express/commands/instances-start'
+import { rewind } from './express/commands/rewind'
 
 program
   .option('-i, --init', 'Initiate the terraform setup')
@@ -64,6 +65,7 @@ program
   .option('-xxx, --chaos [intensity]', 'Start Chaos')
   .option('-istop, --instances-stop', 'Stop aws ec2 instances')
   .option('-istart, --instances-start', 'Start aws ec2 instances')
+  .option('-rewind, --rewind [numberOfBlocks]', 'Rewind the chain')
   .version(pkg.version)
 
 export async function cli() {
@@ -303,5 +305,19 @@ export async function cli() {
     }
     await timer(3000)
     await startInstances()
+  } else if (options.rewind) {
+    console.log('📍Command --rewind')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    if (options.rewind === true) {
+      options.rewind = 100
+    }
+
+    await timer(3000)
+    await rewind(options.rewind)
   }
 }
