@@ -67,7 +67,7 @@ export async function chaos(intensity) {
   let staticNodes
 
   try {
-    staticNodes = require(`${process.cwd()}/static-nodes.json`)
+    require(`${process.cwd()}/static-nodes.json`)
   } catch (error) {
     const src = `${borUsers[0]}@${borHosts[0]}:~/node/bor/static-nodes.json`
     const dest = './static-nodes.json'

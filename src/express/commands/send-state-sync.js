@@ -36,5 +36,5 @@ export async function sendStateSyncTx() {
   const command = `cd ~/matic-cli/devnet/code/contracts && npm run truffle exec scripts/deposit.js -- --network development ${MaticToken} 100000000000000000000`
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
 
-  console.log('📍StateSync Tx Sent, check with "./bin/express-cli --monitor"')
+  console.log('📍StateSync Tx Sent, check with "../../bin/express-cli --monitor"')
 }

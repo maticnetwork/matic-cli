@@ -203,6 +203,10 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
   - Adds dedicated chaos(de-peering) to the network. The `intensity` parameter is optional and can be set from `1` to `10`. If not set, `5` is used.
 
+- `../../bin/express-cli --rewind [numberOfBlocks]`
+
+  - Rewinds the chain by a defined number of blocks (not greater than `128`). Default `numberOfBlocks` value is `100`.
+
 - `../../bin/express-cli --eip-1559-test [index]`
   - Executes a test to send EIP 1559 tx. In case of a non-dockerized devnet, if an integer [index] is specified, it will use
     that VM to send the tx. Otherwise, it will target the first VM.
