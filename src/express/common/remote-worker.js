@@ -107,7 +107,7 @@ export async function runSshCommandWithoutExit(ip, command, retries) {
     )
   } catch (error) {
     if (retries - 1 > 0) {
-      await runSshCommand(ip, command, retries - 1)
+      await runSshCommandWithoutExit(ip, command, retries - 1)
     } else {
       console.log('Command  `' + command + '` failed (Not Serious)')
     }
