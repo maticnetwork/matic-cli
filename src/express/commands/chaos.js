@@ -64,8 +64,6 @@ export async function chaos(intensity) {
     process.exit(1)
   }
 
-  let staticNodes
-
   try {
     require(`${process.cwd()}/static-nodes.json`)
   } catch (error) {
@@ -74,7 +72,7 @@ export async function chaos(intensity) {
     await runScpCommand(src, dest, maxRetries)
   }
 
-  staticNodes = require(`${process.cwd()}/static-nodes.json`)
+  const staticNodes = require(`${process.cwd()}/static-nodes.json`)
   console.log('📍Static nodes', staticNodes)
 
   let N = parseInt((doc['devnetBorHosts'].length * intensity) / 15)
