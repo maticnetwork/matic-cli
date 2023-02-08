@@ -41,7 +41,7 @@ export async function rewind(num) {
     maxRetries
   )
   console.log(
-    `📍 rewinding chain by ${num} blocks, \n📍 current block number: ${intitalBlockNumber}`
+    `📍 Rewinding chain by ${num} blocks, \n📍 current block number: ${intitalBlockNumber}`
   )
 
   const rewindCommand = `~/go/bin/bor attach ~/.bor/data/bor.ipc --exec "debug.setHead(web3.toHex(${intitalBlockNumber} - ${num}))"`
@@ -56,13 +56,13 @@ export async function rewind(num) {
     maxRetries
   )
   console.log(
-    `📍 rewinded chain by ${
+    `📍 Rewinded chain by ${
       intitalBlockNumber - rewindedBlockNumber
     } blocks, \n📍 current block number ${rewindedBlockNumber}`
   )
 
   console.log(
-    'NOTE: minor difference in block number is expected due to small block time'
+    '📍 NOTE: minor difference in block number is expected due to small block time'
   )
 
   console.log('📍 Done! Exiting...')

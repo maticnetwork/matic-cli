@@ -64,17 +64,15 @@ export async function chaos(intensity) {
     process.exit(1)
   }
 
-  let staticNodes
-
   try {
-    staticNodes = require(`${process.cwd()}/static-nodes.json`)
+    require(`${process.cwd()}/static-nodes.json`)
   } catch (error) {
     const src = `${borUsers[0]}@${borHosts[0]}:~/node/bor/static-nodes.json`
     const dest = './static-nodes.json'
     await runScpCommand(src, dest, maxRetries)
   }
 
-  staticNodes = require(`${process.cwd()}/static-nodes.json`)
+  const staticNodes = require(`${process.cwd()}/static-nodes.json`)
   console.log('📍Static nodes', staticNodes)
 
   let N = parseInt((doc['devnetBorHosts'].length * intensity) / 15)

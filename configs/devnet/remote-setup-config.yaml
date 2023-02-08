@@ -7,7 +7,7 @@ borBranch: develop
 heimdallRepo: https://github.com/maticnetwork/heimdall.git
 heimdallBranch: develop
 contractsRepo: https://github.com/maticnetwork/contracts.git
-contractsBranch: 2ed59de3641c407c64def1b40bcd090cb9cc048a # todo change to master once contracts team merges the PR
+contractsBranch: mardizzone/node-16
 genesisContractsRepo: https://github.com/maticnetwork/genesis-contracts.git
 genesisContractsBranch: master
 sprintSize: 64
