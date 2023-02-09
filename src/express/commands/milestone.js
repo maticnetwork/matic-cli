@@ -2,6 +2,7 @@
 import { promises } from 'fs-extra'
 import { loadDevnetConfig, splitToArray } from '../common/config-utils'
 import { timer } from '../common/time-utils'
+import { checkLatestMilestone } from './monitor';
 
 const {
   runScpCommand,
@@ -11,42 +12,48 @@ const {
   runSshCommandWithReturn
 } = require('../common/remote-worker')
 
-async function removeAllPeers(ip, staticNodes) {
-  let command = 'mv ~/.bor/static-nodes.json ~/.bor/static-nodes.json_bkp'
-  try {
-    await runSshCommandWithoutExit(ip, command, 1)
-  } catch (error) {
-    console.log('static-nodes.json already moved')
+const milestoneLength = 64
+const queryTimer = (milestoneLength / 4) * 1000
+
+async function getLatestBlock(ip, number = "latest") {
+  const url = `http://${ip}:8545`
+  if (number != "latest") {
+    number = Number(number).toString(16) // hexify
   }
 
-  const tasks = []
-  for (let i = 0; i < staticNodes.length; i++) {
-    command = `/home/ubuntu/go/bin/bor attach ~/.bor/data/bor.ipc --exec "admin.removeTrustedPeer('${staticNodes[i]}')"`
-    tasks.push(runSshCommand(ip, command, maxRetries))
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      "jsonrpc":"2.0",
+      "id":1,
+      "method":"eth_getBlockByNumber",
+      "params":[number, false],
+    })
+  })
 
-    command = `/home/ubuntu/go/bin/bor attach ~/.bor/data/bor.ipc --exec "admin.removePeer('${staticNodes[i]}')"`
-    tasks.push(runSshCommand(ip, command, maxRetries))
-  }
-  console.log('📍Removing all peers')
-  await Promise.all(tasks)
-  console.log('📍Removed all peers')
-}
-
-async function addAllPeers(ip, staticNodes) {
-  const tasks = []
-  for (let i = 0; i < staticNodes.length; i++) {
-    const command = `/home/ubuntu/go/bin/bor attach ~/.bor/data/bor.ipc --exec "admin.addPeer('${staticNodes[i]}')"`
-    tasks.push(runSshCommand(ip, command, maxRetries))
-  }
-  console.log('📍Adding all peers')
-  await Promise.all(tasks)
-  console.log('📍Added all peers')
+  const responseJson = await response.json()
+  return responseJson.result?.result
 }
 
 async function removePeers(ip, peers) {
   let tasks = []
   for (let i = 0; i < peers.length; i++) {
     let command = `~/go/bin/bor attach ~/.bor/data/bor.ipc --exec "admin.removePeer('${peers[i]}')"`
+    tasks.push(runSshCommand(ip, command, maxRetries))
+  }
+
+  await Promise.all(tasks).catch(error => {
+    return false
+  }).then(() => {
+    return true
+  })
+}
+
+async function addPeers(ip, peers) {
+  let tasks = []
+  for (let i = 0; i < peers.length; i++) {
+    let command = `~/go/bin/bor attach ~/.bor/data/bor.ipc --exec "admin.addPeer('${peers[i]}')"`
     tasks.push(runSshCommand(ip, command, maxRetries))
   }
 
@@ -91,6 +98,28 @@ async function createClusters(ips, enodes) {
   })
 
   return true
+}
+
+async function rejoinClusters(ips, enodes) {
+  let tasks = []
+  for (let i = 0; i < ips.length; i++) {
+    if (i == 0) {
+      // add all other peers in 1st node
+      tasks.push(addPeers(ips[i], enodes.slice(1)))
+    } else {
+      // add 1st node in all peers
+      tasks.push(addPeers(ips[i], [enodes[0]]))
+    }
+  }
+
+  await Promise.all(tasks).then((values) => {
+    if (values.includes(false)) {
+      console.log('📍Unable to add peers while rejoining clusters, exiting')
+      return false
+    }
+  }).catch(error => {
+    return false
+  })
 }
 
 async function getEnode(ip) {
@@ -151,8 +180,6 @@ export async function milestone() {
     process.exit(1)
   }
   
-  
-
   // Wait for milestone
   // Re-join them and check if the final chain is of majority (2/3+1) cluster
   // End tests
@@ -176,11 +203,37 @@ export async function milestone() {
     return
   }
 
+  // Wait for a milestone to get proposed for verification
+  let count = 0
+  console.log('📍Querying heimdall for next milestone...')
+  let milestone;
+  while (true) {
+    if (count > milestoneLength) {
+      console.log('📍Unable to fetch milestone from heimdall, exiting')
+      return
+    }
+
+    milestone = await checkLatestMilestone(borHosts[0])
+    if (milestone.result?.result) {
+      break
+    } else {
+      console.log(`📍Invalid milestone received, count: ${count}`)
+    }
+
+    count++
+    await timer(queryTimer)
+  }
+
+  let lastMilestone = milestone.result.result
+
+  console.log(`📍Got milestone from heimdall. Start block: ${lastMilestone.start_block}, End block: ${lastMilestone.end_block}, ID: ${lastMilestone.milestone_id}`)
+  console.log('📍Creating clusters for tests')
+
   // Next step is to create 2 clusters where primary node is separated from the
   // rest of the network.
   let created = await createClusters(ips, enodes)
   if (!created) {
-    console.log('📍Unable to remove peers for creating clusters exiting')
+    console.log('📍Unable to remove peers for creating clusters, exiting')
     return
   }
 
@@ -206,7 +259,7 @@ export async function milestone() {
     console.log('📍Retrying creation of partition clusters for testing')
     created = await createClusters(ips, enodes)
     if (!created) {
-      console.log('📍Unable to remove peers for creating clusters exiting')
+      console.log('📍Unable to remove peers for creating clusters, exiting')
       return
     }
 
@@ -240,6 +293,85 @@ export async function milestone() {
   // Cluster 1 has a single primary producer whose difficulty should always be higher. 
   // Cluster 2 should have remaining nodes (with 2/3+1 stake) all with difficulty lower than node 1
   // and nodes performing mining out of sync. 
+  await timer(2000)
 
+  // Validate if both the clusters are on their own chain. 
+  console.log('📍Trying to fetch latest block from both clusters')
+  
+  // We'll fetch block from cluster 2 first as it'll be behind in terms of block height
+  let latestBlockCluster2 = await getLatestBlock(borHosts[1], "latest")
+  if (latestBlockCluster2.number) {
+    let latestBlockCluster1 = await getLatestBlock(borHosts[0], number)
+    if (latestBlockCluster1.number) {
+      if (latestBlockCluster1.number != latestBlockCluster2.number) {
+        console.log(`📍Block number mismatch from clusters. Cluster 1: ${latestBlockCluster1.number}, Cluster 2: ${latestBlockCluster2.number}, exiting`)
+        return
+      }
 
+      // Check if same block numbers have different hash or not
+      if (latestBlockCluster1.hash == latestBlockCluster2.hash) {
+        console.log(`📍Block hash matched. Clusters are not created properly. Cluster 1: ${latestBlockCluster1.hash}, Cluster 2: ${latestBlockCluster2.hash}, exiting`)
+        return
+      }
+    } else {
+      console.log('📍Unable to fetch latest block from 1st cluster, exiting')
+      return
+    }
+  } else {
+    console.log('📍Unable to fetch latest block from 2nd cluster, exiting')
+    return
+  }
+  
+  // Wait for the next milestone to get proposed for verification
+  count = 0
+  console.log('📍Querying heimdall for next milestone...')
+  while (true) {
+    if (count > milestoneLength) {
+      console.log('📍Unable to fetch milestone from heimdall, exiting')
+      return
+    }
+
+    milestone = await checkLatestMilestone(borHosts[0])
+    if (milestone.result?.result) {
+      break
+    } else {
+      console.log(`📍Invalid milestone received, count: ${count}`)
+    }
+
+    count++
+    await timer(queryTimer)
+  }
+
+  let latestMilestone = milestone.result.result
+  console.log(`📍Got milestone from heimdall. Start block: ${latestMilestone.start_block}, End block: ${latestMilestone.end_block}, ID: ${latestMilestone.milestone_id}`)
+
+  // Check if the milestone is the immediate next one or not
+  if (latestMilestone.start_block != lastMilestone.end_block + 1) {
+    console.log('📍Next milestone received is not valid. exiting')
+    return
+  }
+
+  // Validate if the proposer of the milestone is someone from 2nd cluster
+
+  // Reconnect both the clusters
+  let rejoined = await rejoinClusters(ips, enodes)
+  if (!rejoined) {
+    console.log('📍Unable to add peers while rejoining clusters, exiting')
+    return
+  }
+
+  // Wait for few seconds for reorg to happen
+  console.log('📍Waiting for clusters to connect and reorg...')
+  await timer(4000)
+
+  // Fetch block from cluster 1 to see if it got reorged to cluster 2
+  let latestBlockCluster1 = await getLatestBlock(borHosts[0], number)
+  if (latestBlockCluster1.number) {
+    if (latestBlockCluster1.hash == latestBlockCluster2.hash) {
+      console.log('✅ Test Passed. Cluster 1 successfully reorged to cluster 2 (with high majority)')
+    }
+  } else {
+    console.log('📍Unable to fetch latest block from 1st cluster, exiting')
+    return
+  }
 }
