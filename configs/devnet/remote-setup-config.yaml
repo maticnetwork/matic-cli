@@ -16,6 +16,7 @@ blockNumber: '0'
 blockTime: '2'
 numOfValidators: 1
 numOfNonValidators: 1
+numOfArchiveNodes: 0
 ethURL: http://ec2-xx-xxx-xxx-xx.us-west-2.compute.amazonaws.com:9545
 ethHostUser: ubuntu
 devnetType: remote

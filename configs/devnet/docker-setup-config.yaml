@@ -16,6 +16,7 @@ blockNumber: '0'
 blockTime: '2'
 numOfValidators: 1
 numOfNonValidators: 1
+numOfArchiveNodes: 0
 ethURL: http://ganache:9545
 ethHostUser: ubuntu
 devnetType: docker
@@ -23,4 +24,4 @@ borDockerBuildContext: https://github.com/maticnetwork/bor.git#develop
 heimdallDockerBuildContext: https://github.com/maticnetwork/heimdall.git#develop
 devnetBorUsers: ubuntu,ubuntu
 devnetBorHosts:
-  - ec2-xx-xxx-xx-xxx.us-west-2.compute.amazonaws.com
+  - ec2-xx-xxx-xx-xxx.us-west-2.compute.amazonaws.com # use localhost for local deployments

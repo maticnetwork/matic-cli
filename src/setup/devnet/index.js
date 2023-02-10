@@ -892,12 +892,11 @@ export class Devnet {
               'keystore'
             )
             fs.readdir(keystoreDir, async (err, files) => {
-              if (err) throw err
-
-              for (let j = 1; j < files.length; j++) {
-                await fs.unlink(path.join(keystoreDir, files[j]), err => {
-                  if (err) throw err
-                })
+              if (files)
+              {
+                for (let j = 1; j < files.length; j++) {
+                  await fs.unlink(path.join(keystoreDir, files[j]))
+                }
               }
             })
             await timer(2000)
