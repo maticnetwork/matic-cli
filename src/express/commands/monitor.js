@@ -61,7 +61,7 @@ async function checkCheckpoint(ip) {
 export async function checkLatestMilestone(ip) {
   const url = `http://${ip}:1317/milestone/latest`
   const response = await fetch(url)
-  return responseJson = await response.json()
+  return await response.json()
 }
 
 async function checkStateSyncTx(ip, id) {

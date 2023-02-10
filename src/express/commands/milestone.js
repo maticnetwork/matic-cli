@@ -18,7 +18,7 @@ const queryTimer = (milestoneLength / 4) * 1000
 async function getLatestBlock(ip, number = "latest") {
   const url = `http://${ip}:8545`
   if (number != "latest") {
-    number = Number(number).toString(16) // hexify
+    number = "0x" + Number(number).toString(16) // hexify
   }
 
   const response = await fetch(url, {
@@ -33,13 +33,20 @@ async function getLatestBlock(ip, number = "latest") {
   })
 
   const responseJson = await response.json()
-  return responseJson.result?.result
+  if (responseJson.result) {
+    return responseJson.result
+  } else {
+    console.log(`📍Error fetching block. number: ${number}, response: ${JSON.stringify(response)}`)
+  }
+
+  return undefined
 }
 
 async function removePeers(ip, peers) {
   let tasks = []
   for (let i = 0; i < peers.length; i++) {
     let command = `~/go/bin/bor attach ~/.bor/data/bor.ipc --exec "admin.removePeer('${peers[i]}')"`
+    console.log("--- remove peers:", command)
     tasks.push(runSshCommand(ip, command, maxRetries))
   }
 
@@ -114,32 +121,34 @@ async function rejoinClusters(ips, enodes) {
 
   await Promise.all(tasks).then((values) => {
     if (values.includes(false)) {
-      console.log('📍Unable to add peers while rejoining clusters, exiting')
+      console.log('📍Unable to add peers, exiting')
       return false
     }
   }).catch(error => {
+    console.log(`📍Unable to add peers, error: ${error}`)
     return false
   })
 }
 
-async function getEnode(ip) {
+async function getEnode(user, host) {
+  const ip = `${user}@${host}`
   let command = '~/go/bin/bor attach ~/.bor/data/bor.ipc --exec admin.nodeInfo.enode'
   try {
     const fullEnode = await runSshCommandWithReturn(ip, command, maxRetries)
-    let enode = string(fullEnode).split('@')[0]; // remove the local ip from the enode
+    let enode = String(fullEnode).split('@')[0].slice(1); // remove the local ip from the enode
     if (enode.length != 136) { // prefix "enode://" + 128 hex values for enode itself
       return ''
     }
-    enode += "@" + ip + ":30303" // assuming that p2p port is opened on 30303 
+    enode += "@" + host + ":30303" // assuming that p2p port is opened on 30303 
     return enode
   } catch (error) {
-    console.log('unable to query enode')
+    console.log(`📍Unable to query enode. Error: ${error}`)
   }
 
   return ''
 }
 
-function validateNumberOfPeers(peers, total) {
+function validateNumberOfPeers(peers) {
   let recreate = false
 
   // 1st node should have 0 peers
@@ -149,8 +158,8 @@ function validateNumberOfPeers(peers, total) {
   }
 
   // Remaining nodes should have total-1 peers
-  for (let i = 1; i < length(peers); i++) {
-    if (peers[i] != total - 1) {
+  for (let i = 1; i < peers.length; i++) {
+    if (peers[i] != (peers.length - 2)) {
       console.log('📍Unexpected peer length received for 2nd cluster, retrying')
       recreate = true
       break
@@ -161,8 +170,6 @@ function validateNumberOfPeers(peers, total) {
 }
 
 export async function milestone() {
-  console.log('📍Command --milestone')
-
   // NOTE: Make sure bor branch has logic for hardcoded primary validator
   
   require('dotenv').config({ path: `${process.cwd()}/.env` })
@@ -188,14 +195,14 @@ export async function milestone() {
   let enodes = []
   let tasks = []
   let ips = []
-  for (let i = 0; i < borUsers; i++) {
+  for (let i = 0; i < borUsers.length; i++) {
     const ip = `${borUsers[i]}@${borHosts[i]}`
     ips.push(ip)
-    tasks.push(getEnode(ip))
+    tasks.push(getEnode(borUsers[i], borHosts[i]))
   }
 
   await Promise.all(tasks).then((values) => {
-    enode = values
+    enodes = values
   })
 
   if (enodes.includes('')) {
@@ -214,20 +221,27 @@ export async function milestone() {
     }
 
     milestone = await checkLatestMilestone(borHosts[0])
-    if (milestone.result?.result) {
+    if (milestone.result) {
       break
     } else {
-      console.log(`📍Invalid milestone received, count: ${count}`)
+      console.log(`📍Invalid milestone received. Response: ${JSON.stringify(milestone.result)}, count: ${count}`) 
     }
 
     count++
     await timer(queryTimer)
   }
 
-  let lastMilestone = milestone.result.result
+  let lastMilestone = milestone.result
 
   console.log(`📍Got milestone from heimdall. Start block: ${lastMilestone.start_block}, End block: ${lastMilestone.end_block}, ID: ${lastMilestone.milestone_id}`)
   console.log('📍Creating clusters for tests')
+
+  // Make sure all peers are joined
+  let rejoined = await rejoinClusters(ips, enodes)
+  if (!rejoined) {
+    console.log('📍Unable to add peers before starting tests, exiting')
+    return
+  }
 
   // Next step is to create 2 clusters where primary node is separated from the
   // rest of the network.
@@ -254,7 +268,7 @@ export async function milestone() {
     peers = values
   })
 
-  let recreate = validateNumberOfPeers(peers, ips.length)  
+  let recreate = validateNumberOfPeers(peers)  
   if (recreate) {
     console.log('📍Retrying creation of partition clusters for testing')
     created = await createClusters(ips, enodes)
@@ -279,7 +293,7 @@ export async function milestone() {
       peers = values
     })
 
-    recreate = validateNumberOfPeers(peers, ips.length)
+    recreate = validateNumberOfPeers(peers)
     if (recreate) {
       console.log('📍Failed to create partition clusters for testing, exiting')
     } else {
@@ -300,8 +314,18 @@ export async function milestone() {
   
   // We'll fetch block from cluster 2 first as it'll be behind in terms of block height
   let latestBlockCluster2 = await getLatestBlock(borHosts[1], "latest")
+  if (latestBlockCluster2 == undefined) {
+    console.log('📍Unable to fetch latest block in cluster 2')
+    return
+  }
+
   if (latestBlockCluster2.number) {
-    let latestBlockCluster1 = await getLatestBlock(borHosts[0], number)
+    let latestBlockCluster1 = await getLatestBlock(borHosts[0], latestBlockCluster2.number)
+    if (latestBlockCluster1 == undefined) {
+      console.log('📍Unable to fetch latest block in cluster 1')
+      return
+    }
+
     if (latestBlockCluster1.number) {
       if (latestBlockCluster1.number != latestBlockCluster2.number) {
         console.log(`📍Block number mismatch from clusters. Cluster 1: ${latestBlockCluster1.number}, Cluster 2: ${latestBlockCluster2.number}, exiting`)
@@ -332,29 +356,28 @@ export async function milestone() {
     }
 
     milestone = await checkLatestMilestone(borHosts[0])
-    if (milestone.result?.result) {
-      break
+    if (milestone.result) {
+      // Check if the milestone is the immediate next one or not
+      if (milestone.result.start_block != milestone.result.end_block + 1) {
+        console.log('📍Waiting for new milestone...')
+      } else {
+        break
+      }
     } else {
-      console.log(`📍Invalid milestone received, count: ${count}`)
+      console.log(`📍Invalid milestone received. Response: ${JSON.stringify(milestone.result)}, count: ${count}`) 
     }
 
     count++
     await timer(queryTimer)
   }
 
-  let latestMilestone = milestone.result.result
+  let latestMilestone = milestone.result
   console.log(`📍Got milestone from heimdall. Start block: ${latestMilestone.start_block}, End block: ${latestMilestone.end_block}, ID: ${latestMilestone.milestone_id}`)
-
-  // Check if the milestone is the immediate next one or not
-  if (latestMilestone.start_block != lastMilestone.end_block + 1) {
-    console.log('📍Next milestone received is not valid. exiting')
-    return
-  }
 
   // Validate if the proposer of the milestone is someone from 2nd cluster
 
   // Reconnect both the clusters
-  let rejoined = await rejoinClusters(ips, enodes)
+  rejoined = await rejoinClusters(ips, enodes)
   if (!rejoined) {
     console.log('📍Unable to add peers while rejoining clusters, exiting')
     return
