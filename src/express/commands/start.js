@@ -424,7 +424,6 @@ export async function start() {
 
   await installRequiredSoftwareOnRemoteMachines(ips, devnetType, devnetId)
 
-  process.exit(1)
   await prepareMaticCLI(ips, devnetType, devnetId)
 
   await eventuallyCleanupPreviousDevnet(ips, devnetType, devnetId)
