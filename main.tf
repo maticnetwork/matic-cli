@@ -58,7 +58,7 @@ resource "aws_security_group" "internet_facing_alb" {
       from_port   = ingress.value
       to_port     = ingress.value
       protocol    = "tcp"
-      cidr_blocks = concat(var.SG_CIDR_BLOCKS, [aws_vpc.My_VPC.cidr_block], [aws_eip.eip.*.public_ip])
+      cidr_blocks = concat(var.SG_CIDR_BLOCKS, [aws_vpc.My_VPC.cidr_block])
       self = true
     }
   }
