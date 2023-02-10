@@ -11,7 +11,7 @@ export async function cleanup() {
   await deployBorContractsAndStateSync(doc)
 }
 
-async function stopServices(doc) {
+export async function stopServices(doc) {
   const borUsers = splitToArray(doc.devnetBorUsers.toString())
   const nodeIps = []
   const isHostMap = new Map()
