@@ -395,9 +395,8 @@ export async function start() {
 
   await terraformApply(devnetId)
   const tfOutput = await terraformOutput()
-  const ips = JSON.parse(tfOutput).instance_ips.value.toString()
-  const ids = JSON.parse(tfOutput).instance_ids.value.toString()
   const dnsIps = JSON.parse(tfOutput).instance_dns_ips.value.toString()
+  const ids = JSON.parse(tfOutput).instance_ids.value.toString()
   process.env.DEVNET_BOR_HOSTS = dnsIps
   process.env.INSTANCES_IDS = ids
 
@@ -422,15 +421,15 @@ export async function start() {
   console.log('📍Waiting 30s for the VMs to initialize...')
   await timer(30000)
 
-  await installRequiredSoftwareOnRemoteMachines(ips, devnetType, devnetId)
+  await installRequiredSoftwareOnRemoteMachines(dnsIps, devnetType, devnetId)
 
-  await prepareMaticCLI(ips, devnetType, devnetId)
+  await prepareMaticCLI(dnsIps, devnetType, devnetId)
 
-  await eventuallyCleanupPreviousDevnet(ips, devnetType, devnetId)
+  await eventuallyCleanupPreviousDevnet(dnsIps, devnetType, devnetId)
 
   if (devnetType === 'docker') {
-    await runDockerSetupWithMaticCLI(ips, devnetId)
+    await runDockerSetupWithMaticCLI(dnsIps, devnetId)
   } else {
-    await runRemoteSetupWithMaticCLI(ips, devnetId)
+    await runRemoteSetupWithMaticCLI(dnsIps, devnetId)
   }
 }

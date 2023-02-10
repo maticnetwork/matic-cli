@@ -892,8 +892,8 @@ export class Devnet {
               'keystore'
             )
             fs.readdir(keystoreDir, async (err, files) => {
-              if (files)
-              {
+              if (err) console.log(err) // harmless
+              if (files) {
                 for (let j = 1; j < files.length; j++) {
                   await fs.unlink(path.join(keystoreDir, files[j]))
                 }
