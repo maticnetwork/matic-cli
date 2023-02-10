@@ -58,7 +58,8 @@ resource "aws_security_group" "internet_facing_alb" {
       from_port   = ingress.value
       to_port     = ingress.value
       protocol    = "tcp"
-      cidr_blocks = var.SG_CIDR_BLOCKS
+      cidr_blocks = concat(var.SG_CIDR_BLOCKS, [aws_vpc.My_VPC.cidr_block])
+      self = true
     }
   }
   dynamic "egress" {
@@ -68,7 +69,8 @@ resource "aws_security_group" "internet_facing_alb" {
       from_port   = egress.value
       to_port     = egress.value
       protocol    = "-1"
-      cidr_blocks = var.SG_CIDR_BLOCKS
+      cidr_blocks = var.SG_CIDR_BLOCKS_OUT
+      self = true
     }
   }
   tags = {
@@ -102,7 +104,10 @@ resource "aws_vpc" "My_VPC" {
   }
 }
 
-resource "aws_internet_gateway" "gw" { vpc_id = aws_vpc.My_VPC.id }
+resource "aws_internet_gateway" "gw" {
+  vpc_id = aws_vpc.My_VPC.id
+
+}
 
 resource "aws_route_table" "table" {
   vpc_id = aws_vpc.My_VPC.id
@@ -126,6 +131,15 @@ variable "Public_Subnet_1" {
 output "instance_ips" {
   value = aws_eip.eip.*.public_ip
 }
+#output "instance_ips_1" {
+#  value = aws_eip.eip.*.public_dns
+#}
+#output "instance_ips_2" {
+#  value = aws_vpc.My_VPC.cidr_block
+#}
+#output "instance_ips_3" {
+#  value = aws_instance.app_server.*.public_ip
+#}
 
 output "instance_ids" {
   value = aws_instance.app_server.*.id
