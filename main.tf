@@ -58,7 +58,7 @@ resource "aws_security_group" "internet_facing_alb" {
       from_port   = ingress.value
       to_port     = ingress.value
       protocol    = "tcp"
-      cidr_blocks = concat(var.SG_CIDR_BLOCKS, [aws_vpc.My_VPC.cidr_block])
+      cidr_blocks = concat(var.SG_CIDR_BLOCKS, [aws_vpc.My_VPC.cidr_block], [aws_eip.eip.*.public_ip])
       self = true
     }
   }
@@ -131,15 +131,10 @@ variable "Public_Subnet_1" {
 output "instance_ips" {
   value = aws_eip.eip.*.public_ip
 }
-#output "instance_ips_1" {
-#  value = aws_eip.eip.*.public_dns
-#}
-#output "instance_ips_2" {
-#  value = aws_vpc.My_VPC.cidr_block
-#}
-#output "instance_ips_3" {
-#  value = aws_instance.app_server.*.public_ip
-#}
+
+output "instance_dns_ips" {
+  value = aws_eip.eip.*.public_dns
+}
 
 output "instance_ids" {
   value = aws_instance.app_server.*.id

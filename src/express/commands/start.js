@@ -397,37 +397,9 @@ export async function start() {
   const tfOutput = await terraformOutput()
   const ips = JSON.parse(tfOutput).instance_ips.value.toString()
   const ids = JSON.parse(tfOutput).instance_ids.value.toString()
-  // const ips1 = JSON.parse(tfOutput).instance_ips_1.value.toString()
-  // const ips2 = JSON.parse(tfOutput).instance_ips_2.value.toString()
-  // const ips3 = JSON.parse(tfOutput).instance_ips_3.value.toString()
-  process.env.DEVNET_BOR_HOSTS = ips
+  const dnsIps = JSON.parse(tfOutput).instance_dns_ips.value.toString()
+  process.env.DEVNET_BOR_HOSTS = dnsIps
   process.env.INSTANCES_IDS = ids
-
-  // console.log(" 1 > ", ips1)
-  // console.log(" 2 > ", ips2)
-  // console.log(" 3 > ", ips3)
-
-  // write ips
-  // require(`${process.cwd()}/secret.tfvars`)
-  // let allowedIPs = fs.readFileSync(`${process.cwd()}/secret.tfvars`, 'utf8')
-  // let splitIps = splitToArray(ips.toString())
-  // for (let i = 0; i < splitIps.length; i++) {
-  //   const n = allowedIPs.lastIndexOf("]");
-  //   allowedIPs = allowedIPs.substring(0, n) + `, "` + splitIps[i] + `/32"]`
-  // }
-  //
-  // console.log(allowedIPs)
-  //
-  // fs.writeFile(`${process.cwd()}/secret.tfvars`, allowedIPs, {encoding:'utf8',flag:'w'}, (err) => {
-  //   if (err) {
-  //     console.log('❌ Error while writing secret.tfvars: \n', err)
-  //     process.exit(1)
-  //   }
-  // })
-  //
-  // let file = fs.readFileSync(`${process.cwd()}/secret.tfvars`, 'utf8')
-  // console.log(file)
-
 
   await validateConfigs()
 
