@@ -397,15 +397,15 @@ export async function start() {
   const tfOutput = await terraformOutput()
   const ips = JSON.parse(tfOutput).instance_ips.value.toString()
   const ids = JSON.parse(tfOutput).instance_ids.value.toString()
-  const ips1 = JSON.parse(tfOutput).instance_ips_1.value.toString()
-  const ips2 = JSON.parse(tfOutput).instance_ips_2.value.toString()
-  const ips3 = JSON.parse(tfOutput).instance_ips_3.value.toString()
+  // const ips1 = JSON.parse(tfOutput).instance_ips_1.value.toString()
+  // const ips2 = JSON.parse(tfOutput).instance_ips_2.value.toString()
+  // const ips3 = JSON.parse(tfOutput).instance_ips_3.value.toString()
   process.env.DEVNET_BOR_HOSTS = ips
   process.env.INSTANCES_IDS = ids
 
-  console.log(" 1 > ", ips1)
-  console.log(" 2 > ", ips2)
-  console.log(" 3 > ", ips3)
+  // console.log(" 1 > ", ips1)
+  // console.log(" 2 > ", ips2)
+  // console.log(" 3 > ", ips3)
 
   // write ips
   // require(`${process.cwd()}/secret.tfvars`)
