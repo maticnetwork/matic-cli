@@ -16,15 +16,16 @@ blockNumber: '0'
 blockTime: '2'
 numOfValidators: 1
 numOfNonValidators: 1
-ethURL: http://172.20.1.100:9545
+numOfArchiveNodes: 0
+ethURL: http://ec2-xx-xxx-xxx-xx.us-west-2.compute.amazonaws.com:9545
 ethHostUser: ubuntu
 devnetType: remote
 devnetBorHosts:
-  - 172.20.1.100
-  - 172.20.1.101
+  - ec2-xx-xxx-xxx-xx.us-west-2.compute.amazonaws.com
+  - ec2-yy-yyy-yyy-yy.us-west-2.compute.amazonaws.com
 devnetHeimdallHosts:
-  - 172.20.1.100
-  - 172.20.1.101
+  - ec2-xx-xxx-xxx-xx.us-west-2.compute.amazonaws.com
+  - ec2-yy-yyy-yyy-yy.us-west-2.compute.amazonaws.com
 devnetBorUsers:
   - ubuntu
   - ubuntu

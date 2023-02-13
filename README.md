@@ -27,6 +27,9 @@ To use the `express-cli` you have to execute the following steps.
   by running `nvm use` from the root folder
 - install `express-cli` and `matic-cli` locally with command `npm i`
 - generate a keypair on AWS EC2 and download its certificate locally (`.pem` file)
+- copy `secret.tfvars.example` to `secret.tfvar` with command `cp secret.tfvars.example secret.tfvars` and check the commented file for details
+- **If you are a Polygon employee**, connect to the company VPN
+- modify `secret.tfvar` with addresses of the allowed IPs (as specified in `secret.tfvars.example` file)
 - copy `.env.example` to `.env` with command `cp .env.example .env` and check the heavily commented file for details
 - make sure `PEM_FILE_PATH` points to a correct AWS key certificate, the one you downloaded in the previous steps
 - define the number of nodes (`TF_VAR_VALIDATOR_COUNT` and `TF_VAR_SENTRY_COUNT`) and adjust the `DEVNET_BOR_USERS`
