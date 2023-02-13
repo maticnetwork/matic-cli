@@ -1,42 +1,42 @@
 /* eslint-disable dot-notation */
-import { promises } from 'fs-extra'
 import { loadDevnetConfig, splitToArray } from '../common/config-utils'
 import { timer } from '../common/time-utils'
 import { checkLatestMilestone } from './monitor';
 
 const {
-  runScpCommand,
   runSshCommand,
   maxRetries,
-  runSshCommandWithoutExit,
+  runCommand,
   runSshCommandWithReturn
 } = require('../common/remote-worker')
 
 const milestoneLength = 64
 const queryTimer = (milestoneLength / 4) * 1000
 
-async function getLatestBlock(ip, number = "latest") {
+export async function getBlock(ip, number = "latest") {
   const url = `http://${ip}:8545`
   if (number != "latest") {
     number = "0x" + Number(number).toString(16) // hexify
   }
 
+  const opts = {
+    "jsonrpc":"2.0",
+    "id":1,
+    "method":"eth_getBlockByNumber",
+    "params":[number, false],
+  }
+
   const response = await fetch(url, {
     method: "POST",
     headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      "jsonrpc":"2.0",
-      "id":1,
-      "method":"eth_getBlockByNumber",
-      "params":[number, false],
-    })
+    body: JSON.stringify(opts)
   })
-
+  
   const responseJson = await response.json()
   if (responseJson.result) {
     return responseJson.result
   } else {
-    console.log(`📍Error fetching block. number: ${number}, response: ${JSON.stringify(response)}`)
+    console.log(`📍Error fetching block. number: ${number}, response: ${JSON.stringify(response)}, opts: ${JSON.stringify(opts)}`)
   }
 
   return undefined
@@ -46,38 +46,43 @@ async function removePeers(ip, peers) {
   let tasks = []
   for (let i = 0; i < peers.length; i++) {
     let command = `~/go/bin/bor attach ~/.bor/data/bor.ipc --exec "admin.removePeer('${peers[i]}')"`
-    console.log("--- remove peers:", command)
     tasks.push(runSshCommand(ip, command, maxRetries))
   }
 
-  await Promise.all(tasks).catch(error => {
-    return false
-  }).then(() => {
-    return true
+  let response = false
+  await Promise.all(tasks).then(() => {
+    response = true
+  }).catch((error) => {
+    console.log('📍Unable to remove peers, error:', error)
   })
+
+  return response
 }
 
-async function addPeers(ip, peers) {
+export async function addPeers(ip, peers) {
   let tasks = []
   for (let i = 0; i < peers.length; i++) {
     let command = `~/go/bin/bor attach ~/.bor/data/bor.ipc --exec "admin.addPeer('${peers[i]}')"`
     tasks.push(runSshCommand(ip, command, maxRetries))
   }
 
-  await Promise.all(tasks).catch(error => {
-    return false
-  }).then(() => {
-    return true
+  let response = false
+  await Promise.all(tasks).then(() => {
+    response = true   
+  }).catch((error) => {
+    console.log('📍Unable to add peers, error:', error)
   })
+
+  return response
 }
 
-async function getPeerLength(ip) {
+export async function getPeerLength(ip) {
   const command = `/home/ubuntu/go/bin/bor attach ~/.bor/data/bor.ipc --exec "admin.peers.length"`
   try {
     let length = await runSshCommandWithReturn(ip, command, maxRetries)
     return parseInt(length)
   } catch (error) {
-    console.log('📍unable to query peer length')
+    console.log('📍Unable to query peer length, error:', error)
   }
 
   return -1
@@ -95,16 +100,18 @@ async function createClusters(ips, enodes) {
     }
   }
 
+  let response = false
   await Promise.all(tasks).then((values) => {
-    if (values.includes(false)) {
-      console.log('📍Unable to remove peers for creating cluster, exiting')
-      return false
+    if (values.includes(false) || values.includes(undefined)) {
+      console.log('📍Unable to remove peers, exiting')
+    } else {
+      response = true
     }
   }).catch(error => {
-    return false
+    console.log('📍Unable to remove peers, error:', error)
   })
 
-  return true
+  return response
 }
 
 async function rejoinClusters(ips, enodes) {
@@ -119,18 +126,21 @@ async function rejoinClusters(ips, enodes) {
     }
   }
 
-  await Promise.all(tasks).then((values) => {
-    if (values.includes(false)) {
+  let response = false
+  await Promise.all(tasks).then(values => {
+    if (values.includes(false) || values.includes(undefined)) {
       console.log('📍Unable to add peers, exiting')
-      return false
+    } else {
+      response = true
     }
   }).catch(error => {
-    console.log(`📍Unable to add peers, error: ${error}`)
-    return false
+    console.log("📍Unable to add peers, error", error)
   })
+  
+  return response
 }
 
-async function getEnode(user, host) {
+export async function getEnode(user, host) {
   const ip = `${user}@${host}`
   let command = '~/go/bin/bor attach ~/.bor/data/bor.ipc --exec admin.nodeInfo.enode'
   try {
@@ -186,10 +196,6 @@ export async function milestone() {
     console.log('📍Cannot run milestone tests on less than 4 validator nodes')
     process.exit(1)
   }
-  
-  // Wait for milestone
-  // Re-join them and check if the final chain is of majority (2/3+1) cluster
-  // End tests
 
   // Grab the enode of all the nodes
   let enodes = []
@@ -200,6 +206,8 @@ export async function milestone() {
     ips.push(ip)
     tasks.push(getEnode(borUsers[i], borHosts[i]))
   }
+
+  console.log("ips:", ips)
 
   await Promise.all(tasks).then((values) => {
     enodes = values
@@ -233,15 +241,17 @@ export async function milestone() {
 
   let lastMilestone = milestone.result
 
-  console.log(`📍Got milestone from heimdall. Start block: ${lastMilestone.start_block}, End block: ${lastMilestone.end_block}, ID: ${lastMilestone.milestone_id}`)
-  console.log('📍Creating clusters for tests')
-
+  console.log(`📍Got milestone from heimdall. Start block: ${Number(lastMilestone.start_block)}, End block: ${Number(lastMilestone.end_block)}, ID: ${lastMilestone.milestone_id}`)
+  console.log('📍Rejoining clusters before performing tests')
+  
   // Make sure all peers are joined
   let rejoined = await rejoinClusters(ips, enodes)
   if (!rejoined) {
     console.log('📍Unable to add peers before starting tests, exiting')
     return
   }
+  
+  console.log('📍Creating clusters for tests')
 
   // Next step is to create 2 clusters where primary node is separated from the
   // rest of the network.
@@ -313,22 +323,23 @@ export async function milestone() {
   console.log('📍Trying to fetch latest block from both clusters')
   
   // We'll fetch block from cluster 2 first as it'll be behind in terms of block height
-  let latestBlockCluster2 = await getLatestBlock(borHosts[1], "latest")
+  let latestBlockCluster2 = await runCommand(getBlock, borHosts[1], "latest", maxRetries)
   if (latestBlockCluster2 == undefined) {
-    console.log('📍Unable to fetch latest block in cluster 2')
+    console.log('📍Unable to fetch latest block in cluster 2, exiting')
     return
   }
 
   if (latestBlockCluster2.number) {
-    let latestBlockCluster1 = await getLatestBlock(borHosts[0], latestBlockCluster2.number)
+    console.log(`📍Trying to fetch block ${latestBlockCluster2.number} from cluster 1`)
+    let latestBlockCluster1 = await runCommand(getBlock, borHosts[0], latestBlockCluster2.number, maxRetries)
     if (latestBlockCluster1 == undefined) {
-      console.log('📍Unable to fetch latest block in cluster 1')
+      console.log(`📍Unable to fetch block ${Number(latestBlockCluster2.number)} in cluster 1, exiting`)
       return
     }
 
     if (latestBlockCluster1.number) {
       if (latestBlockCluster1.number != latestBlockCluster2.number) {
-        console.log(`📍Block number mismatch from clusters. Cluster 1: ${latestBlockCluster1.number}, Cluster 2: ${latestBlockCluster2.number}, exiting`)
+        console.log(`📍Block number mismatch from clusters. Cluster 1: ${Number(latestBlockCluster1.number)}, Cluster 2: ${Number(latestBlockCluster2.number)}, exiting`)
         return
       }
 
@@ -337,6 +348,8 @@ export async function milestone() {
         console.log(`📍Block hash matched. Clusters are not created properly. Cluster 1: ${latestBlockCluster1.hash}, Cluster 2: ${latestBlockCluster2.hash}, exiting`)
         return
       }
+
+      console.log(`📍Same block found with different hash. Block number: ${Number(latestBlockCluster1.number)}, Cluster 1 hash: ${latestBlockCluster1.hash}, Cluster 2 hash: ${latestBlockCluster2.hash}`)
     } else {
       console.log('📍Unable to fetch latest block from 1st cluster, exiting')
       return
@@ -358,11 +371,10 @@ export async function milestone() {
     milestone = await checkLatestMilestone(borHosts[0])
     if (milestone.result) {
       // Check if the milestone is the immediate next one or not
-      if (milestone.result.start_block != milestone.result.end_block + 1) {
-        console.log('📍Waiting for new milestone...')
-      } else {
+      if (Number(milestone.result.start_block) == Number(lastMilestone.end_block) + 1) {
         break
       }
+      console.log('📍Waiting for new milestone...')
     } else {
       console.log(`📍Invalid milestone received. Response: ${JSON.stringify(milestone.result)}, count: ${count}`) 
     }
@@ -372,7 +384,7 @@ export async function milestone() {
   }
 
   let latestMilestone = milestone.result
-  console.log(`📍Got milestone from heimdall. Start block: ${latestMilestone.start_block}, End block: ${latestMilestone.end_block}, ID: ${latestMilestone.milestone_id}`)
+  console.log(`📍Got milestone from heimdall. Start block: ${Number(latestMilestone.start_block)}, End block: ${Number(latestMilestone.end_block)}, ID: ${latestMilestone.milestone_id}`)
 
   // Validate if the proposer of the milestone is someone from 2nd cluster
 
@@ -388,10 +400,18 @@ export async function milestone() {
   await timer(4000)
 
   // Fetch block from cluster 1 to see if it got reorged to cluster 2
-  let latestBlockCluster1 = await getLatestBlock(borHosts[0], number)
+  console.log(`📍Fetching block ${Number(latestBlockCluster2.number)} from cluster 1`)
+  let latestBlockCluster1 = await runCommand(getBlock, borHosts[0], latestBlockCluster2.number, maxRetries)
+  if (latestBlockCluster1 == undefined) {
+    console.log(`📍Unable to fetch block ${Number(latestBlockCluster2.number)} in cluster 1, exiting`)
+    return
+  }
+  
   if (latestBlockCluster1.number) {
     if (latestBlockCluster1.hash == latestBlockCluster2.hash) {
       console.log('✅ Test Passed. Cluster 1 successfully reorged to cluster 2 (with high majority)')
+    } else {
+      console.log(`📍Hash mismatch among clusters. Cluster 1 hash: ${latestBlockCluster1.hash}, Cluster 2 hash: ${latestBlockCluster2.hash}`)
     }
   } else {
     console.log('📍Unable to fetch latest block from 1st cluster, exiting')
