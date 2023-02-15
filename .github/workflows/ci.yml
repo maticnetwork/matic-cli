@@ -133,9 +133,9 @@ jobs:
           echo "Running --destroy"
           ../../bin/express-cli --destroy
 
-      - name: Delete aws key pair
-        continue-on-error: true
-        if: always()
-        run: |
-          cd matic-cli/aws
-          aws ec2 delete-key-pair --key-name matic-cli-ci-key
+#      - name: Delete aws key pair
+#        continue-on-error: true
+#        if: always()
+#        run: |
+#          cd matic-cli/aws
+#          aws ec2 delete-key-pair --key-name matic-cli-ci-key
