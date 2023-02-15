@@ -115,7 +115,8 @@ jobs:
         continue-on-error: true
         run: |
           cd matic-cli/deployments/devnet-1
-          cat /home/runner/work/matic-cli/matic-cli/matic-cli/aws/matic-cli-ci-key
+          ls -la
+          cat /home/runner/work/matic-cli/matic-cli/matic-cli/aws/matic-cli-ci-key.pem
           ../../bin/express-cli --start
 
       - name: Run smoke tests
