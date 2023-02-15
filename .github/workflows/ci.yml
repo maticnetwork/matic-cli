@@ -115,6 +115,7 @@ jobs:
         continue-on-error: true
         run: |
           cd matic-cli/deployments/devnet-1
+          cat /home/runner/work/matic-cli/matic-cli/matic-cli/aws/matic-cli-ci-key
           ../../bin/express-cli --start
 
       - name: Run smoke tests
@@ -125,13 +126,13 @@ jobs:
           cd -
           timeout 20m bash matic-cli/.github/smoke_test.sh
 
-      - name: Destroy devnet
-        continue-on-error: true
-        if: always()
-        run: |
-          cd matic-cli/deployments/devnet-1
-          echo "Running --destroy"
-          ../../bin/express-cli --destroy
+#      - name: Destroy devnet
+#        continue-on-error: true
+#        if: always()
+#        run: |
+#          cd matic-cli/deployments/devnet-1
+#          echo "Running --destroy"
+#          ../../bin/express-cli --destroy
 
 #      - name: Delete aws key pair
 #        continue-on-error: true
