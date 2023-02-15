@@ -111,7 +111,7 @@ async function getLatestCheckpointFromRootChain(ip, rootChainProxyAddress) {
   return currentHeaderBlock.toString().slice(0, -4)
 }
 
-export async function monitor() {
+export async function monitor(exitWhenDone) {
   require('dotenv').config({ path: `${process.cwd()}/.env` })
   const devnetType =
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
@@ -196,6 +196,11 @@ export async function monitor() {
       console.log('📍LastStateId on Bor: ', lastStateId)
     } else {
       console.log('📍Unable to fetch LastStateId ')
+    }
+
+    if (exitWhenDone === true && lastStateId && lastStateID > 0 && checkpointCountFromRootChain > 0 && checkpointCount > 0) {
+      console.log('📍All checks executed successfully')
+      process.exit(0)
     }
   }
 }

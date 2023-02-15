@@ -51,7 +51,7 @@ program
     'Restart heimdall on all machines. If an integer [index] is specified, it will only update the VM corresponding to that index'
   )
   .option('-c, --cleanup', 'Cleanup the setup')
-  .option('-m, --monitor', 'Monitor the setup')
+  .option('-m, --monitor [exit]', 'Monitor the setup. If `exit` string is passed, the process terminates when at least one stateSync and one checkpoint are detected')
   .option(
     '-t, --stress [fund]',
     'Start the stress test. If the string `fund` is specified, the account will be funded. This option is mandatory when the command is executed the first time on a devnet.'
@@ -222,7 +222,11 @@ export async function cli() {
       process.exit(1)
     }
     await timer(3000)
-    await monitor()
+    if (options.monitor === 'exit') {
+      await monitor(true)
+    } else {
+      await monitor(false)
+    }
   } else if (options.stress) {
     console.log('📍Command --stress ')
     if (!checkDir(false)) {

@@ -113,8 +113,7 @@ jobs:
         run: |
           cd matic-cli/deployments/devnet-1
           ../../bin/express-cli --send-state-sync
-          cd -
-          timeout 20m bash matic-cli/.github/smoke_test.sh
+          timeout 20m ../../bin/express-cli --monitor exit
 
       - name: Destroy devnet
         if: always()
