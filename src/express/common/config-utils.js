@@ -161,6 +161,12 @@ function validateAwsKeyAndCertificate() {
     )
     process.exit(1)
   }
+  if (certFilePath.startsWith('~')) {
+    console.log(
+      '❌ PEM_FILE_PATH is a relative path, whilst absolute must be used, please check your configs!'
+    )
+    process.exit(1)
+  }
 }
 
 function validateUsersAndHosts() {

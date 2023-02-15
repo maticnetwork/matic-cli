@@ -166,6 +166,7 @@ export async function monitor(exitWhenDone) {
 
     const firstStateSyncTx = await checkStateSyncTx(machine0, 1)
     let stateSyncTxList
+    let lastStateID
     if (firstStateSyncTx) {
       const timeOfFirstStateSyncTx = firstStateSyncTx.record_time
       const firstEpochTime = parseInt(
@@ -178,7 +179,7 @@ export async function monitor(exitWhenDone) {
         currentEpochTime
       )
       if (stateSyncTxList) {
-        const lastStateID = stateSyncTxList.length
+        lastStateID = stateSyncTxList.length
         const lastStateSyncTxHash = stateSyncTxList[lastStateID - 1].tx_hash
         console.log(
           '📍StateSyncs found on Heimdall ✅ ; Count: ',
@@ -198,7 +199,13 @@ export async function monitor(exitWhenDone) {
       console.log('📍Unable to fetch LastStateId ')
     }
 
-    if (exitWhenDone === true && lastStateId && lastStateID > 0 && checkpointCountFromRootChain > 0 && checkpointCount > 0) {
+    if (
+      exitWhenDone === true &&
+      lastStateId &&
+      lastStateID > 0 &&
+      checkpointCountFromRootChain > 0 &&
+      checkpointCount > 0
+    ) {
       console.log('📍All checks executed successfully')
       process.exit(0)
     }
