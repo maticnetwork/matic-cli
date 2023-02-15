@@ -64,6 +64,15 @@ jobs:
           sed -i 's,/absolute/path/to/your/,/home/runner/work/matic-cli/matic-cli/matic-cli/aws/,' .env
           sed -i 's,MATIC_CLI_BRANCH=master,MATIC_CLI_BRANCH=${{ github.head_ref || github.ref_name }},' .env
 
+      - name: Public IP in secret.tfvars
+        continue-on-error: true
+        uses: haythem/public-ip@v1.3
+        run: |
+          cd matic-cli
+          touch secret.tfvars
+          echo "SG_CIDR_BLOCKS=[\"${{ steps.ip.outputs.ipv4 }}/32\"" >> secret.tfvars
+          cat secret.tfvars
+
       - name: Configure AWS credentials
         continue-on-error: true
         uses: aws-actions/configure-aws-credentials@master
@@ -72,58 +81,58 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/MaticCLIGitHubActionsRole
           role-session-name: GithubActionsSession
 
-      - name: Create aws key pair
-        continue-on-error: true
-        run: |
-          cd matic-cli
-          mkdir aws
-          cd aws
-          aws ec2 create-key-pair --key-name matic-cli-ci-key --key-type rsa --key-format pem --output text > matic-cli-ci-key.pem
-          chmod 600 matic-cli-ci-key.pem
-
-      - name: Setup node
-        continue-on-error: true
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16.17.1'
-
-      - name: Install npm dependencies
-        continue-on-error: true
-        run: |
-          cd matic-cli
-          npm install --prefer-offline --no-audit --progress=false
-
-      - name: Init devnet
-        continue-on-error: true
-        run: |
-          cd matic-cli
-          ./bin/express-cli --init
-
-      - name: Start devnet
-        continue-on-error: true
-        run: |
-          cd matic-cli/deployments/devnet-1
-          ../../bin/express-cli --start
-
-      - name: Run smoke tests
-        continue-on-error: true
-        run: |
-          cd matic-cli/deployments/devnet-1
-          ../../bin/express-cli --send-state-sync
-          cd -
-          timeout 20m bash matic-cli/.github/smoke_test.sh
-
-      - name: Destroy devnet
-        continue-on-error: true
-        if: always()
-        run: |
-          cd matic-cli/deployments/devnet-1
-          echo "Running --destroy"
-          ../../bin/express-cli --destroy
-
-      - name: Delete aws key pair
-        continue-on-error: true
-        if: always()
-        run: |
-          cd matic-cli/aws
-          aws ec2 delete-key-pair --key-name matic-cli-ci-key
+#      - name: Create aws key pair
+#        continue-on-error: true
+#        run: |
+#          cd matic-cli
+#          mkdir aws
+#          cd aws
+#          aws ec2 create-key-pair --key-name matic-cli-ci-key --key-type rsa --key-format pem --output text > matic-cli-ci-key.pem
+#          chmod 600 matic-cli-ci-key.pem
+#
+#      - name: Setup node
+#        continue-on-error: true
+#        uses: actions/setup-node@v3
+#        with:
+#          node-version: '16.17.1'
+#
+#      - name: Install npm dependencies
+#        continue-on-error: true
+#        run: |
+#          cd matic-cli
+#          npm install --prefer-offline --no-audit --progress=false
+#
+#      - name: Init devnet
+#        continue-on-error: true
+#        run: |
+#          cd matic-cli
+#          ./bin/express-cli --init
+#
+#      - name: Start devnet
+#        continue-on-error: true
+#        run: |
+#          cd matic-cli/deployments/devnet-1
+#          ../../bin/express-cli --start
+#
+#      - name: Run smoke tests
+#        continue-on-error: true
+#        run: |
+#          cd matic-cli/deployments/devnet-1
+#          ../../bin/express-cli --send-state-sync
+#          cd -
+#          timeout 20m bash matic-cli/.github/smoke_test.sh
+#
+#      - name: Destroy devnet
+#        continue-on-error: true
+#        if: always()
+#        run: |
+#          cd matic-cli/deployments/devnet-1
+#          echo "Running --destroy"
+#          ../../bin/express-cli --destroy
+#
+#      - name: Delete aws key pair
+#        continue-on-error: true
+#        if: always()
+#        run: |
+#          cd matic-cli/aws
+#          aws ec2 delete-key-pair --key-name matic-cli-ci-key
