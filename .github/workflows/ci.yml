@@ -64,9 +64,12 @@ jobs:
           sed -i 's,/absolute/path/to/your/,/home/runner/work/matic-cli/matic-cli/matic-cli/aws/,' .env
           sed -i 's,MATIC_CLI_BRANCH=master,MATIC_CLI_BRANCH=${{ github.head_ref || github.ref_name }},' .env
 
-      - name: Public IP in secret.tfvars
+      - name: Get GH action Public IP
         continue-on-error: true
         uses: haythem/public-ip@v1.3
+
+      - name: Write GH action Public IP in secret.tfvars
+        continue-on-error: true
         run: |
           cd matic-cli
           touch secret.tfvars
