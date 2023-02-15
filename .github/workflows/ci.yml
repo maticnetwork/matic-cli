@@ -69,7 +69,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@master
         with:
           aws-region: us-west-2
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/GithubActionsRole
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/MaticCLIGitHubActionsRole
           role-session-name: GithubActionsSession
 
       - name: Create aws key pair
