@@ -73,6 +73,7 @@ jobs:
       - name: Write GH action Public IP in secret.tfvars
         continue-on-error: true
         run: |
+          echo $GITHUB_ACTION_RUNNER_IP
           cd matic-cli
           touch secret.tfvars
           echo "SG_CIDR_BLOCKS=[\"$GITHUB_ACTION_RUNNER_IP/32\"]" >> secret.tfvars
