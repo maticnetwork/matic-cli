@@ -67,13 +67,15 @@ jobs:
       - name: Get GH action Public IP
         continue-on-error: true
         uses: haythem/public-ip@v1.3
+        env:
+          GITHUB_ACTION_RUNNER_IP: ${{ steps.ip.outputs.ipv4 }}
 
       - name: Write GH action Public IP in secret.tfvars
         continue-on-error: true
         run: |
           cd matic-cli
           touch secret.tfvars
-          echo "SG_CIDR_BLOCKS=[\"${{ steps.ip.outputs.ipv4 }}/32\"" >> secret.tfvars
+          echo "SG_CIDR_BLOCKS=[\"$GITHUB_ACTION_RUNNER_IP/32\"]" >> secret.tfvars
           cat secret.tfvars
 
       - name: Configure AWS credentials
@@ -83,7 +85,6 @@ jobs:
           aws-region: us-west-2
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/MaticCLIGitHubActionsRole
           role-session-name: GithubActionsSession
-
 #      - name: Create aws key pair
 #        continue-on-error: true
 #        run: |
