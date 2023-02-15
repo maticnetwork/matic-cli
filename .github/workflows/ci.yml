@@ -90,7 +90,7 @@ jobs:
           cd matic-cli
           mkdir aws
           cd aws
-          aws ec2 create-key-pair --key-name matic-cli-ci-key --key-type rsa --key-format pem --output text > matic-cli-ci-key.pem
+          aws ec2 create-key-pair --key-name matic-cli-ci-key --key-type rsa --key-format pem --query "KeyMaterial" --output text > matic-cli-ci-key.pem
           chmod 700 matic-cli-ci-key.pem
 
       - name: Setup node
@@ -116,7 +116,6 @@ jobs:
         run: |
           cd matic-cli/deployments/devnet-1
           ls -la
-          cat /home/runner/work/matic-cli/matic-cli/matic-cli/aws/matic-cli-ci-key.pem
           ../../bin/express-cli --start
 
       - name: Run smoke tests
