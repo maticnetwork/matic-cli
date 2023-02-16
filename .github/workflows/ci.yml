@@ -63,7 +63,7 @@ jobs:
           sed -i 's,/absolute/path/to/your/,/home/runner/work/matic-cli/matic-cli/matic-cli/aws/,' .env
           sed -i 's,MATIC_CLI_BRANCH=master,MATIC_CLI_BRANCH=${{ github.head_ref || github.ref_name }},' .env
 
-      - name: Get GH action IP
+      - name: Get GitHub action runner IP
         id: ip
         uses: haythem/public-ip@v1.3
 
