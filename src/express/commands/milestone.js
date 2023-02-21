@@ -260,7 +260,6 @@ export async function milestone() {
     console.log('📍Unable to fetch last finalized block, exiting')
     return
   }
-  console.log("---- finalized block", finalizedBlock)
 
   // Check if the number and hash matches with the last milestone
   if (Number(finalizedBlock.number) == Number(lastMilestone.end_block) && finalizedBlock.hash == lastMilestone.hash) {
