@@ -34,9 +34,11 @@ export async function getBlock(ip, number = 'latest') {
   
   const responseJson = await response.json()
   if (responseJson.result) {
+    // console.log(`📍Request. number: ${number}, opts: ${JSON.stringify(opts)}`)
     return responseJson.result
   } else {
-    console.log(`📍Error fetching block. number: ${number}, response: ${JSON.stringify(response)}, opts: ${JSON.stringify(opts)}`)
+    console.log(`📍Error fetching block. number: ${number}, opts: ${JSON.stringify(opts)}`)
+    console.log(`📍Response received:`, responseJson)
   }
 
   return undefined
@@ -252,8 +254,10 @@ export async function milestone() {
   }
   console.log('📍Rejoined clusters')
 
+  console.log('📍Waiting to fetch finalized blocks...')
+  await timer(10000)
+
   // Fetch the last 'finalized' block
-  // process.stdout.write("Writing data");
   console.log('📍Trying to fetch last finalized block')
   let finalizedBlock = await runCommand(getBlock, borHosts[0], "finalized", maxRetries)
   if (finalizedBlock == undefined) {
@@ -335,7 +339,7 @@ export async function milestone() {
   // Cluster 1 has a single primary producer whose difficulty should always be higher. 
   // Cluster 2 should have remaining nodes (with 2/3+1 stake) all with difficulty lower than node 1
   // and nodes performing mining out of sync. 
-  await timer(2000)
+  await timer(10000)
 
   // Validate if both the clusters are on their own chain. 
   console.log('📍Trying to fetch latest block from both clusters')
@@ -404,7 +408,8 @@ export async function milestone() {
   let latestMilestone = milestone.result
   console.log(`📍Got milestone from heimdall. Start block: ${Number(latestMilestone.start_block)}, End block: ${Number(latestMilestone.end_block)}, ID: ${latestMilestone.milestone_id}`)
 
-  // Validate if the proposer of the milestone is someone from 2nd cluster
+  console.log('📍Waiting for bor nodes to import milestone')
+  await timer(32000)
 
   // Reconnect both the clusters
   rejoined = await rejoinClusters(ips, enodes)
