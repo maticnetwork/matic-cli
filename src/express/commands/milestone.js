@@ -15,7 +15,7 @@ const queryTimer = (milestoneLength / 4) * 1000
 
 export async function getBlock(ip, number = 'latest') {
   const url = `http://${ip}:8545`
-  if (number != 'latest' && number != 'pending') {
+  if (number != 'latest' && number != 'finalized') {
     number = '0x' + Number(number).toString(16) // hexify
   }
 
@@ -260,12 +260,13 @@ export async function milestone() {
     console.log('📍Unable to fetch last finalized block, exiting')
     return
   }
+  console.log("---- finalized block", finalizedBlock)
 
   // Check if the number and hash matches with the last milestone
-  if (Number(finalizedBlock.Number) == Number(lastMilestone.end_block) && finalizedBlock.hash == lastMilestone.hash) {
+  if (Number(finalizedBlock.number) == Number(lastMilestone.end_block) && finalizedBlock.hash == lastMilestone.hash) {
     console.log('📍Received correct finalized block according to last milestone')
   } else {
-    console.log(`📍Block number or hash mismatch for finalized block. Finalized Block Number: ${Number(finalizedBlock.Number)}, Hash: ${Number(finalizedBlock.hash)}. Milestone end block: ${lastMilestone.end_block}, Hash: ${lastMilestone.hash} exiting`)
+    console.log(`📍Block number or hash mismatch for finalized block. Finalized Block Number: ${Number(finalizedBlock.number)}, Hash: ${finalizedBlock.hash}. Milestone end block: ${Number(lastMilestone.end_block)}, Hash: ${lastMilestone.hash} exiting`)
     return
   }
 
@@ -348,7 +349,7 @@ export async function milestone() {
   }
 
   if (latestBlockCluster2.number) {
-    console.log(`📍Trying to fetch block ${latestBlockCluster2.number} from cluster 1`)
+    console.log(`📍Trying to fetch block ${Number(latestBlockCluster2.number)} from cluster 1`)
     let latestBlockCluster1 = await runCommand(getBlock, borHosts[0], latestBlockCluster2.number, maxRetries)
     if (latestBlockCluster1 == undefined) {
       console.log(`📍Unable to fetch block ${Number(latestBlockCluster2.number)} in cluster 1, exiting`)
@@ -455,11 +456,16 @@ export async function milestone() {
   })
 
   // Check if the number and hash matches with the last milestone
+  let exit = false
   for (let i = 0; i < finalizedBlocks.length; i++) {
-    if (Number(finalizedBlocks[i].Number) != Number(latestMilestone.end_block) || finalizedBlocks[i].hash != latestMilestone.hash) {
-      console.log(`📍Block number or hash mismatch for finalized block. Host index: ${i}, Finalized Block Number: ${Number(finalizedBlocks[i].Number)}, Hash: ${Number(finalizedBlocks[i].hash)}. Milestone end block: ${latestMilestone.end_block}, Hash: ${latestMilestone.hash} exiting`)
-      return
+    if (Number(finalizedBlocks[i].number) != Number(latestMilestone.end_block) || finalizedBlocks[i].hash != latestMilestone.hash) {
+      console.log(`📍Block number or hash mismatch for finalized block. Host index: ${i}, Finalized Block Number: ${Number(finalizedBlocks[i].number)}, Hash: ${finalizedBlocks[i].hash}. Milestone end block: ${Number(latestMilestone.end_block)}, Hash: ${latestMilestone.hash} exiting`)
+      exit = true
     }
+  }
+
+  if (exit) {
+    return
   }
 
   console.log('📍Finalized block matches with the last milestone')
