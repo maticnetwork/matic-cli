@@ -211,8 +211,13 @@ The `express-cli` also comes with additional utility commands, listed below. Som
   - Rewinds the chain by a defined number of blocks (not greater than `128`). Default `numberOfBlocks` value is `100`.
 
 - `../../bin/express-cli --eip-1559-test [index]`
+
   - Executes a test to send EIP 1559 tx. In case of a non-dockerized devnet, if an integer [index] is specified, it will use
     that VM to send the tx. Otherwise, it will target the first VM.
+
+- `../../bin/express-cli --shadow-fork [block]`
+  - Run (mumbai/mainnet) nodes in shadow mode. Please note that there might be an offset of ~3-4 blocks from [block] number
+    specified when restarting the (shadow) node. Currently only works with remote setup.
 
 ## `matic-cli`
 

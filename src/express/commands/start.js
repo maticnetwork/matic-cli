@@ -330,7 +330,7 @@ async function runDockerSetupWithMaticCLI(ips, devnetId) {
     console.log('📍Deploying contracts for bor...')
     command = 'cd ~/matic-cli/devnet && bash ganache-deployment-bor.sh'
     await runSshCommand(ip, command, maxRetries)
-  
+
     await timer(60000)
     console.log('📍Deploying state-sync contracts...')
     command = 'cd ~/matic-cli/devnet && bash ganache-deployment-sync.sh'
@@ -380,7 +380,7 @@ async function runRemoteSetupWithMaticCLI(ips, devnetId) {
     await timer(60000)
     command = 'cd ~/matic-cli/devnet && bash ganache-deployment-bor.sh'
     await runSshCommand(ip, command, maxRetries)
-  
+
     console.log('📍Deploying state-sync contracts on machine ' + ip + ' ...')
     await timer(60000)
     command = 'cd ~/matic-cli/devnet && bash ganache-deployment-sync.sh'

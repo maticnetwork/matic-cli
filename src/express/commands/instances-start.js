@@ -10,7 +10,8 @@ const shell = require('shelljs')
 async function startGanache(doc) {
   const ip = `${doc.ethHostUser}@${doc.devnetBorHosts[0]}`
   console.log('📍Running ganache in machine ' + ip + ' ...')
-  const command = 'sudo systemctl start ganache.service'
+  const command =
+    'sudo systemctl start ganache.service || echo "ganache not running on current machine..."'
   await runSshCommand(ip, command, maxRetries)
 }
 

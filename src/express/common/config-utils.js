@@ -286,18 +286,16 @@ function setCommonConfigs(doc) {
 
   if (process.env.NETWORK) {
     setConfigValue('network', process.env.NETWORK, doc)
-    if (process.env.NETWORK === "mainnet") {
+    if (process.env.NETWORK === 'mainnet') {
       borChainId = 137
-      heimdallChainId = "heimdall-137"
-    } else if (process.env.NETWORK === "mumbai") {
+      heimdallChainId = 'heimdall-137'
+    } else if (process.env.NETWORK === 'mumbai') {
       borChainId = 80001
-      heimdallChainId = "heimdall-80001"
+      heimdallChainId = 'heimdall-80001'
     }
   } else if (!process.env.BOR_CHAIN_ID && !process.env.HEIMDALL_CHAIN_ID) {
     borChainId = Math.floor(Math.random() * 10000 + 1000)
     heimdallChainId = 'heimdall-' + borChainId
-    // setConfigValue('borChainId', parseInt(borChainId), doc)
-    // setConfigValue('heimdallChainId', 'heimdall-' + borChainId, doc)
   } else if (!process.env.BOR_CHAIN_ID) {
     try {
       if (process.env.HEIMDALL_CHAIN_ID > 0) {
@@ -306,9 +304,6 @@ function setCommonConfigs(doc) {
       } else {
         borChainId = process.env.HEIMDALL_CHAIN_ID.split('-')[1]
       }
-
-      // setConfigValue('borChainId', parseInt(borChainId), doc)
-      // setConfigValue('heimdallChainId', heimdallChainId, doc)
     } catch (error) {
       console.log(
         '❌ Error occured while processing heimdall chain id (Heimdall chain id should be like: heimdall-4052)!'
@@ -318,8 +313,6 @@ function setCommonConfigs(doc) {
   } else if (!process.env.HEIMDALL_CHAIN_ID) {
     borChainId = process.env.BOR_CHAIN_ID
     heimdallChainId = 'heimdall-' + borChainId
-    // setConfigValue('borChainId', parseInt(process.env.BOR_CHAIN_ID), doc)
-    // setConfigValue('heimdallChainId', 'heimdall-' + borChainId, doc)
   } else {
     borChainId = process.env.BOR_CHAIN_ID
     if (process.env.HEIMDALL_CHAIN_ID > 0) {
@@ -327,8 +320,6 @@ function setCommonConfigs(doc) {
     } else {
       heimdallChainId = process.env.HEIMDALL_CHAIN_ID
     }
-    // setConfigValue('heimdallChainId', heimdallChainId, doc)
-    // setConfigValue('borChainId', parseInt(process.env.BOR_CHAIN_ID), doc)
   }
 
   setConfigValue('borChainId', borChainId, doc)
@@ -494,9 +485,6 @@ export async function editMaticCliRemoteYAMLConfig() {
   setConfigList('devnetBorUsers', process.env.DEVNET_BOR_USERS, doc)
   setConfigList('devnetHeimdallUsers', process.env.DEVNET_BOR_USERS, doc)
   setConfigValue('devnetType', 'remote', doc)
-  // if (process.env.NETWORK === "mainnet" || process.env.NETWORK === "mumbai") {
-  //   setConfigValue('network', process.env.NETWORK, doc)
-  // }
 
   fs.writeFile(
     `${process.cwd()}/remote-setup-config.yaml`,

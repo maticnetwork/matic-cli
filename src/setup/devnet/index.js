@@ -681,23 +681,7 @@ export class Devnet {
               ],
               { stdio: getRemoteStdio() }
             )
-
-            // if (this.config.heimdallSnapshot) {
-            //     await execa ( 
-            //       'ssh',
-            //       [
-            //         '-o',
-            //         'StrictHostKeyChecking=no',
-            //         '-o',
-            //         'UserKnownHostsFile=/dev/null',
-            //         '-i',
-            //         '~/cert.pem',
-            //         `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-            //         `mkdir -p ~/.heimdalld/data && sudo curl ${this.config.heimdallSnapshot} | sudo tar zxf - -C ~/.heimdalld/data && sudo chmod 777 -R ~/.heimdalld/data`
-            //       ],
-            //     { stdio: getRemoteStdio() })
-            // }
-
+            
             await execa(
               'ssh',
               [
@@ -749,22 +733,6 @@ export class Devnet {
                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                 'sudo systemctl start bor.service'
             ], { stdio: getRemoteStdio() })
-
-            // if (this.config.borSnapshot) {
-            //   await execa ( 
-            //     'ssh',
-            //     [
-            //     '-o',
-            //     'StrictHostKeyChecking=no',
-            //     '-o',
-            //     'UserKnownHostsFile=/dev/null',
-            //     '-i',
-            //     '~/cert.pem',
-            //     `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-            //     `sudo systemctl stop bor.service && rm -rf ~/.bor/data/bor/chaindata/* && sudo curl ${this.config.borSnapshot} | sudo tar zxf - -C ~/.bor/data/bor/chaindata && sudo chmod 777 -R ~/.bor/data/bor/chaindata && sudo systemctl restart bor.service`
-            //     ],
-            //   { stdio: getRemoteStdio() })
-            // }
           }
         }
       }

@@ -21,6 +21,7 @@ import { testEip1559 } from '../tests/test-eip-1559'
 import { stopInstances } from './express/commands/instances-stop'
 import { startInstances } from './express/commands/instances-start'
 import { rewind } from './express/commands/rewind'
+import { shadow } from './express/commands/shadow'
 
 program
   .option('-i, --init', 'Initiate the terraform setup')
@@ -66,6 +67,10 @@ program
   .option('-istop, --instances-stop', 'Stop aws ec2 instances')
   .option('-istart, --instances-start', 'Start aws ec2 instances')
   .option('-rewind, --rewind [numberOfBlocks]', 'Rewind the chain')
+  .option(
+    '-sf, --shadow-fork [block]',
+    'Run nodes in shadow mode. Please note that there might be an offset of ~3-4 blocks from [block] no. specified when restarting the (shadow) node'
+  )
   .version(pkg.version)
 
 export async function cli() {
@@ -319,5 +324,18 @@ export async function cli() {
 
     await timer(3000)
     await rewind(options.rewind)
+  } else if (options.shadowFork) {
+    console.log('📍Command --shadow-fork [block]')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    console.log(
+      '⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...'
+    )
+
+    await shadow(options.shadowFork)
   }
 }
