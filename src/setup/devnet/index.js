@@ -399,32 +399,32 @@ export class Devnet {
         title: 'Download heimdall snapshot',
         task: async () => {
           for (let i = 0; i < this.totalNodes; i++) {
-              await execa ( 
-                'ssh',
-                [
-                  '-o',
-                  'StrictHostKeyChecking=no',
-                  '-o',
-                  'UserKnownHostsFile=/dev/null',
-                  '-i',
-                  '~/cert.pem',
+            await execa(
+              'ssh',
+              [
+                '-o',
+                'StrictHostKeyChecking=no',
+                '-o',
+                'UserKnownHostsFile=/dev/null',
+                '-i',
+                '~/cert.pem',
                   `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                   `mkdir -p ~/.heimdalld/data && sudo curl ${this.config.heimdallSnapshot} | sudo tar zxf - -C ~/.heimdalld/data && sudo chmod 777 -R ~/.heimdalld/data`
-                ],
+              ],
               { stdio: getRemoteStdio() })
           }
         },
         enabled: () => {
-          return this.config.heimdallSnapshot !== undefined && this.config.heimdallSnapshot !== null && this.config.heimdallSnapshot !== '' 
+          return this.config.heimdallSnapshot !== undefined && this.config.heimdallSnapshot !== null && this.config.heimdallSnapshot !== ''
         }
       },
       {
         title: 'Download bor snapshot',
         task: async () => {
           for (let i = 0; i < this.totalNodes; i++) {
-              await execa ( 
-                'ssh',
-                [
+            await execa(
+              'ssh',
+              [
                 '-o',
                 'StrictHostKeyChecking=no',
                 '-o',
@@ -433,16 +433,16 @@ export class Devnet {
                 '~/cert.pem',
                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                 `sudo systemctl stop bor.service && rm -rf ~/.bor/data/bor/chaindata/* && sudo curl ${this.config.borSnapshot} | sudo tar zxf - -C ~/.bor/data/bor/chaindata && sudo chmod 777 -R ~/.bor/data/bor/chaindata && sudo systemctl restart bor.service`
-                ],
-              { stdio: getRemoteStdio() })            
+              ],
+              { stdio: getRemoteStdio() })
           }
         },
         enabled: () => {
-          return this.config.borSnapshot !== undefined && this.config.borSnapshot !== null && this.config.borSnapshot !== '' 
+          return this.config.borSnapshot !== undefined && this.config.borSnapshot !== null && this.config.borSnapshot !== ''
         }
       }
     ],
-    {concurrent: true})
+    { concurrent: true })
   }
 
   async getRemoteTasks() {
@@ -476,7 +476,7 @@ export class Devnet {
               ],
               { stdio: getRemoteStdio() }
             )
-  
+
             await execa(
               'scp',
               [
@@ -493,7 +493,7 @@ export class Devnet {
               { stdio: getRemoteStdio() }
             )
           }
-        
+
           // Generate service files
           for (let i = 0; i < this.totalNodes; i++) {
             await execa(
@@ -658,13 +658,13 @@ export class Devnet {
 
             if (this.config.network) {
               const chain = this.config.network
-                await execa('ssh', [
-                  '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
-                  '-i', '~/cert.pem',
+              await execa('ssh', [
+                '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
+                '-i', '~/cert.pem',
                       `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                       // eslint-disable-next-line
                       `sed -i "s|\\$BOR_HOME/genesis.json|${chain}|g" node/bor-start.sh`
-                ], { stdio: getRemoteStdio() })
+              ], { stdio: getRemoteStdio() })
             }
 
             await execa(
@@ -681,7 +681,7 @@ export class Devnet {
               ],
               { stdio: getRemoteStdio() }
             )
-            
+
             await execa(
               'ssh',
               [
@@ -745,21 +745,21 @@ export class Devnet {
       heimdall.buildTask(),
       {
         title: 'Create testnet files for Heimdall',
-        task: async () => {          
-             const args = [
-              'create-testnet',
-              '--home', 'devnet',
-              '--v',
-              this.config.numOfValidators,
-              '--n',
-              this.config.numOfNonValidators + this.config.numOfArchiveNodes,
-              '--chain-id',
-              this.config.heimdallChainId,
-              '--node-host-prefix',
-              'heimdall',
-              '--output-dir',
-              'devnet'
-            ]
+        task: async () => {
+          const args = [
+            'create-testnet',
+            '--home', 'devnet',
+            '--v',
+            this.config.numOfValidators,
+            '--n',
+            this.config.numOfNonValidators + this.config.numOfArchiveNodes,
+            '--chain-id',
+            this.config.heimdallChainId,
+            '--node-host-prefix',
+            'heimdall',
+            '--output-dir',
+            'devnet'
+          ]
 
           // Create heimdall folders
           if (this.config.devnetType === 'remote') {
@@ -776,20 +776,19 @@ export class Devnet {
 
           // create testnet if a public network isn't specified
           await execa(heimdall.heimdalldCmd, args, {
-              cwd: this.config.targetDirectory,
-              stdio: getRemoteStdio()
+            cwd: this.config.targetDirectory,
+            stdio: getRemoteStdio()
           })
 
-           if(this.config.network) {
+          if (this.config.network) {
             for (let i = 0; i < this.totalNodes; i++) {
               await execa('rm', ['-rf', `${this.heimdallDir(i)}`], {
                 stdio: getRemoteStdio()
               })
-               
+
               await execa(`${heimdall.heimdalldCmd}`, [
                 'init', `--chain=${this.config.network}`, `--home=${this.heimdallDir(i)}`
               ], { stdio: getRemoteStdio(), cwd: this.config.targetDirectory })
-              
             }
           }
 
@@ -802,16 +801,16 @@ export class Devnet {
               .replace(/moniker.+=.+/gi, `moniker = "heimdall${i}"`)
               .save()
 
-              if (this.config.network) {
-                const heimdallSeeds = this.config.heimdallSeeds.join()
-                fileReplacer(this.heimdallConfigFilePath(i))
-                 .replace(/persistent_peers.+=.+/gi, `persistent_peers = "${heimdallSeeds}"`)
-                 .save() 
+            if (this.config.network) {
+              const heimdallSeeds = this.config.heimdallSeeds.join()
+              fileReplacer(this.heimdallConfigFilePath(i))
+                .replace(/persistent_peers.+=.+/gi, `persistent_peers = "${heimdallSeeds}"`)
+                .save()
 
-                 fileReplacer(this.heimdallConfigFilePath(i))
-                 .replace(/seeds.+=.+/gi, `seeds = "${heimdallSeeds}"`)
-                 .save() 
-              }
+              fileReplacer(this.heimdallConfigFilePath(i))
+                .replace(/seeds.+=.+/gi, `seeds = "${heimdallSeeds}"`)
+                .save()
+            }
             fileReplacer(this.heimdallGenesisFilePath(i))
               .replace(
                 /"bor_chain_id"[ ]*:[ ]*".*"/gi,
@@ -941,7 +940,7 @@ export class Devnet {
               signerDumpData[i].priv_key,
               password
             )
-            let p = [
+            const p = [
               // save password file
               fs.writeFile(this.borPasswordFilePath(i), `${password}\n`),
               // save private key file
@@ -961,7 +960,7 @@ export class Devnet {
                   keystoreFileObj.keystoreFilename
                 ),
                 JSON.stringify(keystoreFileObj.keystore, null, 2)
-              ),
+              )
             ]
 
             if (!this.config.network) {
@@ -969,8 +968,8 @@ export class Devnet {
               p.push(execa(
                 'cp',
                 [genesis.borGenesisFilePath, this.borGenesisFilePath(i)],
-                  { stdio: getRemoteStdio() }
-                ) 
+                { stdio: getRemoteStdio() }
+              )
               )
             }
             await Promise.all(p)
@@ -1045,7 +1044,7 @@ async function setupDevnet(config) {
   const dockerOrRemoteTasks = await devnet.getDockerOrRemoteTask()
   await dockerOrRemoteTasks.run()
 
-  if (devnet.config.devnetType === "remote") {
+  if (devnet.config.devnetType === 'remote') {
     const snapshotTasks = await devnet.getSnapshotSyncTasks()
     await snapshotTasks.run()
   }

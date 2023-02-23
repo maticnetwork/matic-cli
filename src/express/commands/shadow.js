@@ -12,11 +12,11 @@ export async function shadow(targetBlock) {
   const doc = await loadDevnetConfig('remote')
   const borUsers = splitToArray(doc.devnetBorUsers.toString())
   const providerToNodeIp = new Map()
-  let ip,
-    shadowBorChainId,
-    latestBlock,
-    provider,
-    providers = []
+  let ip
+  let shadowBorChainId
+  let latestBlock
+  let provider
+  const providers = []
 
   for (let i = 0; i < doc.devnetBorHosts.length; i++) {
     ip = `${borUsers[i]}@${doc.devnetBorHosts[i]}`
@@ -47,10 +47,13 @@ export async function shadow(targetBlock) {
     shadowBorChainId = Math.floor(Math.random() * 10000 + 1000)
   }
 
+  // eslint-disable-next-line
   const modifyGenesisCmd = `sed -i '/\"chainId\"/c\   \   "chainId\": ${shadowBorChainId},' ${shadowGenesisLocation}`
+  // eslint-disable-next-line
   const chainModifyCmd = `sed -i "s|${process.env.NETWORK}|\\$BOR_HOME/shadow-genesis.json|g" ${startScriptLocation}`
+  // eslint-disable-next-line
   const addFlagsCmd = `sed -i 's/--mine$/--mine \\\\\\\n  --bor.withoutheimdall \\\\\\\n  --bor.devfakeauthor \\\\\\\n  --rpc.allow-unprotected-txs \\\\/' ${startScriptLocation}`
-  const restartBorCmd = `sudo service bor restart`
+  const restartBorCmd = 'sudo service bor restart'
 
   const shadowTasks = providers.map(async (p) => {
     while (true) {
