@@ -22,6 +22,7 @@ import { stopInstances } from './express/commands/instances-stop'
 import { startInstances } from './express/commands/instances-start'
 import { rewind } from './express/commands/rewind'
 import { shadow } from './express/commands/shadow'
+import { relay } from './express/commands/relay'
 
 program
   .option('-i, --init', 'Initiate the terraform setup')
@@ -71,6 +72,7 @@ program
     '-sf, --shadow-fork [block]',
     'Run nodes in shadow mode. Please note that there might be an offset of ~3-4 blocks from [block] no. specified when restarting the (shadow) node'
   )
+  .option('-relay, --relay', 'Relay transaction to shadow node')
   .version(pkg.version)
 
 export async function cli() {
@@ -337,5 +339,18 @@ export async function cli() {
     )
 
     await shadow(options.shadowFork)
+  } else if (options.relay) {
+    console.log('📍Command --relay')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    console.log(
+      '⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...'
+    )
+
+    await relay()
   }
 }

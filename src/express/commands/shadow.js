@@ -2,6 +2,7 @@ import Web3 from 'web3'
 import { loadDevnetConfig, splitToArray } from '../common/config-utils'
 import { maxRetries, runSshCommand } from '../common/remote-worker'
 import { stopServices } from './cleanup'
+const fs = require('fs')
 
 async function initWeb3(provider) {
   return new Web3(provider)
@@ -75,4 +76,17 @@ export async function shadow(targetBlock) {
   })
 
   await Promise.all(shadowTasks)
+
+  try {
+    const blockData = JSON.stringify({
+      blockNumber: targetBlock
+    })
+    if (!fs.existsSync('shadowData')) {
+      fs.mkdirSync('shadowData')
+    }
+    fs.writeFileSync('./shadowData/blockData.json', blockData, 'utf-8')
+  } catch (error) {
+    console.error(`Error occured while writing block number to file: ${error}`)
+    process.exit(1)
+  }
 }
