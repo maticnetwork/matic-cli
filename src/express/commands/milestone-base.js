@@ -87,7 +87,7 @@ export async function milestoneBase() {
   console.log('📍Rejoining clusters before performing tests')
  
   // Make sure all peers are joined
-  let rejoined = await rejoinClusters(ips, enodes)
+  let rejoined = await rejoinClusters(ips, enodes, 1)
   if (!rejoined) {
     console.log('📍Unable to add peers before starting tests, exiting')
     return
@@ -117,7 +117,7 @@ export async function milestoneBase() {
 
   // Next step is to create 2 clusters where primary node is separated from the
   // rest of the network.
-  let created = await createClusters(ips, enodes)
+  let created = await createClusters(ips, enodes, 1)
   if (!created) {
     console.log('📍Unable to remove peers for creating clusters, exiting')
     return
@@ -143,7 +143,7 @@ export async function milestoneBase() {
   let recreate = validateNumberOfPeers(peers)  
   if (recreate) {
     console.log('📍Retrying creation of partition clusters for testing')
-    created = await createClusters(ips, enodes)
+    created = await createClusters(ips, enodes, 1)
     if (!created) {
       console.log('📍Unable to remove peers for creating clusters, exiting')
       return
@@ -280,7 +280,7 @@ export async function milestoneBase() {
   await timer(32000)
 
   // Reconnect both the clusters
-  rejoined = await rejoinClusters(ips, enodes)
+  rejoined = await rejoinClusters(ips, enodes, 1)
   if (!rejoined) {
     console.log('📍Unable to add peers while rejoining clusters, exiting')
     return

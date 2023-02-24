@@ -93,16 +93,15 @@ export async function getPeerLength(ip) {
   return -1
 }
 
-export async function createClusters(ips, enodes) {
+export async function createClusters(ips, enodes, split = 1) {
+  // `split` defines how clusters are created and which index to use to seperate nodes. 
+  // e.g. for split = 1, clusters created would be of 1 and 3 nodes (nodes[:split], nodes[split:])
   let tasks = []
-  for (let i = 0; i < ips.length; i++) {
-    if (i == 0) {
-      // remove all other peers from 1st node
-      tasks.push(removePeers(ips[i], enodes.slice(1)))
-    } else {
-      // remove 1st node from all peers
-      tasks.push(removePeers(ips[i], [enodes[0]]))
-    }
+  for (let i = 0; i < ips.slice(0, split); i++) {
+    tasks.push(removePeers(ips[i], enodes.slice(split)))
+  }
+  for (let i = 0; i < ips.slice(split); i++) {
+    tasks.push(removePeers(ips[i], enodes.slice(0, split)))
   }
 
   let response = false
@@ -119,16 +118,15 @@ export async function createClusters(ips, enodes) {
   return response
 }
 
-export async function rejoinClusters(ips, enodes) {
+export async function rejoinClusters(ips, enodes, split = 1) {
+  // `split` defines how clusters are joined and which index to use to join nodes. 
+  // e.g. for split = 1, clusters of 1 and 3 nodes would be joined (nodes[:split], nodes[split:])
   let tasks = []
-  for (let i = 0; i < ips.length; i++) {
-    if (i == 0) {
-      // add all other peers in 1st node
-      tasks.push(addPeers(ips[i], enodes.slice(1)))
-    } else {
-      // add 1st node in all peers
-      tasks.push(addPeers(ips[i], [enodes[0]]))
-    }
+  for (let i = 0; i < ips.slice(0, split); i++) {
+    tasks.push(addPeers(ips[i], enodes.slice(split)))
+  }
+  for (let i = 0; i < ips.slice(split); i++) {
+    tasks.push(addPeers(ips[i], enodes.slice(0, split)))
   }
 
   let response = false
