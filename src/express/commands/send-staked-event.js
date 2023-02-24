@@ -43,7 +43,10 @@ export async function sendStakedEvent() {
   const StakeManagerProxyAddress = contractAddresses.root.StakeManagerProxy
 
   const MaticTokenAddr = contractAddresses.root.tokens.TestToken
-  const MaticTokenContract = new rootChainWeb3.eth.Contract(ERC20ABI, MaticTokenAddr)
+  const MaticTokenContract = new rootChainWeb3.eth.Contract(
+    ERC20ABI,
+    MaticTokenAddr
+  )
 
   const signerDump = require(`${process.cwd()}/signer-dump.json`)
   const pkey = signerDump[0].priv_key
@@ -51,12 +54,26 @@ export async function sendStakedEvent() {
   const stakeAmount = rootChainWeb3.utils.toWei('12')
   const heimdallFee = rootChainWeb3.utils.toWei('12')
 
-  const stakeManagerContract = new rootChainWeb3.eth.Contract(stakeManagerABI, StakeManagerProxyAddress)
+  const stakeManagerContract = new rootChainWeb3.eth.Contract(
+    stakeManagerABI,
+    StakeManagerProxyAddress
+  )
 
-  let tx = MaticTokenContract.methods.approve(StakeManagerProxyAddress, rootChainWeb3.utils.toWei('50'))
-  let signedTx = await getSignedTx(rootChainWeb3, MaticTokenAddr, tx, validatorAccount, pkey)
+  let tx = MaticTokenContract.methods.approve(
+    StakeManagerProxyAddress,
+    rootChainWeb3.utils.toWei('50')
+  )
+  let signedTx = await getSignedTx(
+    rootChainWeb3,
+    MaticTokenAddr,
+    tx,
+    validatorAccount,
+    pkey
+  )
 
-  const approvalReceipt = await rootChainWeb3.eth.sendSignedTransaction(signedTx.rawTransaction)
+  const approvalReceipt = await rootChainWeb3.eth.sendSignedTransaction(
+    signedTx.rawTransaction
+  )
   console.log('Approval Receipt txHash:  ' + approvalReceipt.transactionHash)
 
   const RandomSeed = 'random' + Math.random()
@@ -68,13 +85,27 @@ export async function sendStakedEvent() {
   console.log('NewValidatorAddr', newAccAddr, newAccPubKey)
   console.log('NewValidatorPrivKey', wallet.getPrivateKeyString())
 
-  tx = stakeManagerContract.methods.stakeFor(newAccAddr, stakeAmount, heimdallFee, false, newAccPubKey)
-  signedTx = await getSignedTx(rootChainWeb3, StakeManagerProxyAddress, tx, validatorAccount, pkey)
+  tx = stakeManagerContract.methods.stakeFor(
+    newAccAddr,
+    stakeAmount,
+    heimdallFee,
+    false,
+    newAccPubKey
+  )
+  signedTx = await getSignedTx(
+    rootChainWeb3,
+    StakeManagerProxyAddress,
+    tx,
+    validatorAccount,
+    pkey
+  )
 
   const oldValidatorsCount = await checkValidatorsLength(doc)
   console.log('oldValidatorsCount : ', oldValidatorsCount)
 
-  const receipt = await rootChainWeb3.eth.sendSignedTransaction(signedTx.rawTransaction)
+  const receipt = await rootChainWeb3.eth.sendSignedTransaction(
+    signedTx.rawTransaction
+  )
   console.log('StakeFor Receipt txHash :  ' + receipt.transactionHash)
 
   let newValidatorsCount = await checkValidatorsLength(doc)
@@ -87,13 +118,19 @@ export async function sendStakedEvent() {
   }
 
   console.log('✅ Validator Added')
-  console.log('✅ Staked Event Sent from Rootchain and Received and processed on Heimdall')
+  console.log(
+    '✅ Staked Event Sent from Rootchain and Received and processed on Heimdall'
+  )
 }
 
 async function checkValidatorsLength(doc) {
   const machine0 = doc.devnetBorHosts[0]
   const command = 'curl localhost:1317/staking/validator-set'
-  const out = await runSshCommandWithReturn(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
+  const out = await runSshCommandWithReturn(
+    `${doc.ethHostUser}@${machine0}`,
+    command,
+    maxRetries
+  )
   const outobj = JSON.parse(out)
   return outobj.result.validators.length
 }
@@ -108,7 +145,8 @@ async function getSignedTx(web3object, to, tx, validatorAccount, privateKey) {
       to,
       data,
       gas
-    }, privateKey
+    },
+    privateKey
   )
 
   return signedTx

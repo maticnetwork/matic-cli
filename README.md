@@ -179,6 +179,10 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
   - Create a `state-sync` transaction on the remote network
 
+- `../../bin/express-cli --send-staked-event`
+
+  - Create a `staked` transaction on the remote network and adds a new validator.
+
 - ` ../../bin/express-cli --monitor`
 
   - Monitors the reception of state-syncs and checkpoints to make sure the whole network is in a healthy state.
