@@ -22,6 +22,7 @@ import { stopInstances } from './express/commands/instances-stop'
 import { startInstances } from './express/commands/instances-start'
 import { rewind } from './express/commands/rewind'
 import { milestone } from './express/commands/milestone'
+import { milestoneHelper } from './express/commands/milestone-helper'
 
 program
   .option('-i, --init', 'Initiate the terraform setup')
@@ -68,6 +69,7 @@ program
   .option('-istart, --instances-start', 'Start aws ec2 instances')
   .option('-rewind, --rewind [numberOfBlocks]', 'Rewind the chain')
   .option('-milestone, --milestone', 'Run milestone tests')
+  .option('-milestone-helper, --milestone-helper', 'Helper utility for milestone')
   .version(pkg.version)
 
 export async function cli() {
@@ -321,7 +323,6 @@ export async function cli() {
 
     await timer(3000)
     await rewind(options.rewind)
-  // }
   } else if (options.milestone) {
     console.log('📍Command --milestone')
     if (!checkDir(false)) {
@@ -333,5 +334,16 @@ export async function cli() {
 
     await timer(3000)
     await milestone()
+  } else if (options.milestoneHelper) {
+    console.log('📍Command --milestone-helper')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+
+    await timer(3000)
+    await milestoneHelper()
   }
 }

@@ -164,6 +164,7 @@ export async function runCommand(fn, ip, number, retries) {
     return response
   } catch (error) {
     if (retries - 1 > 0) {
+      console.log("--- running command")
       await runCommand(fn, ip, number, retries - 1)
     } else {
       console.log(
