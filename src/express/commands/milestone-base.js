@@ -21,7 +21,7 @@ import {
 const milestoneLength = 64
 const queryTimer = (milestoneLength / 4) * 1000
 
-export async function milestone() {
+export async function milestoneBase() {
   // NOTE: Make sure bor branch has logic for hardcoded primary validator
   
   require('dotenv').config({ path: `${process.cwd()}/.env` })

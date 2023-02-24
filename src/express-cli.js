@@ -21,7 +21,7 @@ import { testEip1559 } from '../tests/test-eip-1559'
 import { stopInstances } from './express/commands/instances-stop'
 import { startInstances } from './express/commands/instances-start'
 import { rewind } from './express/commands/rewind'
-import { milestone } from './express/commands/milestone'
+import { milestoneBase } from './express/commands/milestone-base'
 import { milestoneHelper } from './express/commands/milestone-helper'
 
 program
@@ -68,7 +68,7 @@ program
   .option('-istop, --instances-stop', 'Stop aws ec2 instances')
   .option('-istart, --instances-start', 'Start aws ec2 instances')
   .option('-rewind, --rewind [numberOfBlocks]', 'Rewind the chain')
-  .option('-milestone, --milestone', 'Run milestone tests')
+  .option('-milestone-base, --milestone-base', 'Run milestone base tests')
   .option('-milestone-helper, --milestone-helper', 'Helper utility for milestone')
   .version(pkg.version)
 
@@ -324,7 +324,7 @@ export async function cli() {
     await timer(3000)
     await rewind(options.rewind)
   } else if (options.milestone) {
-    console.log('📍Command --milestone')
+    console.log('📍Command --milestone-base')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -333,7 +333,7 @@ export async function cli() {
     }
 
     await timer(3000)
-    await milestone()
+    await milestoneBase()
   } else if (options.milestoneHelper) {
     console.log('📍Command --milestone-helper')
     if (!checkDir(false)) {
