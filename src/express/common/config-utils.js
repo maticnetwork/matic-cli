@@ -376,8 +376,8 @@ function setCommonConfigs(doc) {
     doc
   )
   setConfigList('instancesIds', process.env.INSTANCES_IDS, doc)
-  setConfigValue('borSnapshot', process.env.BOR_SNAP_URL, doc)
-  setConfigValue('heimdallSnapshot', process.env.HEIMDALL_SNAP_URL, doc)
+  setConfigValue('borSnapshotUrl', process.env.BOR_SNAPSHOT_URL, doc)
+  setConfigValue('heimdallSnapshotUrl', process.env.HEIMDALL_SNAPSHOT_URL, doc)
 }
 
 function setConfigValue(key, value, doc) {

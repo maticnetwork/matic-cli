@@ -409,13 +409,13 @@ export class Devnet {
                 '-i',
                 '~/cert.pem',
                   `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                  `mkdir -p ~/.heimdalld/data && sudo curl ${this.config.heimdallSnapshot} | sudo tar zxf - -C ~/.heimdalld/data && sudo chmod 777 -R ~/.heimdalld/data`
+                  `sudo systemctl stop heimdalld.service && rm -rf ~/.heimdalld/data/* && sudo curl ${this.config.heimdallSnapshotUrl} | sudo tar zxf - -C ~/.heimdalld/data && sudo chmod 777 -R ~/.heimdalld/data && sudo systemctl restart heimdalld.service`
               ],
               { stdio: getRemoteStdio() })
           }
         },
         enabled: () => {
-          return this.config.heimdallSnapshot !== undefined && this.config.heimdallSnapshot !== null && this.config.heimdallSnapshot !== ''
+          return this.config.heimdallSnapshotUrl !== undefined && this.config.heimdallSnapshotUrl !== null && this.config.heimdallSnapshotUrl !== ''
         }
       },
       {
@@ -432,13 +432,13 @@ export class Devnet {
                 '-i',
                 '~/cert.pem',
                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                `sudo systemctl stop bor.service && rm -rf ~/.bor/data/bor/chaindata/* && sudo curl ${this.config.borSnapshot} | sudo tar zxf - -C ~/.bor/data/bor/chaindata && sudo chmod 777 -R ~/.bor/data/bor/chaindata && sudo systemctl restart bor.service`
+                `sudo systemctl stop bor.service && rm -rf ~/.bor/data/bor/chaindata/* && sudo curl ${this.config.borSnapshotUrl} | sudo tar zxf - -C ~/.bor/data/bor/chaindata && sudo chmod 777 -R ~/.bor/data/bor/chaindata && sudo systemctl restart bor.service`
               ],
               { stdio: getRemoteStdio() })
           }
         },
         enabled: () => {
-          return this.config.borSnapshot !== undefined && this.config.borSnapshot !== null && this.config.borSnapshot !== ''
+          return this.config.borSnapshotUrl !== undefined && this.config.borSnapshotUrl !== null && this.config.borSnapshotUrl !== ''
         }
       }
     ],
@@ -644,7 +644,7 @@ export class Devnet {
                 '-i', '~/cert.pem',
                     `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                     // eslint-disable-next-line
-                    `sed -i '$s,$, \\\\,' node/bor-start.sh`
+                    `sed -i '$s,$, \\\\,' ~/node/bor-start.sh`
               ], { stdio: getRemoteStdio() })
 
               await execa('ssh', [
@@ -663,7 +663,7 @@ export class Devnet {
                 '-i', '~/cert.pem',
                       `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                       // eslint-disable-next-line
-                      `sed -i "s|\\$BOR_HOME/genesis.json|${chain}|g" node/bor-start.sh`
+                      `sed -i "s|\\$BOR_HOME/genesis.json|${chain}|g" ~/node/bor-start.sh`
               ], { stdio: getRemoteStdio() })
             }
 
@@ -1044,7 +1044,7 @@ async function setupDevnet(config) {
   const dockerOrRemoteTasks = await devnet.getDockerOrRemoteTask()
   await dockerOrRemoteTasks.run()
 
-  if (devnet.config.devnetType === 'remote') {
+  if (devnet.config.devnetType === 'remote' && devnet.config.network) {
     const snapshotTasks = await devnet.getSnapshotSyncTasks()
     await snapshotTasks.run()
   }

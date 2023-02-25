@@ -215,9 +215,9 @@ The `express-cli` also comes with additional utility commands, listed below. Som
   - Executes a test to send EIP 1559 tx. In case of a non-dockerized devnet, if an integer [index] is specified, it will use
     that VM to send the tx. Otherwise, it will target the first VM.
 
-- `../../bin/express-cli --shadow-fork [block]`
+- `../../bin/express-cli --shadow-fork [blockNumber]`
   - Run (mumbai/mainnet) nodes in shadow mode. Please note that there might be an offset of ~3-4 blocks from [block] number
-    specified when restarting the (shadow) node. Currently only works with remote setup.
+    specified when restarting the (shadow) node. Currently only works with remote setup (no docker support).
 
 ## `matic-cli`
 

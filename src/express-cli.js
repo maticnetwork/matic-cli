@@ -68,8 +68,8 @@ program
   .option('-istart, --instances-start', 'Start aws ec2 instances')
   .option('-rewind, --rewind [numberOfBlocks]', 'Rewind the chain')
   .option(
-    '-sf, --shadow-fork [block]',
-    'Run nodes in shadow mode. Please note that there might be an offset of ~3-4 blocks from [block] no. specified when restarting the (shadow) node'
+    '-sf, --shadow-fork [blockNumber]',
+    'Run nodes in shadow mode. Please note that there might be an offset of ~3-4 blocks from [blockNumber] specified when restarting the (shadow) node'
   )
   .version(pkg.version)
 
@@ -325,7 +325,7 @@ export async function cli() {
     await timer(3000)
     await rewind(options.rewind)
   } else if (options.shadowFork) {
-    console.log('📍Command --shadow-fork [block]')
+    console.log('📍Command --shadow-fork [blockNumber]')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'

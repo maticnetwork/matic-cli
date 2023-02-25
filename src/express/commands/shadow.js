@@ -7,7 +7,20 @@ async function initWeb3(provider) {
   return new Web3(provider)
 }
 
+function isValidBlockNum(targetBlock) {
+  return (
+    targetBlock !== undefined &&
+    targetBlock !== null &&
+    targetBlock !== '' &&
+    parseInt(targetBlock, 10) > 0
+  )
+}
+
 export async function shadow(targetBlock) {
+  if (!isValidBlockNum(targetBlock)) {
+    console.log('❌ Invalid [blockNumber] parameter! Exiting ...')
+    process.exit(1)
+  }
   require('dotenv').config({ path: `${process.cwd()}/.env` })
   const doc = await loadDevnetConfig('remote')
   const borUsers = splitToArray(doc.devnetBorUsers.toString())
@@ -48,9 +61,9 @@ export async function shadow(targetBlock) {
   }
 
   // eslint-disable-next-line
-  const modifyGenesisCmd = `sed -i '/\"chainId\"/c\   \   "chainId\": ${shadowBorChainId},' ${shadowGenesisLocation}`
+  const updateGenesisChainIdCmd = `sed -i '/\"chainId\"/c\   \   "chainId\": ${shadowBorChainId},' ${shadowGenesisLocation}`
   // eslint-disable-next-line
-  const chainModifyCmd = `sed -i "s|${process.env.NETWORK}|\\$BOR_HOME/shadow-genesis.json|g" ${startScriptLocation}`
+  const updateBorStartScriptCmd = `sed -i "s|${process.env.NETWORK}|\\$BOR_HOME/shadow-genesis.json|g" ${startScriptLocation}`
   // eslint-disable-next-line
   const addFlagsCmd = `sed -i 's/--mine$/--mine \\\\\\\n  --bor.withoutheimdall \\\\\\\n  --bor.devfakeauthor \\\\\\\n  --rpc.allow-unprotected-txs \\\\/' ${startScriptLocation}`
   const restartBorCmd = 'sudo service bor restart'
@@ -59,7 +72,7 @@ export async function shadow(targetBlock) {
     while (true) {
       const currentBlock = await p.eth.getBlock('latest')
       // eslint-disable-next-line
-      if (currentBlock.number == targetBlock) {
+      if (currentBlock.number === Number(targetBlock)) {
         break
       }
     }
@@ -67,10 +80,18 @@ export async function shadow(targetBlock) {
 
     console.log('📍Downloading and modifying genesis on machines ... ')
     await runSshCommand(providerToNodeIp.get(p), genesisCmd, maxRetries)
-    await runSshCommand(providerToNodeIp.get(p), modifyGenesisCmd, maxRetries)
+    await runSshCommand(
+      providerToNodeIp.get(p),
+      updateGenesisChainIdCmd,
+      maxRetries
+    )
 
     console.log('📍Updating start script on machines ... ')
-    await runSshCommand(providerToNodeIp.get(p), chainModifyCmd, maxRetries)
+    await runSshCommand(
+      providerToNodeIp.get(p),
+      updateBorStartScriptCmd,
+      maxRetries
+    )
     await runSshCommand(providerToNodeIp.get(p), addFlagsCmd, maxRetries)
 
     console.log('📍Restarting bor on machines ... ')
