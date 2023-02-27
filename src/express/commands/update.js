@@ -10,7 +10,8 @@ export async function pullAndRestartBor(ip, i, isPull) {
   const borBranch = process.env.BOR_BRANCH
 
   console.log('📍Stopping bor...')
-  let command = 'sudo systemctl stop bor.service || echo "bor not running on current machine..."'
+  let command =
+    'sudo systemctl stop bor.service || echo "bor not running on current machine..."'
   await runSshCommand(ip, command, maxRetries)
 
   if (isPull) {
@@ -53,7 +54,8 @@ export async function pullAndRestartHeimdall(ip, i, isPull) {
   const heimdallBranch = process.env.HEIMDALL_BRANCH
 
   console.log('📍Stopping heimdall...')
-  let command = 'sudo systemctl stop heimdalld.service || echo "heimdall not running on current machine..."'
+  let command =
+    'sudo systemctl stop heimdalld.service || echo "heimdall not running on current machine..."'
   await runSshCommand(ip, command, maxRetries)
 
   if (isPull) {
