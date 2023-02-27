@@ -409,7 +409,7 @@ export class Devnet {
                 '-i',
                 '~/cert.pem',
                   `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                  `sudo systemctl stop heimdalld.service && rm -rf ~/.heimdalld/data/* && sudo curl ${this.config.heimdallSnapshotUrl} | sudo tar zxf - -C ~/.heimdalld/data && sudo chmod 777 -R ~/.heimdalld/data && sudo systemctl restart heimdalld.service`
+                  `sudo systemctl stop heimdalld.service && sudo rm -rf ~/.heimdalld/data/* && sudo curl ${this.config.heimdallSnapshotUrl} | sudo tar zxf - -C ~/.heimdalld/data && sudo chmod 777 -R ~/.heimdalld/data && sudo systemctl restart heimdalld.service`
               ],
               { stdio: getRemoteStdio() })
           }
@@ -432,7 +432,7 @@ export class Devnet {
                 '-i',
                 '~/cert.pem',
                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                `sudo systemctl stop bor.service && rm -rf ~/.bor/data/bor/chaindata/* && sudo curl ${this.config.borSnapshotUrl} | sudo tar zxf - -C ~/.bor/data/bor/chaindata && sudo chmod 777 -R ~/.bor/data/bor/chaindata && sudo systemctl restart bor.service`
+                `sudo systemctl stop bor.service && sudo rm -rf ~/.bor/data/bor/chaindata/* && sudo curl ${this.config.borSnapshotUrl} | sudo tar zxf - -C ~/.bor/data/bor/chaindata && sudo chmod 777 -R ~/.bor/data/bor/chaindata && sudo systemctl restart bor.service`
               ],
               { stdio: getRemoteStdio() })
           }
