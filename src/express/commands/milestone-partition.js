@@ -138,7 +138,7 @@ export async function milestonePartition() {
       tasks.push(getPeerLength(ips[i]))    
     }
 
-    let peers = []
+    peers = []
     await Promise.all(tasks).then((values) => {
       // Check if there's no validation error
       if (values.includes(-1)) {
