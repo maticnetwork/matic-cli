@@ -116,14 +116,25 @@ export async function joinAllPeers(ips, enodes) {
     tasks.push(getPeerLength(ips[i]))
   }
 
+  let lengths
   await Promise.all(tasks).then((values) => {
-    if (values.includes(-1)) {
-      console.log('📍Unable to query peer length, exiting')
+    lengths = values
+  })
+
+  if (!lengths) {
+    await timer(100)
+    if (!lengths) {
       return false
     }
-    console.log('📍Peer length:', values)
-    return true
-  })
+  }
+
+  if (lengths.includes(-1)) {
+    console.log('📍Unable to query peer length, exiting')
+    return false
+  }
+
+  console.log('📍Peer length:', lengths)
+  return true
 }
 
 export async function createClusters(ips, enodes, split = 1) {
@@ -194,12 +205,12 @@ export async function getEnode(user, host) {
   return ''
 }
 
-export async function validateNumberOfPeers(peers, expected) {
+export async function validateNumberOfPeers(peers) {
   let recreate = false
 
   // 1st node should have 0 peers
   if (peers[0] > 0) {
-    console.log('📍Unexpected peer length received for 1st cluster, retrying. expected: 0, received:', peers[0])
+    console.log('📍Unexpected peer length received for 1st cluster, retrying')
     recreate = true
   }
 
@@ -250,7 +261,7 @@ export async function validateFinalizedBlock(hosts, milestone) {
   return true
 }
 
-export async function fetchLatestMilestone(milestoneLength, queryTimer, lastMilestone = undefined) {
+export async function fetchLatestMilestone(milestoneLength, queryTimer, host, lastMilestone = undefined) {
   let milestone
   let count = 0
   console.log('📍Querying heimdall for next milestone...')
@@ -260,7 +271,7 @@ export async function fetchLatestMilestone(milestoneLength, queryTimer, lastMile
       return undefined
     }
 
-    milestone = await checkLatestMilestone(borHosts[0])
+    milestone = await checkLatestMilestone(host)
     if (milestone.result) {
       // Check against last milestone (if present) if it's immediate next one or not
       if (lastMilestone) {

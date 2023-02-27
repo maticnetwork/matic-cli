@@ -14,7 +14,8 @@ import {
   getEnode,
   validateNumberOfPeers,
   validateFinalizedBlock,
-  fetchLatestMilestone
+  fetchLatestMilestone,
+  joinAllPeers
 } from '../common/milestone-utils'
 
 const milestoneLength = 64
@@ -48,8 +49,6 @@ export async function milestonePartition() {
     tasks.push(getEnode(borUsers[i], borHosts[i]))
   }
 
-  console.log("ips:", ips)
-
   await Promise.all(tasks).then((values) => {
     enodes = values
   })
@@ -60,7 +59,7 @@ export async function milestonePartition() {
   }
 
   // Wait for a milestone to get proposed for verification
-  let lastMilestone = await fetchLatestMilestone(milestoneLength, queryTimer)
+  let lastMilestone = await fetchLatestMilestone(milestoneLength, queryTimer, borHosts[0])
   if (!lastMilestone) {
     console.log('📍Unable to fetch latest milestone from heimdall, exiting')
     return
@@ -77,7 +76,7 @@ export async function milestonePartition() {
 
   console.log('📍Rejoined clusters')
 
-  console.log('📍Waiting to fetch finalized blocks...')
+  console.log('📍Waiting 32s to fetch finalized blocks...')
   await timer(32000)
 
   // Fetch the last 'finalized' block
@@ -123,9 +122,10 @@ export async function milestonePartition() {
     peers = values
   })
 
-  let recreate = validateNumberOfPeers(peers)  
-  if (recreate) {
-    console.log('📍Retrying creation of partition clusters for testing')
+  // validate if number of peers are correct or not
+  let expected = [1, 1, 1, 1]
+  if (JSON.stringify(peers) != JSON.stringify(expected)) {
+    console.log(`📍Retrying creation of partition clusters for testing due to peer length mismatch, got: ${peers}, expected: ${expected}`)
     created = await createClusters(ips, enodes)
     if (!created) {
       console.log('📍Unable to remove peers for creating clusters, exiting')
@@ -148,9 +148,10 @@ export async function milestonePartition() {
       peers = values
     })
 
-    recreate = validateNumberOfPeers(peers)
-    if (recreate) {
+    if (JSON.stringify(peers) != JSON.stringify(expected)) {
+      console.log(`📍Peer length mismatch while creating clusters, got: ${peers}, expected: ${expected}`)
       console.log('📍Failed to create partition clusters for testing, exiting')
+      return
     } else {
       console.log('📍Partition clusters for testing created. Proceeding to test')
     }
@@ -164,7 +165,7 @@ export async function milestonePartition() {
   // nodes performing mining out of sync. 
 
   // Validate if both the clusters are on their own chain. 
-  console.log('📍Trying to fetch latest block from both clusters after 10s')
+  console.log('📍Waiting 10s before fetching latest block from both clusters')
   await timer(10000)
 
   // We'll fetch block from cluster 2 first as it'll be behind in terms of block height
@@ -206,7 +207,7 @@ export async function milestonePartition() {
   }
 
   // Expect no milestone to be proposed
-  let latestMilestone = await fetchLatestMilestone(2 * milestoneLength, queryTimer, lastMilestone)
+  let latestMilestone = await fetchLatestMilestone(2 * milestoneLength, queryTimer, borHosts[0], lastMilestone)
   if (latestMilestone) {
     console.log('📍New milestone proposed despite non-majority clusters, exiting')
     return
@@ -220,7 +221,7 @@ export async function milestonePartition() {
   }
 
   // Wait for few seconds for reorg to happen
-  console.log('📍Waiting for clusters to connect and reorg...')
+  console.log('📍Waiting 4s for clusters to connect and reorg...')
   await timer(4000)
 
   // Fetch block from cluster 2 to see if it got reorged to cluster 1
@@ -283,14 +284,14 @@ export async function milestonePartition() {
   }
 
   // Wait for the next milestone to get proposed for verification
-  latestMilestone = await fetchLatestMilestone(milestoneLength, queryTimer, lastMilestone)
+  latestMilestone = await fetchLatestMilestone(milestoneLength, queryTimer, borHosts[0], lastMilestone)
   if (!latestMilestone) {
     console.log('📍Unable to fetch latest milestone from heimdall, exiting')
     return
   }
 
   console.log('📍Waiting for bor nodes to import milestone')
-  await timer(32000)
+  console.log('📍Waiting 32s for bor nodes to import milestone')
 
   console.log('📍Trying to fetch last finalized block from all nodes and validate')
   let valid = await validateFinalizedBlock(borHosts, latestMilestone)
