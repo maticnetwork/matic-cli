@@ -118,12 +118,6 @@ ignore:
     - '*':
         reason: 'As open source org, we have no issues with licenses'
         created: 2022-11-11T11:02:46.054Z
-  SNYK-JS-ANSIREGEX-1583908:
-    - '*':
-        reason: >-
-          Waiting for issue to be fixed. See
-          https://github.com/SamVerschueren/listr/issues/163
-        created: 2022-11-11T11:54:18.213Z
   SNYK-JS-NODEFETCH-2342118:
     - '*':
         reason: >-

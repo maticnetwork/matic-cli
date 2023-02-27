@@ -183,11 +183,11 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
   - Create a `staked` transaction on the remote network and adds a new validator.
 
-- ` ../../bin/express-cli --monitor`
+- ` ../../bin/express-cli --monitor [exit]`
 
   - Monitors the reception of state-syncs and checkpoints to make sure the whole network is in a healthy state.
-    If `--send-state-sync` hasn't been used before, only checkpoints will be detected. The execution stops when
-    a `state-sync` is found
+    If `--send-state-sync` hasn't been used before, only checkpoints will be detected. Monitor the setup.  
+    If `exit` string is passed the process terminates when at least one `stateSync` and one `checkpoint` are detected.
 
 - ` ../../bin/express-cli --instances-stop`
 
