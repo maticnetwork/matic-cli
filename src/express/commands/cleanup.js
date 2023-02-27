@@ -28,16 +28,16 @@ export async function stopServices(doc) {
   const stopServiceTasks = nodeIps.map(async (ip) => {
     if (isHostMap.get(ip)) {
       console.log('📍Stopping ganache on machine ' + ip + ' ...')
-      const command = 'sudo systemctl stop ganache.service'
+      const command = 'sudo systemctl stop ganache.service || echo "ganache not running on current machine..."'
       await runSshCommand(ip, command, maxRetries)
     }
 
     console.log('📍Stopping heimdall on machine ' + ip + '...')
-    let command = 'sudo systemctl stop heimdalld.service'
+    let command = 'sudo systemctl stop heimdalld.service || echo "heimdall not running on current machine..."'
     await runSshCommand(ip, command, maxRetries)
 
     console.log('📍Stopping bor on machine ' + ip + ' ...')
-    command = 'sudo systemctl stop bor.service'
+    command = 'sudo systemctl stop bor.service || echo "bor not running on current machine..."'
     await runSshCommand(ip, command, maxRetries)
   })
 
