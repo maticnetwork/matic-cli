@@ -1,3 +1,6 @@
+import { checkLatestMilestone } from '../commands/monitor'
+import { timer } from './time-utils'
+
 const {
   runSshCommand,
   maxRetries,
@@ -93,6 +96,36 @@ export async function getPeerLength(ip) {
   return -1
 }
 
+export async function joinAllPeers(ips, enodes) {
+  let tasks = []
+  for (let i = 0; i < ips.length; i++) {
+    tasks.push(addPeers(ips[i], enodes))
+  }
+
+  await Promise.all(tasks).then((values) => {
+    if (values.includes(false) || values.includes(undefined)) {
+      console.log('📍Failed to add peers for rejoining clusters')
+      return false
+    }
+    console.log('📍Rejoined clusters')
+  })
+
+  // Validate by fetching peer length
+  tasks = []
+  for (let i = 0; i < ips.length; i++) {
+    tasks.push(getPeerLength(ips[i]))
+  }
+
+  await Promise.all(tasks).then((values) => {
+    if (values.includes(-1)) {
+      console.log('📍Unable to query peer length, exiting')
+      return false
+    }
+    console.log('📍Peer length:', values)
+    return true
+  })
+}
+
 export async function createClusters(ips, enodes, split = 1) {
   // `split` defines how clusters are created and which index to use to seperate nodes. 
   // e.g. for split = 1, clusters created would be of 1 and 3 nodes (nodes[:split], nodes[split:])
@@ -161,7 +194,7 @@ export async function getEnode(user, host) {
   return ''
 }
 
-export function validateNumberOfPeers(peers) {
+export async function validateNumberOfPeers(peers, expected) {
   let recreate = false
 
   // 1st node should have 0 peers
@@ -180,4 +213,74 @@ export function validateNumberOfPeers(peers) {
   }
 
   return recreate
+}
+
+export async function validateFinalizedBlock(hosts, milestone) {
+  // Fetch the last 'finalized' block from all nodes
+  let tasks = []
+  for (let i = 0; i < hosts.length; i++) {
+    tasks.push(runCommand(getBlock, hosts[i], 'finalized', maxRetries))    
+  }
+
+  let finalizedBlocks = []
+  await Promise.all(tasks).then((values) => {
+    // Check if there's empty value
+    if (values.includes(undefined)) {
+      console.log(`📍Error in fetching last finalized block, responses: ${values}, exiting`)
+      return false
+    }
+    finalizedBlocks = values
+  })
+
+  if (finalizedBlocks.length != hosts) {
+    await timer(500)
+    if (finalizedBlocks.length != hosts) {
+      return false
+    }
+  } 
+
+  // Check if the number and hash matches with the last milestone
+  for (let i = 0; i < finalizedBlocks.length; i++) {
+    if (Number(finalizedBlocks[i].number) != Number(milestone.end_block) || finalizedBlocks[i].hash != milestone.hash) {
+      console.log(`📍Block number or hash mismatch for finalized block. Host index: ${i}, Finalized Block Number: ${Number(finalizedBlocks[i].number)}, Hash: ${finalizedBlocks[i].hash}. Milestone end block: ${Number(milestone.end_block)}, Hash: ${milestone.hash} exiting`)
+      return false
+    }
+  }
+
+  return true
+}
+
+export async function fetchLatestMilestone(milestoneLength, queryTimer, lastMilestone = undefined) {
+  let milestone
+  let count = 0
+  console.log('📍Querying heimdall for next milestone...')
+  while (true) {
+    if (count > milestoneLength) {
+      console.log(`📍Unable to fetch milestone from heimdall after ${count} tries`)
+      return undefined
+    }
+
+    milestone = await checkLatestMilestone(borHosts[0])
+    if (milestone.result) {
+      // Check against last milestone (if present) if it's immediate next one or not
+      if (lastMilestone) {
+        if (Number(milestone.result.start_block) == Number(lastMilestone.end_block) + 1) {
+          break
+        } else {
+          console.log('📍Waiting for new milestone...')
+          continue
+        }
+      }
+      break
+    } else {
+      console.log(`📍Invalid milestone received. Response: ${JSON.stringify(milestone.result)}, count: ${count}`) 
+    }
+
+    count++
+    await timer(queryTimer)
+  }
+
+  let latestMilestone = milestone.result
+  console.log(`📍Got milestone from heimdall. Start block: ${Number(latestMilestone.start_block)}, End block: ${Number(latestMilestone.end_block)}, ID: ${latestMilestone.milestone_id}`)
+  return latestMilestone
 }

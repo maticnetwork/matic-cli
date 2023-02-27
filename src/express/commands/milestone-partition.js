@@ -9,20 +9,20 @@ const {
 
 import {
   getBlock,
-  getValidatorInfo,
   getPeerLength,
   createClusters,
   getEnode,
   validateNumberOfPeers,
+  validateFinalizedBlock,
   fetchLatestMilestone
 } from '../common/milestone-utils'
 
 const milestoneLength = 64
 const queryTimer = (milestoneLength / 4) * 1000
 
-export async function milestoneBase() {
+export async function milestonePartition() {
   // NOTE: Make sure bor branch has logic for hardcoded primary validator
-  
+    
   require('dotenv').config({ path: `${process.cwd()}/.env` })
   const devnetType =
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
@@ -67,6 +67,8 @@ export async function milestoneBase() {
   }
 
   console.log('📍Rejoining clusters before performing tests')
+ 
+  // Make sure all peers are joined
   let joined = await joinAllPeers(ips, enodes)
   if (!joined) {
     console.log('📍Unable to join peers before starting tests, exiting')
@@ -98,7 +100,7 @@ export async function milestoneBase() {
 
   // Next step is to create 2 clusters where primary node is separated from the
   // rest of the network.
-  let created = await createClusters(ips, enodes, 1)
+  let created = await createClusters(ips, enodes)
   if (!created) {
     console.log('📍Unable to remove peers for creating clusters, exiting')
     return
@@ -124,7 +126,7 @@ export async function milestoneBase() {
   let recreate = validateNumberOfPeers(peers)  
   if (recreate) {
     console.log('📍Retrying creation of partition clusters for testing')
-    created = await createClusters(ips, enodes, 1)
+    created = await createClusters(ips, enodes)
     if (!created) {
       console.log('📍Unable to remove peers for creating clusters, exiting')
       return
@@ -157,16 +159,17 @@ export async function milestoneBase() {
   }
 
   // Reaching this step means that we've created 2 clusters for testing. 
-  // Cluster 1 has a single primary producer whose difficulty should always be higher. 
-  // Cluster 2 should have remaining nodes (with 2/3+1 stake) all with difficulty lower than node 1
-  // and nodes performing mining out of sync. 
+  // Cluster 1 has 2 nodes with 1 primary producer whose difficulty will always be higher. 
+  // Cluster 2 has other (2) nodes with lower difficulty than cluster 1 and 
+  // nodes performing mining out of sync. 
 
   // Validate if both the clusters are on their own chain. 
   console.log('📍Trying to fetch latest block from both clusters after 10s')
   await timer(10000)
 
   // We'll fetch block from cluster 2 first as it'll be behind in terms of block height
-  let latestBlockCluster2 = await runCommand(getBlock, borHosts[1], 'latest', maxRetries)
+  let latestBlockCluster1, latestBlockCluster2
+  latestBlockCluster2 = await runCommand(getBlock, borHosts[2], 'latest', maxRetries)
   if (latestBlockCluster2 == undefined) {
     console.log('📍Unable to fetch latest block in cluster 2, exiting')
     return
@@ -174,7 +177,7 @@ export async function milestoneBase() {
 
   if (latestBlockCluster2.number) {
     console.log(`📍Trying to fetch block ${Number(latestBlockCluster2.number)} from cluster 1`)
-    let latestBlockCluster1 = await runCommand(getBlock, borHosts[0], latestBlockCluster2.number, maxRetries)
+    latestBlockCluster1 = await runCommand(getBlock, borHosts[0], latestBlockCluster2.number, maxRetries)
     if (latestBlockCluster1 == undefined) {
       console.log(`📍Unable to fetch block ${Number(latestBlockCluster2.number)} in cluster 1, exiting`)
       return
@@ -201,44 +204,13 @@ export async function milestoneBase() {
     console.log('📍Unable to fetch latest block from 2nd cluster, exiting')
     return
   }
-  
-  // Wait for the next milestone to get proposed and validate
-  let latestMilestone = await fetchLatestMilestone(milestoneLength, queryTimer, lastMilestone)
-  if (!latestMilestone) {
-    console.log('📍Unable to fetch latest milestone from heimdall, exiting')
+
+  // Expect no milestone to be proposed
+  let latestMilestone = await fetchLatestMilestone(2 * milestoneLength, queryTimer, lastMilestone)
+  if (latestMilestone) {
+    console.log('📍New milestone proposed despite non-majority clusters, exiting')
     return
-  }
-
-  // Validate if the milestone is proposed by validators of cluster 2 and not by validators of cluster 1
-  let validators = await getValidatorInfo(ips[0])
-  try {
-    if (validators) {
-      if (latestMilestone.proposer == validators[0].address) {
-        console.log(`📍Invalid milestone got proposed from validator/s of cluster 1. Proposer: ${latestMilestone.proposer}, Validators address: ${validators[0].address}, exiting`)
-        return
-      }
-  
-      // Skip the validator from cluster 1
-      let done = false
-      for (let i = 1; i < validators.length; i++) {
-        if (latestMilestone.proposer == validators[i].address) {
-          console.log(`📍Validated milestone proposer`)
-          done = true
-          break
-        }
-      }
-
-      if (!done) {
-        console.log('📍Invalid milestone got proposed from validator/s of cluster 1, proposer: exiting')
-        return
-      }
-    }
-  } catch (error) {
-    console.log('📍Error in validating milestone proposer')
-  }
-
-  console.log('📍Waiting for bor nodes to import milestone')
-  await timer(32000)
+  } 
 
   // Reconnect both the clusters
   joined = await joinAllPeers(ips, enodes)
@@ -251,25 +223,74 @@ export async function milestoneBase() {
   console.log('📍Waiting for clusters to connect and reorg...')
   await timer(4000)
 
-  // Fetch block from cluster 1 to see if it got reorged to cluster 2
-  console.log(`📍Fetching block ${Number(latestBlockCluster2.number)} from cluster 1`)
-  let latestBlockCluster1 = await runCommand(getBlock, borHosts[0], latestBlockCluster2.number, maxRetries)
-  if (latestBlockCluster1 == undefined) {
-    console.log(`📍Unable to fetch block ${Number(latestBlockCluster2.number)} in cluster 1, exiting`)
+  // Fetch block from cluster 2 to see if it got reorged to cluster 1
+  console.log(`📍Fetching block ${Number(latestBlockCluster1.number)} from cluster 2`)
+  latestBlockCluster2 = await runCommand(getBlock, borHosts[2], latestBlockCluster1.number, maxRetries)
+  if (latestBlockCluster2 == undefined) {
+    console.log(`📍Unable to fetch block ${Number(latestBlockCluster1.number)} in cluster 2, exiting`)
     return
   }
   
-  if (latestBlockCluster1.number) {
+  if (latestBlockCluster2.number) {
     if (latestBlockCluster1.hash == latestBlockCluster2.hash) {
-      console.log('Cluster 1 successfully reorged to cluster 2 (with high majority)')
+      console.log('Cluster 2 successfully reorged to cluster 1 (having high difficulty) as expected')
     } else {
       console.log(`📍Hash mismatch among clusters. Cluster 1 hash: ${latestBlockCluster1.hash}, Cluster 2 hash: ${latestBlockCluster2.hash}, exiting`)
+      return
+    }
+  } else {
+    console.log(`📍Unable to fetch ${Number(latestBlockCluster1.number)} in cluster 2, exiting`)
+    return
+  }
+
+  // For sanity check, also validate the latest block from both clusters
+  console.log('📍Fetching latest block from both cluster nodes for sanity check')
+  latestBlockCluster1 = await runCommand(getBlock, borHosts[0], 'latest', maxRetries)
+  if (latestBlockCluster1 == undefined) {
+    console.log('📍Unable to fetch latest block in cluster 1, exiting')
+    return
+  }
+
+  if (latestBlockCluster1.number) {
+    console.log(`📍Trying to fetch block ${Number(latestBlockCluster1.number)} from cluster 2`)
+    latestBlockCluster2 = await runCommand(getBlock, borHosts[2], latestBlockCluster1.number, maxRetries)
+    if (latestBlockCluster2 == undefined) {
+      console.log(`📍Unable to fetch block ${Number(latestBlockCluster1.number)} in cluster 2, exiting`)
+      return
+    }
+
+    if (latestBlockCluster2.number) {
+      // check for block number
+      if (latestBlockCluster1.number != latestBlockCluster2.number) {
+        console.log(`📍Block number mismatch from clusters. Cluster 1: ${Number(latestBlockCluster1.number)}, Cluster 2: ${Number(latestBlockCluster2.number)}, exiting`)
+        return
+      }
+
+      // check for block hash
+      if (latestBlockCluster1.hash != latestBlockCluster2.hash) {
+        console.log(`📍Block hash mismatch, failed reorg. Cluster 1: ${latestBlockCluster1.hash}, Cluster 2: ${latestBlockCluster2.hash}, exiting`)
+        return
+      }
+
+      console.log(`📍Same block found on both clusters. Block number: ${Number(latestBlockCluster1.number)}, Cluster 1 hash: ${latestBlockCluster1.hash}, Cluster 2 hash: ${latestBlockCluster2.hash}`)
+    } else {
+      console.log('📍Unable to fetch latest block from 2nd cluster, exiting')
       return
     }
   } else {
     console.log('📍Unable to fetch latest block from 1st cluster, exiting')
     return
   }
+
+  // Wait for the next milestone to get proposed for verification
+  latestMilestone = await fetchLatestMilestone(milestoneLength, queryTimer, lastMilestone)
+  if (!latestMilestone) {
+    console.log('📍Unable to fetch latest milestone from heimdall, exiting')
+    return
+  }
+
+  console.log('📍Waiting for bor nodes to import milestone')
+  await timer(32000)
 
   console.log('📍Trying to fetch last finalized block from all nodes and validate')
   let valid = await validateFinalizedBlock(borHosts, latestMilestone)
