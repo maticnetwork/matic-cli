@@ -82,7 +82,7 @@ async function cleanupServices(doc) {
     await runSshCommand(ip, command, maxRetries)
 
     console.log('📍Cleaning up bridge storage on machine ' + ip + ' ...')
-    command = 'rm -rf ~/.heimdalld/bridge'
+    command = 'rm -rf var/lib/heimdall/bridge'
     await runSshCommand(ip, command, maxRetries)
 
     console.log('📍Cleaning up bor on machine ' + ip + ' ...')
