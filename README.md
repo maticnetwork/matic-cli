@@ -181,7 +181,11 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
 - `../../bin/express-cli --send-staked-event`
 
-  - Create a `staked` transaction on the remote network and adds a new validator.
+  - Create a `Staked` transaction on the remote network and adds a new validator.
+
+- `../../bin/express-cli --send-stakeupdate-event`
+
+  - Create a `StakeUpdate` transaction on the remote network and increase stake of 1st validator by 100 MATIC.
 
 - ` ../../bin/express-cli --monitor [exit]`
 

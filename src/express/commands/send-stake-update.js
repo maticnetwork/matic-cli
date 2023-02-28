@@ -71,13 +71,19 @@ export async function sendStakeUpdateEvent() {
   const approvalReceipt = await rootChainWeb3.eth.sendSignedTransaction(
     signedTx.rawTransaction
   )
-  console.log('\n\nApproval Receipt txHash:  ' + approvalReceipt.transactionHash)
+  console.log(
+    '\n\nApproval Receipt txHash:  ' + approvalReceipt.transactionHash
+  )
 
   const oldValidatarPower = await getValidatorPower(doc, validatorIDForTest)
   console.log('Old Validator Power:  ' + oldValidatarPower)
 
   // Adding 100 MATIC stake
-  tx = stakeManagerContract.methods.restake(validatorIDForTest, rootChainWeb3.utils.toWei('100'), false)
+  tx = stakeManagerContract.methods.restake(
+    validatorIDForTest,
+    rootChainWeb3.utils.toWei('100'),
+    false
+  )
   signedTx = await getSignedTx(
     rootChainWeb3,
     StakeManagerProxyAddress,

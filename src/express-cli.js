@@ -63,7 +63,10 @@ program
   )
   .option('-ss, --send-state-sync', 'Send state sync tx')
   .option('-sstake, --send-staked-event', 'Send staked event')
-  .option('-sstakeupdate, --send-stakedupdate-event', 'Send staked-update event')
+  .option(
+    '-sstakeupdate, --send-stakedupdate-event',
+    'Send staked-update event'
+  )
   .option(
     '-e1559, --eip-1559-test [index]',
     'Test EIP 1559 txs. In case of a non-dockerized devnet, if an integer [index] is specified, it will use that VM to send the tx. Otherwise, it will target the first VM.'
