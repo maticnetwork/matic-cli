@@ -267,7 +267,9 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType, devnetId) {
     await runSshCommand(ip, command, maxRetries)
 
     console.log(
-      '📍Removing /var/lib/heimdall folder (if present) on machine ' + ip + ' ...'
+      '📍Removing /var/lib/heimdall folder (if present) on machine ' +
+        ip +
+        ' ...'
     )
     command = 'rm -rf /var/lib/heimdall'
     await runSshCommand(ip, command, maxRetries)
