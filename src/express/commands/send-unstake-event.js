@@ -5,10 +5,7 @@ import stakeManagerABI from '../../abi/StakeManagerABI.json'
 import ERC20ABI from '../../abi/ERC20ABI.json'
 import Web3 from 'web3'
 
-const {
-  runScpCommand,
-  maxRetries
-} = require('../common/remote-worker')
+const { runScpCommand, maxRetries } = require('../common/remote-worker')
 
 export async function sendUnstakeEvent() {
   require('dotenv').config({ path: `${process.cwd()}/.env` })
@@ -74,9 +71,7 @@ export async function sendUnstakeEvent() {
   // TODO
   //  replace validatorId to call stakeManager.signerToValidator(validatorAccount)
   const validatorId = 1
-  tx = stakeManagerContract.methods.unstake(
-    validatorId,
-    )
+  tx = stakeManagerContract.methods.unstake(validatorId)
   signedTx = await getSignedTx(
     rootChainWeb3,
     StakeManagerProxyAddress,
