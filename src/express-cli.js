@@ -6,6 +6,7 @@ import { startStressTest } from './express/commands/stress'
 import { sendStateSyncTx } from './express/commands/send-state-sync'
 import { sendStakedEvent } from './express/commands/send-staked-event'
 import { sendStakeUpdateEvent } from './express/commands/send-stake-update'
+import { sendUnstakeEvent } from './express/commands/send-unstake-event'
 import { monitor } from './express/commands/monitor'
 import {
   restartAll,
@@ -67,6 +68,7 @@ program
     '-sstakeupdate, --send-stakedupdate-event',
     'Send staked-update event'
   )
+  .option('-sunstake, --send-unstake-event', 'Send unstake event')
   .option(
     '-e1559, --eip-1559-test [index]',
     'Test EIP 1559 txs. In case of a non-dockerized devnet, if an integer [index] is specified, it will use that VM to send the tx. Otherwise, it will target the first VM.'
@@ -284,6 +286,16 @@ export async function cli() {
     }
     await timer(3000)
     await sendStakeUpdateEvent()
+  } else if (options.sendUnstakeEvent) {
+    console.log('📍Command --send-unstake-event ')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    await timer(3000)
+    await sendUnstakeEvent()
   } else if (options.eip1559Test) {
     console.log('📍Command --eip-1559-test')
     if (!checkDir(false)) {
