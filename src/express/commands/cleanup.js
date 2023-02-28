@@ -74,11 +74,11 @@ async function cleanupServices(doc) {
     await runSshCommand(ip, command, maxRetries)
 
     console.log('📍Purging queue for heimdall bridge on machine ' + ip + ' ...')
-    command = 'heimdalld heimdall-bridge purge-queue'
+    command = 'heimdalld heimdall-bridge --home /var/lib/heimdall purge-queue'
     await runSshCommand(ip, command, maxRetries)
 
     console.log('📍Resetting heimdall bridge on machine ' + ip + ' ...')
-    command = 'heimdalld heimdall-bridge unsafe-reset-all'
+    command = 'heimdalld heimdall-bridge --home /var/lib/heimdall unsafe-reset-all'
     await runSshCommand(ip, command, maxRetries)
 
     console.log('📍Cleaning up bridge storage on machine ' + ip + ' ...')
