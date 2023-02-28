@@ -71,8 +71,11 @@ export async function sendUnstakeEvent() {
   )
   console.log('Approval Receipt txHash:  ' + approvalReceipt.transactionHash)
 
+  // TODO
+  //  replace validatorId to call stakeManager.signerToValidator(validatorAccount)
+  const validatorId = 1
   tx = stakeManagerContract.methods.unstake(
-    1,
+    validatorId,
     )
   signedTx = await getSignedTx(
     rootChainWeb3,
