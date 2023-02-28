@@ -5,6 +5,7 @@ import { terraformDestroy } from './express/commands/destroy'
 import { startStressTest } from './express/commands/stress'
 import { sendStateSyncTx } from './express/commands/send-state-sync'
 import { sendStakedEvent } from './express/commands/send-staked-event'
+import { sendStakeUpdateEvent } from './express/commands/send-stake-update'
 import { monitor } from './express/commands/monitor'
 import {
   restartAll,
@@ -62,6 +63,7 @@ program
   )
   .option('-ss, --send-state-sync', 'Send state sync tx')
   .option('-sstake, --send-staked-event', 'Send staked event')
+  .option('-sstakeupdate, --send-stakedupdate-event', 'Send staked-update event')
   .option(
     '-e1559, --eip-1559-test [index]',
     'Test EIP 1559 txs. In case of a non-dockerized devnet, if an integer [index] is specified, it will use that VM to send the tx. Otherwise, it will target the first VM.'
@@ -269,6 +271,16 @@ export async function cli() {
     }
     await timer(3000)
     await sendStakedEvent()
+  } else if (options.sendStakedupdateEvent) {
+    console.log('📍Command --send-stakeupdate-event ')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    await timer(3000)
+    await sendStakeUpdateEvent()
   } else if (options.eip1559Test) {
     console.log('📍Command --eip-1559-test')
     if (!checkDir(false)) {
