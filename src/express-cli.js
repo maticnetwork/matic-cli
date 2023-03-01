@@ -6,6 +6,7 @@ import { startStressTest } from './express/commands/stress'
 import { sendStateSyncTx } from './express/commands/send-state-sync'
 import { sendStakedEvent } from './express/commands/send-staked-event'
 import { sendStakeUpdateEvent } from './express/commands/send-stake-update'
+import { sendSignerChangeEvent } from './express/commands/send-signer-change'
 import { monitor } from './express/commands/monitor'
 import {
   restartAll,
@@ -66,6 +67,10 @@ program
   .option(
     '-sstakeupdate, --send-stakedupdate-event',
     'Send staked-update event'
+  )
+  .option(
+    '-ssignerchange, --send-signerchange-event',
+    'Send signer-change event'
   )
   .option(
     '-e1559, --eip-1559-test [index]',
@@ -284,6 +289,16 @@ export async function cli() {
     }
     await timer(3000)
     await sendStakeUpdateEvent()
+  } else if (options.sendSignerchangeEvent) {
+    console.log('📍Command --send-signerchange-event ')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    await timer(3000)
+    await sendSignerChangeEvent()
   } else if (options.eip1559Test) {
     console.log('📍Command --eip-1559-test')
     if (!checkDir(false)) {

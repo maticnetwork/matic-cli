@@ -2,10 +2,10 @@
 
 import { loadDevnetConfig } from '../common/config-utils'
 import stakeManagerABI from '../../abi/StakeManagerABI.json'
-import ERC20ABI from '../../abi/ERC20ABI.json'
 import Web3 from 'web3'
-import { timer } from '../common/time-utils'
 import { getSignedTx } from '../common/tx-utils'
+import { timer } from '../common/time-utils'
+import Wallet, { hdkey } from 'ethereumjs-wallet'
 
 const {
   runScpCommand,
@@ -13,7 +13,7 @@ const {
   maxRetries
 } = require('../common/remote-worker')
 
-export async function sendStakeUpdateEvent() {
+export async function sendSignerChangeEvent() {
   require('dotenv').config({ path: `${process.cwd()}/.env` })
   const devnetType =
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
@@ -42,12 +42,6 @@ export async function sendStakeUpdateEvent() {
 
   const StakeManagerProxyAddress = contractAddresses.root.StakeManagerProxy
 
-  const MaticTokenAddr = contractAddresses.root.tokens.TestToken
-  const MaticTokenContract = new rootChainWeb3.eth.Contract(
-    ERC20ABI,
-    MaticTokenAddr
-  )
-
   const signerDump = require(`${process.cwd()}/signer-dump.json`)
   const pkey = signerDump[0].priv_key
   const validatorAccount = signerDump[0].address
@@ -58,61 +52,41 @@ export async function sendStakeUpdateEvent() {
     StakeManagerProxyAddress
   )
 
-  let tx = MaticTokenContract.methods.approve(
-    StakeManagerProxyAddress,
-    rootChainWeb3.utils.toWei('1000')
-  )
-  let signedTx = await getSignedTx(
-    rootChainWeb3,
-    MaticTokenAddr,
-    tx,
-    validatorAccount,
-    pkey
-  )
-  const approvalReceipt = await rootChainWeb3.eth.sendSignedTransaction(
-    signedTx.rawTransaction
-  )
-  console.log(
-    '\n\nApproval Receipt txHash:  ' + approvalReceipt.transactionHash
-  )
+  const oldSigner = await getValidatorSigner(doc, validatorIDForTest)
+  console.log('OldValidatorSigner', oldSigner)
 
-  const oldValidatarPower = await getValidatorPower(doc, validatorIDForTest)
-  console.log('Old Validator Power:  ' + oldValidatarPower)
+  const RandomSeed = 'random' + Math.random()
+  const newAccPrivKey = hdkey.fromMasterSeed(RandomSeed)._hdkey._privateKey
+  const wallet = Wallet.fromPrivateKey(newAccPrivKey)
+  const newAccAddr = wallet.getAddressString()
+  const newAccPubKey = wallet.getPublicKeyString()
 
-  // Adding 100 MATIC stake
-  tx = stakeManagerContract.methods.restake(
-    validatorIDForTest,
-    rootChainWeb3.utils.toWei('100'),
-    false
-  )
-  signedTx = await getSignedTx(
-    rootChainWeb3,
-    StakeManagerProxyAddress,
-    tx,
-    validatorAccount,
-    pkey
-  )
+  console.log('NewValidatorAddr', newAccAddr, newAccPubKey)
+  console.log('NewValidatorPrivKey', wallet.getPrivateKeyString())
+
+  const tx = stakeManagerContract.methods.updateSigner(validatorIDForTest, newAccPubKey)
+  const signedTx = await getSignedTx(rootChainWeb3, StakeManagerProxyAddress, tx, validatorAccount, pkey)
   const Receipt = await rootChainWeb3.eth.sendSignedTransaction(
     signedTx.rawTransaction
   )
-  console.log('Restake Receipt txHash:  ' + Receipt.transactionHash)
+  console.log('UpdateSigner Receipt', Receipt.transactionHash)
 
-  let newValidatarPower = await getValidatorPower(doc, validatorIDForTest)
+  let newSigner = await getValidatorSigner(doc, validatorIDForTest)
 
-  while (parseInt(newValidatarPower) !== parseInt(oldValidatarPower) + 100) {
-    console.log('Waiting 3 secs for stakeupdate')
+  while (newSigner === oldSigner) {
+    console.log('Waiting 3 secs for signer to be updated')
     await timer(3000) // waiting 3 secs
-    newValidatarPower = await getValidatorPower(doc, validatorIDForTest)
-    console.log('newValidatarPower : ', newValidatarPower)
+    newSigner = await getValidatorSigner(doc, validatorIDForTest)
+    console.log('newSigner : ', newSigner)
   }
 
-  console.log('✅ Stake Updated')
+  console.log('✅ Signer Updated')
   console.log(
-    '✅ Stake-Update event Sent from Rootchain and Received and processed on Heimdall'
+    '✅ SignerChange Event Sent from Rootchain and Received and processed on Heimdall'
   )
 }
 
-async function getValidatorPower(doc, validatorID) {
+async function getValidatorSigner(doc, validatorID) {
   const machine0 = doc.devnetBorHosts[0]
   const command = `curl localhost:1317/staking/validator/${validatorID}`
   const out = await runSshCommandWithReturn(
@@ -121,5 +95,5 @@ async function getValidatorPower(doc, validatorID) {
     maxRetries
   )
   const outobj = JSON.parse(out)
-  return outobj.result.power
+  return outobj.result.signer
 }
