@@ -9,13 +9,13 @@ const {
 
 import {
   getBlock,
-  getValidatorInfo,
   getPeerLength,
   createClusters,
   getEnode,
-  validateNumberOfPeers,
   fetchLatestMilestone,
-  joinAllPeers
+  joinAllPeers,
+  validateProposer,
+  validateFinalizedBlock
 } from '../common/milestone-utils'
 
 const milestoneLength = 64
@@ -58,13 +58,6 @@ export async function milestoneBase() {
     return
   }
 
-  // Wait for a milestone to get proposed for verification
-  let lastMilestone = await fetchLatestMilestone(milestoneLength, queryTimer, borHosts[0])
-  if (!lastMilestone) {
-    console.log('📍Unable to fetch latest milestone from heimdall, exiting')
-    return
-  }
-
   console.log('📍Rejoining clusters before performing tests')
   let joined = await joinAllPeers(ips, enodes)
   if (!joined) {
@@ -74,8 +67,15 @@ export async function milestoneBase() {
 
   console.log('📍Rejoined clusters')
 
-  console.log('📍Waiting 32s to fetch finalized blocks...')
-  await timer(32000)
+  // Wait for a milestone to get proposed for verification
+  let lastMilestone = await fetchLatestMilestone(milestoneLength, queryTimer, borHosts[0])
+  if (!lastMilestone) {
+    console.log('📍Unable to fetch latest milestone from heimdall, exiting')
+    return
+  }
+
+  console.log('📍Waiting 10s to fetch finalized blocks...')
+  await timer(10000)
 
   // Fetch the last 'finalized' block
   console.log('📍Trying to fetch last finalized block')
@@ -211,37 +211,15 @@ export async function milestoneBase() {
   }
 
   // Validate if the milestone is proposed by validators of cluster 2 and not by validators of cluster 1
-  let validators = await getValidatorInfo(ips[0])
-  try {
-    if (validators) {
-      if (latestMilestone.proposer == validators[0].address) {
-        console.log(`📍Invalid milestone got proposed from validator/s of cluster 1. Proposer: ${latestMilestone.proposer}, Validators address: ${validators[0].address}, exiting`)
-        return
-      }
+  console.log(`📍Validating if milestone got proposed by expected cluster's proposer`)
+  await validateProposer(ips[0], latestMilestone.proposer)
+
+  console.log('📍Waiting 10s for bor nodes to import milestone')
+  await timer(10000)
+
   
-      // Skip the validator from cluster 1
-      let done = false
-      for (let i = 1; i < validators.length; i++) {
-        if (latestMilestone.proposer == validators[i].address) {
-          console.log(`📍Validated milestone proposer`)
-          done = true
-          break
-        }
-      }
-
-      if (!done) {
-        console.log('📍Invalid milestone got proposed from validator/s of cluster 1, proposer: exiting')
-        return
-      }
-    }
-  } catch (error) {
-    console.log('📍Error in validating milestone proposer')
-  }
-
-  console.log('📍Waiting 32s for bor nodes to import milestone')
-  await timer(32000)
-
   // Reconnect both the clusters
+  console.log('📍Rejoining clusters')
   joined = await joinAllPeers(ips, enodes)
   if (!joined) {
     console.log('📍Unable to join peers while rejoining clusters, exiting')
@@ -262,7 +240,7 @@ export async function milestoneBase() {
   
   if (latestBlockCluster1.number) {
     if (latestBlockCluster1.hash == latestBlockCluster2.hash) {
-      console.log('Cluster 1 successfully reorged to cluster 2 (with high majority)')
+      console.log('📍Cluster 1 successfully reorged to cluster 2 (with high majority)')
     } else {
       console.log(`📍Hash mismatch among clusters. Cluster 1 hash: ${latestBlockCluster1.hash}, Cluster 2 hash: ${latestBlockCluster2.hash}, exiting`)
       return

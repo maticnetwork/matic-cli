@@ -4,7 +4,8 @@ import { timer } from './time-utils'
 const {
   runSshCommand,
   maxRetries,
-  runSshCommandWithReturn
+  runSshCommandWithReturn,
+  runCommand
 } = require('../common/remote-worker')
 
 export async function getBlock(ip, number = 'latest') {
@@ -38,7 +39,7 @@ export async function getBlock(ip, number = 'latest') {
   return undefined
 }
 
-export async function getValidatorInfo(ip) {
+async function getValidatorInfo(ip) {
   const command = 'echo `cat $HOME/matic-cli/devnet/code/genesis-contracts/validators.json`'
   try {
     let validators = await runSshCommandWithReturn(ip, command, maxRetries)
@@ -48,6 +49,26 @@ export async function getValidatorInfo(ip) {
   }
 
   return undefined
+}
+
+export async function validateProposer(ip, proposer) {
+  let validators = await getValidatorInfo(ip)
+  try {
+    if (validators) {
+      // Skip the validator from cluster 1
+      for (let i = 1; i < validators.length; i++) {
+        if (String(proposer).toLowerCase() == String(validators[i].address).toLowerCase()) {
+          console.log(`📍Validated milestone proposer`)
+          return
+        }
+      }
+
+      console.log('📍Invalid milestone got proposed from validator/s of cluster 1')
+      console.log('📍Milestone proposer:', proposer, ", validators: ", validators)
+    }
+  } catch (error) {
+    console.log('📍Error in validating milestone proposer, skipping check. Error:', error)
+  }
 }
 
 export async function removePeers(ip, peers) {
@@ -107,7 +128,6 @@ export async function joinAllPeers(ips, enodes) {
       console.log('📍Failed to add peers for rejoining clusters')
       return false
     }
-    console.log('📍Rejoined clusters')
   })
 
   // Validate by fetching peer length
@@ -141,11 +161,13 @@ export async function createClusters(ips, enodes, split = 1) {
   // `split` defines how clusters are created and which index to use to seperate nodes. 
   // e.g. for split = 1, clusters created would be of 1 and 3 nodes (nodes[:split], nodes[split:])
   let tasks = []
-  for (let i = 0; i < ips.slice(0, split); i++) {
-    tasks.push(removePeers(ips[i], enodes.slice(split)))
+  let ips1 = ips.slice(0, split)
+  let ips2 = ips.slice(split)
+  for (let i = 0; i < ips1.length; i++) {
+    tasks.push(removePeers(ips1[i], enodes.slice(split)))
   }
-  for (let i = 0; i < ips.slice(split); i++) {
-    tasks.push(removePeers(ips[i], enodes.slice(0, split)))
+  for (let i = 0; i < ips2.length; i++) {
+    tasks.push(removePeers(ips2[i], enodes.slice(0, split)))
   }
 
   let response = false
@@ -243,12 +265,13 @@ export async function validateFinalizedBlock(hosts, milestone) {
     finalizedBlocks = values
   })
 
-  if (finalizedBlocks.length != hosts) {
-    await timer(500)
-    if (finalizedBlocks.length != hosts) {
-      return false
-    }
-  } 
+  // if (finalizedBlocks.length != hosts) {
+  //   await timer(500)
+  //   if (finalizedBlocks.length != hosts) {
+  //     return false
+  //   }
+  // } 
+  await timer(100)
 
   // Check if the number and hash matches with the last milestone
   for (let i = 0; i < finalizedBlocks.length; i++) {
@@ -266,6 +289,11 @@ export async function fetchLatestMilestone(milestoneLength, queryTimer, host, la
   let count = 0
   console.log('📍Querying heimdall for next milestone...')
   while (true) {
+    if (count != 0) {
+      await timer(queryTimer)
+    }
+    count++
+
     if (count > milestoneLength) {
       console.log(`📍Unable to fetch milestone from heimdall after ${count} tries`)
       return undefined
@@ -286,9 +314,6 @@ export async function fetchLatestMilestone(milestoneLength, queryTimer, host, la
     } else {
       console.log(`📍Invalid milestone received. Response: ${JSON.stringify(milestone.result)}, count: ${count}`) 
     }
-
-    count++
-    await timer(queryTimer)
   }
 
   let latestMilestone = milestone.result

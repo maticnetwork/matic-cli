@@ -12,14 +12,13 @@ import {
   getPeerLength,
   createClusters,
   getEnode,
-  validateNumberOfPeers,
   validateFinalizedBlock,
   fetchLatestMilestone,
   joinAllPeers
 } from '../common/milestone-utils'
 
 const milestoneLength = 64
-const queryTimer = (milestoneLength / 4) * 1000
+const queryTimer = (milestoneLength / 8) * 1000
 
 export async function milestonePartition() {
   // NOTE: Make sure bor branch has logic for hardcoded primary validator
@@ -58,13 +57,6 @@ export async function milestonePartition() {
     return
   }
 
-  // Wait for a milestone to get proposed for verification
-  let lastMilestone = await fetchLatestMilestone(milestoneLength, queryTimer, borHosts[0])
-  if (!lastMilestone) {
-    console.log('📍Unable to fetch latest milestone from heimdall, exiting')
-    return
-  }
-
   console.log('📍Rejoining clusters before performing tests')
  
   // Make sure all peers are joined
@@ -76,8 +68,15 @@ export async function milestonePartition() {
 
   console.log('📍Rejoined clusters')
 
-  console.log('📍Waiting 32s to fetch finalized blocks...')
-  await timer(32000)
+  // Wait for a milestone to get proposed for verification
+  let lastMilestone = await fetchLatestMilestone(milestoneLength, queryTimer, borHosts[0])
+  if (!lastMilestone) {
+    console.log('📍Unable to fetch latest milestone from heimdall, exiting')
+    return
+  }
+
+  console.log('📍Waiting 10s to fetch finalized blocks...')
+  await timer(10000)
 
   // Fetch the last 'finalized' block
   console.log('📍Trying to fetch last finalized block')
@@ -99,7 +98,7 @@ export async function milestonePartition() {
 
   // Next step is to create 2 clusters where primary node is separated from the
   // rest of the network.
-  let created = await createClusters(ips, enodes)
+  let created = await createClusters(ips, enodes, 2)
   if (!created) {
     console.log('📍Unable to remove peers for creating clusters, exiting')
     return
@@ -126,7 +125,7 @@ export async function milestonePartition() {
   let expected = [1, 1, 1, 1]
   if (JSON.stringify(peers) != JSON.stringify(expected)) {
     console.log(`📍Retrying creation of partition clusters for testing due to peer length mismatch, got: ${peers}, expected: ${expected}`)
-    created = await createClusters(ips, enodes)
+    created = await createClusters(ips, enodes, 2)
     if (!created) {
       console.log('📍Unable to remove peers for creating clusters, exiting')
       return
@@ -207,13 +206,14 @@ export async function milestonePartition() {
   }
 
   // Expect no milestone to be proposed
-  let latestMilestone = await fetchLatestMilestone(2 * milestoneLength, queryTimer, borHosts[0], lastMilestone)
+  let latestMilestone = await fetchLatestMilestone(milestoneLength, queryTimer/4, borHosts[0], lastMilestone)
   if (latestMilestone) {
     console.log('📍New milestone proposed despite non-majority clusters, exiting')
     return
   } 
 
   // Reconnect both the clusters
+  console.log('📍Rejoining clusters')
   joined = await joinAllPeers(ips, enodes)
   if (!joined) {
     console.log('📍Unable to join peers while rejoining clusters, exiting')
@@ -234,7 +234,7 @@ export async function milestonePartition() {
   
   if (latestBlockCluster2.number) {
     if (latestBlockCluster1.hash == latestBlockCluster2.hash) {
-      console.log('Cluster 2 successfully reorged to cluster 1 (having high difficulty) as expected')
+      console.log('📍Cluster 2 successfully reorged to cluster 1 (having high difficulty) as expected')
     } else {
       console.log(`📍Hash mismatch among clusters. Cluster 1 hash: ${latestBlockCluster1.hash}, Cluster 2 hash: ${latestBlockCluster2.hash}, exiting`)
       return
@@ -290,8 +290,8 @@ export async function milestonePartition() {
     return
   }
 
-  console.log('📍Waiting for bor nodes to import milestone')
-  console.log('📍Waiting 32s for bor nodes to import milestone')
+  console.log('📍Waiting 10s for bor nodes to import milestone')
+  await timer(10000)
 
   console.log('📍Trying to fetch last finalized block from all nodes and validate')
   let valid = await validateFinalizedBlock(borHosts, latestMilestone)

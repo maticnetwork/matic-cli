@@ -1,7 +1,7 @@
 /* eslint-disable dot-notation */
 import { loadDevnetConfig, splitToArray } from '../common/config-utils'
 import { getEnode, getBlock, addPeers, getPeerLength } from '../common/milestone-utils'
-const { runCommand, runSshCommand, runSshCommandWithReturn } = require('../common/remote-worker')
+const { runCommand, runSshCommand, runSshCommandWithReturn, maxRetries } = require('../common/remote-worker')
 import { checkLatestMilestone } from './monitor';
 import { timer } from '../common/time-utils'
 
@@ -32,6 +32,16 @@ export async function getMiner(ip, number) {
   return undefined
 }
 
+export async function getGitBranch(ip, path = '~', repo = 'bor') {
+  let command = `cd ${path}/${repo} && git branch --show-current`
+  return await runSshCommandWithReturn(ip, command, maxRetries)
+}
+
+export async function getLastCommitMessage(ip, repo = 'bor') {
+  let command = `cd ~/matic-cli/devnet/code/bor && git show-branch --no-name HEAD`
+  return await runSshCommandWithReturn(ip, command, maxRetries)
+}
+
 export async function milestoneHelper() {
   require('dotenv').config({ path: `${process.cwd()}/.env` })
   const devnetType =
@@ -55,7 +65,8 @@ export async function milestoneHelper() {
     enodes = values
   })
 
-  console.log(enodes, ips)
+  console.log("ips:", ips)
+  console.log("enodes:", enodes)
 
   tasks = []
   for (let i = 0; i < ips.length; i++) {
@@ -74,6 +85,57 @@ export async function milestoneHelper() {
   await Promise.all(tasks).then((values) => {
     console.log("length:", values)
   })
+
+  // Validate if the milestone is proposed by validators of cluster 2 and not by validators of cluster 1
+  // let validators = await getValidatorInfo(ips[0])
+  // let latestMilestone = {proposer: "0x0e525b1eb9be52f9dec18a6b233a562a48f6e187"}
+  // try {
+  //   if (validators) {
+  //     if (String(latestMilestone.proposer).toLowerCase() == String(validators[0].address).toLowerCase()) {
+  //       console.log(`📍Invalid milestone got proposed from validator/s of cluster 1. Proposer: ${latestMilestone.proposer}, Validators address: ${validators[0].address}, exiting`)
+  //       return
+  //     }
+  
+  //     // Skip the validator from cluster 1
+  //     let done = false
+  //     for (let i = 1; i < validators.length; i++) {
+  //       if (String(latestMilestone.proposer).toLowerCase() == String(validators[i].address).toLowerCase()) {
+  //         console.log(`📍Validated milestone proposer`)
+  //         done = true
+  //         break
+  //       }
+  //     }
+
+  //     if (!done) {
+  //       console.log('📍Invalid milestone got proposed from validator/s of cluster 1, proposer: exiting')
+  //       return
+  //     }
+  //   }
+  // } catch (error) {
+  //   console.log('📍Error in validating milestone proposer', error)
+  // }
+
+  // tasks = []
+  // for (let i = 0; i < ips.length; i++) {
+  //   tasks.push(getGitBranch(ips[i], i==0 ? '~/matic-cli/devnet/code' : '~'))
+  // }
+
+  // await Promise.all(tasks).then((values) => {
+  //   console.log("git branches", values)
+  // })
+
+  // let arr1 = ["ip1", "ip2", "ip3", "ip4"]
+  // let arr2 = ["enode1", "enode2", "enode3", "enode4"]
+  // hello(arr1, arr2)
+
+  // tasks = []
+  // for (let i = 0; i < ips.length; i++) {
+  //   tasks.push(getLastCommitMessage(ips[i]))
+  // }
+
+  // await Promise.all(tasks).then((values) => {
+  //   console.log("last commit messages", values)
+  // })
 
   // const response1 = await runCommand(getBlock, ips[0], 'latest', 3)
   // console.log('0: ', Number(response1.number), response1.hash)
@@ -125,4 +187,15 @@ export async function milestoneHelper() {
 
   // let latestMilestone = milestone.result
   // console.log(`📍Got milestone from heimdall. Start block: ${Number(latestMilestone.start_block)}, End block: ${Number(latestMilestone.end_block)}, ID: ${latestMilestone.milestone_id}`)
+}
+
+export async function hello(ips, enodes, split = 1) {
+  let ips1 = ips.slice(0, split)
+  let ips2 = ips.slice(split)
+  for (let i = 0; i < ips1.length; i++) {
+    console.log("Remove peers 1 - ips[i]:", ips1[i], ", enodes.slice(split):", enodes.slice(split), ", i:", i)
+  }
+  for (let i = 0; i < ips2.length; i++) {
+    console.log("Remove peers 2 - ips[i]:", ips2[i], ", enodes.slice(0, split):", enodes.slice(0, split), ", i:", i)
+  }
 }
