@@ -187,6 +187,10 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
   - Create a `StakeUpdate` transaction on the remote network and increase stake of 1st validator by 100 MATIC.
 
+- `../../bin/express-cli --send-signerchange-event`
+
+  - Create a `SignerChange` transaction on the remote network and changes the signer of the 1st validator.
+
 - ` ../../bin/express-cli --monitor [exit]`
 
   - Monitors the reception of state-syncs and checkpoints to make sure the whole network is in a healthy state.

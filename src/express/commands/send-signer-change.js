@@ -64,8 +64,17 @@ export async function sendSignerChangeEvent() {
   console.log('NewValidatorAddr', newAccAddr, newAccPubKey)
   console.log('NewValidatorPrivKey', wallet.getPrivateKeyString())
 
-  const tx = stakeManagerContract.methods.updateSigner(validatorIDForTest, newAccPubKey)
-  const signedTx = await getSignedTx(rootChainWeb3, StakeManagerProxyAddress, tx, validatorAccount, pkey)
+  const tx = stakeManagerContract.methods.updateSigner(
+    validatorIDForTest,
+    newAccPubKey
+  )
+  const signedTx = await getSignedTx(
+    rootChainWeb3,
+    StakeManagerProxyAddress,
+    tx,
+    validatorAccount,
+    pkey
+  )
   const Receipt = await rootChainWeb3.eth.sendSignedTransaction(
     signedTx.rawTransaction
   )

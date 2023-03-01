@@ -1,4 +1,10 @@
-export async function getSignedTx(web3object, to, tx, validatorAccount, privateKey) {
+export async function getSignedTx(
+  web3object,
+  to,
+  tx,
+  validatorAccount,
+  privateKey
+) {
   const gas = await tx.estimateGas({ from: validatorAccount })
   const data = tx.encodeABI()
 
