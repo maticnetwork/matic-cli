@@ -42,7 +42,7 @@ cat > heimdalld.service <<EOF
   Description=heimdalld
 [Service]
   WorkingDirectory=$NODE_DIR
-  ExecStart=$BIN_DIR/heimdalld start --home $HOME/.heimdalld --chain=$HOME/.heimdalld/config/genesis.json  --bridge --all --rest-server
+  ExecStart=$BIN_DIR/heimdalld start --home /var/lib/heimdall --chain=/var/lib/heimdall/config/genesis.json  --bridge --all --rest-server
   Type=simple
   User=$USER
 [Install]

@@ -111,7 +111,7 @@ async function getLatestCheckpointFromRootChain(ip, rootChainProxyAddress) {
   return currentHeaderBlock.toString().slice(0, -4)
 }
 
-export async function monitor() {
+export async function monitor(exitWhenDone) {
   require('dotenv').config({ path: `${process.cwd()}/.env` })
   const devnetType =
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
@@ -166,6 +166,7 @@ export async function monitor() {
 
     const firstStateSyncTx = await checkStateSyncTx(machine0, 1)
     let stateSyncTxList
+    let lastStateID
     if (firstStateSyncTx) {
       const timeOfFirstStateSyncTx = firstStateSyncTx.record_time
       const firstEpochTime = parseInt(
@@ -178,7 +179,7 @@ export async function monitor() {
         currentEpochTime
       )
       if (stateSyncTxList) {
-        const lastStateID = stateSyncTxList.length
+        lastStateID = stateSyncTxList.length
         const lastStateSyncTxHash = stateSyncTxList[lastStateID - 1].tx_hash
         console.log(
           '📍StateSyncs found on Heimdall ✅ ; Count: ',
@@ -196,6 +197,17 @@ export async function monitor() {
       console.log('📍LastStateId on Bor: ', lastStateId)
     } else {
       console.log('📍Unable to fetch LastStateId ')
+    }
+
+    if (
+      exitWhenDone === true &&
+      lastStateId &&
+      lastStateID > 0 &&
+      checkpointCountFromRootChain > 0 &&
+      checkpointCount > 0
+    ) {
+      console.log('📍All checks executed successfully')
+      process.exit(0)
     }
   }
 }
