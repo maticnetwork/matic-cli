@@ -6,6 +6,7 @@ import ERC20ABI from '../../abi/ERC20ABI.json'
 import Web3 from 'web3'
 import Wallet, { hdkey } from 'ethereumjs-wallet'
 import { timer } from '../common/time-utils'
+import { getSignedTx } from '../common/tx-utils'
 
 const {
   runScpCommand,
@@ -112,7 +113,7 @@ export async function sendStakedEvent() {
 
   while (parseInt(newValidatorsCount) !== parseInt(oldValidatorsCount) + 1) {
     console.log('Waiting 3 secs for validator to be added')
-    await timer(3000) // waiting 10 seconds for the validator to be added
+    await timer(3000) // waiting 3 secs
     newValidatorsCount = await checkValidatorsLength(doc)
     console.log('newValidatorsCount : ', newValidatorsCount)
   }
@@ -133,21 +134,4 @@ async function checkValidatorsLength(doc) {
   )
   const outobj = JSON.parse(out)
   return outobj.result.validators.length
-}
-
-async function getSignedTx(web3object, to, tx, validatorAccount, privateKey) {
-  const gas = await tx.estimateGas({ from: validatorAccount })
-  const data = tx.encodeABI()
-
-  const signedTx = await web3object.eth.accounts.signTransaction(
-    {
-      from: validatorAccount,
-      to,
-      data,
-      gas
-    },
-    privateKey
-  )
-
-  return signedTx
 }
