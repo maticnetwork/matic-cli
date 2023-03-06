@@ -124,7 +124,7 @@ export async function sendStakedEvent() {
   )
 }
 
-async function checkValidatorsLength(doc) {
+export async function checkValidatorsLength(doc) {
   const machine0 = doc.devnetBorHosts[0]
   const command = 'curl localhost:1317/staking/validator-set'
   const out = await runSshCommandWithReturn(
