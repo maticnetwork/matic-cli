@@ -195,6 +195,10 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
   - Create a `UnstakeInit` transaction on the remote network and removes the validator from validator-set.
 
+- `../../bin/express-cli --send-topupfee-event`
+
+  - Create a `TopUpFee` transaction on the remote network and adds balance/heimdallFee for the first validator on Heimdall.
+
 - ` ../../bin/express-cli --monitor [exit]`
 
   - Monitors the reception of state-syncs and checkpoints to make sure the whole network is in a healthy state.

@@ -66,10 +66,7 @@ program
   )
   .option('-ss, --send-state-sync', 'Send state sync tx')
   .option('-sstake, --send-staked-event', 'Send staked event')
-  .option(
-    '-sstakeupdate, --send-stakeupdate-event',
-    'Send staked-update event'
-  )
+  .option('-sstakeupdate, --send-stakeupdate-event', 'Send staked-update event')
   .option(
     '-ssignerchange, --send-signerchange-event',
     'Send signer-change event'
