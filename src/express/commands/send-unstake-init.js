@@ -7,10 +7,7 @@ import { getSignedTx } from '../common/tx-utils'
 import { timer } from '../common/time-utils'
 import { checkValidatorsLength } from './send-staked-event'
 
-const {
-  runScpCommand,
-  maxRetries
-} = require('../common/remote-worker')
+const { runScpCommand, maxRetries } = require('../common/remote-worker')
 
 export async function sendUnstakeInitEvent() {
   require('dotenv').config({ path: `${process.cwd()}/.env` })
@@ -51,9 +48,7 @@ export async function sendUnstakeInitEvent() {
     StakeManagerProxyAddress
   )
 
-  const tx = stakeManagerContract.methods.unstake(
-    validatorIDForTest
-  )
+  const tx = stakeManagerContract.methods.unstake(validatorIDForTest)
   const signedTx = await getSignedTx(
     rootChainWeb3,
     StakeManagerProxyAddress,

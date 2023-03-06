@@ -191,6 +191,10 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
   - Create a `SignerChange` transaction on the remote network and changes the signer of the 1st validator.
 
+- `../../bin/express-cli --send-unstakeinit-event`
+
+  - Create a `UnstakeInit` transaction on the remote network and removes the validator from validator-set.
+
 - ` ../../bin/express-cli --monitor [exit]`
 
   - Monitors the reception of state-syncs and checkpoints to make sure the whole network is in a healthy state.
