@@ -74,6 +74,10 @@ program
   .option('-sunstakeinit, --send-unstakeinit-event', 'Send unstake-init event')
   .option('-stopupfee, --send-topupfee-event', 'Send topupfee event')
   .option(
+    '-sunstakeinit, --send-unstakeinit-event [validatorID]',
+    'Send unstake-init event'
+  )
+  .option(
     '-e1559, --eip-1559-test [index]',
     'Test EIP 1559 txs. In case of a non-dockerized devnet, if an integer [index] is specified, it will use that VM to send the tx. Otherwise, it will target the first VM.'
   )
@@ -301,15 +305,20 @@ export async function cli() {
     await timer(3000)
     await sendSignerChangeEvent()
   } else if (options.sendUnstakeinitEvent) {
-    console.log('📍Command --send-unstakeinit-event ')
+    console.log('📍Command --send-unstakeinit-event [validatorID]')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
       )
       process.exit(1)
     }
+    if (options.sendUnstakeinitEvent === true) {
+      if (parseInt(options.sendUnstakeinitEvent) < 1) {
+        options.sendUnstakeinitEvent = 1
+      }
+    }
     await timer(3000)
-    await sendUnstakeInitEvent()
+    await sendUnstakeInitEvent(parseInt(options.sendUnstakeinitEvent))
   } else if (options.sendTopupfeeEvent) {
     console.log('📍Command --send-topupfee-event ')
     if (!checkDir(false)) {

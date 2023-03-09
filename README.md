@@ -191,13 +191,13 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
   - Create a `SignerChange` transaction on the remote network and changes the signer of the 1st validator.
 
-- `../../bin/express-cli --send-unstakeinit-event`
-
-  - Create a `UnstakeInit` transaction on the remote network and removes the validator from validator-set.
-
 - `../../bin/express-cli --send-topupfee-event`
 
   - Create a `TopUpFee` transaction on the remote network and adds balance/heimdallFee for the first validator on Heimdall.
+  
+- `../../bin/express-cli --send-unstakeinit-event [validatorID]`
+
+  - Create a `UnstakeInit` transaction on the remote network and removes the validator from validator-set. `validatorID` can be used to specify the validator to be removed. If not specified, the first validator will be removed.
 
 - ` ../../bin/express-cli --monitor [exit]`
 

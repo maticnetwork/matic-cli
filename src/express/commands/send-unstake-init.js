@@ -9,7 +9,7 @@ import { checkValidatorsLength } from './send-staked-event'
 
 const { runScpCommand, maxRetries } = require('../common/remote-worker')
 
-export async function sendUnstakeInitEvent() {
+export async function sendUnstakeInitEvent(validatorID) {
   require('dotenv').config({ path: `${process.cwd()}/.env` })
   const devnetType =
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
@@ -18,6 +18,7 @@ export async function sendUnstakeInitEvent() {
 
   if (doc.devnetBorHosts.length > 0) {
     console.log('📍Monitoring the first node', doc.devnetBorHosts[0])
+    console.log('📍Unstaking Validator : ', validatorID)
   } else {
     console.log('📍No nodes to monitor, please check your configs! Exiting...')
     process.exit(1)
@@ -39,9 +40,9 @@ export async function sendUnstakeInitEvent() {
   const StakeManagerProxyAddress = contractAddresses.root.StakeManagerProxy
 
   const signerDump = require(`${process.cwd()}/signer-dump.json`)
-  const pkey = signerDump[0].priv_key
-  const validatorAccount = signerDump[0].address
-  const validatorIDForTest = '1'
+  const pkey = signerDump[validatorID - 1].priv_key
+  const validatorAccount = signerDump[validatorID - 1].address
+  const validatorIDForTest = validatorID.toString()
 
   const stakeManagerContract = new rootChainWeb3.eth.Contract(
     stakeManagerABI,
