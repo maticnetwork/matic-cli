@@ -71,7 +71,6 @@ program
     '-ssignerchange, --send-signerchange-event',
     'Send signer-change event'
   )
-  .option('-sunstakeinit, --send-unstakeinit-event', 'Send unstake-init event')
   .option('-stopupfee, --send-topupfee-event', 'Send topupfee event')
   .option(
     '-sunstakeinit, --send-unstakeinit-event [validatorID]',
