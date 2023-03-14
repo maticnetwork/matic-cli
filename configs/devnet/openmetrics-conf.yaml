@@ -10,6 +10,7 @@ instances:
       - les*
       - eth*
       - chain*
+      - worker*
     namespace: bor
     openmetrics_endpoint: http://localhost:7071/debug/metrics/prometheus
   - exclude_metrics:
