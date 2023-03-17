@@ -39,6 +39,21 @@ export async function getBlock(ip, number = 'latest') {
   return undefined
 }
 
+export async function checkForRewind(ip) {
+  let command = `journalctl -u bor -n 500 | grep "Rewinding blockchain" | wc -l`
+  try {
+    let count = await runSshCommandWithReturn(ip, command, maxRetries)
+    // console.log('📍Fetched count of rewind logs, count:', count)
+    if ((Number(count) == 1)) {
+      console.log('📍Chain got to correct fork with Rewind')
+    } else {
+      console.log('📍Chain got to correct fork without Rewind, count:', count)
+    }
+  } catch (error) {
+    console.log('📍Unable to fetch count of rewind logs, error:', error)
+  }
+}
+
 async function getValidatorInfo(ip) {
   const command = 'echo `cat $HOME/matic-cli/devnet/code/genesis-contracts/validators.json`'
   try {

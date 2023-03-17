@@ -15,7 +15,8 @@ import {
   fetchLatestMilestone,
   joinAllPeers,
   validateProposer,
-  validateFinalizedBlock
+  validateFinalizedBlock,
+  checkForRewind,
 } from '../common/milestone-utils'
 
 const milestoneLength = 64
@@ -229,6 +230,9 @@ export async function milestoneBase() {
   // Wait for few seconds for reorg to happen
   console.log('📍Waiting 4s for clusters to connect and reorg...')
   await timer(4000)
+  
+  console.log('📍Checking for rewind')
+  await checkForRewind(ips[0])
 
   // Fetch block from cluster 1 to see if it got reorged to cluster 2
   console.log(`📍Fetching block ${Number(latestBlockCluster2.number)} from cluster 1`)
