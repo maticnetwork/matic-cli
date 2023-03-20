@@ -25,6 +25,7 @@ import { stopInstances } from './express/commands/instances-stop'
 import { startInstances } from './express/commands/instances-start'
 import { rewind } from './express/commands/rewind'
 import { shadow } from './express/commands/shadow'
+import { rpcTest } from '../tests/rpc-tests/rpc-test'
 
 program
   .option('-i, --init', 'Initiate the terraform setup')
@@ -86,6 +87,7 @@ program
     '-sf, --shadow-fork [blockNumber]',
     'Run nodes in shadow mode. Please note that there might be an offset of ~3-4 blocks from [blockNumber] specified when restarting the (shadow) node'
   )
+  .option('-rpc, --rpc-test', 'Run the rpc test command')
   .version(pkg.version)
 
 export async function cli() {
@@ -386,5 +388,18 @@ export async function cli() {
     )
 
     await shadow(options.shadowFork)
+  } else if (options.rpcTest) {
+    console.log('📍Command --rpc-test')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    
+    console.log(
+      '⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...'
+    )
+    await rpcTest()
   }
 }

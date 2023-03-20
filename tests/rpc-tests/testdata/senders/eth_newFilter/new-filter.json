@@ -1,0 +1,3 @@
+{
+    "req": {"jsonrpc":"2.0","method":"eth_newFilter","params":[{"fromBlock": "0xe20360", "toBlock": "0xe20411", "address": "0x06c3c26f80887a108a182ac70894793ebbe19eee","topics": []}],"id":1}
+}

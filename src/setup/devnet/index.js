@@ -432,7 +432,7 @@ export class Devnet {
                 '-i',
                 '~/cert.pem',
                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                `sudo systemctl stop bor.service && sudo rm -rf ~/.bor/data/bor/chaindata/* && sudo wget -O- ${this.config.borSnapshotUrl} | sudo tar zxf - -C ~/.bor/data/bor/chaindata && sudo chmod 777 -R ~/.bor/data/bor/chaindata && sudo systemctl restart bor.service`
+                `sudo systemctl stop bor.service && sudo rm -rf ~/.bor/data/bor/chaindata/* && sudo wget -O- ${this.config.borSnapshotUrl} | tar -I zstd -xf - -C ~/.bor/data/bor/chaindata && sudo chmod 777 -R ~/.bor/data/bor/chaindata && sudo systemctl restart bor.service`
               ],
               { stdio: getRemoteStdio() })
           }

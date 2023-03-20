@@ -1,0 +1,4 @@
+{
+    "req": {"method":"eth_getBlockTransactionCountByNumber","params":["0x2058900"],"id":1,"jsonrpc":"2.0"},
+    "res": {"jsonrpc":"2.0","id":1,"result":"0x7"}
+}

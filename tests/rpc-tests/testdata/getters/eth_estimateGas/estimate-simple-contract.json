@@ -1,0 +1,15 @@
+{
+  "req": {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "eth_estimateGas",
+    "params": [
+      {
+        "from": "0x9B65FB1DD183842E7808470e09B3d785926Cd29F",
+        "to": "0xfe4f5145f6e09952a5ba9e956ed0c25e3fa4c7f1"
+      },
+      "0x1F16E62"
+    ]
+  },
+  "res": { "jsonrpc": "2.0", "id": 1, "result": "0x523f" }
+}

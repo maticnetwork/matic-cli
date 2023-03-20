@@ -231,6 +231,8 @@ The `express-cli` also comes with additional utility commands, listed below. Som
   - Run (mumbai/mainnet) nodes in shadow mode. Please note that there might be an offset of ~3-4 blocks from [block] number
     specified when restarting the (shadow) node. Currently only works with remote setup (no docker support).
 
+- `../../bin/express-cli --rpc-test`
+  - Executes RPC methods against the provided test data and verifies the response data's compatibility and correctness.
 ## `matic-cli`
 
 `matic-cli` has to be installed on a `ubuntu` VM (_host_) and - through a config file - it will point to
