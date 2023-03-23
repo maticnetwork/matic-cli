@@ -89,8 +89,14 @@ program
   .option('-istart, --instances-start', 'Start aws ec2 instances')
   .option('-rewind, --rewind [numberOfBlocks]', 'Rewind the chain')
   .option('-milestone-base, --milestone-base', 'Run milestone base tests')
-  .option('-milestone-partition, --milestone-partition', 'Run milestone partition tests')
-  .option('-milestone-helper, --milestone-helper', 'Helper utility for milestone')
+  .option(
+    '-milestone-partition, --milestone-partition',
+    'Run milestone partition tests'
+  )
+  .option(
+    '-milestone-helper, --milestone-helper',
+    'Helper utility for milestone'
+  )
   .version(pkg.version)
 
 export async function cli() {

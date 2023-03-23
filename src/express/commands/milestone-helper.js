@@ -1,32 +1,46 @@
 /* eslint-disable dot-notation */
 import { loadDevnetConfig, splitToArray } from '../common/config-utils'
-import { getEnode, getBlock, addPeers, getPeerLength } from '../common/milestone-utils'
-const { runCommand, runSshCommand, runSshCommandWithReturn, maxRetries } = require('../common/remote-worker')
-import { checkLatestMilestone } from './monitor';
+import {
+  getEnode,
+  getBlock,
+  addPeers,
+  getPeerLength
+} from '../common/milestone-utils'
+const {
+  runCommand,
+  runSshCommand,
+  runSshCommandWithReturn,
+  maxRetries
+} = require('../common/remote-worker')
+import { checkLatestMilestone } from './monitor'
 import { timer } from '../common/time-utils'
 
 export async function getMiner(ip, number) {
   const url = `http://${ip}:8545`
-  number = "0x" + Number(number).toString(16) // hexify
+  number = '0x' + Number(number).toString(16) // hexify
 
   const opts = {
-    "jsonrpc":"2.0",
-    "id":1,
-    "method":"bor_getAuthor",
-    "params":[number],
+    jsonrpc: '2.0',
+    id: 1,
+    method: 'bor_getAuthor',
+    params: [number]
   }
 
   const response = await fetch(url, {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(opts)
   })
-  
+
   const responseJson = await response.json()
   if (responseJson.result) {
     return responseJson.result
   } else {
-    console.log(`📍Error fetching miner. number: ${number}, response: ${JSON.stringify(response)}, opts: ${JSON.stringify(opts)}`)
+    console.log(
+      `📍Error fetching miner. number: ${number}, response: ${JSON.stringify(
+        response
+      )}, opts: ${JSON.stringify(opts)}`
+    )
   }
 
   return undefined
@@ -65,8 +79,8 @@ export async function milestoneHelper() {
     enodes = values
   })
 
-  console.log("ips:", ips)
-  console.log("enodes:", enodes)
+  console.log('ips:', ips)
+  console.log('enodes:', enodes)
 
   tasks = []
   for (let i = 0; i < ips.length; i++) {
@@ -75,7 +89,7 @@ export async function milestoneHelper() {
 
   await Promise.all(tasks).then((values) => {
     console.log('addPeers done. values:', values)
-  })  
+  })
 
   tasks = []
   for (let i = 0; i < ips.length; i++) {
@@ -83,7 +97,7 @@ export async function milestoneHelper() {
   }
 
   await Promise.all(tasks).then((values) => {
-    console.log("length:", values)
+    console.log('length:', values)
   })
 
   // Validate if the milestone is proposed by validators of cluster 2 and not by validators of cluster 1
@@ -95,7 +109,7 @@ export async function milestoneHelper() {
   //       console.log(`📍Invalid milestone got proposed from validator/s of cluster 1. Proposer: ${latestMilestone.proposer}, Validators address: ${validators[0].address}, exiting`)
   //       return
   //     }
-  
+
   //     // Skip the validator from cluster 1
   //     let done = false
   //     for (let i = 1; i < validators.length; i++) {
@@ -178,7 +192,7 @@ export async function milestoneHelper() {
   //     }
   //     console.log('📍Waiting for new milestone...')
   //   } else {
-  //     console.log(`📍Invalid milestone received. Response: ${JSON.stringify(milestone.result)}, count: ${count}`) 
+  //     console.log(`📍Invalid milestone received. Response: ${JSON.stringify(milestone.result)}, count: ${count}`)
   //   }
 
   //   count++
@@ -193,9 +207,23 @@ export async function hello(ips, enodes, split = 1) {
   let ips1 = ips.slice(0, split)
   let ips2 = ips.slice(split)
   for (let i = 0; i < ips1.length; i++) {
-    console.log("Remove peers 1 - ips[i]:", ips1[i], ", enodes.slice(split):", enodes.slice(split), ", i:", i)
+    console.log(
+      'Remove peers 1 - ips[i]:',
+      ips1[i],
+      ', enodes.slice(split):',
+      enodes.slice(split),
+      ', i:',
+      i
+    )
   }
   for (let i = 0; i < ips2.length; i++) {
-    console.log("Remove peers 2 - ips[i]:", ips2[i], ", enodes.slice(0, split):", enodes.slice(0, split), ", i:", i)
+    console.log(
+      'Remove peers 2 - ips[i]:',
+      ips2[i],
+      ', enodes.slice(0, split):',
+      enodes.slice(0, split),
+      ', i:',
+      i
+    )
   }
 }

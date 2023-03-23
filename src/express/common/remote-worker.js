@@ -153,10 +153,7 @@ export async function runScpCommand(src, dest, retries) {
 
 export async function runCommand(fn, ip, number, retries) {
   if (retries < 0) {
-    console.log(
-      '❌ runCommand called with negative retries number: ',
-      retries
-    )
+    console.log('❌ runCommand called with negative retries number: ', retries)
     process.exit(1)
   }
   try {
@@ -164,13 +161,10 @@ export async function runCommand(fn, ip, number, retries) {
     return response
   } catch (error) {
     if (retries - 1 > 0) {
-      console.log("--- running command")
+      console.log('--- running command')
       await runCommand(fn, ip, number, retries - 1)
     } else {
-      console.log(
-        '❌ Command failed too many times with error: \n',
-        error
-      )
+      console.log('❌ Command failed too many times with error: \n', error)
       process.exit(1)
     }
   }

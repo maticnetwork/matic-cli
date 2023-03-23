@@ -15,24 +15,26 @@ export async function getBlock(ip, number = 'latest') {
   }
 
   const opts = {
-    'jsonrpc':'2.0',
-    'id':1,
-    'method':'eth_getBlockByNumber',
-    'params':[number, false],
+    jsonrpc: '2.0',
+    id: 1,
+    method: 'eth_getBlockByNumber',
+    params: [number, false]
   }
 
   const response = await fetch(url, {
     method: 'POST',
-    headers: {'Content-Type': 'application/json'},
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(opts)
   })
-  
+
   const responseJson = await response.json()
   if (responseJson.result) {
     // console.log(`📍Request. number: ${number}, opts: ${JSON.stringify(opts)}`)
     return responseJson.result
   } else {
-    console.log(`📍Error fetching block. number: ${number}, opts: ${JSON.stringify(opts)}`)
+    console.log(
+      `📍Error fetching block. number: ${number}, opts: ${JSON.stringify(opts)}`
+    )
     console.log(`📍Response received:`, responseJson)
   }
 
@@ -44,7 +46,7 @@ export async function checkForRewind(ip) {
   try {
     let count = await runSshCommandWithReturn(ip, command, maxRetries)
     // console.log('📍Fetched count of rewind logs, count:', count)
-    if ((Number(count) == 1)) {
+    if (Number(count) == 1) {
       console.log('📍Chain got to correct fork with Rewind')
     } else {
       console.log('📍Chain got to correct fork without Rewind, count:', count)
@@ -55,7 +57,8 @@ export async function checkForRewind(ip) {
 }
 
 async function getValidatorInfo(ip) {
-  const command = 'echo `cat $HOME/matic-cli/devnet/code/genesis-contracts/validators.json`'
+  const command =
+    'echo `cat $HOME/matic-cli/devnet/code/genesis-contracts/validators.json`'
   try {
     let validators = await runSshCommandWithReturn(ip, command, maxRetries)
     return JSON.parse(validators)
@@ -72,17 +75,30 @@ export async function validateProposer(ip, proposer) {
     if (validators) {
       // Skip the validator from cluster 1
       for (let i = 1; i < validators.length; i++) {
-        if (String(proposer).toLowerCase() == String(validators[i].address).toLowerCase()) {
+        if (
+          String(proposer).toLowerCase() ==
+          String(validators[i].address).toLowerCase()
+        ) {
           console.log(`📍Validated milestone proposer`)
           return
         }
       }
 
-      console.log('📍Invalid milestone got proposed from validator/s of cluster 1')
-      console.log('📍Milestone proposer:', proposer, ", validators: ", validators)
+      console.log(
+        '📍Invalid milestone got proposed from validator/s of cluster 1'
+      )
+      console.log(
+        '📍Milestone proposer:',
+        proposer,
+        ', validators: ',
+        validators
+      )
     }
   } catch (error) {
-    console.log('📍Error in validating milestone proposer, skipping check. Error:', error)
+    console.log(
+      '📍Error in validating milestone proposer, skipping check. Error:',
+      error
+    )
   }
 }
 
@@ -94,11 +110,13 @@ export async function removePeers(ip, peers) {
   }
 
   let response = false
-  await Promise.all(tasks).then(() => {
-    response = true
-  }).catch((error) => {
-    console.log('📍Unable to remove peers, error:', error)
-  })
+  await Promise.all(tasks)
+    .then(() => {
+      response = true
+    })
+    .catch((error) => {
+      console.log('📍Unable to remove peers, error:', error)
+    })
 
   return response
 }
@@ -111,11 +129,13 @@ export async function addPeers(ip, peers) {
   }
 
   let response = false
-  await Promise.all(tasks).then(() => {
-    response = true   
-  }).catch((error) => {
-    console.log('📍Unable to add peers, error:', error)
-  })
+  await Promise.all(tasks)
+    .then(() => {
+      response = true
+    })
+    .catch((error) => {
+      console.log('📍Unable to add peers, error:', error)
+    })
 
   return response
 }
@@ -173,7 +193,7 @@ export async function joinAllPeers(ips, enodes) {
 }
 
 export async function createClusters(ips, enodes, split = 1) {
-  // `split` defines how clusters are created and which index to use to seperate nodes. 
+  // `split` defines how clusters are created and which index to use to seperate nodes.
   // e.g. for split = 1, clusters created would be of 1 and 3 nodes (nodes[:split], nodes[split:])
   let tasks = []
   let ips1 = ips.slice(0, split)
@@ -186,21 +206,23 @@ export async function createClusters(ips, enodes, split = 1) {
   }
 
   let response = false
-  await Promise.all(tasks).then((values) => {
-    if (values.includes(false) || values.includes(undefined)) {
-      console.log('📍Unable to remove peers, exiting')
-    } else {
-      response = true
-    }
-  }).catch(error => {
-    console.log('📍Unable to remove peers, error:', error)
-  })
+  await Promise.all(tasks)
+    .then((values) => {
+      if (values.includes(false) || values.includes(undefined)) {
+        console.log('📍Unable to remove peers, exiting')
+      } else {
+        response = true
+      }
+    })
+    .catch((error) => {
+      console.log('📍Unable to remove peers, error:', error)
+    })
 
   return response
 }
 
 export async function rejoinClusters(ips, enodes, split = 1) {
-  // `split` defines how clusters are joined and which index to use to join nodes. 
+  // `split` defines how clusters are joined and which index to use to join nodes.
   // e.g. for split = 1, clusters of 1 and 3 nodes would be joined (nodes[:split], nodes[split:])
   let tasks = []
   for (let i = 0; i < ips.slice(0, split); i++) {
@@ -211,29 +233,33 @@ export async function rejoinClusters(ips, enodes, split = 1) {
   }
 
   let response = false
-  await Promise.all(tasks).then(values => {
-    if (values.includes(false) || values.includes(undefined)) {
-      console.log('📍Unable to add peers, exiting')
-    } else {
-      response = true
-    }
-  }).catch(error => {
-    console.log("📍Unable to add peers, error", error)
-  })
-  
+  await Promise.all(tasks)
+    .then((values) => {
+      if (values.includes(false) || values.includes(undefined)) {
+        console.log('📍Unable to add peers, exiting')
+      } else {
+        response = true
+      }
+    })
+    .catch((error) => {
+      console.log('📍Unable to add peers, error', error)
+    })
+
   return response
 }
 
 export async function getEnode(user, host) {
   const ip = `${user}@${host}`
-  let command = '~/go/bin/bor attach ~/.bor/data/bor.ipc --exec admin.nodeInfo.enode'
+  let command =
+    '~/go/bin/bor attach ~/.bor/data/bor.ipc --exec admin.nodeInfo.enode'
   try {
     const fullEnode = await runSshCommandWithReturn(ip, command, maxRetries)
-    let enode = String(fullEnode).split('@')[0].slice(1); // remove the local ip from the enode
-    if (enode.length != 136) { // prefix "enode://" + 128 hex values for enode itself
+    let enode = String(fullEnode).split('@')[0].slice(1) // remove the local ip from the enode
+    if (enode.length != 136) {
+      // prefix "enode://" + 128 hex values for enode itself
       return ''
     }
-    enode += "@" + host + ":30303" // assuming that p2p port is opened on 30303 
+    enode += '@' + host + ':30303' // assuming that p2p port is opened on 30303
     return enode
   } catch (error) {
     console.log(`📍Unable to query enode. Error: ${error}`)
@@ -253,7 +279,7 @@ export async function validateNumberOfPeers(peers) {
 
   // Remaining nodes should have total-1 peers
   for (let i = 1; i < peers.length; i++) {
-    if (peers[i] != (peers.length - 2)) {
+    if (peers[i] != peers.length - 2) {
       console.log('📍Unexpected peer length received for 2nd cluster, retrying')
       recreate = true
       break
@@ -267,14 +293,16 @@ export async function validateFinalizedBlock(hosts, milestone) {
   // Fetch the last 'finalized' block from all nodes
   let tasks = []
   for (let i = 0; i < hosts.length; i++) {
-    tasks.push(runCommand(getBlock, hosts[i], 'finalized', maxRetries))    
+    tasks.push(runCommand(getBlock, hosts[i], 'finalized', maxRetries))
   }
 
   let finalizedBlocks = []
   await Promise.all(tasks).then((values) => {
     // Check if there's empty value
     if (values.includes(undefined)) {
-      console.log(`📍Error in fetching last finalized block, responses: ${values}, exiting`)
+      console.log(
+        `📍Error in fetching last finalized block, responses: ${values}, exiting`
+      )
       return false
     }
     finalizedBlocks = values
@@ -285,13 +313,22 @@ export async function validateFinalizedBlock(hosts, milestone) {
   //   if (finalizedBlocks.length != hosts) {
   //     return false
   //   }
-  // } 
+  // }
   await timer(100)
 
   // Check if the number and hash matches with the last milestone
   for (let i = 0; i < finalizedBlocks.length; i++) {
-    if (Number(finalizedBlocks[i].number) != Number(milestone.end_block) || finalizedBlocks[i].hash != milestone.hash) {
-      console.log(`📍Block number or hash mismatch for finalized block. Host index: ${i}, Finalized Block Number: ${Number(finalizedBlocks[i].number)}, Hash: ${finalizedBlocks[i].hash}. Milestone end block: ${Number(milestone.end_block)}, Hash: ${milestone.hash} exiting`)
+    if (
+      Number(finalizedBlocks[i].number) != Number(milestone.end_block) ||
+      finalizedBlocks[i].hash != milestone.hash
+    ) {
+      console.log(
+        `📍Block number or hash mismatch for finalized block. Host index: ${i}, Finalized Block Number: ${Number(
+          finalizedBlocks[i].number
+        )}, Hash: ${finalizedBlocks[i].hash}. Milestone end block: ${Number(
+          milestone.end_block
+        )}, Hash: ${milestone.hash} exiting`
+      )
       return false
     }
   }
@@ -299,7 +336,12 @@ export async function validateFinalizedBlock(hosts, milestone) {
   return true
 }
 
-export async function fetchLatestMilestone(milestoneLength, queryTimer, host, lastMilestone = undefined) {
+export async function fetchLatestMilestone(
+  milestoneLength,
+  queryTimer,
+  host,
+  lastMilestone = undefined
+) {
   let milestone
   let count = 0
   console.log('📍Querying heimdall for next milestone...')
@@ -310,7 +352,9 @@ export async function fetchLatestMilestone(milestoneLength, queryTimer, host, la
     count++
 
     if (count > milestoneLength) {
-      console.log(`📍Unable to fetch milestone from heimdall after ${count} tries`)
+      console.log(
+        `📍Unable to fetch milestone from heimdall after ${count} tries`
+      )
       return undefined
     }
 
@@ -318,7 +362,10 @@ export async function fetchLatestMilestone(milestoneLength, queryTimer, host, la
     if (milestone.result) {
       // Check against last milestone (if present) if it's immediate next one or not
       if (lastMilestone) {
-        if (Number(milestone.result.start_block) == Number(lastMilestone.end_block) + 1) {
+        if (
+          Number(milestone.result.start_block) ==
+          Number(lastMilestone.end_block) + 1
+        ) {
           break
         } else {
           console.log('📍Waiting for new milestone...')
@@ -327,11 +374,21 @@ export async function fetchLatestMilestone(milestoneLength, queryTimer, host, la
       }
       break
     } else {
-      console.log(`📍Invalid milestone received. Response: ${JSON.stringify(milestone.result)}, count: ${count}`) 
+      console.log(
+        `📍Invalid milestone received. Response: ${JSON.stringify(
+          milestone.result
+        )}, count: ${count}`
+      )
     }
   }
 
   let latestMilestone = milestone.result
-  console.log(`📍Got milestone from heimdall. Start block: ${Number(latestMilestone.start_block)}, End block: ${Number(latestMilestone.end_block)}, ID: ${latestMilestone.milestone_id}`)
+  console.log(
+    `📍Got milestone from heimdall. Start block: ${Number(
+      latestMilestone.start_block
+    )}, End block: ${Number(latestMilestone.end_block)}, ID: ${
+      latestMilestone.milestone_id
+    }`
+  )
   return latestMilestone
 }
