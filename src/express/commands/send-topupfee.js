@@ -4,7 +4,6 @@ import { loadDevnetConfig } from '../common/config-utils'
 import stakeManagerABI from '../../abi/StakeManagerABI.json'
 import ERC20ABI from '../../abi/ERC20ABI.json'
 import Web3 from 'web3'
-import Wallet, { hdkey } from 'ethereumjs-wallet'
 import { timer } from '../common/time-utils'
 import { getSignedTx } from '../common/tx-utils'
 
@@ -14,7 +13,7 @@ const {
   maxRetries
 } = require('../common/remote-worker')
 
-export async function sendStakedEvent() {
+export async function sendTopUpFeeEvent() {
   require('dotenv').config({ path: `${process.cwd()}/.env` })
   const devnetType =
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
@@ -52,8 +51,7 @@ export async function sendStakedEvent() {
   const signerDump = require(`${process.cwd()}/signer-dump.json`)
   const pkey = signerDump[0].priv_key
   const validatorAccount = signerDump[0].address
-  const stakeAmount = rootChainWeb3.utils.toWei('12')
-  const heimdallFee = rootChainWeb3.utils.toWei('12')
+  // const validatorIDForTest = '1'
 
   const stakeManagerContract = new rootChainWeb3.eth.Contract(
     stakeManagerABI,
@@ -62,7 +60,7 @@ export async function sendStakedEvent() {
 
   let tx = MaticTokenContract.methods.approve(
     StakeManagerProxyAddress,
-    rootChainWeb3.utils.toWei('50')
+    rootChainWeb3.utils.toWei('1000')
   )
   let signedTx = await getSignedTx(
     rootChainWeb3,
@@ -71,28 +69,22 @@ export async function sendStakedEvent() {
     validatorAccount,
     pkey
   )
-
   const approvalReceipt = await rootChainWeb3.eth.sendSignedTransaction(
     signedTx.rawTransaction
   )
-  console.log('Approval Receipt txHash:  ' + approvalReceipt.transactionHash)
-
-  const RandomSeed = 'random' + Math.random()
-  const newAccPrivKey = hdkey.fromMasterSeed(RandomSeed)._hdkey._privateKey
-  const wallet = Wallet.fromPrivateKey(newAccPrivKey)
-  const newAccAddr = wallet.getAddressString()
-  const newAccPubKey = wallet.getPublicKeyString()
-
-  console.log('NewValidatorAddr', newAccAddr, newAccPubKey)
-  console.log('NewValidatorPrivKey', wallet.getPrivateKeyString())
-
-  tx = stakeManagerContract.methods.stakeFor(
-    newAccAddr,
-    stakeAmount,
-    heimdallFee,
-    false,
-    newAccPubKey
+  console.log(
+    '\n\nApproval Receipt txHash:  ' + approvalReceipt.transactionHash
   )
+
+  // Adding 100 MATIC stake
+  tx = stakeManagerContract.methods.topUpForFee(
+    validatorAccount,
+    rootChainWeb3.utils.toWei('100')
+  )
+
+  const oldValidatorBalance = await getValidatorBalance(doc, validatorAccount)
+  console.log('Old Validator Balance:  ' + oldValidatorBalance)
+
   signedTx = await getSignedTx(
     rootChainWeb3,
     StakeManagerProxyAddress,
@@ -100,38 +92,34 @@ export async function sendStakedEvent() {
     validatorAccount,
     pkey
   )
-
-  const oldValidatorsCount = await checkValidatorsLength(doc)
-  console.log('oldValidatorsCount : ', oldValidatorsCount)
-
-  const receipt = await rootChainWeb3.eth.sendSignedTransaction(
+  const Receipt = await rootChainWeb3.eth.sendSignedTransaction(
     signedTx.rawTransaction
   )
-  console.log('StakeFor Receipt txHash :  ' + receipt.transactionHash)
+  console.log('TopUpForFee Receipt txHash:  ' + Receipt.transactionHash)
 
-  let newValidatorsCount = await checkValidatorsLength(doc)
+  let newValidatorBalance = await getValidatorBalance(doc, validatorAccount)
 
-  while (parseInt(newValidatorsCount) !== parseInt(oldValidatorsCount) + 1) {
-    console.log('Waiting 3 secs for validator to be added')
+  while (parseInt(newValidatorBalance) <= parseInt(oldValidatorBalance)) {
+    console.log('Waiting 3 secs for topupfee')
     await timer(3000) // waiting 3 secs
-    newValidatorsCount = await checkValidatorsLength(doc)
-    console.log('newValidatorsCount : ', newValidatorsCount)
+    newValidatorBalance = await getValidatorBalance(doc, validatorAccount)
+    console.log('newValidatorBalance : ', newValidatorBalance)
   }
 
-  console.log('✅ Validator Added')
+  console.log('✅ Topup Done')
   console.log(
-    '✅ Staked Event Sent from Rootchain and Received and processed on Heimdall'
+    '✅ TopUpFee event Sent from Rootchain and Received and processed on Heimdall'
   )
 }
 
-export async function checkValidatorsLength(doc) {
+async function getValidatorBalance(doc, valAddr) {
   const machine0 = doc.devnetBorHosts[0]
-  const command = 'curl localhost:1317/staking/validator-set'
+  const command = `curl http://localhost:1317/bank/balances/${valAddr}`
   const out = await runSshCommandWithReturn(
     `${doc.ethHostUser}@${machine0}`,
     command,
     maxRetries
   )
   const outobj = JSON.parse(out)
-  return outobj.result.validators.length
+  return outobj.result[0].amount
 }

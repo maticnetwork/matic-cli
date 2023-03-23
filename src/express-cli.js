@@ -7,6 +7,8 @@ import { sendStateSyncTx } from './express/commands/send-state-sync'
 import { sendStakedEvent } from './express/commands/send-staked-event'
 import { sendStakeUpdateEvent } from './express/commands/send-stake-update'
 import { sendSignerChangeEvent } from './express/commands/send-signer-change'
+import { sendUnstakeInitEvent } from './express/commands/send-unstake-init'
+import { sendTopUpFeeEvent } from './express/commands/send-topupfee'
 import { monitor } from './express/commands/monitor'
 import {
   restartAll,
@@ -65,13 +67,15 @@ program
   )
   .option('-ss, --send-state-sync', 'Send state sync tx')
   .option('-sstake, --send-staked-event', 'Send staked event')
-  .option(
-    '-sstakeupdate, --send-stakedupdate-event',
-    'Send staked-update event'
-  )
+  .option('-sstakeupdate, --send-stakeupdate-event', 'Send staked-update event')
   .option(
     '-ssignerchange, --send-signerchange-event',
     'Send signer-change event'
+  )
+  .option('-stopupfee, --send-topupfee-event', 'Send topupfee event')
+  .option(
+    '-sunstakeinit, --send-unstakeinit-event [validatorID]',
+    'Send unstake-init event'
   )
   .option(
     '-e1559, --eip-1559-test [index]',
@@ -284,7 +288,7 @@ export async function cli() {
     }
     await timer(3000)
     await sendStakedEvent()
-  } else if (options.sendStakedupdateEvent) {
+  } else if (options.sendStakeupdateEvent) {
     console.log('📍Command --send-stakeupdate-event ')
     if (!checkDir(false)) {
       console.log(
@@ -304,6 +308,31 @@ export async function cli() {
     }
     await timer(3000)
     await sendSignerChangeEvent()
+  } else if (options.sendUnstakeinitEvent) {
+    console.log('📍Command --send-unstakeinit-event [validatorID]')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    if (options.sendUnstakeinitEvent === true) {
+      if (parseInt(options.sendUnstakeinitEvent) < 1) {
+        options.sendUnstakeinitEvent = 1
+      }
+    }
+    await timer(3000)
+    await sendUnstakeInitEvent(parseInt(options.sendUnstakeinitEvent))
+  } else if (options.sendTopupfeeEvent) {
+    console.log('📍Command --send-topupfee-event ')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    await timer(3000)
+    await sendTopUpFeeEvent()
   } else if (options.eip1559Test) {
     console.log('📍Command --eip-1559-test')
     if (!checkDir(false)) {
