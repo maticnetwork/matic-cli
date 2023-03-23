@@ -155,7 +155,7 @@ function validateAwsKeyAndCertificate() {
   const certName = certFilePath
     .substring(certFilePath.lastIndexOf('/') + 1)
     .split('.')[0]
-  if (!certName === process.env.TF_VAR_PEM_FILE) {
+  if (certName !== process.env.TF_VAR_PEM_FILE) {
     console.log(
       '❌ PEM_FILE_PATH and TF_VAR_PEM_FILE are inconsistent, please check your configs!'
     )

@@ -4,6 +4,11 @@ import { terraformInit } from './express/commands/init'
 import { terraformDestroy } from './express/commands/destroy'
 import { startStressTest } from './express/commands/stress'
 import { sendStateSyncTx } from './express/commands/send-state-sync'
+import { sendStakedEvent } from './express/commands/send-staked-event'
+import { sendStakeUpdateEvent } from './express/commands/send-stake-update'
+import { sendSignerChangeEvent } from './express/commands/send-signer-change'
+import { sendUnstakeInitEvent } from './express/commands/send-unstake-init'
+import { sendTopUpFeeEvent } from './express/commands/send-topupfee'
 import { monitor } from './express/commands/monitor'
 import {
   restartAll,
@@ -54,12 +59,26 @@ program
     'Restart heimdall on all machines. If an integer [index] is specified, it will only update the VM corresponding to that index'
   )
   .option('-c, --cleanup', 'Cleanup the setup')
-  .option('-m, --monitor', 'Monitor the setup')
+  .option(
+    '-m, --monitor [exit]',
+    'Monitor the setup. If `exit` string is passed, the process terminates when at least one stateSync and one checkpoint are detected'
+  )
   .option(
     '-t, --stress [fund]',
     'Start the stress test. If the string `fund` is specified, the account will be funded. This option is mandatory when the command is executed the first time on a devnet.'
   )
   .option('-ss, --send-state-sync', 'Send state sync tx')
+  .option('-sstake, --send-staked-event', 'Send staked event')
+  .option('-sstakeupdate, --send-stakeupdate-event', 'Send staked-update event')
+  .option(
+    '-ssignerchange, --send-signerchange-event',
+    'Send signer-change event'
+  )
+  .option('-stopupfee, --send-topupfee-event', 'Send topupfee event')
+  .option(
+    '-sunstakeinit, --send-unstakeinit-event [validatorID]',
+    'Send unstake-init event'
+  )
   .option(
     '-e1559, --eip-1559-test [index]',
     'Test EIP 1559 txs. In case of a non-dockerized devnet, if an integer [index] is specified, it will use that VM to send the tx. Otherwise, it will target the first VM.'
@@ -228,7 +247,11 @@ export async function cli() {
       process.exit(1)
     }
     await timer(3000)
-    await monitor()
+    if (options.monitor === 'exit') {
+      await monitor(true)
+    } else {
+      await monitor(false)
+    }
   } else if (options.stress) {
     console.log('📍Command --stress ')
     if (!checkDir(false)) {
@@ -256,6 +279,61 @@ export async function cli() {
     }
     await timer(3000)
     await sendStateSyncTx()
+  } else if (options.sendStakedEvent) {
+    console.log('📍Command --send-stake-event ')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    await timer(3000)
+    await sendStakedEvent()
+  } else if (options.sendStakeupdateEvent) {
+    console.log('📍Command --send-stakeupdate-event ')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    await timer(3000)
+    await sendStakeUpdateEvent()
+  } else if (options.sendSignerchangeEvent) {
+    console.log('📍Command --send-signerchange-event ')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    await timer(3000)
+    await sendSignerChangeEvent()
+  } else if (options.sendUnstakeinitEvent) {
+    console.log('📍Command --send-unstakeinit-event [validatorID]')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    if (options.sendUnstakeinitEvent === true) {
+      if (parseInt(options.sendUnstakeinitEvent) < 1) {
+        options.sendUnstakeinitEvent = 1
+      }
+    }
+    await timer(3000)
+    await sendUnstakeInitEvent(parseInt(options.sendUnstakeinitEvent))
+  } else if (options.sendTopupfeeEvent) {
+    console.log('📍Command --send-topupfee-event ')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    await timer(3000)
+    await sendTopUpFeeEvent()
   } else if (options.eip1559Test) {
     console.log('📍Command --eip-1559-test')
     if (!checkDir(false)) {

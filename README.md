@@ -27,6 +27,9 @@ To use the `express-cli` you have to execute the following steps.
   by running `nvm use` from the root folder
 - install `express-cli` and `matic-cli` locally with command `npm i`
 - generate a keypair on AWS EC2 and download its certificate locally (`.pem` file)
+- copy `secret.tfvars.example` to `secret.tfvar` with command `cp secret.tfvars.example secret.tfvars` and check the commented file for details
+- **If you are a Polygon employee**, connect to the company VPN
+- modify `secret.tfvar` with addresses of the allowed IPs (as specified in `secret.tfvars.example` file)
 - copy `.env.example` to `.env` with command `cp .env.example .env` and check the heavily commented file for details
 - make sure `PEM_FILE_PATH` points to a correct AWS key certificate, the one you downloaded in the previous steps
 - define the number of nodes (`TF_VAR_VALIDATOR_COUNT` and `TF_VAR_SENTRY_COUNT`) and adjust the `DEVNET_BOR_USERS`
@@ -176,11 +179,31 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
   - Create a `state-sync` transaction on the remote network
 
-- ` ../../bin/express-cli --monitor`
+- `../../bin/express-cli --send-staked-event`
+
+  - Create a `Staked` transaction on the remote network and adds a new validator.
+
+- `../../bin/express-cli --send-stakeupdate-event`
+
+  - Create a `StakeUpdate` transaction on the remote network and increase stake of 1st validator by 100 MATIC.
+
+- `../../bin/express-cli --send-signerchange-event`
+
+  - Create a `SignerChange` transaction on the remote network and changes the signer of the 1st validator.
+
+- `../../bin/express-cli --send-topupfee-event`
+
+  - Create a `TopUpFee` transaction on the remote network and adds balance/heimdallFee for the first validator on Heimdall.
+
+- `../../bin/express-cli --send-unstakeinit-event [validatorID]`
+
+  - Create a `UnstakeInit` transaction on the remote network and removes the validator from validator-set. `validatorID` can be used to specify the validator to be removed. If not specified, the first validator will be removed.
+
+- ` ../../bin/express-cli --monitor [exit]`
 
   - Monitors the reception of state-syncs and checkpoints to make sure the whole network is in a healthy state.
-    If `--send-state-sync` hasn't been used before, only checkpoints will be detected. The execution stops when
-    a `state-sync` is found
+    If `--send-state-sync` hasn't been used before, only checkpoints will be detected. Monitor the setup.  
+    If `exit` string is passed the process terminates when at least one `stateSync` and one `checkpoint` are detected.
 
 - ` ../../bin/express-cli --instances-stop`
 
@@ -202,6 +225,10 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 - `../../bin/express-cli --chaos [intensity]`
 
   - Adds dedicated chaos(de-peering) to the network. The `intensity` parameter is optional and can be set from `1` to `10`. If not set, `5` is used.
+
+- `../../bin/express-cli --rewind [numberOfBlocks]`
+
+  - Rewinds the chain by a defined number of blocks (not greater than `128`). Default `numberOfBlocks` value is `100`.
 
 - `../../bin/express-cli --eip-1559-test [index]`
   - Executes a test to send EIP 1559 tx. In case of a non-dockerized devnet, if an integer [index] is specified, it will use

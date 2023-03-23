@@ -7,7 +7,7 @@ borBranch: develop
 heimdallRepo: https://github.com/maticnetwork/heimdall.git
 heimdallBranch: develop
 contractsRepo: https://github.com/maticnetwork/contracts.git
-contractsBranch: 2ed59de3641c407c64def1b40bcd090cb9cc048a # todo change to master once contracts team merges the PR
+contractsBranch: mardizzone/node-16
 genesisContractsRepo: https://github.com/maticnetwork/genesis-contracts.git
 genesisContractsBranch: master
 sprintSize: 64
@@ -16,6 +16,7 @@ blockNumber: '0'
 blockTime: '2'
 numOfValidators: 1
 numOfNonValidators: 1
+numOfArchiveNodes: 0
 ethURL: http://ganache:9545
 ethHostUser: ubuntu
 devnetType: docker
@@ -23,4 +24,4 @@ borDockerBuildContext: https://github.com/maticnetwork/bor.git#develop
 heimdallDockerBuildContext: https://github.com/maticnetwork/heimdall.git#develop
 devnetBorUsers: ubuntu,ubuntu
 devnetBorHosts:
-  - 35.92.248.232
+  - ec2-xx-xxx-xx-xxx.us-west-2.compute.amazonaws.com # use localhost for local deployments

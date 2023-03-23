@@ -42,8 +42,8 @@ async function runTest(web3, accounts, sender) {
     const burnContract = process.env.BURN_CONTRACT_ADDRESS
 
     const latestBlock = await web3.eth.getBlock('latest')
-    let miner = latestBlock.miner
-    console.log('Coinbase account: ', miner)
+    let miner = await web3.eth.getAuthor(latestBlock.number)
+    console.log('Block miner: ', miner)
 
     const maxPriorityFeePerGas = process.env.MAX_PRIORITY_FEE
     const maxFeePerGas = process.env.MAX_FEE
@@ -84,8 +84,9 @@ async function runTest(web3, accounts, sender) {
     const blockBaseFeePerGas = block.baseFeePerGas
 
     // In case a new sprint begins, block miner will change
-    if (block.miner !== miner) {
-      miner = block.miner
+    const blockMiner = await web3.eth.getAuthor(block.number)
+    if (blockMiner !== miner) {
+      miner = blockMiner
       const prevBlock = await web3.eth.getBlock(block.number - 1)
       initialMinerBal = await web3.eth.getBalance(miner, prevBlock.number)
     }
@@ -151,7 +152,19 @@ async function initWeb3(machine) {
     providerOrUrl: `http://${machine}:8545`
   })
 
-  return new Web3(provider)
+  const web3 = new Web3(provider)
+  web3.extend({
+    property: 'eth',
+    methods: [
+      {
+        name: 'getAuthor',
+        call: 'bor_getAuthor',
+        params: 1,
+        inputFormatter: [web3.extend.utils.toHex]
+      }
+    ]
+  })
+  return web3
 }
 
 export async function testEip1559(n) {

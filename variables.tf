@@ -67,6 +67,11 @@ variable "REGION" {
 }
 
 variable "SG_CIDR_BLOCKS" {
+  description = "Contains allowed IPs. Please, set them into secret.tfvars (example available at secret.tfvars.example)"
+  sensitive = true
+}
+
+variable "SG_CIDR_BLOCKS_OUT" {
   default = ["0.0.0.0/0"]
 }
 

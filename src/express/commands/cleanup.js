@@ -11,7 +11,7 @@ export async function cleanup() {
   await deployBorContractsAndStateSync(doc)
 }
 
-async function stopServices(doc) {
+export async function stopServices(doc) {
   const borUsers = splitToArray(doc.devnetBorUsers.toString())
   const nodeIps = []
   const isHostMap = new Map()
@@ -28,16 +28,19 @@ async function stopServices(doc) {
   const stopServiceTasks = nodeIps.map(async (ip) => {
     if (isHostMap.get(ip)) {
       console.log('📍Stopping ganache on machine ' + ip + ' ...')
-      const command = 'sudo systemctl stop ganache.service'
+      const command =
+        'sudo systemctl stop ganache.service || echo "ganache not running on current machine..."'
       await runSshCommand(ip, command, maxRetries)
     }
 
     console.log('📍Stopping heimdall on machine ' + ip + '...')
-    let command = 'sudo systemctl stop heimdalld.service'
+    let command =
+      'sudo systemctl stop heimdalld.service || echo "heimdall not running on current machine..."'
     await runSshCommand(ip, command, maxRetries)
 
     console.log('📍Stopping bor on machine ' + ip + ' ...')
-    command = 'sudo systemctl stop bor.service'
+    command =
+      'sudo systemctl stop bor.service || echo "bor not running on current machine..."'
     await runSshCommand(ip, command, maxRetries)
   })
 
@@ -71,15 +74,16 @@ async function cleanupServices(doc) {
     await runSshCommand(ip, command, maxRetries)
 
     console.log('📍Purging queue for heimdall bridge on machine ' + ip + ' ...')
-    command = 'heimdalld heimdall-bridge purge-queue'
+    command = 'heimdalld heimdall-bridge --home /var/lib/heimdall purge-queue'
     await runSshCommand(ip, command, maxRetries)
 
     console.log('📍Resetting heimdall bridge on machine ' + ip + ' ...')
-    command = 'heimdalld heimdall-bridge unsafe-reset-all'
+    command =
+      'heimdalld heimdall-bridge --home /var/lib/heimdall unsafe-reset-all'
     await runSshCommand(ip, command, maxRetries)
 
     console.log('📍Cleaning up bridge storage on machine ' + ip + ' ...')
-    command = 'rm -rf ~/.heimdalld/bridge'
+    command = 'rm -rf var/lib/heimdall/bridge'
     await runSshCommand(ip, command, maxRetries)
 
     console.log('📍Cleaning up bor on machine ' + ip + ' ...')
