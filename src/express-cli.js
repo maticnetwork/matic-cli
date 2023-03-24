@@ -86,12 +86,18 @@ program
   .option('-xxx, --chaos [intensity]', 'Start Chaos')
   .option('-istop, --instances-stop', 'Stop aws ec2 instances')
   .option('-istart, --instances-start', 'Start aws ec2 instances')
-  .option('-rewind, --rewind [numberOfBlocks]', 'Rewind the chain by a given number of blocks')
+  .option(
+    '-rewind, --rewind [numberOfBlocks]',
+    'Rewind the chain by a given number of blocks'
+  )
   .option(
     '-key-a, --aws-key-add',
     'Generate additional aws keypair for the devnet'
   )
-  .option('-key-d, --aws-key-des [keyName]', 'Destroy aws keypair from devnet, given its keyName')
+  .option(
+    '-key-d, --aws-key-des [keyName]',
+    'Destroy aws keypair from devnet, given its keyName'
+  )
   .version(pkg.version)
 
 export async function cli() {
