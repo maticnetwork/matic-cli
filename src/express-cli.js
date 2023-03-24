@@ -23,9 +23,11 @@ import { timer } from './express/common/time-utils'
 import { program } from 'commander'
 import pkg from '../package.json'
 import { testEip1559 } from '../tests/test-eip-1559'
-import { stopInstances } from './express/commands/instances-stop'
-import { startInstances } from './express/commands/instances-start'
+import { stopInstances } from './express/commands/aws-instances-stop'
+import { startInstances } from './express/commands/aws-instances-start'
 import { rewind } from './express/commands/rewind'
+import { awsKeypairAdd } from './express/commands/aws-keypair-add'
+import { awsKeypairDestroy } from './express/commands/aws-keypair-destroy'
 
 program
   .option('-i, --init', 'Initiate the terraform setup')
@@ -85,6 +87,14 @@ program
   .option('-istop, --instances-stop', 'Stop aws ec2 instances')
   .option('-istart, --instances-start', 'Start aws ec2 instances')
   .option('-rewind, --rewind [numberOfBlocks]', 'Rewind the chain')
+  .option(
+    '-key-a, --aws-key-add',
+    'Generate additional aws keypair for the devnet'
+  )
+  .option(
+    '-key-d, --aws-key-des [keyName]',
+    'Destroy aws keypair from devnet'
+  )
   .version(pkg.version)
 
 export async function cli() {
@@ -397,5 +407,23 @@ export async function cli() {
 
     await timer(3000)
     await rewind(options.rewind)
+  } else if (options.awsKeyAdd) {
+    console.log('📍 Command --aws-key-add')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    await awsKeypairAdd()
+  } else if (options.awsKeyDes) {
+    console.log('📍 Command --aws-key-des')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    await awsKeypairDestroy(options.awsKeyDes)
   }
 }
