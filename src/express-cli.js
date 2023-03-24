@@ -86,12 +86,12 @@ program
   .option('-xxx, --chaos [intensity]', 'Start Chaos')
   .option('-istop, --instances-stop', 'Stop aws ec2 instances')
   .option('-istart, --instances-start', 'Start aws ec2 instances')
-  .option('-rewind, --rewind [numberOfBlocks]', 'Rewind the chain')
+  .option('-rewind, --rewind [numberOfBlocks]', 'Rewind the chain by a given number of blocks')
   .option(
     '-key-a, --aws-key-add',
     'Generate additional aws keypair for the devnet'
   )
-  .option('-key-d, --aws-key-des [keyName]', 'Destroy aws keypair from devnet')
+  .option('-key-d, --aws-key-des [keyName]', 'Destroy aws keypair from devnet, given its keyName')
   .version(pkg.version)
 
 export async function cli() {
@@ -240,7 +240,7 @@ export async function cli() {
     await timer(3000)
     await cleanup()
   } else if (options.monitor) {
-    console.log('📍Command --monitor ')
+    console.log('📍Command --monitor [exit]')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -254,7 +254,7 @@ export async function cli() {
       await monitor(false)
     }
   } else if (options.stress) {
-    console.log('📍Command --stress ')
+    console.log('📍Command --stress [fund]')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -281,7 +281,7 @@ export async function cli() {
     await timer(3000)
     await sendStateSyncTx()
   } else if (options.sendStakedEvent) {
-    console.log('📍Command --send-stake-event ')
+    console.log('📍Command --send-staked-event ')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -357,7 +357,7 @@ export async function cli() {
     await timer(3000)
     await setupDatadog()
   } else if (options.chaos) {
-    console.log('📍Command --chaos')
+    console.log('📍Command --chaos [intensity]')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
