@@ -6,14 +6,14 @@ import {
   addPeers,
   getPeerLength
 } from '../common/milestone-utils'
+import { checkLatestMilestone } from './monitor'
+import { timer } from '../common/time-utils'
 const {
   runCommand,
   runSshCommand,
   runSshCommandWithReturn,
   maxRetries
 } = require('../common/remote-worker')
-import { checkLatestMilestone } from './monitor'
-import { timer } from '../common/time-utils'
 
 export async function getMiner(ip, number) {
   const url = `http://${ip}:8545`
@@ -47,12 +47,13 @@ export async function getMiner(ip, number) {
 }
 
 export async function getGitBranch(ip, path = '~', repo = 'bor') {
-  let command = `cd ${path}/${repo} && git branch --show-current`
+  const command = `cd ${path}/${repo} && git branch --show-current`
   return await runSshCommandWithReturn(ip, command, maxRetries)
 }
 
 export async function getLastCommitMessage(ip, repo = 'bor') {
-  let command = `cd ~/matic-cli/devnet/code/bor && git show-branch --no-name HEAD`
+  const command =
+    'cd ~/matic-cli/devnet/code/bor && git show-branch --no-name HEAD'
   return await runSshCommandWithReturn(ip, command, maxRetries)
 }
 
@@ -68,7 +69,7 @@ export async function milestoneHelper() {
 
   let enodes = []
   let tasks = []
-  let ips = []
+  const ips = []
   for (let i = 0; i < borUsers.length; i++) {
     const ip = `${borUsers[i]}@${borHosts[i]}`
     ips.push(ip)
@@ -204,8 +205,8 @@ export async function milestoneHelper() {
 }
 
 export async function hello(ips, enodes, split = 1) {
-  let ips1 = ips.slice(0, split)
-  let ips2 = ips.slice(split)
+  const ips1 = ips.slice(0, split)
+  const ips2 = ips.slice(split)
   for (let i = 0; i < ips1.length; i++) {
     console.log(
       'Remove peers 1 - ips[i]:',

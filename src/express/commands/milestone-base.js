@@ -1,9 +1,7 @@
 /* eslint-disable dot-notation */
 import { loadDevnetConfig, splitToArray } from '../common/config-utils'
 import { timer } from '../common/time-utils'
-
-const { maxRetries, runCommand } = require('../common/remote-worker')
-
+import { maxRetries, runCommand } from '../common/remote-worker'
 import {
   getBlock,
   getPeerLength,
@@ -40,7 +38,7 @@ export async function milestoneBase() {
   // Grab the enode of all the nodes
   let enodes = []
   let tasks = []
-  let ips = []
+  const ips = []
   for (let i = 0; i < borUsers.length; i++) {
     const ip = `${borUsers[i]}@${borHosts[i]}`
     ips.push(ip)
@@ -66,7 +64,7 @@ export async function milestoneBase() {
   console.log('📍Rejoined clusters')
 
   // Wait for a milestone to get proposed for verification
-  let lastMilestone = await fetchLatestMilestone(
+  const lastMilestone = await fetchLatestMilestone(
     milestoneLength,
     queryTimer,
     borHosts[0]
@@ -81,21 +79,21 @@ export async function milestoneBase() {
 
   // Fetch the last 'finalized' block
   console.log('📍Trying to fetch last finalized block')
-  let finalizedBlock = await runCommand(
+  const finalizedBlock = await runCommand(
     getBlock,
     borHosts[0],
     'finalized',
     maxRetries
   )
-  if (finalizedBlock == undefined) {
+  if (finalizedBlock === undefined) {
     console.log('📍Unable to fetch last finalized block, exiting')
     return
   }
 
   // Check if the number and hash matches with the last milestone
   if (
-    Number(finalizedBlock.number) == Number(lastMilestone.end_block) &&
-    finalizedBlock.hash == lastMilestone.hash
+    Number(finalizedBlock.number) === Number(lastMilestone.end_block) &&
+    finalizedBlock.hash === lastMilestone.hash
   ) {
     console.log(
       '📍Received correct finalized block according to last milestone'
@@ -138,8 +136,8 @@ export async function milestoneBase() {
   })
 
   // validate if number of peers are correct or not
-  let expected = [0, 2, 2, 2]
-  if (JSON.stringify(peers) != JSON.stringify(expected)) {
+  const expected = [0, 2, 2, 2]
+  if (JSON.stringify(peers) !== JSON.stringify(expected)) {
     console.log(
       `📍Retrying creation of partition clusters for testing due to peer length mismatch, got: ${peers}, expected: ${expected}`
     )
@@ -165,7 +163,7 @@ export async function milestoneBase() {
       peers = values
     })
 
-    if (JSON.stringify(peers) != JSON.stringify(expected)) {
+    if (JSON.stringify(peers) !== JSON.stringify(expected)) {
       console.log(
         `📍Peer length mismatch while creating clusters, got: ${peers}, expected: ${expected}`
       )
@@ -190,13 +188,13 @@ export async function milestoneBase() {
   await timer(10000)
 
   // We'll fetch block from cluster 2 first as it'll be behind in terms of block height
-  let latestBlockCluster2 = await runCommand(
+  const latestBlockCluster2 = await runCommand(
     getBlock,
     borHosts[1],
     'latest',
     maxRetries
   )
-  if (latestBlockCluster2 == undefined) {
+  if (latestBlockCluster2 === undefined) {
     console.log('📍Unable to fetch latest block in cluster 2, exiting')
     return
   }
@@ -207,13 +205,13 @@ export async function milestoneBase() {
         latestBlockCluster2.number
       )} from cluster 1`
     )
-    let latestBlockCluster1 = await runCommand(
+    const latestBlockCluster1 = await runCommand(
       getBlock,
       borHosts[0],
       latestBlockCluster2.number,
       maxRetries
     )
-    if (latestBlockCluster1 == undefined) {
+    if (latestBlockCluster1 === undefined) {
       console.log(
         `📍Unable to fetch block ${Number(
           latestBlockCluster2.number
@@ -223,7 +221,7 @@ export async function milestoneBase() {
     }
 
     if (latestBlockCluster1.number) {
-      if (latestBlockCluster1.number != latestBlockCluster2.number) {
+      if (latestBlockCluster1.number !== latestBlockCluster2.number) {
         console.log(
           `📍Block number mismatch from clusters. Cluster 1: ${Number(
             latestBlockCluster1.number
@@ -233,7 +231,7 @@ export async function milestoneBase() {
       }
 
       // Check if same block numbers have different hash or not
-      if (latestBlockCluster1.hash == latestBlockCluster2.hash) {
+      if (latestBlockCluster1.hash === latestBlockCluster2.hash) {
         console.log(
           `📍Block hash matched. Clusters are not created properly. Cluster 1: ${latestBlockCluster1.hash}, Cluster 2: ${latestBlockCluster2.hash}, exiting`
         )
@@ -257,7 +255,7 @@ export async function milestoneBase() {
   }
 
   // Wait for the next milestone to get proposed and validate
-  let latestMilestone = await fetchLatestMilestone(
+  const latestMilestone = await fetchLatestMilestone(
     milestoneLength,
     queryTimer,
     borHosts[0],
@@ -270,7 +268,7 @@ export async function milestoneBase() {
 
   // Validate if the milestone is proposed by validators of cluster 2 and not by validators of cluster 1
   console.log(
-    `📍Validating if milestone got proposed by expected cluster's proposer`
+    "📍Validating if milestone got proposed by expected cluster's proposer"
   )
   await validateProposer(ips[0], latestMilestone.proposer)
 
@@ -296,13 +294,13 @@ export async function milestoneBase() {
   console.log(
     `📍Fetching block ${Number(latestBlockCluster2.number)} from cluster 1`
   )
-  let latestBlockCluster1 = await runCommand(
+  const latestBlockCluster1 = await runCommand(
     getBlock,
     borHosts[0],
     latestBlockCluster2.number,
     maxRetries
   )
-  if (latestBlockCluster1 == undefined) {
+  if (latestBlockCluster1 === undefined) {
     console.log(
       `📍Unable to fetch block ${Number(
         latestBlockCluster2.number
@@ -312,7 +310,7 @@ export async function milestoneBase() {
   }
 
   if (latestBlockCluster1.number) {
-    if (latestBlockCluster1.hash == latestBlockCluster2.hash) {
+    if (latestBlockCluster1.hash === latestBlockCluster2.hash) {
       console.log(
         '📍Cluster 1 successfully reorged to cluster 2 (with high majority)'
       )
@@ -330,7 +328,7 @@ export async function milestoneBase() {
   console.log(
     '📍Trying to fetch last finalized block from all nodes and validate'
   )
-  let valid = await validateFinalizedBlock(borHosts, latestMilestone)
+  const valid = await validateFinalizedBlock(borHosts, latestMilestone)
   if (!valid) {
     console.log(
       '📍Unable to fetch or validate last finalized block from all nodes with last milestone, exiting'

@@ -2,8 +2,6 @@
 import { loadDevnetConfig, splitToArray } from '../common/config-utils'
 import { timer } from '../common/time-utils'
 
-const { maxRetries, runCommand } = require('../common/remote-worker')
-
 import {
   getBlock,
   getPeerLength,
@@ -13,6 +11,8 @@ import {
   fetchLatestMilestone,
   joinAllPeers
 } from '../common/milestone-utils'
+
+const { maxRetries, runCommand } = require('../common/remote-worker')
 
 const milestoneLength = 64
 const queryTimer = (milestoneLength / 8) * 1000
@@ -38,7 +38,7 @@ export async function milestonePartition() {
   // Grab the enode of all the nodes
   let enodes = []
   let tasks = []
-  let ips = []
+  const ips = []
   for (let i = 0; i < borUsers.length; i++) {
     const ip = `${borUsers[i]}@${borHosts[i]}`
     ips.push(ip)
@@ -66,7 +66,7 @@ export async function milestonePartition() {
   console.log('📍Rejoined clusters')
 
   // Wait for a milestone to get proposed for verification
-  let lastMilestone = await fetchLatestMilestone(
+  const lastMilestone = await fetchLatestMilestone(
     milestoneLength,
     queryTimer,
     borHosts[0]
@@ -81,7 +81,7 @@ export async function milestonePartition() {
 
   // Fetch the last 'finalized' block
   console.log('📍Trying to fetch last finalized block')
-  let finalizedBlock = await runCommand(
+  const finalizedBlock = await runCommand(
     getBlock,
     borHosts[0],
     'finalized',
@@ -138,7 +138,7 @@ export async function milestonePartition() {
   })
 
   // validate if number of peers are correct or not
-  let expected = [1, 1, 1, 1]
+  const expected = [1, 1, 1, 1]
   if (JSON.stringify(peers) != JSON.stringify(expected)) {
     console.log(
       `📍Retrying creation of partition clusters for testing due to peer length mismatch, got: ${peers}, expected: ${expected}`
@@ -411,7 +411,7 @@ export async function milestonePartition() {
   console.log(
     '📍Trying to fetch last finalized block from all nodes and validate'
   )
-  let valid = await validateFinalizedBlock(borHosts, latestMilestone)
+  const valid = await validateFinalizedBlock(borHosts, latestMilestone)
   if (!valid) {
     console.log(
       '📍Unable to fetch or validate last finalized block from all nodes with last milestone, exiting'

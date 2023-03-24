@@ -3,8 +3,6 @@ import { loadDevnetConfig, splitToArray } from '../common/config-utils'
 import { timer } from '../common/time-utils'
 import { checkLatestMilestone } from './monitor'
 
-const { maxRetries, runCommand } = require('../common/remote-worker')
-
 import {
   getBlock,
   getPeerLength,
@@ -13,6 +11,8 @@ import {
   joinAllPeers,
   validateProposer
 } from '../common/milestone-utils'
+
+const { maxRetries, runCommand } = require('../common/remote-worker')
 
 const milestoneLength = 64
 const queryTimer = (milestoneLength / 4) * 1000
@@ -38,7 +38,7 @@ export async function milestoneBase(testType = 'base') {
   // Grab the enode of all the nodes
   let enodes = []
   let tasks = []
-  let ips = []
+  const ips = []
   for (let i = 0; i < borUsers.length; i++) {
     const ip = `${borUsers[i]}@${borHosts[i]}`
     ips.push(ip)
@@ -81,7 +81,7 @@ export async function milestoneBase(testType = 'base') {
     await timer(queryTimer)
   }
 
-  let lastMilestone = milestone.result
+  const lastMilestone = milestone.result
 
   console.log(
     `📍Got milestone from heimdall. Start block: ${Number(
@@ -103,7 +103,7 @@ export async function milestoneBase(testType = 'base') {
 
   // Fetch the last 'finalized' block
   console.log('📍Trying to fetch last finalized block')
-  let finalizedBlock = await runCommand(
+  const finalizedBlock = await runCommand(
     getBlock,
     borHosts[0],
     'finalized',
@@ -237,7 +237,7 @@ export async function milestoneBase(testType = 'base') {
   await timer(10000)
 
   // We'll fetch block from cluster 2 first as it'll be behind in terms of block height
-  let latestBlockCluster2 = await runCommand(
+  const latestBlockCluster2 = await runCommand(
     getBlock,
     borHosts[index2],
     'latest',
@@ -254,7 +254,7 @@ export async function milestoneBase(testType = 'base') {
         latestBlockCluster2.number
       )} from cluster 1`
     )
-    let latestBlockCluster1 = await runCommand(
+    const latestBlockCluster1 = await runCommand(
       getBlock,
       borHosts[index1],
       latestBlockCluster2.number,
@@ -342,7 +342,7 @@ export async function milestoneBase(testType = 'base') {
     await timer(queryTimer)
   }
 
-  let latestMilestone = milestone.result
+  const latestMilestone = milestone.result
   console.log(
     `📍Got milestone from heimdall. Start block: ${Number(
       latestMilestone.start_block
@@ -375,7 +375,7 @@ export async function milestoneBase(testType = 'base') {
   console.log(
     `📍Fetching block ${Number(latestBlockCluster2.number)} from cluster 1`
   )
-  let latestBlockCluster1 = await runCommand(
+  const latestBlockCluster1 = await runCommand(
     getBlock,
     borHosts[0],
     latestBlockCluster2.number,

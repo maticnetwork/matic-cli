@@ -35,16 +35,17 @@ export async function getBlock(ip, number = 'latest') {
     console.log(
       `📍Error fetching block. number: ${number}, opts: ${JSON.stringify(opts)}`
     )
-    console.log(`📍Response received:`, responseJson)
+    console.log('📍Response received:', responseJson)
   }
 
   return undefined
 }
 
 export async function checkForRewind(ip) {
-  let command = `journalctl -u bor -n 500 | grep "Rewinding blockchain" | wc -l`
+  const command =
+    'journalctl -u bor -n 500 | grep "Rewinding blockchain" | wc -l'
   try {
-    let count = await runSshCommandWithReturn(ip, command, maxRetries)
+    const count = await runSshCommandWithReturn(ip, command, maxRetries)
     // console.log('📍Fetched count of rewind logs, count:', count)
     if (Number(count) == 1) {
       console.log('📍Chain got to correct fork with Rewind')
@@ -60,7 +61,7 @@ async function getValidatorInfo(ip) {
   const command =
     'echo `cat $HOME/matic-cli/devnet/code/genesis-contracts/validators.json`'
   try {
-    let validators = await runSshCommandWithReturn(ip, command, maxRetries)
+    const validators = await runSshCommandWithReturn(ip, command, maxRetries)
     return JSON.parse(validators)
   } catch (error) {
     console.log('📍Unable to get validator info, error:', error)
@@ -70,7 +71,7 @@ async function getValidatorInfo(ip) {
 }
 
 export async function validateProposer(ip, proposer) {
-  let validators = await getValidatorInfo(ip)
+  const validators = await getValidatorInfo(ip)
   try {
     if (validators) {
       // Skip the validator from cluster 1
@@ -79,7 +80,7 @@ export async function validateProposer(ip, proposer) {
           String(proposer).toLowerCase() ==
           String(validators[i].address).toLowerCase()
         ) {
-          console.log(`📍Validated milestone proposer`)
+          console.log('📍Validated milestone proposer')
           return
         }
       }
@@ -103,9 +104,9 @@ export async function validateProposer(ip, proposer) {
 }
 
 export async function removePeers(ip, peers) {
-  let tasks = []
+  const tasks = []
   for (let i = 0; i < peers.length; i++) {
-    let command = `~/go/bin/bor attach ~/.bor/data/bor.ipc --exec "admin.removePeer('${peers[i]}')"`
+    const command = `~/go/bin/bor attach ~/.bor/data/bor.ipc --exec "admin.removePeer('${peers[i]}')"`
     tasks.push(runSshCommand(ip, command, maxRetries))
   }
 
@@ -122,9 +123,9 @@ export async function removePeers(ip, peers) {
 }
 
 export async function addPeers(ip, peers) {
-  let tasks = []
+  const tasks = []
   for (let i = 0; i < peers.length; i++) {
-    let command = `~/go/bin/bor attach ~/.bor/data/bor.ipc --exec "admin.addPeer('${peers[i]}')"`
+    const command = `~/go/bin/bor attach ~/.bor/data/bor.ipc --exec "admin.addPeer('${peers[i]}')"`
     tasks.push(runSshCommand(ip, command, maxRetries))
   }
 
@@ -141,9 +142,10 @@ export async function addPeers(ip, peers) {
 }
 
 export async function getPeerLength(ip) {
-  const command = `/home/ubuntu/go/bin/bor attach ~/.bor/data/bor.ipc --exec "admin.peers.length"`
+  const command =
+    '/home/ubuntu/go/bin/bor attach ~/.bor/data/bor.ipc --exec "admin.peers.length"'
   try {
-    let length = await runSshCommandWithReturn(ip, command, maxRetries)
+    const length = await runSshCommandWithReturn(ip, command, maxRetries)
     return parseInt(length)
   } catch (error) {
     console.log('📍Unable to query peer length, error:', error)
@@ -195,9 +197,9 @@ export async function joinAllPeers(ips, enodes) {
 export async function createClusters(ips, enodes, split = 1) {
   // `split` defines how clusters are created and which index to use to seperate nodes.
   // e.g. for split = 1, clusters created would be of 1 and 3 nodes (nodes[:split], nodes[split:])
-  let tasks = []
-  let ips1 = ips.slice(0, split)
-  let ips2 = ips.slice(split)
+  const tasks = []
+  const ips1 = ips.slice(0, split)
+  const ips2 = ips.slice(split)
   for (let i = 0; i < ips1.length; i++) {
     tasks.push(removePeers(ips1[i], enodes.slice(split)))
   }
@@ -224,7 +226,7 @@ export async function createClusters(ips, enodes, split = 1) {
 export async function rejoinClusters(ips, enodes, split = 1) {
   // `split` defines how clusters are joined and which index to use to join nodes.
   // e.g. for split = 1, clusters of 1 and 3 nodes would be joined (nodes[:split], nodes[split:])
-  let tasks = []
+  const tasks = []
   for (let i = 0; i < ips.slice(0, split); i++) {
     tasks.push(addPeers(ips[i], enodes.slice(split)))
   }
@@ -250,7 +252,7 @@ export async function rejoinClusters(ips, enodes, split = 1) {
 
 export async function getEnode(user, host) {
   const ip = `${user}@${host}`
-  let command =
+  const command =
     '~/go/bin/bor attach ~/.bor/data/bor.ipc --exec admin.nodeInfo.enode'
   try {
     const fullEnode = await runSshCommandWithReturn(ip, command, maxRetries)
@@ -291,7 +293,7 @@ export async function validateNumberOfPeers(peers) {
 
 export async function validateFinalizedBlock(hosts, milestone) {
   // Fetch the last 'finalized' block from all nodes
-  let tasks = []
+  const tasks = []
   for (let i = 0; i < hosts.length; i++) {
     tasks.push(runCommand(getBlock, hosts[i], 'finalized', maxRetries))
   }
@@ -382,7 +384,7 @@ export async function fetchLatestMilestone(
     }
   }
 
-  let latestMilestone = milestone.result
+  const latestMilestone = milestone.result
   console.log(
     `📍Got milestone from heimdall. Start block: ${Number(
       latestMilestone.start_block
