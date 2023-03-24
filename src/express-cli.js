@@ -91,10 +91,7 @@ program
     '-key-a, --aws-key-add',
     'Generate additional aws keypair for the devnet'
   )
-  .option(
-    '-key-d, --aws-key-des [keyName]',
-    'Destroy aws keypair from devnet'
-  )
+  .option('-key-d, --aws-key-des [keyName]', 'Destroy aws keypair from devnet')
   .version(pkg.version)
 
 export async function cli() {

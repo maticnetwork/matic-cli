@@ -55,6 +55,10 @@ export async function awsKeypairAdd() {
 
   await Promise.all(addKeyTasks)
   console.log(`📍 Successfully added ${keyName} to all machines of the devnet`)
-  console.log(`🔑 You can now share ${keyName}.pem with other devs - on a secure channel - to let them access the devnet`)
-  console.log(`🚨 Do not forget to destroy the key when no longer needed, using the command "../../bin/express-cli --des-aws-key ${keyName}"`)
+  console.log(
+    `🔑 You can now share ${keyName}.pem with other devs - on a secure channel - to let them access the devnet`
+  )
+  console.log(
+    `🚨 Do not forget to destroy the key when no longer needed, using the command "../../bin/express-cli --des-aws-key ${keyName}"`
+  )
 }

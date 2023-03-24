@@ -8,7 +8,9 @@ import { maxRetries, runSshCommand } from '../common/remote-worker'
 const shell = require('shelljs')
 export async function awsKeypairDestroy(keyName) {
   if (keyName === true || keyName === null || keyName === undefined) {
-    console.log(`📍 Invalid keyName specified! Please use a valid keyName for this instance`)
+    console.log(
+      '📍 Invalid keyName specified! Please use a valid keyName for this instance'
+    )
     process.exit(1)
   }
   require('dotenv').config({ path: `${process.cwd()}/.env` })
