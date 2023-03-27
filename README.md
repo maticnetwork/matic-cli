@@ -233,6 +233,10 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 - `../../bin/express-cli --eip-1559-test [index]`
   - Executes a test to send EIP 1559 tx. In case of a non-dockerized devnet, if an integer [index] is specified, it will use
     that VM to send the tx. Otherwise, it will target the first VM.
+- `../../bin/express-cli --aws-key-add`
+  - Generates an additional `aws` key-pair remotely and stores it locally in the devnet folder. The public key is added to the ssh authorized keys of the devnet's machines. The key can be shared - on a secure channel! - with other devs to grant them access to the remote devnet.
+- `../../bin/express-cli --aws-key-des [keyName]`
+  - Destroys an `aws` key-pair given its `keyName`. The key gets deleted remotely from `aws`, cancelled from the authorized ssh keys of the devnet's machines and removed from local devnet folder.
 
 ## `matic-cli`
 
