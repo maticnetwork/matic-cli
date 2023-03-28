@@ -179,11 +179,31 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
   - Create a `state-sync` transaction on the remote network
 
-- ` ../../bin/express-cli --monitor`
+- `../../bin/express-cli --send-staked-event`
+
+  - Create a `Staked` transaction on the remote network and adds a new validator.
+
+- `../../bin/express-cli --send-stakeupdate-event`
+
+  - Create a `StakeUpdate` transaction on the remote network and increase stake of 1st validator by 100 MATIC.
+
+- `../../bin/express-cli --send-signerchange-event`
+
+  - Create a `SignerChange` transaction on the remote network and changes the signer of the 1st validator.
+
+- `../../bin/express-cli --send-topupfee-event`
+
+  - Create a `TopUpFee` transaction on the remote network and adds balance/heimdallFee for the first validator on Heimdall.
+
+- `../../bin/express-cli --send-unstakeinit-event [validatorID]`
+
+  - Create a `UnstakeInit` transaction on the remote network and removes the validator from validator-set. `validatorID` can be used to specify the validator to be removed. If not specified, the first validator will be removed.
+
+- ` ../../bin/express-cli --monitor [exit]`
 
   - Monitors the reception of state-syncs and checkpoints to make sure the whole network is in a healthy state.
-    If `--send-state-sync` hasn't been used before, only checkpoints will be detected. The execution stops when
-    a `state-sync` is found
+    If `--send-state-sync` hasn't been used before, only checkpoints will be detected. Monitor the setup.  
+    If `exit` string is passed the process terminates when at least one `stateSync` and one `checkpoint` are detected.
 
 - ` ../../bin/express-cli --instances-stop`
 
@@ -215,9 +235,9 @@ The `express-cli` also comes with additional utility commands, listed below. Som
   - Executes a test to send EIP 1559 tx. In case of a non-dockerized devnet, if an integer [index] is specified, it will use
     that VM to send the tx. Otherwise, it will target the first VM.
 
-- `../../bin/express-cli --shadow-fork [block]`
+- `../../bin/express-cli --shadow-fork [blockNumber]`
   - Run (mumbai/mainnet) nodes in shadow mode. Please note that there might be an offset of ~3-4 blocks from [block] number
-    specified when restarting the (shadow) node. Currently only works with remote setup.
+    specified when restarting the (shadow) node. Currently only works with remote setup (no docker support).
 
 ## `matic-cli`
 

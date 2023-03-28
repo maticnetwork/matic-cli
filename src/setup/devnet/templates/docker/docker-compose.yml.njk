@@ -44,14 +44,14 @@ services:
     networks:
       - devnet-network
     volumes:
-      - ./devnet/node{{ node }}/heimdalld:/root/.heimdalld
+      - ./devnet/node{{ node }}/heimdalld:/root/var/lib/heimdall
       - ./logs/node{{ node }}/heimdall:/root/heimdall/logs
     {% if node == 0 %}
     ports:
       - "1317:1317"
       - "26657:26657"
     {% endif %}
-  
+
   bor{{ node }}:
     {% if obj.config.borDockerBuildContext|length %}
       {% if node == 0 %}

@@ -244,7 +244,7 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType, devnetId) {
       console.log(
         '📍Removing old devnet (if present) on machine ' + ip + ' ...'
       )
-      let command = 'rm -rf ~/matic-cli/devnet'
+      let command = 'sudo rm -rf ~/matic-cli/devnet'
       await runSshCommand(ip, command, maxRetries)
 
       console.log('📍Stopping ganache (if present) on machine ' + ip + ' ...')
@@ -263,21 +263,23 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType, devnetId) {
     await runSshCommand(ip, command, maxRetries)
 
     console.log('📍Removing .bor folder (if present) on machine ' + ip + ' ...')
-    command = 'rm -rf ~/.bor'
+    command = 'sudo rm -rf ~/.bor'
     await runSshCommand(ip, command, maxRetries)
 
     console.log(
-      '📍Removing .heimdalld folder (if present) on machine ' + ip + ' ...'
+      '📍Removing /var/lib/heimdall folder (if present) on machine ' +
+        ip +
+        ' ...'
     )
-    command = 'rm -rf ~/.heimdalld'
+    command = 'sudo rm -rf /var/lib/heimdall'
     await runSshCommand(ip, command, maxRetries)
 
     console.log('📍Removing data folder (if present) on machine ' + ip + ' ...')
-    command = 'rm -rf ~/data'
+    command = 'sudo rm -rf ~/data'
     await runSshCommand(ip, command, maxRetries)
 
     console.log('📍Removing node folder (if present) on machine ' + ip + ' ...')
-    command = 'rm -rf ~/node'
+    command = 'sudo rm -rf ~/node'
     await runSshCommand(ip, command, maxRetries)
   })
 
