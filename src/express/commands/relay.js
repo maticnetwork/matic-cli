@@ -1,5 +1,6 @@
 import { loadDevnetConfig, splitToArray } from '../common/config-utils'
 import Web3 from 'web3'
+
 const fs = require('fs')
 require('dotenv').config()
 
@@ -10,7 +11,7 @@ function print(text, index) {
   }
 }
 
-// web3 library intialization
+// web3 library initialization
 async function initWeb3(provider) {
   const web3 = new Web3(provider)
   web3.extend({
@@ -42,7 +43,7 @@ function storeTxData(ip, block, txIndex) {
     fs.writeFileSync(`./shadowData/${ip}-tx-indices.json`, txData, 'utf-8')
   } catch (error) {
     console.error(
-      `Error occured while writing last tx index and block number to file: ${error}`
+      `📍 Error occurred while writing last tx index and block number to file: ${error}`
     )
     process.exit(1)
   }
@@ -59,7 +60,7 @@ function fetchTxData(ip) {
     return JSON.parse(txData)
   } catch (error) {
     console.error(
-      `Error occured while fetching last tx index and block number from file: ${error}`
+      `📍 Error occurred while fetching last tx index and block number from file: ${error}`
     )
     process.exit(1)
   }
@@ -87,7 +88,7 @@ export async function relay() {
       : 'https://rpc-mumbai.maticvigil.com'
 
   const relayTasks = providers.map(async (p, i) => {
-    relayTxs(p, providerToNodeIp.get(p), polygonProviderUrl, i)
+    await relayTxs(p, providerToNodeIp.get(p), polygonProviderUrl, i)
   })
 
   await Promise.all(relayTasks)
@@ -109,15 +110,14 @@ async function relayTxs(p, ip, polygonProviderUrl, index) {
     startTxIndex = txData.lastTxIndex + 1
   } else if (fs.existsSync('./shadowData/blockData.json')) {
     const blockData = fs.readFileSync('./shadowData/blockData.json', 'utf-8')
-    const targetBlock = JSON.parse(blockData).blockNumber
-    startBlock = targetBlock
+    startBlock = JSON.parse(blockData).blockNumber
     startTxIndex = 0
   } else {
     startBlock = 0
     startTxIndex = 0
   }
 
-  print(`Start block: ${startBlock} Start index: ${startTxIndex}`, index)
+  print(`📍 Start block: ${startBlock} Start index: ${startTxIndex}`, index)
 
   let polygonBlock = startBlock
 
@@ -126,7 +126,7 @@ async function relayTxs(p, ip, polygonProviderUrl, index) {
       polygonBlock
     )
 
-    print(`📍Block ${polygonBlock} has ${txCount} transactions`, index)
+    print(`📍 Block ${polygonBlock} has ${txCount} transactions`, index)
 
     for (let i = startTxIndex; i < txCount; i++) {
       try {
@@ -139,19 +139,19 @@ async function relayTxs(p, ip, polygonProviderUrl, index) {
 
         if (res.status) {
           print(
-            `Tx sent to shadow node is mined in block number: ${res.blockNumber}`,
+            `📍 Tx sent to shadow node is mined in block number: ${res.blockNumber}`,
             index
           )
         }
       } catch (error) {
         if (error.receipt) {
           print(
-            `Tx sent to shadow node is reverted in block number: ${error.receipt.blockNumber}`,
+            `📍 Tx sent to shadow node is reverted in block number: ${error.receipt.blockNumber}`,
             index
           )
         } else {
           print(
-            `Error occured while sending tx to shadow node: ${error}`,
+            `📍 Error occurred while sending tx to shadow node: ${error}`,
             index
           )
         }
