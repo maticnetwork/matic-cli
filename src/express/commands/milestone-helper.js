@@ -1,16 +1,7 @@
 /* eslint-disable dot-notation */
 import { loadDevnetConfig, splitToArray } from '../common/config-utils'
-import {
-  getEnode,
-  getBlock,
-  addPeers,
-  getPeerLength
-} from '../common/milestone-utils'
-import { checkLatestMilestone } from './monitor'
-import { timer } from '../common/time-utils'
+import { getEnode, addPeers, getPeerLength } from '../common/milestone-utils'
 const {
-  runCommand,
-  runSshCommand,
   runSshCommandWithReturn,
   maxRetries
 } = require('../common/remote-worker')

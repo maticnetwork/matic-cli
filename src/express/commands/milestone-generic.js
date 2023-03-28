@@ -14,7 +14,7 @@ import {
 
 const { maxRetries, runCommand } = require('../common/remote-worker')
 
-const milestoneLength = 64
+let milestoneLength = 64
 const queryTimer = (milestoneLength / 4) * 1000
 
 export async function milestoneBase(testType = 'base') {
@@ -109,15 +109,15 @@ export async function milestoneBase(testType = 'base') {
     'finalized',
     maxRetries
   )
-  if (finalizedBlock == undefined) {
+  if (finalizedBlock === undefined) {
     console.log('📍Unable to fetch last finalized block, exiting')
     return
   }
 
   // Check if the number and hash matches with the last milestone
   if (
-    Number(finalizedBlock.number) == Number(lastMilestone.end_block) &&
-    finalizedBlock.hash == lastMilestone.hash
+    Number(finalizedBlock.number) === Number(lastMilestone.end_block) &&
+    finalizedBlock.hash === lastMilestone.hash
   ) {
     console.log(
       '📍Received correct finalized block according to last milestone'
@@ -190,7 +190,7 @@ export async function milestoneBase(testType = 'base') {
     peers = values
   })
 
-  if (JSON.stringify(peers) != JSON.stringify(expectedPeers)) {
+  if (JSON.stringify(peers) !== JSON.stringify(expectedPeers)) {
     console.log(
       `📍Retrying creation of partition clusters for testing. Got peers: ${peers}, expected: ${expectedPeers}`
     )
@@ -206,7 +206,7 @@ export async function milestoneBase(testType = 'base') {
       tasks.push(getPeerLength(ips[i]))
     }
 
-    let peers = []
+    peers = []
     await Promise.all(tasks).then((values) => {
       // Check if there's no validation error
       if (values.includes(-1)) {
@@ -216,7 +216,7 @@ export async function milestoneBase(testType = 'base') {
       peers = values
     })
 
-    if (JSON.stringify(peers) != JSON.stringify(expectedPeers)) {
+    if (JSON.stringify(peers) !== JSON.stringify(expectedPeers)) {
       console.log('📍Failed to create partition clusters for testing, exiting')
       return
     } else {
@@ -224,7 +224,6 @@ export async function milestoneBase(testType = 'base') {
         '📍Partition clusters for testing created. Proceeding to test'
       )
     }
-  } else {
   }
 
   // Reaching this step means that we've created 2 clusters for testing.
@@ -243,7 +242,7 @@ export async function milestoneBase(testType = 'base') {
     'latest',
     maxRetries
   )
-  if (latestBlockCluster2 == undefined) {
+  if (latestBlockCluster2 === undefined) {
     console.log('📍Unable to fetch latest block in cluster 2, exiting')
     return
   }
@@ -260,7 +259,7 @@ export async function milestoneBase(testType = 'base') {
       latestBlockCluster2.number,
       maxRetries
     )
-    if (latestBlockCluster1 == undefined) {
+    if (latestBlockCluster1 === undefined) {
       console.log(
         `📍Unable to fetch block ${Number(
           latestBlockCluster2.number
@@ -270,7 +269,7 @@ export async function milestoneBase(testType = 'base') {
     }
 
     if (latestBlockCluster1.number) {
-      if (latestBlockCluster1.number != latestBlockCluster2.number) {
+      if (latestBlockCluster1.number !== latestBlockCluster2.number) {
         console.log(
           `📍Block number mismatch from clusters. Cluster 1: ${Number(
             latestBlockCluster1.number
@@ -280,7 +279,7 @@ export async function milestoneBase(testType = 'base') {
       }
 
       // Check if same block numbers have different hash or not
-      if (latestBlockCluster1.hash == latestBlockCluster2.hash) {
+      if (latestBlockCluster1.hash === latestBlockCluster2.hash) {
         console.log(
           `📍Block hash matched. Clusters are not created properly. Cluster 1: ${latestBlockCluster1.hash}, Cluster 2: ${latestBlockCluster2.hash}, exiting`
         )
@@ -308,14 +307,14 @@ export async function milestoneBase(testType = 'base') {
   console.log('📍Querying heimdall for next milestone...')
 
   // Run the test a bit longer for `partition` type
-  if (testType == 'partition') {
+  if (testType === 'partition') {
     milestoneLength *= 2
   }
 
   while (true) {
     if (count > milestoneLength) {
       console.log('📍Unable to fetch milestone from heimdall, exiting')
-      if (testType != 'partition') {
+      if (testType !== 'partition') {
         return
       }
     }
@@ -324,7 +323,7 @@ export async function milestoneBase(testType = 'base') {
     if (milestone.result) {
       // Check if the milestone is the immediate next one or not
       if (
-        Number(milestone.result.start_block) ==
+        Number(milestone.result.start_block) ===
         Number(lastMilestone.end_block) + 1
       ) {
         break
@@ -381,7 +380,7 @@ export async function milestoneBase(testType = 'base') {
     latestBlockCluster2.number,
     maxRetries
   )
-  if (latestBlockCluster1 == undefined) {
+  if (latestBlockCluster1 === undefined) {
     console.log(
       `📍Unable to fetch block ${Number(
         latestBlockCluster2.number
@@ -391,7 +390,7 @@ export async function milestoneBase(testType = 'base') {
   }
 
   if (latestBlockCluster1.number) {
-    if (latestBlockCluster1.hash == latestBlockCluster2.hash) {
+    if (latestBlockCluster1.hash === latestBlockCluster2.hash) {
       console.log(
         'Cluster 1 successfully reorged to cluster 2 (with high majority)'
       )
@@ -431,8 +430,8 @@ export async function milestoneBase(testType = 'base') {
   let exit = false
   for (let i = 0; i < finalizedBlocks.length; i++) {
     if (
-      Number(finalizedBlocks[i].number) != Number(latestMilestone.end_block) ||
-      finalizedBlocks[i].hash != latestMilestone.hash
+      Number(finalizedBlocks[i].number) !== Number(latestMilestone.end_block) ||
+      finalizedBlocks[i].hash !== latestMilestone.hash
     ) {
       console.log(
         `📍Block number or hash mismatch for finalized block. Host index: ${i}, Finalized Block Number: ${Number(
