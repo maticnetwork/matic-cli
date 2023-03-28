@@ -23,11 +23,13 @@ import { timer } from './express/common/time-utils'
 import { program } from 'commander'
 import pkg from '../package.json'
 import { testEip1559 } from '../tests/test-eip-1559'
-import { stopInstances } from './express/commands/instances-stop'
-import { startInstances } from './express/commands/instances-start'
+import { stopInstances } from './express/commands/aws-instances-stop'
+import { startInstances } from './express/commands/aws-instances-start'
 import { rewind } from './express/commands/rewind'
 import { shadow } from './express/commands/shadow'
 import { relay } from './express/commands/relay'
+import { awsKeypairAdd } from './express/commands/aws-keypair-add'
+import { awsKeypairDestroy } from './express/commands/aws-keypair-destroy'
 
 program
   .option('-i, --init', 'Initiate the terraform setup')
@@ -86,7 +88,18 @@ program
   .option('-xxx, --chaos [intensity]', 'Start Chaos')
   .option('-istop, --instances-stop', 'Stop aws ec2 instances')
   .option('-istart, --instances-start', 'Start aws ec2 instances')
-  .option('-rewind, --rewind [numberOfBlocks]', 'Rewind the chain')
+  .option(
+    '-rewind, --rewind [numberOfBlocks]',
+    'Rewind the chain by a given number of blocks'
+  )
+  .option(
+    '-key-a, --aws-key-add',
+    'Generate additional aws keypair for the devnet'
+  )
+  .option(
+    '-key-d, --aws-key-des [keyName]',
+    'Destroy aws keypair from devnet, given its keyName'
+  )
   .option(
     '-sf, --shadow-fork [blockNumber]',
     'Run nodes in shadow mode. Please note that there might be an offset of ~3-4 blocks from [blockNumber] specified when restarting the (shadow) node'
@@ -240,7 +253,7 @@ export async function cli() {
     await timer(3000)
     await cleanup()
   } else if (options.monitor) {
-    console.log('📍Command --monitor ')
+    console.log('📍Command --monitor [exit]')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -254,7 +267,7 @@ export async function cli() {
       await monitor(false)
     }
   } else if (options.stress) {
-    console.log('📍Command --stress ')
+    console.log('📍Command --stress [fund]')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -281,7 +294,7 @@ export async function cli() {
     await timer(3000)
     await sendStateSyncTx()
   } else if (options.sendStakedEvent) {
-    console.log('📍Command --send-stake-event ')
+    console.log('📍Command --send-staked-event ')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -357,7 +370,7 @@ export async function cli() {
     await timer(3000)
     await setupDatadog()
   } else if (options.chaos) {
-    console.log('📍Command --chaos')
+    console.log('📍Command --chaos [intensity]')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -404,6 +417,24 @@ export async function cli() {
 
     await timer(3000)
     await rewind(options.rewind)
+  } else if (options.awsKeyAdd) {
+    console.log('📍 Command --aws-key-add')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    await awsKeypairAdd()
+  } else if (options.awsKeyDes) {
+    console.log('📍 Command --aws-key-des')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    await awsKeypairDestroy(options.awsKeyDes)
   } else if (options.shadowFork) {
     console.log('📍Command --shadow-fork [blockNumber]')
     if (!checkDir(false)) {
