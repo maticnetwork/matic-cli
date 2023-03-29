@@ -148,6 +148,10 @@ resource "aws_main_route_table_association" "route_table_association" {
 }
 
 # output variables used by express-cli
+output "cloud" {
+  value = "aws"
+}
+
 output "instance_ips" {
   value = aws_eip.eip.*.public_ip
 }

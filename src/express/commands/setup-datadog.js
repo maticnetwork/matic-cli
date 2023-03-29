@@ -32,7 +32,7 @@ export async function setupDatadog() {
   let doc
   require('dotenv').config({ path: `${process.cwd()}/.env` })
 
-  if (process.env.TF_VAR_DOCKERIZED === 'yes') {
+  if (process.env.TF_VAR_DOCKERIZED === 'yes' || process.env.TF_VAR_PROJECT_ID) {
     console.log('📍Not supported for datadog at the moment')
     return
   } else {

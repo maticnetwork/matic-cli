@@ -5,7 +5,7 @@ import fs from 'fs'
 
 const shell = require('shelljs')
 
-export async function terraformInit() {
+export async function terraformInit(cloud) {
   const nextDevnetId = !fs.existsSync('./deployments')
     ? 1
     : findMaxDevnetId() + 1
@@ -15,9 +15,9 @@ export async function terraformInit() {
   shell.exec(
     `cp ./secret.tfvars ./deployments/devnet-${nextDevnetId}/secret.tfvars`
   )
-  shell.exec(`cp ./main.tf ./deployments/devnet-${nextDevnetId}/main.tf`)
+  shell.exec(`cp ./terraform/${cloud}/main.tf ./deployments/devnet-${nextDevnetId}/main.tf`)
   shell.exec(
-    `cp ./variables.tf ./deployments/devnet-${nextDevnetId}/variables.tf`
+    `cp ./terraform/${cloud}/variables.tf ./deployments/devnet-${nextDevnetId}/variables.tf`
   )
 
   require('dotenv').config({

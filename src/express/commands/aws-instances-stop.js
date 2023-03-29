@@ -16,8 +16,14 @@ export async function stopInstances() {
   await stopServices(doc)
 
   const instances = doc.instancesIds.toString().replace(/,/g, ' ')
+  const cloud = doc.cloud.toString()
 
-  shell.exec(`aws ec2 stop-instances --instance-ids ${instances}`)
+  if (cloud === 'gcp') {
+    const zone = doc.devnetZone.toString()
+    shell.exec(`gcloud compute instances stop ${instances} --zone ${zone}`)
+  } else {
+    shell.exec(`aws ec2 stop-instances --instance-ids ${instances}`)
+  }
   if (shell.error() !== null) {
     console.log(
       `📍Stopping instances ${doc.instancesIds.toString()} didn't work. Please check AWS manually`

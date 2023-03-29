@@ -31,6 +31,7 @@ import { awsKeypairDestroy } from './express/commands/aws-keypair-destroy'
 
 program
   .option('-i, --init', 'Initiate the terraform setup')
+  .option('--cloud [aws|gcp]', '--init will intiates the terraform with specified cloud', /^(aws|gcp)$/i, 'aws')
   .option('-s, --start', 'Start the setup')
   .option('-d, --destroy', 'Destroy the setup')
   .option(
@@ -108,7 +109,6 @@ export async function cli() {
 
   program.parse(process.argv)
   const options = program.opts()
-
   if (options.init) {
     console.log('📍Command --init')
     if (!checkDir(true)) {
@@ -117,7 +117,8 @@ export async function cli() {
       )
       process.exit(1)
     }
-    await terraformInit()
+    const cloud = options.cloud.toLowerCase()
+    await terraformInit(cloud)
   } else if (options.start) {
     console.log('📍Command --start')
     if (!checkDir(false)) {
