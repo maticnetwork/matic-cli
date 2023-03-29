@@ -110,7 +110,6 @@ function validateEnvVars(cloud) {
 
   // validating GCP infra vars
   } else if (cloud == 'gcp') {
-    console.log("Checking GCP vars")
     cleanEnv(process.env, {
       TF_VAR_MACHINE_TYPE: validStr({ default: 'c3-highcpu-22' }),
       TF_VAR_INSTANCE_IMAGE: validGCPVmImageStr({ default: 'ubuntu-2204-jammy-v20230302' }),
@@ -553,11 +552,8 @@ export async function editMaticCliRemoteYAMLConfig() {
   setConfigList('devnetBorUsers', process.env.DEVNET_BOR_USERS, doc)
   setConfigList('devnetHeimdallUsers', process.env.DEVNET_BOR_USERS, doc)
   setConfigValue('devnetType', 'remote', doc)
-  if (process.env.CLOUD) {
-    setConfigValue('devnetRegion', process.env.TF_VAR_REGION, doc)
-    setConfigValue('devnetZone', process.env.TF_VAR_ZONE, doc)
-    setConfigValue('cloud', process.env.CLOUD, doc)
-  }
+  setConfigValue('devnetRegion', process.env.TF_VAR_REGION, doc)
+  setConfigValue('cloud', process.env.CLOUD, doc)
 
   fs.writeFile(
     `${process.cwd()}/remote-setup-config.yaml`,

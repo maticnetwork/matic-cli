@@ -74,7 +74,7 @@ resource "google_compute_instance" "node_server" {
 }
 
 resource "google_compute_firewall" "firewall_rules" {
-  name    = var.FW_RULE_NAME
+  name    = format("%s-%s", var.VM_NAME, var.FW_RULE_SUFFIX)
   network = google_compute_network.vpc_network.name
 
   allow {
@@ -95,5 +95,5 @@ output "instance_dns_ips" {
 }
 
 output "instance_ids" {
-  value = google_compute_instance.node_server.*.name 
+  value = google_compute_instance.node_server.*.id
 }

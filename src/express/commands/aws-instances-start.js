@@ -20,14 +20,17 @@ export async function startInstances() {
   const devnetType =
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
   const doc = await loadDevnetConfig(devnetType)
-  const instances = doc.instancesIds.toString().replace(/,/g, ' ')
   const cloud = doc.cloud.toString()
 
   if (cloud === 'gcp') {
-    const zone = doc.devnetZone.toString()
-    shell.exec(`gcloud compute instances start ${instances} --zone ${zone}`)
+    const project = doc.instancesIds[0].split('/')[1].toString()
+    const zone = doc.instancesIds[0].split('/')[3].toString()
+    const instances = doc.instancesIds.map(x => x.split('/').at(-1)).toString().replace(/,/g, ' ')
+    shell.exec(`gcloud compute instances start ${instances} --zone ${zone} --project ${project}`)
   } else {
-    shell.exec(`aws ec2 start-instances --instance-ids ${instances}`)
+    const instances = doc.instancesIds.toString().replace(/,/g, ' ')
+    const region = doc.devnetRegion.toString()
+    shell.exec(`aws ec2 start-instances  --region ${region} --instance-ids ${instances}`)
   }
   
   if (shell.error() !== null) {

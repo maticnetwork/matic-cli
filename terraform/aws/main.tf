@@ -100,7 +100,7 @@ variable "devnet_public_subnet" {
 resource "aws_subnet" "devnet_public_subnet" {
   vpc_id                  = aws_vpc.devnet_vpc.id
   cidr_block              = var.devnet_public_subnet
-  availability_zone       = "us-west-2a"
+  availability_zone       = var.AVAILABILITY_ZONE
   map_public_ip_on_launch = true
 
   tags = {

@@ -66,6 +66,10 @@ variable "REGION" {
   default = "us-west-2"
 }
 
+variable "AVAILABILITY_ZONE" {
+  default = "us-west-2a"
+}
+
 variable "SG_CIDR_BLOCKS" {
   description = "Contains allowed IPs. Please, set them into secret.tfvars (example available at secret.tfvars.example)"
   sensitive = true

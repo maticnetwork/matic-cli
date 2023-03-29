@@ -41,10 +41,10 @@ variable "SUBNET_CIDR_RANGE" {
   default = "10.0.0.0/16"
 }
 
-variable "FW_RULE_NAME" {
+variable "FW_RULE_SUFFIX" {
   type = string
-  description = "Name for the GCP firewall ingress rules"
-  default = "devnet-ingress"
+  description = "Suffix for the GCP firewall ingress rules"
+  default = "firewall"
 }
 
 variable "PORTS_LIST" {
@@ -61,12 +61,12 @@ variable "VM_NAME" {
 }
 
 variable "MACHINE_TYPE" {
-  default = "c3-highcpu-22"
+  default = "n2-standard-4"
   description = "Type of the Compute VM instance"
 }
 
 variable "ARCHIVE_MACHINE_TYPE" {
-  default = "c3-highcpu-22"
+  default = "n2-standard-4"
   description = "Type of the Compute VM instance"
 }
 
