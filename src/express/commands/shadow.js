@@ -2,19 +2,11 @@ import Web3 from 'web3'
 import { loadDevnetConfig, splitToArray } from '../common/config-utils'
 import { maxRetries, runSshCommand } from '../common/remote-worker'
 import { stopServices } from './cleanup'
+import { isValidBlockNum } from '../common/num-utils'
 const fs = require('fs')
 
 async function initWeb3(provider) {
   return new Web3(provider)
-}
-
-function isValidBlockNum(targetBlock) {
-  return (
-    targetBlock !== undefined &&
-    targetBlock !== null &&
-    targetBlock !== '' &&
-    parseInt(targetBlock, 10) > 0
-  )
 }
 
 export async function shadow(targetBlock) {
@@ -110,7 +102,7 @@ export async function shadow(targetBlock) {
     }
     fs.writeFileSync('./shadowData/blockData.json', blockData, 'utf-8')
   } catch (error) {
-    console.error(`Error occured while writing block number to file: ${error}`)
+    console.error(`Error occurred while writing block number to file: ${error}`)
     process.exit(1)
   }
 }
