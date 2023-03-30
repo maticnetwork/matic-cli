@@ -4,6 +4,15 @@ import Web3 from 'web3'
 const fs = require('fs')
 require('dotenv').config()
 
+function validateBlock(blockNumber) {
+  return (
+    blockNumber !== undefined &&
+    blockNumber !== null &&
+    blockNumber !== '' &&
+    Number(blockNumber) > 0
+  )
+}
+
 // print function, so that only 0th index node prints the logs
 function print(text, index) {
   if (index === 0) {
@@ -40,7 +49,7 @@ function storeTxData(ip, block, txIndex) {
       blockNumber: block,
       lastTxIndex: txIndex
     })
-    fs.writeFileSync(`./shadowData/${ip}-tx-indices.json`, txData, 'utf-8')
+    fs.writeFileSync(`./${ip}-relay-data.json`, txData, 'utf-8')
   } catch (error) {
     console.error(
       `📍 Error occurred while writing last tx index and block number to file: ${error}`
@@ -53,10 +62,7 @@ function storeTxData(ip, block, txIndex) {
 // name of file is <ip>-tx-indices.json
 function fetchTxData(ip) {
   try {
-    const txData = fs.readFileSync(
-      `./shadowData/${ip}-tx-indices.json`,
-      'utf-8'
-    )
+    const txData = fs.readFileSync(`./${ip}-relay-data.json`, 'utf-8')
     return JSON.parse(txData)
   } catch (error) {
     console.error(
@@ -96,23 +102,27 @@ export async function relay() {
 
 // function to relay transactions from bor testnet/mainnet to shadow node
 // this function is called on all nodes
-// If the file <ip>-tx-indices.json exists, then it will start replaying from the last tx index and block number
-// else it will look for blockData.json file, if it exists, then it will start replaying from the block number in the file
+// If the file ./<user@dns>-relay-data.json exists, then it will start replaying from the last tx index and block number
+// else it will look for RELAY_START_BLOCK_NUMBER environment variable, if it exists, then it will start replaying from that block number
 // else it will start replaying from block 0
 async function relayTxs(p, ip, polygonProviderUrl, index) {
   const polygonProvider = await initWeb3(polygonProviderUrl)
   const shadowProvider = p
   let startBlock, startTxIndex
 
-  if (fs.existsSync(`./shadowData/${ip}-tx-indices.json`)) {
+  if (fs.existsSync(`./${ip}-relay-data.json`)) {
+    console.log(`📍 Resuming data from ${ip}-relay-data.json`)
     const txData = fetchTxData(ip)
     startBlock = txData.blockNumber
     startTxIndex = txData.lastTxIndex + 1
-  } else if (fs.existsSync('./shadowData/blockData.json')) {
-    const blockData = fs.readFileSync('./shadowData/blockData.json', 'utf-8')
-    startBlock = JSON.parse(blockData).blockNumber
+  } else if (validateBlock(process.env.RELAY_START_BLOCK_NUMBER)) {
+    console.log(
+      '📍 Resuming data from environment variable process.env.RELAY_START_BLOCK_NUMBER'
+    )
+    startBlock = Number(process.env.RELAY_START_BLOCK_NUMBER)
     startTxIndex = 0
   } else {
+    console.log('📍 No data to resume, starting from scratch')
     startBlock = 0
     startTxIndex = 0
   }
@@ -135,6 +145,8 @@ async function relayTxs(p, ip, polygonProviderUrl, index) {
             polygonBlock,
             i
           )
+        // TODO FIXME
+        //  Error occurred while sending tx to shadow node: Error: Returned error: nonce too low
         const res = await shadowProvider.eth.sendSignedTransaction(rawTx)
 
         if (res.status) {
