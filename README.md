@@ -191,6 +191,14 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
   - Create a `SignerChange` transaction on the remote network and changes the signer of the 1st validator.
 
+- `../../bin/express-cli --send-topupfee-event`
+
+  - Create a `TopUpFee` transaction on the remote network and adds balance/heimdallFee for the first validator on Heimdall.
+
+- `../../bin/express-cli --send-unstakeinit-event [validatorID]`
+
+  - Create a `UnstakeInit` transaction on the remote network and removes the validator from validator-set. `validatorID` can be used to specify the validator to be removed. If not specified, the first validator will be removed.
+
 - ` ../../bin/express-cli --monitor [exit]`
 
   - Monitors the reception of state-syncs and checkpoints to make sure the whole network is in a healthy state.
@@ -226,6 +234,10 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
   - Executes a test to send EIP 1559 tx. In case of a non-dockerized devnet, if an integer [index] is specified, it will use
     that VM to send the tx. Otherwise, it will target the first VM.
+- `../../bin/express-cli --aws-key-add`
+  - Generates an additional `aws` key-pair remotely and stores it locally in the devnet folder. The public key is added to the ssh authorized keys of the devnet's machines. The key can be shared - on a secure channel! - with other devs to grant them access to the remote devnet.
+- `../../bin/express-cli --aws-key-des [keyName]`
+  - Destroys an `aws` key-pair given its `keyName`. The key gets deleted remotely from `aws`, cancelled from the authorized ssh keys of the devnet's machines and removed from local devnet folder.
 
 - `../../bin/express-cli --shadow-fork [blockNumber]`
   - Run (mumbai/mainnet) nodes in shadow mode. Please note that there might be an offset of ~3-4 blocks from [block] number

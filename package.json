@@ -1,6 +1,6 @@
 {
   "name": "@maticnetwork/matic-cli",
-  "version": "0.0.9",
+  "version": "0.10.0",
   "description": "Testing toolkit to setup, manage and operate Polygon networks",
   "publishConfig": {
     "access": "public"

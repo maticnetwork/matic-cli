@@ -7,6 +7,8 @@ import { sendStateSyncTx } from './express/commands/send-state-sync'
 import { sendStakedEvent } from './express/commands/send-staked-event'
 import { sendStakeUpdateEvent } from './express/commands/send-stake-update'
 import { sendSignerChangeEvent } from './express/commands/send-signer-change'
+import { sendUnstakeInitEvent } from './express/commands/send-unstake-init'
+import { sendTopUpFeeEvent } from './express/commands/send-topupfee'
 import { monitor } from './express/commands/monitor'
 import {
   restartAll,
@@ -21,9 +23,11 @@ import { timer } from './express/common/time-utils'
 import { program } from 'commander'
 import pkg from '../package.json'
 import { testEip1559 } from '../tests/test-eip-1559'
-import { stopInstances } from './express/commands/instances-stop'
-import { startInstances } from './express/commands/instances-start'
+import { stopInstances } from './express/commands/aws-instances-stop'
+import { startInstances } from './express/commands/aws-instances-start'
 import { rewind } from './express/commands/rewind'
+import { awsKeypairAdd } from './express/commands/aws-keypair-add'
+import { awsKeypairDestroy } from './express/commands/aws-keypair-destroy'
 import { shadow } from './express/commands/shadow'
 import { rpcTest } from '../tests/rpc-tests/rpc-test'
 
@@ -66,13 +70,15 @@ program
   )
   .option('-ss, --send-state-sync', 'Send state sync tx')
   .option('-sstake, --send-staked-event', 'Send staked event')
-  .option(
-    '-sstakeupdate, --send-stakedupdate-event',
-    'Send staked-update event'
-  )
+  .option('-sstakeupdate, --send-stakeupdate-event', 'Send staked-update event')
   .option(
     '-ssignerchange, --send-signerchange-event',
     'Send signer-change event'
+  )
+  .option('-stopupfee, --send-topupfee-event', 'Send topupfee event')
+  .option(
+    '-sunstakeinit, --send-unstakeinit-event [validatorID]',
+    'Send unstake-init event'
   )
   .option(
     '-e1559, --eip-1559-test [index]',
@@ -82,7 +88,18 @@ program
   .option('-xxx, --chaos [intensity]', 'Start Chaos')
   .option('-istop, --instances-stop', 'Stop aws ec2 instances')
   .option('-istart, --instances-start', 'Start aws ec2 instances')
-  .option('-rewind, --rewind [numberOfBlocks]', 'Rewind the chain')
+  .option(
+    '-rewind, --rewind [numberOfBlocks]',
+    'Rewind the chain by a given number of blocks'
+  )
+  .option(
+    '-key-a, --aws-key-add',
+    'Generate additional aws keypair for the devnet'
+  )
+  .option(
+    '-key-d, --aws-key-des [keyName]',
+    'Destroy aws keypair from devnet, given its keyName'
+  )
   .option(
     '-sf, --shadow-fork [blockNumber]',
     'Run nodes in shadow mode. Please note that there might be an offset of ~3-4 blocks from [blockNumber] specified when restarting the (shadow) node'
@@ -236,7 +253,7 @@ export async function cli() {
     await timer(3000)
     await cleanup()
   } else if (options.monitor) {
-    console.log('📍Command --monitor ')
+    console.log('📍Command --monitor [exit]')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -250,7 +267,7 @@ export async function cli() {
       await monitor(false)
     }
   } else if (options.stress) {
-    console.log('📍Command --stress ')
+    console.log('📍Command --stress [fund]')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -277,7 +294,7 @@ export async function cli() {
     await timer(3000)
     await sendStateSyncTx()
   } else if (options.sendStakedEvent) {
-    console.log('📍Command --send-stake-event ')
+    console.log('📍Command --send-staked-event ')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -286,7 +303,7 @@ export async function cli() {
     }
     await timer(3000)
     await sendStakedEvent()
-  } else if (options.sendStakedupdateEvent) {
+  } else if (options.sendStakeupdateEvent) {
     console.log('📍Command --send-stakeupdate-event ')
     if (!checkDir(false)) {
       console.log(
@@ -306,6 +323,31 @@ export async function cli() {
     }
     await timer(3000)
     await sendSignerChangeEvent()
+  } else if (options.sendUnstakeinitEvent) {
+    console.log('📍Command --send-unstakeinit-event [validatorID]')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    if (options.sendUnstakeinitEvent === true) {
+      if (parseInt(options.sendUnstakeinitEvent) < 1) {
+        options.sendUnstakeinitEvent = 1
+      }
+    }
+    await timer(3000)
+    await sendUnstakeInitEvent(parseInt(options.sendUnstakeinitEvent))
+  } else if (options.sendTopupfeeEvent) {
+    console.log('📍Command --send-topupfee-event ')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    await timer(3000)
+    await sendTopUpFeeEvent()
   } else if (options.eip1559Test) {
     console.log('📍Command --eip-1559-test')
     if (!checkDir(false)) {
@@ -328,7 +370,7 @@ export async function cli() {
     await timer(3000)
     await setupDatadog()
   } else if (options.chaos) {
-    console.log('📍Command --chaos')
+    console.log('📍Command --chaos [intensity]')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -375,6 +417,24 @@ export async function cli() {
 
     await timer(3000)
     await rewind(options.rewind)
+  } else if (options.awsKeyAdd) {
+    console.log('📍 Command --aws-key-add')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    await awsKeypairAdd()
+  } else if (options.awsKeyDes) {
+    console.log('📍 Command --aws-key-des')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    await awsKeypairDestroy(options.awsKeyDes)
   } else if (options.shadowFork) {
     console.log('📍Command --shadow-fork [blockNumber]')
     if (!checkDir(false)) {

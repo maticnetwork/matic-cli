@@ -244,7 +244,7 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType, devnetId) {
       console.log(
         '📍Removing old devnet (if present) on machine ' + ip + ' ...'
       )
-      let command = 'rm -rf ~/matic-cli/devnet'
+      let command = 'sudo rm -rf ~/matic-cli/devnet'
       await runSshCommand(ip, command, maxRetries)
 
       console.log('📍Stopping ganache (if present) on machine ' + ip + ' ...')
