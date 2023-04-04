@@ -33,7 +33,7 @@ export async function stopServices(doc) {
       await runSshCommand(ip, command, maxRetries)
     }
 
-  console.log('📍Stopping bor on machine ' + ip + ' ...')
+    console.log('📍Stopping bor on machine ' + ip + ' ...')
     let command = 'sudo systemctl stop bor.service'
     await runSshCommand(ip, command, maxRetries)
 

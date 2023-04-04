@@ -1,4 +1,32 @@
 {
-    "req": {"method":"eth_getTransactionByBlockHashAndIndex","params":["0xcff4a95fe9ebf34a1123656ee1f87ffdd813cb6a78fa91c6fd7325c1f4bf891e","0x6"],"id":1,"jsonrpc":"2.0"},
-    "res": {"jsonrpc":"2.0","id":1,"result":{"blockHash":"0xcff4a95fe9ebf34a1123656ee1f87ffdd813cb6a78fa91c6fd7325c1f4bf891e","blockNumber":"0x2058900","from":"0x0000000000000000000000000000000000000000","gas":"0x0","gasPrice":"0x0","hash":"0xe79e4719c6770b41405f691c18be3346b691e220d730d6b61abb5dd3ac9d71f0","input":"0x","nonce":"0x0","to":"0x0000000000000000000000000000000000000000","transactionIndex":"0x6","value":"0x0","type":"0x0","v":"0x0","r":"0x0","s":"0x0"}}
+  "req": {
+    "method": "eth_getTransactionByBlockHashAndIndex",
+    "params": [
+      "0xcff4a95fe9ebf34a1123656ee1f87ffdd813cb6a78fa91c6fd7325c1f4bf891e",
+      "0x6"
+    ],
+    "id": 1,
+    "jsonrpc": "2.0"
+  },
+  "res": {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": {
+      "blockHash": "0xcff4a95fe9ebf34a1123656ee1f87ffdd813cb6a78fa91c6fd7325c1f4bf891e",
+      "blockNumber": "0x2058900",
+      "from": "0x0000000000000000000000000000000000000000",
+      "gas": "0x0",
+      "gasPrice": "0x0",
+      "hash": "0xe79e4719c6770b41405f691c18be3346b691e220d730d6b61abb5dd3ac9d71f0",
+      "input": "0x",
+      "nonce": "0x0",
+      "to": "0x0000000000000000000000000000000000000000",
+      "transactionIndex": "0x6",
+      "value": "0x0",
+      "type": "0x0",
+      "v": "0x0",
+      "r": "0x0",
+      "s": "0x0"
+    }
+  }
 }

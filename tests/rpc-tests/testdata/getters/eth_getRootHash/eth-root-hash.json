@@ -1,4 +1,13 @@
 {
-    "req": {"method":"eth_getRootHash","params":[1000000, 1032767],"id":1,"jsonrpc":"2.0"},
-    "res": {"jsonrpc":"2.0","id":1,"result":"e459af1a779be93d649dad8ebcde19aa9034e372307d4aefc897d89113dd91fd"}
+  "req": {
+    "method": "eth_getRootHash",
+    "params": [1000000, 1032767],
+    "id": 1,
+    "jsonrpc": "2.0"
+  },
+  "res": {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": "e459af1a779be93d649dad8ebcde19aa9034e372307d4aefc897d89113dd91fd"
+  }
 }

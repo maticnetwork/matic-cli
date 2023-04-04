@@ -1,4 +1,21 @@
 {
-    "req": {"method":"bor_getSignersAtHash","params":["0x7028f872ddbda05f99a5e9a186b5fbc96ac9d95d7abfe7312ff7f02229da684c"],"id":1,"jsonrpc":"2.0"},
-    "res": {"jsonrpc":"2.0","id":1,"result":["0x3a22c8bc68e98b0faf40f349dd2b2890fae01484","0xbe188d6641e8b680743a4815dfa0f6208038960f","0xc26880a0af2ea0c7e8130e6ec47af756465452e8","0xc275dc8be39f50d12f66b6a63629c39da5bae5bd","0xf903ba9e006193c1527bfbe65fe2123704ea3f99"]}
+  "req": {
+    "method": "bor_getSignersAtHash",
+    "params": [
+      "0x7028f872ddbda05f99a5e9a186b5fbc96ac9d95d7abfe7312ff7f02229da684c"
+    ],
+    "id": 1,
+    "jsonrpc": "2.0"
+  },
+  "res": {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": [
+      "0x3a22c8bc68e98b0faf40f349dd2b2890fae01484",
+      "0xbe188d6641e8b680743a4815dfa0f6208038960f",
+      "0xc26880a0af2ea0c7e8130e6ec47af756465452e8",
+      "0xc275dc8be39f50d12f66b6a63629c39da5bae5bd",
+      "0xf903ba9e006193c1527bfbe65fe2123704ea3f99"
+    ]
+  }
 }

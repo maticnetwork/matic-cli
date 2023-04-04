@@ -1,7 +1,12 @@
 import fs from 'fs'
 import path from 'path'
-import { maxRetries, runScpCommand, runSshCommand, runSshCommandWithReturn } from '../../src/express/common/remote-worker'
-import assert, { match } from 'assert'
+import {
+  maxRetries,
+  runScpCommand,
+  runSshCommand,
+  runSshCommandWithReturn
+} from '../../src/express/common/remote-worker'
+import assert from 'assert'
 import { loadDevnetConfig } from '../../src/express/common/config-utils'
 import HDWalletProvider from '@truffle/hdwallet-provider'
 import { timer } from '../../src/express/common/time-utils'
@@ -32,35 +37,45 @@ async function initWeb3(machine) {
     providerOrUrl: `http://${machine}:8545`
   })
 
-    return new Web3(provider)
+  return new Web3(provider)
 }
 
 async function init() {
   console.log('📍Executing RPC tests')
   const doc = await loadDevnetConfig('remote')
-  let machine = doc.devnetBorHosts[0]
-  let user = doc.devnetBorUsers[0]
-  let ip = `${user}@${machine}`
+  const machine = doc.devnetBorHosts[0]
+  const user = doc.devnetBorUsers[0]
+  const ip = `${user}@${machine}`
   const borStartScriptLocation = '~/node/bor-start.sh'
 
   const walletDisableFlagCmd = `grep -q 'disable-bor-wallet=false' ${borStartScriptLocation} && echo 'found' || echo 'not found'`
-  const isPresent = await runSshCommandWithReturn(ip, walletDisableFlagCmd, maxRetries)
- 
+  const isPresent = await runSshCommandWithReturn(
+    ip,
+    walletDisableFlagCmd,
+    maxRetries
+  )
+
   if (isPresent === 'not found') {
     const addFlagsCmd = `sed -i 's/--allow-insecure-unlock \\\\/&\\n  --disable-bor-wallet=false \\\\/' ${borStartScriptLocation}`
     const restartBorCmd = 'sudo service bor restart'
-    const isSyncingCmd = `~/go/bin/bor attach ~/.bor/data/bor.ipc --exec "eth.syncing"`
-  
-    console.log('📍Updating start script on machine to unlock node account ... ')
+    const isSyncingCmd = '~/go/bin/bor attach ~/.bor/data/bor.ipc --exec "eth.syncing"'
+
+    console.log(
+      '📍Updating start script on machine to unlock node account ... '
+    )
     await runSshCommand(ip, addFlagsCmd, maxRetries)
-    
+
     console.log('📍Restarting bor on machine ... ')
     await runSshCommand(ip, restartBorCmd, maxRetries)
-  
+
     await timer(100000)
-  
+
     while (true) {
-      let isSyncing = await runSshCommandWithReturn(ip, isSyncingCmd, maxRetries)
+      const isSyncing = await runSshCommandWithReturn(
+        ip,
+        isSyncingCmd,
+        maxRetries
+      )
       if (isSyncing === 'false') {
         console.log('📍Node sync completed ... ')
         break
@@ -70,8 +85,8 @@ async function init() {
 
   const web3 = await initWeb3(machine)
 
-  let src = `${ip}:~/.bor/address.txt`
-  let dest = './address.txt'
+  const src = `${ip}:~/.bor/address.txt`
+  const dest = './address.txt'
   await runScpCommand(src, dest, maxRetries)
 
   const addrText = fs.readFileSync('./address.txt', 'utf-8')
@@ -79,16 +94,25 @@ async function init() {
   const balance = await web3.eth.getBalance(nodeAccount)
 
   if (balance <= web3.utils.toWei('0.5', 'ether')) {
-    console.log("Node account is running low on funds. Refilling...")
+    console.log('Node account is running low on funds. Refilling...')
     await web3.eth.accounts.wallet.add(process.env.PRIVATE_KEY)
-    const sender = web3.eth.accounts.privateKeyToAccount(process.env.PRIVATE_KEY)
+    const sender = web3.eth.accounts.privateKeyToAccount(
+      process.env.PRIVATE_KEY
+    )
     const nonce = await web3.eth.getTransactionCount(sender.address)
-    await fundAccount(web3, sender, [nodeAccount], 30000000009, 30000000000, nonce, '5000000000000000000')
+    await fundAccount(
+      web3,
+      sender,
+      [nodeAccount],
+      30000000009,
+      30000000000,
+      nonce,
+      '5000000000000000000'
+    )
   }
-  console.log("Balance of node account: ", balance)
+  console.log('Balance of node account: ', balance)
 
   return [machine, web3, nodeAccount]
-  
 }
 
 function fetchTestFiles(dir) {
@@ -116,88 +140,86 @@ function fetchTestFiles(dir) {
 
 function isValidTxHash(txHashes) {
   if (Array.isArray(txHashes)) {
-    txHashes.forEach(txHash => {
+    txHashes.forEach((txHash) => {
       if (!txHash.match(txHashRegex)) {
-        console.log("❌ Invalid transaction hash: ", txHash);
+        console.log('❌ Invalid transaction hash: ', txHash)
         return false
       }
     })
     return true
   } else {
     if (!txHashes.match(txHashRegex)) {
-      console.log("❌ Invalid transaction hash: ", txHash);
+      console.log('❌ Invalid transaction hash: ', txHashes)
       return false
     }
     return true
   }
-
 }
 
 function isValidBlockHash(blockHashes) {
   if (Array.isArray(blockHashes)) {
-    blockHashes.forEach(blockHash => {
+    blockHashes.forEach((blockHash) => {
       if (!blockHash.match(blockHashRegex)) {
-        console.log("❌ Invalid block hash: ", blockHashRegex);
+        console.log('❌ Invalid block hash: ', blockHashRegex)
         return false
       }
     })
     return true
   } else {
     if (!blockHashes.match(blockHashRegex)) {
-      console.log("❌ Invalid block hash: ", blockHashRegex);
+      console.log('❌ Invalid block hash: ', blockHashRegex)
       return false
     }
-  return true
+    return true
   }
-
 }
 
 function isValidFilterLog(logs) {
   for (let i = 0; i < logs.length; i++) {
     for (let j = 0; j < logs[i].topics.length; j++) {
       if (!logs[i].topics[j].match(topicRegex)) {
-        console.log("❌ Invalid topic: ", logs[i].topics[j])
+        console.log('❌ Invalid topic: ', logs[i].topics[j])
         return false
       }
     }
-    
+
     if (!logs[i].address.match(accountRegex)) {
-      console.log("❌ Invalid address: ", logs[i].address)
+      console.log('❌ Invalid address: ', logs[i].address)
       return false
     }
 
     if (!logs[i].data.match(logDataRegex)) {
-      console.log("❌ Invalid log data: ", logs[i].data)
+      console.log('❌ Invalid log data: ', logs[i].data)
       return false
     }
 
     if (!logs[i].blockNumber.match(blockNumberRegex)) {
-      console.log("❌ Invalid block number: ", logs[i].blockNumber)
+      console.log('❌ Invalid block number: ', logs[i].blockNumber)
       return false
     }
 
     if (!logs[i].transactionHash.match(txHashRegex)) {
-      console.log("❌ Invalid transaction hash: ", logs[i].transactionHash)
+      console.log('❌ Invalid transaction hash: ', logs[i].transactionHash)
       return false
     }
 
     if (!logs[i].transactionIndex.match(txIndexRegex)) {
-      console.log("❌ Invalid transaction index: ", logs[i].transactionIndex)
+      console.log('❌ Invalid transaction index: ', logs[i].transactionIndex)
       return false
     }
 
     if (!logs[i].blockHash.match(blockHashRegex)) {
-      console.log("❌ Invalid block hash: ", logs[i].blockHash)
+      console.log('❌ Invalid block hash: ', logs[i].blockHash)
       return false
     }
 
     if (!logs[i].logIndex.match(logIndexRegex)) {
-      console.log("❌ Invalid log index: ", logs[i].logIndex)
+      console.log('❌ Invalid log index: ', logs[i].logIndex)
       return false
     }
 
     if (logs[i].removed !== true && logs[i].removed !== false) {
-      console.log("❌ Invalid removed log field: ", logs[i].removed)
+      console.log('❌ Invalid removed log field: ', logs[i].removed)
       return false
     }
   }
@@ -207,24 +229,32 @@ function isValidFilterLog(logs) {
 
 function isValidSignedMessage(message, signature, address) {
   const msgHash = ethUtil.hashPersonalMessage(Buffer.from(message))
-  const {r, s, v} = ethUtil.fromRpcSig(signature)
+  const { r, s, v } = ethUtil.fromRpcSig(signature)
   const pubKey = ethUtil.ecrecover(msgHash, v, r, s)
 
-  const recoveredAddress = "0x" + ethUtil.pubToAddress(pubKey).toString('hex')
-  return (recoveredAddress === address) && (ethUtil.isValidSignature(v,r,s))
-
+  const recoveredAddress = '0x' + ethUtil.pubToAddress(pubKey).toString('hex')
+  return recoveredAddress === address && ethUtil.isValidSignature(v, r, s)
 }
 
-async function updateSenderTestData(sendTestData, web3, sender, nonce, axiosInstance) {
+async function updateSenderTestData(
+  sendTestData,
+  web3,
+  sender,
+  nonce,
+  axiosInstance
+) {
   let response
   // prepare sender address
   for (let i = 0; i < sendTestData.length; i++) {
     if (sendTestData[i].req.method === 'eth_sign') {
       sendTestData[i].req.params[0] = sender
-    } else if (sendTestData[i].req.method === 'eth_sendTransaction' || sendTestData[i].req.method === 'eth_signTransaction') {
+    } else if (
+      sendTestData[i].req.method === 'eth_sendTransaction' ||
+      sendTestData[i].req.method === 'eth_signTransaction'
+    ) {
       sendTestData[i].req.params[0].from = sender
-    } 
-    
+    }
+
     // raw transaction to be used in eth_sendRawTransaction
     if (sendTestData[i].req.method === 'eth_signTransaction') {
       sendTestData[i].req.params[0].nonce = web3.utils.toHex(nonce)
@@ -238,26 +268,34 @@ async function updateSenderTestData(sendTestData, web3, sender, nonce, axiosInst
       sendTestData[i].req.params[0] = response.data.result.raw
       break
     }
-    
   }
 }
 
 export async function rpcTest() {
   try {
-    let [machine, web3, sender] = await init()
+    const [machine, web3, sender] = await init()
 
-    const getCurrentSnapshot = {"method":"bor_getSnapshot","params":["latest"],"id":1,"jsonrpc":"2.0"}
+    const getCurrentSnapshot = {
+      method: 'bor_getSnapshot',
+      params: ['latest'],
+      id: 1,
+      jsonrpc: '2.0'
+    }
 
     // Getter rpc calls
     const getTestData = fetchTestFiles('../../tests/rpc-tests/testdata/getters')
     const axiosInstance = axios.create({
-      baseURL: `http://${machine}:8545`,
+      baseURL: `http://${machine}:8545`
     })
 
     let response
-    
+
     let getterIterattions = process.env.EXECUTION_COUNT_GETTERS
-    if (getterIterattions <= 0 || getterIterattions === null || getterIterattions === undefined) {
+    if (
+      getterIterattions <= 0 ||
+      getterIterattions === null ||
+      getterIterattions === undefined
+    ) {
       getterIterattions = 1
     }
 
@@ -266,27 +304,38 @@ export async function rpcTest() {
       for (let i = 0; i < getTestData.length; i++) {
         console.log('📍 Executing: ', getTestData[i].req.method)
         response = await axiosInstance.post('/', getTestData[i].req)
-  
-        if (getTestData[i].req.method === "bor_getCurrentProposer") {
-          const currentSnapshotResponse = await  axiosInstance.post('/', getCurrentSnapshot)
+
+        if (getTestData[i].req.method === 'bor_getCurrentProposer') {
+          const currentSnapshotResponse = await axiosInstance.post(
+            '/',
+            getCurrentSnapshot
+          )
           // If the validator set changes, the assertion will fail
-          response = await  axiosInstance.post('/', getTestData[i].req)
-          assert.deepStrictEqual(currentSnapshotResponse.data.result.validatorSet.proposer.signer, response.data.result)
+          response = await axiosInstance.post('/', getTestData[i].req)
+          assert.deepStrictEqual(
+            currentSnapshotResponse.data.result.validatorSet.proposer.signer,
+            response.data.result
+          )
           continue
         }
-  
-        if (getTestData[i].req.method === "bor_getCurrentValidators") {
-          const currentSnapshotResponse = await  axiosInstance.post('/', getCurrentSnapshot)
+
+        if (getTestData[i].req.method === 'bor_getCurrentValidators') {
+          const currentSnapshotResponse = await axiosInstance.post(
+            '/',
+            getCurrentSnapshot
+          )
           // If the validator set changes, the assertion will fail
-          response = await  axiosInstance.post('/', getTestData[i].req)
-          assert.deepStrictEqual(currentSnapshotResponse.data.result.validatorSet.validators, response.data.result)
+          response = await axiosInstance.post('/', getTestData[i].req)
+          assert.deepStrictEqual(
+            currentSnapshotResponse.data.result.validatorSet.validators,
+            response.data.result
+          )
           continue
         }
-  
+
         assert.deepStrictEqual(response.data, getTestData[i].res)
-      } 
+      }
     }
- 
 
     // Sender rpc calls
     const sendTestData = fetchTestFiles(
@@ -295,185 +344,365 @@ export async function rpcTest() {
 
     let nonce = await web3.eth.getTransactionCount(sender)
 
-    const getFilterChanges = {"method":"eth_getFilterChanges","params":[""],"id":1,"jsonrpc":"2.0"}
+    const getFilterChanges = {
+      method: 'eth_getFilterChanges',
+      params: [''],
+      id: 1,
+      jsonrpc: '2.0'
+    }
     let filterResponse
 
-    const getFilterLogs = {"method":"eth_getFilterLogs","params":[""],"id":1,"jsonrpc":"2.0"}
+    const getFilterLogs = {
+      method: 'eth_getFilterLogs',
+      params: [''],
+      id: 1,
+      jsonrpc: '2.0'
+    }
     let filterLogsResponse
 
     let senderrIterattions = process.env.EXECUTION_COUNT_SENDERS
-    if (senderrIterattions <= 0 || senderrIterattions === null || senderrIterattions === undefined) {
+    if (
+      senderrIterattions <= 0 ||
+      senderrIterattions === null ||
+      senderrIterattions === undefined
+    ) {
       senderrIterattions = 1
     }
 
     // Finally, fire 'em
     for (let iter = 0; iter < senderrIterattions; iter++) {
-      await updateSenderTestData(sendTestData, web3, sender, nonce, axiosInstance)
+      await updateSenderTestData(
+        sendTestData,
+        web3,
+        sender,
+        nonce,
+        axiosInstance
+      )
       console.log('📍Executing sender rpc calls. Iteration: ', iter)
       for (let i = 0; i < sendTestData.length; i++) {
         console.log('📍 Executing: ', sendTestData[i].req.method)
         response = await axiosInstance.post('/', sendTestData[i].req)
         if (response.data.error !== undefined && response.data.error !== null) {
-          console.error(`❌ Invalid rpc call for : ${sendTestData[i].req.method} `, response.data, response.data.error)
+          console.error(
+            `❌ Invalid rpc call for : ${sendTestData[i].req.method} `,
+            response.data,
+            response.data.error
+          )
           process.exit(1)
         }
-  
-        if (sendTestData[i].req.method === "eth_pendingTransactions" && response.data.result.length > 0 && !isValidTxHash(response.data.result)) {
-          console.error(`❌ Invalid transaction hash returned : ${sendTestData[i].req.method} `, response.data.result )
+
+        if (
+          sendTestData[i].req.method === 'eth_pendingTransactions' &&
+          response.data.result.length > 0 &&
+          !isValidTxHash(response.data.result)
+        ) {
+          console.error(
+            `❌ Invalid transaction hash returned : ${sendTestData[i].req.method} `,
+            response.data.result
+          )
           process.exit(1)
         }
-  
-        if ((sendTestData[i].req.method === "eth_sendRawTransaction" || sendTestData[i].req.method === "eth_sendTransaction") && !isValidTxHash(response.data.result)) {
-          console.error(`❌ Invalid transaction hash returned : ${sendTestData[i].req.method} `, response.data.result)
+
+        if (
+          (sendTestData[i].req.method === 'eth_sendRawTransaction' ||
+            sendTestData[i].req.method === 'eth_sendTransaction') &&
+          !isValidTxHash(response.data.result)
+        ) {
+          console.error(
+            `❌ Invalid transaction hash returned : ${sendTestData[i].req.method} `,
+            response.data.result
+          )
           process.exit(1)
         }
-  
-        if (sendTestData[i].req.method === "eth_sign" && isValidSignedMessage(sendTestData[i].req.params[1], response.data.result, sendTestData[i].req.params[0])) {
-          console.error(`❌ Invalid signature returned : ${sendTestData[i].req.method} `, response.data.result)
+
+        if (
+          sendTestData[i].req.method === 'eth_sign' &&
+          isValidSignedMessage(
+            sendTestData[i].req.params[1],
+            response.data.result,
+            sendTestData[i].req.params[0]
+          )
+        ) {
+          console.error(
+            `❌ Invalid signature returned : ${sendTestData[i].req.method} `,
+            response.data.result
+          )
           process.exit(1)
         }
-  
-        if (sendTestData[i].req.method === "eth_signTransaction") {
+
+        if (sendTestData[i].req.method === 'eth_signTransaction') {
           if (!response.data.result.raw.match(signedTxRegex)) {
-            console.error(`❌ Invalid signed transaction returned : ${sendTestData[i].req.method} `, response.data.result.raw)
+            console.error(
+              `❌ Invalid signed transaction returned : ${sendTestData[i].req.method} `,
+              response.data.result.raw
+            )
             process.exit(1)
           }
-  
-          if (response.data.result.tx.type !== "0x0" && response.data.result.tx.type !== "0x1" && response.data.result.tx.type !== "0x2") {
-            console.error(`❌ Invalid transaction type returned : ${sendTestData[i].req.method} `, response.data.result.tx.type)
+
+          if (
+            response.data.result.tx.type !== '0x0' &&
+            response.data.result.tx.type !== '0x1' &&
+            response.data.result.tx.type !== '0x2'
+          ) {
+            console.error(
+              `❌ Invalid transaction type returned : ${sendTestData[i].req.method} `,
+              response.data.result.tx.type
+            )
             process.exit(1)
           }
-  
-          if (response.data.result.tx.nonce !== sendTestData[i].req.params[0].nonce) {
-            console.error(`❌ Invalid nonce returned : ${sendTestData[i].req.method} `, response.data.result.tx.nonce)
+
+          if (
+            response.data.result.tx.nonce !==
+            sendTestData[i].req.params[0].nonce
+          ) {
+            console.error(
+              `❌ Invalid nonce returned : ${sendTestData[i].req.method} `,
+              response.data.result.tx.nonce
+            )
             process.exit(1)
           }
-  
-          if (response.data.result.tx.gas !== sendTestData[i].req.params[0].gas) {
-            console.error(`❌ Invalid gas returned : ${sendTestData[i].req.method} `, response.data.result.tx.gas)
+
+          if (
+            response.data.result.tx.gas !== sendTestData[i].req.params[0].gas
+          ) {
+            console.error(
+              `❌ Invalid gas returned : ${sendTestData[i].req.method} `,
+              response.data.result.tx.gas
+            )
             process.exit(1)
           }
-  
-          if (response.data.result.tx.value !== sendTestData[i].req.params[0].value) {
-            console.error(`❌ Invalid value returned : ${sendTestData[i].req.method} `, response.data.result.tx.value)
+
+          if (
+            response.data.result.tx.value !==
+            sendTestData[i].req.params[0].value
+          ) {
+            console.error(
+              `❌ Invalid value returned : ${sendTestData[i].req.method} `,
+              response.data.result.tx.value
+            )
             process.exit(1)
           }
-  
-          if (response.data.result.tx.to.trim().toLowerCase() !== sendTestData[i].req.params[0].to.trim().toLowerCase()) {
-            console.error(`❌ Invalid to address returned : ${sendTestData[i].req.method} `, response.data.result.tx.to, sendTestData[i].req.params[0].to, response.data.result.tx.to === sendTestData[i].req.params[0].to )
+
+          if (
+            response.data.result.tx.to.trim().toLowerCase() !==
+            sendTestData[i].req.params[0].to.trim().toLowerCase()
+          ) {
+            console.error(
+              `❌ Invalid to address returned : ${sendTestData[i].req.method} `,
+              response.data.result.tx.to,
+              sendTestData[i].req.params[0].to,
+              response.data.result.tx.to === sendTestData[i].req.params[0].to
+            )
             process.exit(1)
           }
-  
-          if (sendTestData[i].req.params[0].gasPrice !== null && sendTestData[i].req.params[0].gasPrice !== undefined && response.data.result.tx.gasPrice !== sendTestData[i].req.params[0].gasPrice) {
-            console.error(`❌ Invalid gasPrice returned : ${sendTestData[i].req.method} `, response.data.result.tx.gasPrice)
+
+          if (
+            sendTestData[i].req.params[0].gasPrice !== null &&
+            sendTestData[i].req.params[0].gasPrice !== undefined &&
+            response.data.result.tx.gasPrice !==
+              sendTestData[i].req.params[0].gasPrice
+          ) {
+            console.error(
+              `❌ Invalid gasPrice returned : ${sendTestData[i].req.method} `,
+              response.data.result.tx.gasPrice
+            )
             process.exit(1)
           }
-  
-          if (sendTestData[i].req.params[0].maxPriorityFeePerGas !== null && sendTestData[i].req.params[0].maxPriorityFeePerGas !== undefined && response.data.result.tx.maxPriorityFeePerGas !== sendTestData[i].req.params[0].maxPriorityFeePerGas) {
-            console.error(`❌ Invalid maxPriorityFeePerGas returned : ${sendTestData[i].req.method} `, response.data.result.tx.maxPriorityFeePerGas)
+
+          if (
+            sendTestData[i].req.params[0].maxPriorityFeePerGas !== null &&
+            sendTestData[i].req.params[0].maxPriorityFeePerGas !== undefined &&
+            response.data.result.tx.maxPriorityFeePerGas !==
+              sendTestData[i].req.params[0].maxPriorityFeePerGas
+          ) {
+            console.error(
+              `❌ Invalid maxPriorityFeePerGas returned : ${sendTestData[i].req.method} `,
+              response.data.result.tx.maxPriorityFeePerGas
+            )
             process.exit(1)
           }
-  
-          if (sendTestData[i].req.params[0].maxFeePerGas !== null && sendTestData[i].req.params[0].maxFeePerGas !== undefined && response.data.result.tx.maxFeePerGas !== sendTestData[i].req.params[0].maxFeePerGas) {
-            console.error(`❌ Invalid maxFeePerGas returned : ${sendTestData[i].req.method} `, response.data.result.tx.maxFeePerGas)
+
+          if (
+            sendTestData[i].req.params[0].maxFeePerGas !== null &&
+            sendTestData[i].req.params[0].maxFeePerGas !== undefined &&
+            response.data.result.tx.maxFeePerGas !==
+              sendTestData[i].req.params[0].maxFeePerGas
+          ) {
+            console.error(
+              `❌ Invalid maxFeePerGas returned : ${sendTestData[i].req.method} `,
+              response.data.result.tx.maxFeePerGas
+            )
             process.exit(1)
           }
-  
-          if (sendTestData[i].req.params[0].input !== null && sendTestData[i].req.params[0].input !== undefined && response.data.result.tx.input !== "0x") {
-            console.error(`❌ Invalid input returned : ${sendTestData[i].req.method} `, response.data.result.tx.input)
+
+          if (
+            sendTestData[i].req.params[0].input !== null &&
+            sendTestData[i].req.params[0].input !== undefined &&
+            response.data.result.tx.input !== '0x'
+          ) {
+            console.error(
+              `❌ Invalid input returned : ${sendTestData[i].req.method} `,
+              response.data.result.tx.input
+            )
             process.exit(1)
           }
-  
+
           if (!response.data.result.tx.hash.match(txHashRegex)) {
-            console.error(`❌ Invalid transaction hash returned : ${sendTestData[i].req.method} `, response.data.result.tx.hash)
+            console.error(
+              `❌ Invalid transaction hash returned : ${sendTestData[i].req.method} `,
+              response.data.result.tx.hash
+            )
             process.exit(1)
           }
-  
+
           const tx = new Transaction(response.data.result.raw)
           const v = '0x' + tx.v.toString('hex').slice(1)
-          
-          let r =  tx.r.toString('hex')
-          if (r.charAt(0) === "0") {
+
+          let r = tx.r.toString('hex')
+          if (r.charAt(0) === '0') {
             r = '0x' + r.slice(1)
           } else {
-            r ='0x' + r
+            r = '0x' + r
           }
 
           let s = tx.s.toString('hex')
-          if (s.charAt(0) === "0") {
+          if (s.charAt(0) === '0') {
             s = '0x' + s.slice(1)
           } else {
-            s ='0x' + s
+            s = '0x' + s
           }
-          
+
           if (r !== response.data.result.tx.r) {
-            console.error(`❌ Invalid r field returned: ${sendTestData[i].req.method} ` , response.data.result.tx.r, r)
+            console.error(
+              `❌ Invalid r field returned: ${sendTestData[i].req.method} `,
+              response.data.result.tx.r,
+              r
+            )
             process.exit(1)
           }
 
           if (s !== response.data.result.tx.s) {
-            console.error(`❌ Invalid s field returned: ${sendTestData[i].req.method} ` , response.data.result.tx.s, s)
+            console.error(
+              `❌ Invalid s field returned: ${sendTestData[i].req.method} `,
+              response.data.result.tx.s,
+              s
+            )
             process.exit(1)
           }
 
           if (v !== response.data.result.tx.v) {
-            console.error(`❌ Invalid v field returned: ${sendTestData[i].req.method} ` , response.data.result.tx.v, v)
+            console.error(
+              `❌ Invalid v field returned: ${sendTestData[i].req.method} `,
+              response.data.result.tx.v,
+              v
+            )
             process.exit(1)
           }
         }
-        console.log(`${JSON.stringify(sendTestData[i].req.method)}: `, response.data)
-  
-        if (sendTestData[i].req.method === "eth_newFilter") {
+        console.log(
+          `${JSON.stringify(sendTestData[i].req.method)}: `,
+          response.data
+        )
+
+        if (sendTestData[i].req.method === 'eth_newFilter') {
           if (!response.data.result.match(filterIdRegex)) {
-            console.error(`❌ Invalid filter ID returned : ${sendTestData[i].req.method} `, response.data.result )
-            process.exit(1)
-          }       
-          getFilterLogs.params[0] = response.data.result
-          filterLogsResponse = await  axiosInstance.post('/', getFilterLogs)
-  
-          if (filterLogsResponse.data.error !== undefined && filterLogsResponse.data.error !== null) {
-            console.error(`❌ Error while fetching the changes for the filter : ${sendTestData[i].req.method} `, filterLogsResponse.data, filterLogsResponse.data.error)
+            console.error(
+              `❌ Invalid filter ID returned : ${sendTestData[i].req.method} `,
+              response.data.result
+            )
             process.exit(1)
           }
-  
-          if (filterLogsResponse.data.result.length > 0 && !isValidFilterLog(filterLogsResponse.data.result)) {
-            console.error(`❌ Invalid log returned : ${sendTestData[i].req.method} `, filterLogsResponse.data)
-            process.exit(1)       
-         }
-          console.log("eth_getFilterLogs: ", JSON.stringify(filterLogsResponse.data))
+          getFilterLogs.params[0] = response.data.result
+          filterLogsResponse = await axiosInstance.post('/', getFilterLogs)
+
+          if (
+            filterLogsResponse.data.error !== undefined &&
+            filterLogsResponse.data.error !== null
+          ) {
+            console.error(
+              `❌ Error while fetching the changes for the filter : ${sendTestData[i].req.method} `,
+              filterLogsResponse.data,
+              filterLogsResponse.data.error
+            )
+            process.exit(1)
+          }
+
+          if (
+            filterLogsResponse.data.result.length > 0 &&
+            !isValidFilterLog(filterLogsResponse.data.result)
+          ) {
+            console.error(
+              `❌ Invalid log returned : ${sendTestData[i].req.method} `,
+              filterLogsResponse.data
+            )
+            process.exit(1)
+          }
+          console.log(
+            'eth_getFilterLogs: ',
+            JSON.stringify(filterLogsResponse.data)
+          )
         }
-  
-        if (sendTestData[i].req.method === "eth_newBlockFilter" || sendTestData[i].req.method === "eth_newPendingTransactionFilter") {
-          if (!response.data.result.match( filterIdRegex)) {
-            console.error(`❌ Invalid filter ID returned : ${sendTestData[i].req.method} `, response.data.result )
+
+        if (
+          sendTestData[i].req.method === 'eth_newBlockFilter' ||
+          sendTestData[i].req.method === 'eth_newPendingTransactionFilter'
+        ) {
+          if (!response.data.result.match(filterIdRegex)) {
+            console.error(
+              `❌ Invalid filter ID returned : ${sendTestData[i].req.method} `,
+              response.data.result
+            )
             process.exit(1)
           }
           getFilterChanges.params[0] = response.data.result
-          filterResponse = await  axiosInstance.post('/', getFilterChanges)
-  
-          if (filterResponse.data.error !== undefined && filterResponse.data.error !== null) {
-            console.error(`❌ Error while fetching the changes for the filter : ${sendTestData[i].req.method} `, filterResponse.data, filterResponse.data.error)
+          filterResponse = await axiosInstance.post('/', getFilterChanges)
+
+          if (
+            filterResponse.data.error !== undefined &&
+            filterResponse.data.error !== null
+          ) {
+            console.error(
+              `❌ Error while fetching the changes for the filter : ${sendTestData[i].req.method} `,
+              filterResponse.data,
+              filterResponse.data.error
+            )
             process.exit(1)
           }
-  
-          if (sendTestData[i].req.method === "eth_newBlockFilter" && filterResponse.data.result.length > 0 && !isValidBlockHash(filterResponse.data.result)) {
-              console.error(`❌ Invalid block hash returned : ${sendTestData[i].req.method} `, blockHash )
-              process.exit(1)
+
+          if (
+            sendTestData[i].req.method === 'eth_newBlockFilter' &&
+            filterResponse.data.result.length > 0 &&
+            !isValidBlockHash(filterResponse.data.result)
+          ) {
+            console.error(
+              `❌ Invalid block hash returned : ${sendTestData[i].req.method} `,
+              filterResponse.data.result
+            )
+            process.exit(1)
           }
-  
-          if (sendTestData[i].req.method === "eth_newPendingTransactionFilter" && filterResponse.data.result.length > 0 && !isValidTxHash(filterResponse.data.result)) {
-              console.error(`❌ Invalid transaction hash returned : ${sendTestData[i].req.method} `, txHash )
-              process.exit(1)
+
+          if (
+            sendTestData[i].req.method === 'eth_newPendingTransactionFilter' &&
+            filterResponse.data.result.length > 0 &&
+            !isValidTxHash(filterResponse.data.result)
+          ) {
+            console.error(
+              `❌ Invalid transaction hash returned : ${sendTestData[i].req.method} `,
+              filterResponse.data.result
+            )
+            process.exit(1)
           }
-          console.log("eth_getFilterChanges: ", JSON.stringify(filterResponse.data))
+          console.log(
+            'eth_getFilterChanges: ',
+            JSON.stringify(filterResponse.data)
+          )
         }
-      } 
-      nonce+=2
+      }
+      nonce += 2
     }
 
     console.log('📍All RPC tests passed!')
     process.exit(0)
-
   } catch (error) {
     console.error('❌ Error occurred while running rpc tests: ', error)
     process.exit(1)

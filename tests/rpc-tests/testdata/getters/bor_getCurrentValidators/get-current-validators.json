@@ -1,3 +1,8 @@
 {
-    "req": {"method":"bor_getCurrentValidators","params":[],"id":1,"jsonrpc":"2.0"}
+  "req": {
+    "method": "bor_getCurrentValidators",
+    "params": [],
+    "id": 1,
+    "jsonrpc": "2.0"
+  }
 }

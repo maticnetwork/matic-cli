@@ -1,3 +1,16 @@
 {
-    "req": {"jsonrpc": "2.0", "id": 1, "method": "eth_sendTransaction", "params": [{"from": "", "to": "0x07435F8b582542724eb34E53D381ba323E7398d0", "gas": "0x76c0", "gasPrice": "0x9184e72a000", "value": "0x9184e72a"}]}
+  "req": {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "eth_sendTransaction",
+    "params": [
+      {
+        "from": "",
+        "to": "0x07435F8b582542724eb34E53D381ba323E7398d0",
+        "gas": "0x76c0",
+        "gasPrice": "0x9184e72a000",
+        "value": "0x9184e72a"
+      }
+    ]
+  }
 }
