@@ -10,7 +10,7 @@ const {
 
 export async function getBlock(ip, number = 'latest') {
   const url = `http://${ip}:8545`
-  if (number != 'latest' && number != 'finalized') {
+  if (number !== 'latest' && number !== 'finalized') {
     number = '0x' + Number(number).toString(16) // hexify
   }
 
@@ -47,7 +47,7 @@ export async function checkForRewind(ip) {
   try {
     const count = await runSshCommandWithReturn(ip, command, maxRetries)
     // console.log('📍Fetched count of rewind logs, count:', count)
-    if (Number(count) == 1) {
+    if (Number(count) === 1) {
       console.log('📍Chain got to correct fork with Rewind')
     } else {
       console.log('📍Chain got to correct fork without Rewind, count:', count)
@@ -77,7 +77,7 @@ export async function validateProposer(ip, proposer) {
       // Skip the validator from cluster 1
       for (let i = 1; i < validators.length; i++) {
         if (
-          String(proposer).toLowerCase() ==
+          String(proposer).toLowerCase() ===
           String(validators[i].address).toLowerCase()
         ) {
           console.log('📍Validated milestone proposer')
@@ -257,7 +257,7 @@ export async function getEnode(user, host) {
   try {
     const fullEnode = await runSshCommandWithReturn(ip, command, maxRetries)
     let enode = String(fullEnode).split('@')[0].slice(1) // remove the local ip from the enode
-    if (enode.length != 136) {
+    if (enode.length !== 136) {
       // prefix "enode://" + 128 hex values for enode itself
       return ''
     }
@@ -281,7 +281,7 @@ export async function validateNumberOfPeers(peers) {
 
   // Remaining nodes should have total-1 peers
   for (let i = 1; i < peers.length; i++) {
-    if (peers[i] != peers.length - 2) {
+    if (peers[i] !== peers.length - 2) {
       console.log('📍Unexpected peer length received for 2nd cluster, retrying')
       recreate = true
       break
@@ -321,8 +321,8 @@ export async function validateFinalizedBlock(hosts, milestone) {
   // Check if the number and hash matches with the last milestone
   for (let i = 0; i < finalizedBlocks.length; i++) {
     if (
-      Number(finalizedBlocks[i].number) != Number(milestone.end_block) ||
-      finalizedBlocks[i].hash != milestone.hash
+      Number(finalizedBlocks[i].number) !== Number(milestone.end_block) ||
+      finalizedBlocks[i].hash !== milestone.hash
     ) {
       console.log(
         `📍Block number or hash mismatch for finalized block. Host index: ${i}, Finalized Block Number: ${Number(
@@ -348,7 +348,7 @@ export async function fetchLatestMilestone(
   let count = 0
   console.log('📍Querying heimdall for next milestone...')
   while (true) {
-    if (count != 0) {
+    if (count !== 0) {
       await timer(queryTimer)
     }
     count++
@@ -365,7 +365,7 @@ export async function fetchLatestMilestone(
       // Check against last milestone (if present) if it's immediate next one or not
       if (lastMilestone) {
         if (
-          Number(milestone.result.start_block) ==
+          Number(milestone.result.start_block) ===
           Number(lastMilestone.end_block) + 1
         ) {
           break

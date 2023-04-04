@@ -87,15 +87,15 @@ export async function milestonePartition() {
     'finalized',
     maxRetries
   )
-  if (finalizedBlock == undefined) {
+  if (finalizedBlock === undefined) {
     console.log('📍Unable to fetch last finalized block, exiting')
     return
   }
 
   // Check if the number and hash matches with the last milestone
   if (
-    Number(finalizedBlock.number) == Number(lastMilestone.end_block) &&
-    finalizedBlock.hash == lastMilestone.hash
+    Number(finalizedBlock.number) === Number(lastMilestone.end_block) &&
+    finalizedBlock.hash === lastMilestone.hash
   ) {
     console.log(
       '📍Received correct finalized block according to last milestone'
@@ -139,7 +139,7 @@ export async function milestonePartition() {
 
   // validate if number of peers are correct or not
   const expected = [1, 1, 1, 1]
-  if (JSON.stringify(peers) != JSON.stringify(expected)) {
+  if (JSON.stringify(peers) !== JSON.stringify(expected)) {
     console.log(
       `📍Retrying creation of partition clusters for testing due to peer length mismatch, got: ${peers}, expected: ${expected}`
     )
@@ -165,7 +165,7 @@ export async function milestonePartition() {
       peers = values
     })
 
-    if (JSON.stringify(peers) != JSON.stringify(expected)) {
+    if (JSON.stringify(peers) !== JSON.stringify(expected)) {
       console.log(
         `📍Peer length mismatch while creating clusters, got: ${peers}, expected: ${expected}`
       )
@@ -197,7 +197,7 @@ export async function milestonePartition() {
     'latest',
     maxRetries
   )
-  if (latestBlockCluster2 == undefined) {
+  if (latestBlockCluster2 === undefined) {
     console.log('📍Unable to fetch latest block in cluster 2, exiting')
     return
   }
@@ -214,7 +214,7 @@ export async function milestonePartition() {
       latestBlockCluster2.number,
       maxRetries
     )
-    if (latestBlockCluster1 == undefined) {
+    if (latestBlockCluster1 === undefined) {
       console.log(
         `📍Unable to fetch block ${Number(
           latestBlockCluster2.number
@@ -224,7 +224,7 @@ export async function milestonePartition() {
     }
 
     if (latestBlockCluster1.number) {
-      if (latestBlockCluster1.number != latestBlockCluster2.number) {
+      if (latestBlockCluster1.number !== latestBlockCluster2.number) {
         console.log(
           `📍Block number mismatch from clusters. Cluster 1: ${Number(
             latestBlockCluster1.number
@@ -234,7 +234,7 @@ export async function milestonePartition() {
       }
 
       // Check if same block numbers have different hash or not
-      if (latestBlockCluster1.hash == latestBlockCluster2.hash) {
+      if (latestBlockCluster1.hash === latestBlockCluster2.hash) {
         console.log(
           `📍Block hash matched. Clusters are not created properly. Cluster 1: ${latestBlockCluster1.hash}, Cluster 2: ${latestBlockCluster2.hash}, exiting`
         )
@@ -293,7 +293,7 @@ export async function milestonePartition() {
     latestBlockCluster1.number,
     maxRetries
   )
-  if (latestBlockCluster2 == undefined) {
+  if (latestBlockCluster2 === undefined) {
     console.log(
       `📍Unable to fetch block ${Number(
         latestBlockCluster1.number
@@ -303,7 +303,7 @@ export async function milestonePartition() {
   }
 
   if (latestBlockCluster2.number) {
-    if (latestBlockCluster1.hash == latestBlockCluster2.hash) {
+    if (latestBlockCluster1.hash === latestBlockCluster2.hash) {
       console.log(
         '📍Cluster 2 successfully reorged to cluster 1 (having high difficulty) as expected'
       )
@@ -332,7 +332,7 @@ export async function milestonePartition() {
     'latest',
     maxRetries
   )
-  if (latestBlockCluster1 == undefined) {
+  if (latestBlockCluster1 === undefined) {
     console.log('📍Unable to fetch latest block in cluster 1, exiting')
     return
   }
@@ -349,7 +349,7 @@ export async function milestonePartition() {
       latestBlockCluster1.number,
       maxRetries
     )
-    if (latestBlockCluster2 == undefined) {
+    if (latestBlockCluster2 === undefined) {
       console.log(
         `📍Unable to fetch block ${Number(
           latestBlockCluster1.number
@@ -360,7 +360,7 @@ export async function milestonePartition() {
 
     if (latestBlockCluster2.number) {
       // check for block number
-      if (latestBlockCluster1.number != latestBlockCluster2.number) {
+      if (latestBlockCluster1.number !== latestBlockCluster2.number) {
         console.log(
           `📍Block number mismatch from clusters. Cluster 1: ${Number(
             latestBlockCluster1.number
@@ -370,7 +370,7 @@ export async function milestonePartition() {
       }
 
       // check for block hash
-      if (latestBlockCluster1.hash != latestBlockCluster2.hash) {
+      if (latestBlockCluster1.hash !== latestBlockCluster2.hash) {
         console.log(
           `📍Block hash mismatch, failed reorg. Cluster 1: ${latestBlockCluster1.hash}, Cluster 2: ${latestBlockCluster2.hash}, exiting`
         )
