@@ -58,7 +58,8 @@ async function init() {
   if (isPresent === 'not found') {
     const addFlagsCmd = `sed -i 's/--allow-insecure-unlock \\\\/&\\n  --disable-bor-wallet=false \\\\/' ${borStartScriptLocation}`
     const restartBorCmd = 'sudo service bor restart'
-    const isSyncingCmd = '~/go/bin/bor attach ~/.bor/data/bor.ipc --exec "eth.syncing"'
+    const isSyncingCmd =
+      '~/go/bin/bor attach ~/.bor/data/bor.ipc --exec "eth.syncing"'
 
     console.log(
       '📍Updating start script on machine to unlock node account ... '
