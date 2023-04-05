@@ -1,5 +1,3 @@
-// noinspection JSUnresolvedVariable
-
 import { loadDevnetConfig } from '../common/config-utils'
 import stakeManagerABI from '../../abi/StakeManagerABI.json'
 import ERC20ABI from '../../abi/ERC20ABI.json'
@@ -7,6 +5,7 @@ import Web3 from 'web3'
 import Wallet, { hdkey } from 'ethereumjs-wallet'
 import { timer } from '../common/time-utils'
 import { getSignedTx } from '../common/tx-utils'
+import { isValidatorIdCorrect } from '../common/validators-utils'
 
 const {
   runScpCommand,
@@ -14,19 +13,27 @@ const {
   maxRetries
 } = require('../common/remote-worker')
 
-export async function sendStakedEvent() {
+export async function sendStakedEvent(validatorID) {
   require('dotenv').config({ path: `${process.cwd()}/.env` })
   const devnetType =
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
 
   const doc = await loadDevnetConfig(devnetType)
 
+  if (!isValidatorIdCorrect(validatorID, doc.devnetBorHosts.length)) {
+    console.log(
+      '📍Invalid validatorID used, please try with a valid argument! Exiting...'
+    )
+    process.exit(1)
+  }
   if (doc.devnetBorHosts.length > 0) {
     console.log('📍Monitoring the first node', doc.devnetBorHosts[0])
   } else {
     console.log('📍No nodes to monitor, please check your configs! Exiting...')
     process.exit(1)
   }
+
+  validatorID = Number(validatorID)
 
   const machine0 = doc.devnetBorHosts[0]
   const rootChainWeb3 = new Web3(`http://${machine0}:9545`)
@@ -50,8 +57,8 @@ export async function sendStakedEvent() {
   )
 
   const signerDump = require(`${process.cwd()}/signer-dump.json`)
-  const pkey = signerDump[0].priv_key
-  const validatorAccount = signerDump[0].address
+  const pkey = signerDump[validatorID - 1].priv_key
+  const validatorAccount = signerDump[validatorID - 1].address
   const stakeAmount = rootChainWeb3.utils.toWei('12')
   const heimdallFee = rootChainWeb3.utils.toWei('12')
 
@@ -120,7 +127,7 @@ export async function sendStakedEvent() {
 
   console.log('✅ Validator Added')
   console.log(
-    '✅ Staked Event Sent from Rootchain and Received and processed on Heimdall'
+    '✅ Staked Event sent from rootchain, received and processed on Heimdall'
   )
 }
 
@@ -132,6 +139,6 @@ export async function checkValidatorsLength(doc) {
     command,
     maxRetries
   )
-  const outobj = JSON.parse(out)
-  return outobj.result.validators.length
+  const outObj = JSON.parse(out)
+  return outObj.result.validators.length
 }

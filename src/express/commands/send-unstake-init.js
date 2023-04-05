@@ -6,6 +6,7 @@ import Web3 from 'web3'
 import { getSignedTx } from '../common/tx-utils'
 import { timer } from '../common/time-utils'
 import { checkValidatorsLength } from './send-staked-event'
+import { isValidatorIdCorrect } from '../common/validators-utils'
 
 const { runScpCommand, maxRetries } = require('../common/remote-worker')
 
@@ -16,6 +17,12 @@ export async function sendUnstakeInitEvent(validatorID) {
 
   const doc = await loadDevnetConfig(devnetType)
 
+  if (!isValidatorIdCorrect(validatorID, doc.devnetBorHosts.length)) {
+    console.log(
+      '📍Invalid validatorID used, please try with a valid argument! Exiting...'
+    )
+    process.exit(1)
+  }
   if (doc.devnetBorHosts.length > 0) {
     console.log('📍Monitoring the first node', doc.devnetBorHosts[0])
     console.log('📍Unstaking Validator : ', validatorID)
@@ -23,6 +30,8 @@ export async function sendUnstakeInitEvent(validatorID) {
     console.log('📍No nodes to monitor, please check your configs! Exiting...')
     process.exit(1)
   }
+
+  validatorID = Number(validatorID)
 
   const machine0 = doc.devnetBorHosts[0]
   const rootChainWeb3 = new Web3(`http://${machine0}:9545`)

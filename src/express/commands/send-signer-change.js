@@ -6,6 +6,7 @@ import Web3 from 'web3'
 import { getSignedTx } from '../common/tx-utils'
 import { timer } from '../common/time-utils'
 import Wallet, { hdkey } from 'ethereumjs-wallet'
+import { isValidatorIdCorrect } from '../common/validators-utils'
 
 const {
   runScpCommand,
@@ -13,19 +14,27 @@ const {
   maxRetries
 } = require('../common/remote-worker')
 
-export async function sendSignerChangeEvent() {
+export async function sendSignerChangeEvent(validatorID) {
   require('dotenv').config({ path: `${process.cwd()}/.env` })
   const devnetType =
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
 
   const doc = await loadDevnetConfig(devnetType)
 
+  if (!isValidatorIdCorrect(validatorID, doc.devnetBorHosts.length)) {
+    console.log(
+      '📍Invalid validatorID used, please try with a valid argument! Exiting...'
+    )
+    process.exit(1)
+  }
   if (doc.devnetBorHosts.length > 0) {
     console.log('📍Monitoring the first node', doc.devnetBorHosts[0])
   } else {
     console.log('📍No nodes to monitor, please check your configs! Exiting...')
     process.exit(1)
   }
+
+  validatorID = Number(validatorID)
 
   const machine0 = doc.devnetBorHosts[0]
   const rootChainWeb3 = new Web3(`http://${machine0}:9545`)
@@ -43,16 +52,15 @@ export async function sendSignerChangeEvent() {
   const StakeManagerProxyAddress = contractAddresses.root.StakeManagerProxy
 
   const signerDump = require(`${process.cwd()}/signer-dump.json`)
-  const pkey = signerDump[0].priv_key
-  const validatorAccount = signerDump[0].address
-  const validatorIDForTest = '1'
+  const pkey = signerDump[validatorID - 1].priv_key
+  const validatorAccount = signerDump[validatorID - 1].address
 
   const stakeManagerContract = new rootChainWeb3.eth.Contract(
     stakeManagerABI,
     StakeManagerProxyAddress
   )
 
-  const oldSigner = await getValidatorSigner(doc, validatorIDForTest)
+  const oldSigner = await getValidatorSigner(doc, validatorID)
   console.log('OldValidatorSigner', oldSigner)
 
   const RandomSeed = 'random' + Math.random()
@@ -65,7 +73,7 @@ export async function sendSignerChangeEvent() {
   console.log('NewValidatorPrivKey', wallet.getPrivateKeyString())
 
   const tx = stakeManagerContract.methods.updateSigner(
-    validatorIDForTest,
+    validatorID,
     newAccPubKey
   )
   const signedTx = await getSignedTx(
@@ -80,18 +88,18 @@ export async function sendSignerChangeEvent() {
   )
   console.log('UpdateSigner Receipt', Receipt.transactionHash)
 
-  let newSigner = await getValidatorSigner(doc, validatorIDForTest)
+  let newSigner = await getValidatorSigner(doc, validatorID)
 
   while (newSigner === oldSigner) {
     console.log('Waiting 3 secs for signer to be updated')
     await timer(3000) // waiting 3 secs
-    newSigner = await getValidatorSigner(doc, validatorIDForTest)
+    newSigner = await getValidatorSigner(doc, validatorID)
     console.log('newSigner : ', newSigner)
   }
 
   console.log('✅ Signer Updated')
   console.log(
-    '✅ SignerChange Event Sent from Rootchain and Received and processed on Heimdall'
+    '✅ SignerChange Event event from rootchain, received and processed on Heimdall'
   )
 }
 
@@ -103,6 +111,6 @@ async function getValidatorSigner(doc, validatorID) {
     command,
     maxRetries
   )
-  const outobj = JSON.parse(out)
-  return outobj.result.signer
+  const outObj = JSON.parse(out)
+  return outObj.result.signer
 }
