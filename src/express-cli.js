@@ -67,13 +67,19 @@ program
     'Start the stress test. If the string `fund` is specified, the account will be funded. This option is mandatory when the command is executed the first time on a devnet.'
   )
   .option('-ss, --send-state-sync', 'Send state sync tx')
-  .option('-sstake, --send-staked-event', 'Send staked event')
-  .option('-sstakeupdate, --send-stakeupdate-event', 'Send staked-update event')
+  .option('-sstake, --send-staked-event [validatorID]', 'Send staked event')
   .option(
-    '-ssignerchange, --send-signerchange-event',
+    '-sstakeupdate, --send-stakeupdate-event [validatorID]',
+    'Send staked-update event'
+  )
+  .option(
+    '-ssignerchange, --send-signerchange-event [validatorID]',
     'Send signer-change event'
   )
-  .option('-stopupfee, --send-topupfee-event', 'Send topupfee event')
+  .option(
+    '-stopupfee, --send-topupfee-event [validatorID]',
+    'Send topupfee event'
+  )
   .option(
     '-sunstakeinit, --send-unstakeinit-event [validatorID]',
     'Send unstake-init event'
@@ -287,7 +293,7 @@ export async function cli() {
     await timer(3000)
     await sendStateSyncTx()
   } else if (options.sendStakedEvent) {
-    console.log('📍Command --send-staked-event ')
+    console.log('📍Command --send-staked-event [validatorID]')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -295,9 +301,9 @@ export async function cli() {
       process.exit(1)
     }
     await timer(3000)
-    await sendStakedEvent()
+    await sendStakedEvent(options.sendStakedEvent)
   } else if (options.sendStakeupdateEvent) {
-    console.log('📍Command --send-stakeupdate-event ')
+    console.log('📍Command --send-stakeupdate-event [validatorID]')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -305,9 +311,9 @@ export async function cli() {
       process.exit(1)
     }
     await timer(3000)
-    await sendStakeUpdateEvent()
+    await sendStakeUpdateEvent(options.sendStakeupdateEvent)
   } else if (options.sendSignerchangeEvent) {
-    console.log('📍Command --send-signerchange-event ')
+    console.log('📍Command --send-signerchange-event [validatorID]')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -315,7 +321,7 @@ export async function cli() {
       process.exit(1)
     }
     await timer(3000)
-    await sendSignerChangeEvent()
+    await sendSignerChangeEvent(options.sendSignerchangeEvent)
   } else if (options.sendUnstakeinitEvent) {
     console.log('📍Command --send-unstakeinit-event [validatorID]')
     if (!checkDir(false)) {
@@ -324,15 +330,10 @@ export async function cli() {
       )
       process.exit(1)
     }
-    if (options.sendUnstakeinitEvent === true) {
-      if (parseInt(options.sendUnstakeinitEvent) < 1) {
-        options.sendUnstakeinitEvent = 1
-      }
-    }
     await timer(3000)
-    await sendUnstakeInitEvent(parseInt(options.sendUnstakeinitEvent))
+    await sendUnstakeInitEvent(options.sendUnstakeinitEvent)
   } else if (options.sendTopupfeeEvent) {
-    console.log('📍Command --send-topupfee-event ')
+    console.log('📍Command --send-topupfee-event [validatorID]')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -340,7 +341,7 @@ export async function cli() {
       process.exit(1)
     }
     await timer(3000)
-    await sendTopUpFeeEvent()
+    await sendTopUpFeeEvent(options.sendTopupfeeEvent)
   } else if (options.eip1559Test) {
     console.log('📍Command --eip-1559-test')
     if (!checkDir(false)) {

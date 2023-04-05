@@ -33,6 +33,7 @@
     "esm": "^3.2.18",
     "eth-crypto": "^2.4.0",
     "ethereumjs-util": "^7.1.5",
+    "ethereumjs-wallet": "^1.0.2",
     "execa": "^1.0.0",
     "fs-extra": "^10.1.0",
     "ganache": "^7.5.0",
