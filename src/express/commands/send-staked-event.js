@@ -20,7 +20,7 @@ export async function sendStakedEvent(validatorID) {
 
   const doc = await loadDevnetConfig(devnetType)
 
-  if (!isValidatorIdCorrect(validatorID, doc.devnetBorHosts.length)) {
+  if (!isValidatorIdCorrect(validatorID, doc.numOfValidators)) {
     console.log(
       '📍Invalid validatorID used, please try with a valid argument! Exiting...'
     )

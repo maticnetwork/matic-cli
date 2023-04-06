@@ -1,5 +1,3 @@
-// noinspection JSUnresolvedVariable
-
 import { loadDevnetConfig } from '../common/config-utils'
 import stakeManagerABI from '../../abi/StakeManagerABI.json'
 import ERC20ABI from '../../abi/ERC20ABI.json'
@@ -21,7 +19,7 @@ export async function sendTopUpFeeEvent(validatorID) {
 
   const doc = await loadDevnetConfig(devnetType)
 
-  if (!isValidatorIdCorrect(validatorID, doc.devnetBorHosts.length)) {
+  if (!isValidatorIdCorrect(validatorID, doc.numOfValidators)) {
     console.log(
       '📍Invalid validatorID used, please try with a valid argument! Exiting...'
     )
@@ -128,6 +126,6 @@ async function getValidatorBalance(doc, valAddr) {
     command,
     maxRetries
   )
-  const outobj = JSON.parse(out)
-  return outobj.result[0].amount
+  const outObj = JSON.parse(out)
+  return outObj.result[0].amount
 }
