@@ -109,11 +109,19 @@ jobs:
           ls -la
           ../../bin/express-cli --start
 
-      - name: Run smoke tests
+      - name: Run stateSynced and checkpoint tests
         run: |
           cd matic-cli/deployments/devnet-1
           ../../bin/express-cli --send-state-sync
           timeout 20m ../../bin/express-cli --monitor exit
+
+      - name: Run smart contracts events tests
+        run: |
+          cd matic-cli/deployments/devnet-1
+          timeout 5m ../../bin/express-cli --send-staked-event 1
+          timeout 5m ../../bin/express-cli --send-stakeupdate-event 1
+          timeout 5m ../../bin/express-cli --send-topupfee-event 1
+          timeout 10m ../../bin/express-cli --send-unstakeinit-event 1
 
       - name: Destroy devnet
         if: always()

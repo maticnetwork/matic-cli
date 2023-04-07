@@ -23,12 +23,14 @@ import { timer } from './express/common/time-utils'
 import { program } from 'commander'
 import pkg from '../package.json'
 import { testEip1559 } from '../tests/test-eip-1559'
-import { stopInstances } from './express/commands/instances-stop'
-import { startInstances } from './express/commands/instances-start'
+import { stopInstances } from './express/commands/aws-instances-stop'
+import { startInstances } from './express/commands/aws-instances-start'
 import { rewind } from './express/commands/rewind'
 import { milestoneBase } from './express/commands/milestone-base'
 import { milestonePartition } from './express/commands/milestone-partition'
 import { milestoneHelper } from './express/commands/milestone-helper'
+import { awsKeypairAdd } from './express/commands/aws-keypair-add'
+import { awsKeypairDestroy } from './express/commands/aws-keypair-destroy'
 
 program
   .option('-i, --init', 'Initiate the terraform setup')
@@ -68,13 +70,19 @@ program
     'Start the stress test. If the string `fund` is specified, the account will be funded. This option is mandatory when the command is executed the first time on a devnet.'
   )
   .option('-ss, --send-state-sync', 'Send state sync tx')
-  .option('-sstake, --send-staked-event', 'Send staked event')
-  .option('-sstakeupdate, --send-stakeupdate-event', 'Send staked-update event')
+  .option('-sstake, --send-staked-event [validatorID]', 'Send staked event')
   .option(
-    '-ssignerchange, --send-signerchange-event',
+    '-sstakeupdate, --send-stakeupdate-event [validatorID]',
+    'Send staked-update event'
+  )
+  .option(
+    '-ssignerchange, --send-signerchange-event [validatorID]',
     'Send signer-change event'
   )
-  .option('-stopupfee, --send-topupfee-event', 'Send topupfee event')
+  .option(
+    '-stopupfee, --send-topupfee-event [validatorID]',
+    'Send topupfee event'
+  )
   .option(
     '-sunstakeinit, --send-unstakeinit-event [validatorID]',
     'Send unstake-init event'
@@ -96,6 +104,18 @@ program
   .option(
     '-milestone-helper, --milestone-helper',
     'Helper utility for milestone'
+  )
+  .option(
+    '-rewind, --rewind [numberOfBlocks]',
+    'Rewind the chain by a given number of blocks'
+  )
+  .option(
+    '-key-a, --aws-key-add',
+    'Generate additional aws keypair for the devnet'
+  )
+  .option(
+    '-key-d, --aws-key-des [keyName]',
+    'Destroy aws keypair from devnet, given its keyName'
   )
   .version(pkg.version)
 
@@ -245,7 +265,7 @@ export async function cli() {
     await timer(3000)
     await cleanup()
   } else if (options.monitor) {
-    console.log('📍Command --monitor ')
+    console.log('📍Command --monitor [exit]')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -259,7 +279,7 @@ export async function cli() {
       await monitor(false)
     }
   } else if (options.stress) {
-    console.log('📍Command --stress ')
+    console.log('📍Command --stress [fund]')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -286,7 +306,7 @@ export async function cli() {
     await timer(3000)
     await sendStateSyncTx()
   } else if (options.sendStakedEvent) {
-    console.log('📍Command --send-stake-event ')
+    console.log('📍Command --send-staked-event [validatorID]')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -294,9 +314,9 @@ export async function cli() {
       process.exit(1)
     }
     await timer(3000)
-    await sendStakedEvent()
+    await sendStakedEvent(options.sendStakedEvent)
   } else if (options.sendStakeupdateEvent) {
-    console.log('📍Command --send-stakeupdate-event ')
+    console.log('📍Command --send-stakeupdate-event [validatorID]')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -304,9 +324,9 @@ export async function cli() {
       process.exit(1)
     }
     await timer(3000)
-    await sendStakeUpdateEvent()
+    await sendStakeUpdateEvent(options.sendStakeupdateEvent)
   } else if (options.sendSignerchangeEvent) {
-    console.log('📍Command --send-signerchange-event ')
+    console.log('📍Command --send-signerchange-event [validatorID]')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -314,7 +334,7 @@ export async function cli() {
       process.exit(1)
     }
     await timer(3000)
-    await sendSignerChangeEvent()
+    await sendSignerChangeEvent(options.sendSignerchangeEvent)
   } else if (options.sendUnstakeinitEvent) {
     console.log('📍Command --send-unstakeinit-event [validatorID]')
     if (!checkDir(false)) {
@@ -323,15 +343,10 @@ export async function cli() {
       )
       process.exit(1)
     }
-    if (options.sendUnstakeinitEvent === true) {
-      if (parseInt(options.sendUnstakeinitEvent) < 1) {
-        options.sendUnstakeinitEvent = 1
-      }
-    }
     await timer(3000)
-    await sendUnstakeInitEvent(parseInt(options.sendUnstakeinitEvent))
+    await sendUnstakeInitEvent(options.sendUnstakeinitEvent)
   } else if (options.sendTopupfeeEvent) {
-    console.log('📍Command --send-topupfee-event ')
+    console.log('📍Command --send-topupfee-event [validatorID]')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -339,7 +354,7 @@ export async function cli() {
       process.exit(1)
     }
     await timer(3000)
-    await sendTopUpFeeEvent()
+    await sendTopUpFeeEvent(options.sendTopupfeeEvent)
   } else if (options.eip1559Test) {
     console.log('📍Command --eip-1559-test')
     if (!checkDir(false)) {
@@ -362,7 +377,7 @@ export async function cli() {
     await timer(3000)
     await setupDatadog()
   } else if (options.chaos) {
-    console.log('📍Command --chaos')
+    console.log('📍Command --chaos [intensity]')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -409,6 +424,26 @@ export async function cli() {
 
     await timer(3000)
     await rewind(options.rewind)
+  } else if (options.awsKeyAdd) {
+    console.log('📍 Command --aws-key-add')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+
+    await awsKeypairAdd()
+  } else if (options.awsKeyDes) {
+    console.log('📍 Command --aws-key-des')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+
+    await awsKeypairDestroy(options.awsKeyDes)
   } else if (options.milestoneBase) {
     console.log('📍Command --milestone-base')
     if (!checkDir(false)) {
@@ -418,7 +453,6 @@ export async function cli() {
       process.exit(1)
     }
 
-    await timer(3000)
     await milestoneBase()
   } else if (options.milestonePartition) {
     console.log('📍Command --milestone-partition')
@@ -429,10 +463,10 @@ export async function cli() {
       process.exit(1)
     }
 
-    await timer(3000)
     await milestonePartition()
   } else if (options.milestoneHelper) {
     console.log('📍Command --milestone-helper')
+
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -440,7 +474,6 @@ export async function cli() {
       process.exit(1)
     }
 
-    await timer(3000)
     await milestoneHelper()
   }
 }
