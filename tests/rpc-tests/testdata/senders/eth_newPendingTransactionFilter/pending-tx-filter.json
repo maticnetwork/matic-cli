@@ -1,8 +1,0 @@
-{
-  "req": {
-    "jsonrpc": "2.0",
-    "method": "eth_newPendingTransactionFilter",
-    "params": [],
-    "id": 1
-  }
-}

@@ -247,7 +247,15 @@ The `express-cli` also comes with additional utility commands, listed below. Som
     specified when restarting the (shadow) node. Currently only works with remote setup (no docker support).
 
 - `../../bin/express-cli --rpc-test`
+
   - Executes RPC methods against the provided test data and verifies the response data's compatibility and correctness.
+    Since the `tests/rpc-tests/RPC-testdata` is a [submodule](https://github.com/maticnetwork/RPC-testdata) , do the following
+    to initialize and fetch the testdata:
+
+    ```bash
+    git submodule init
+    git submodule update
+    ```
 
 ## `matic-cli`
 

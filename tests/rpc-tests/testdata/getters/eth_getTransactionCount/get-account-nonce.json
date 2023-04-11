@@ -1,9 +1,0 @@
-{
-  "req": {
-    "jsonrpc": "2.0",
-    "id": 1,
-    "method": "eth_getTransactionCount",
-    "params": ["0xe84d601e5d945031129a83e5602be0cc7f182cf3", "0x1F15B97"]
-  },
-  "res": { "jsonrpc": "2.0", "id": 1, "result": "0x3767dd" }
-}
