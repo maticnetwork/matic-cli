@@ -15,6 +15,7 @@ const axios = require('axios/dist/node/axios.cjs')
 const Web3 = require('web3')
 const ethUtil = require('ethereumjs-util')
 const Transaction = require('ethereumjs-tx')
+const _ = require('lodash')
 
 require('dotenv').config({ path: `${process.cwd()}/.env` })
 
@@ -30,11 +31,15 @@ const logIndexRegex = /^0x[0-9a-fA-F]*$/
 const filterIdRegex = /^0x[0-9a-fA-F]+$/
 
 async function initWeb3(machine) {
+  let providerOrUrl = `http://${machine}:8545`
+  if (process.env.RPC_URL) {
+    providerOrUrl = `${machine}`
+  }
   const provider = new HDWalletProvider({
     mnemonic: {
       phrase: process.env.MNEMONIC
     },
-    providerOrUrl: `http://${machine}:8545`
+    providerOrUrl: providerOrUrl
   })
 
   return new Web3(provider)
@@ -42,48 +47,57 @@ async function initWeb3(machine) {
 
 async function init() {
   console.log('📍Executing RPC tests')
-  const doc = await loadDevnetConfig('remote')
-  const machine = doc.devnetBorHosts[0]
-  const user = doc.devnetBorUsers[0]
-  const ip = `${user}@${machine}`
-  const borStartScriptLocation = '~/node/bor-start.sh'
-
-  const walletDisableFlagCmd = `grep -q 'disable-bor-wallet=false' ${borStartScriptLocation} && echo 'found' || echo 'not found'`
-  const isPresent = await runSshCommandWithReturn(
-    ip,
-    walletDisableFlagCmd,
-    maxRetries
-  )
-
-  if (isPresent === 'not found') {
-    const addFlagsCmd = `sed -i 's/--allow-insecure-unlock \\\\/&\\n  --disable-bor-wallet=false \\\\/' ${borStartScriptLocation}`
-    const restartBorCmd = 'sudo service bor restart'
-    const isSyncingCmd =
-      '~/go/bin/bor attach ~/.bor/data/bor.ipc --exec "eth.syncing"'
-
-    console.log(
-      '📍Updating start script on machine to unlock node account ... '
+  let machine, ip
+  if (process.env.RPC_URL) {
+    machine = process.env.RPC_URL
+    const web3 = await initWeb3(machine)
+    const sender = web3.eth.accounts.privateKeyToAccount(
+      process.env.PRIVATE_KEY
     )
-    await runSshCommand(ip, addFlagsCmd, maxRetries)
+    return [machine, web3, sender.address]
+  } else {
+    const doc = await loadDevnetConfig('remote')
+    machine = doc.devnetBorHosts[0]
+    const user = doc.devnetBorUsers[0]
+    ip = `${user}@${machine}`
+    const borStartScriptLocation = '~/node/bor-start.sh'
 
-    console.log('📍Restarting bor on machine ... ')
-    await runSshCommand(ip, restartBorCmd, maxRetries)
+    const walletDisableFlagCmd = `grep -q 'disable-bor-wallet=false' ${borStartScriptLocation} && echo 'found' || echo 'not found'`
+    const isPresent = await runSshCommandWithReturn(
+      ip,
+      walletDisableFlagCmd,
+      maxRetries
+    )
 
-    await timer(100000)
+    if (isPresent === 'not found') {
+      const addFlagsCmd = `sed -i 's/--allow-insecure-unlock \\\\/&\\n  --disable-bor-wallet=false \\\\/' ${borStartScriptLocation}`
+      const restartBorCmd = 'sudo service bor restart'
+      const isSyncingCmd =
+        '~/go/bin/bor attach ~/.bor/data/bor.ipc --exec "eth.syncing"'
 
-    while (true) {
-      const isSyncing = await runSshCommandWithReturn(
-        ip,
-        isSyncingCmd,
-        maxRetries
+      console.log(
+        '📍Updating start script on machine to unlock node account ... '
       )
-      if (isSyncing === 'false') {
-        console.log('📍Node sync completed ... ')
-        break
+      await runSshCommand(ip, addFlagsCmd, maxRetries)
+
+      console.log('📍Restarting bor on machine ... ')
+      await runSshCommand(ip, restartBorCmd, maxRetries)
+
+      await timer(100000)
+
+      while (true) {
+        const isSyncing = await runSshCommandWithReturn(
+          ip,
+          isSyncingCmd,
+          maxRetries
+        )
+        if (isSyncing === 'false') {
+          console.log('📍Node sync completed ... ')
+          break
+        }
       }
     }
   }
-
   const web3 = await initWeb3(machine)
 
   const src = `${ip}:~/.bor/address.txt`
@@ -247,6 +261,16 @@ async function updateSenderTestData(
   let response
   // prepare sender address
   for (let i = 0; i < sendTestData.length; i++) {
+    if (
+      process.env.RPC_URL &&
+      (sendTestData[i].req.method === 'eth_sendRawTransaction' ||
+        sendTestData[i].req.method === 'eth_sign' ||
+        sendTestData[i].req.method === 'eth_signTransaction' ||
+        sendTestData[i].req.method === 'eth_sendTransaction')
+    ) {
+      continue
+    }
+
     if (sendTestData[i].req.method === 'eth_sign') {
       sendTestData[i].req.params[0] = sender
     } else if (
@@ -265,11 +289,24 @@ async function updateSenderTestData(
   }
 
   for (let i = 0; i < sendTestData.length; i++) {
+    if (process.env.RPC_URL) {
+      continue
+    }
     if (sendTestData[i].req.method === 'eth_sendRawTransaction') {
       sendTestData[i].req.params[0] = response.data.result.raw
       break
     }
   }
+}
+
+function sortAccessList(accessList) {
+  const sortedAccessList = _.sortBy(accessList, 'address')
+
+  _.forEach(sortedAccessList, (obj) => {
+    obj.storageKeys = _.sortBy(obj.storageKeys)
+  })
+
+  return sortedAccessList
 }
 
 export async function rpcTest() {
@@ -284,10 +321,19 @@ export async function rpcTest() {
     }
 
     // Getter rpc calls
-    const getTestData = fetchTestFiles('../../tests/rpc-tests/testdata/getters')
-    const axiosInstance = axios.create({
-      baseURL: `http://${machine}:8545`
-    })
+    let axiosInstance
+    const getTestData = fetchTestFiles(
+      `../../tests/rpc-tests/RPC-testdata/${process.env.RPC_NETWORK}/getters`
+    )
+    if (process.env.RPC_URL) {
+      axiosInstance = axios.create({
+        baseURL: `${machine}`
+      })
+    } else {
+      axiosInstance = axios.create({
+        baseURL: `http://${machine}:8545`
+      })
+    }
 
     let response
 
@@ -334,13 +380,24 @@ export async function rpcTest() {
           continue
         }
 
-        assert.deepStrictEqual(response.data, getTestData[i].res)
+        if (getTestData[i].req.method === 'eth_createAccessList') {
+          assert.deepStrictEqual(
+            sortAccessList(response.data.result.accessList),
+            sortAccessList(getTestData[i].res.result.accessList)
+          )
+          assert.deepStrictEqual(
+            response.data.result.gasUsed,
+            getTestData[i].res.result.gasUsed
+          )
+        } else {
+          assert.deepStrictEqual(response.data, getTestData[i].res)
+        }
       }
     }
 
     // Sender rpc calls
     const sendTestData = fetchTestFiles(
-      '../../tests/rpc-tests/testdata/senders'
+      `../../tests/rpc-tests/RPC-testdata/${process.env.RPC_NETWORK}/senders`
     )
 
     let nonce = await web3.eth.getTransactionCount(sender)
@@ -381,6 +438,15 @@ export async function rpcTest() {
       )
       console.log('📍Executing sender rpc calls. Iteration: ', iter)
       for (let i = 0; i < sendTestData.length; i++) {
+        if (
+          process.env.RPC_URL &&
+          (sendTestData[i].req.method === 'eth_sendRawTransaction' ||
+            sendTestData[i].req.method === 'eth_sign' ||
+            sendTestData[i].req.method === 'eth_signTransaction' ||
+            sendTestData[i].req.method === 'eth_sendTransaction')
+        ) {
+          continue
+        }
         console.log('📍 Executing: ', sendTestData[i].req.method)
         response = await axiosInstance.post('/', sendTestData[i].req)
         if (response.data.error !== undefined && response.data.error !== null) {
