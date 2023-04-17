@@ -26,6 +26,8 @@ import { testEip1559 } from '../tests/test-eip-1559'
 import { stopInstances } from './express/commands/aws-instances-stop'
 import { startInstances } from './express/commands/aws-instances-start'
 import { rewind } from './express/commands/rewind'
+import { shadow } from './express/commands/shadow'
+import { relay } from './express/commands/relay'
 import { awsKeypairAdd } from './express/commands/aws-keypair-add'
 import { awsKeypairDestroy } from './express/commands/aws-keypair-destroy'
 
@@ -104,6 +106,11 @@ program
     '-key-d, --aws-key-des [keyName]',
     'Destroy aws keypair from devnet, given its keyName'
   )
+  .option(
+    '-sf, --shadow-fork [blockNumber]',
+    'Run nodes in shadow mode. Please note that there might be an offset of ~3-4 blocks from [blockNumber] specified when restarting the (shadow) node'
+  )
+  .option('-relay, --relay', 'Relay transaction to shadow node')
   .version(pkg.version)
 
 export async function cli() {
@@ -429,5 +436,31 @@ export async function cli() {
       process.exit(1)
     }
     await awsKeypairDestroy(options.awsKeyDes)
+  } else if (options.shadowFork) {
+    console.log('📍Command --shadow-fork [blockNumber]')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    console.log(
+      '⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...'
+    )
+
+    await shadow(options.shadowFork)
+  } else if (options.relay) {
+    console.log('📍Command --relay')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    console.log(
+      '⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...'
+    )
+
+    await relay()
   }
 }

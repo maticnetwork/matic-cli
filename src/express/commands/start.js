@@ -327,15 +327,17 @@ async function runDockerSetupWithMaticCLI(ips, devnetId) {
   command = 'cd ~/matic-cli/devnet && bash docker-bor-start-all.sh'
   await runSshCommand(ip, command, maxRetries)
 
-  await timer(60000)
-  console.log('📍Deploying contracts for bor...')
-  command = 'cd ~/matic-cli/devnet && bash ganache-deployment-bor.sh'
-  await runSshCommand(ip, command, maxRetries)
+  if (!process.env.NETWORK) {
+    await timer(60000)
+    console.log('📍Deploying contracts for bor...')
+    command = 'cd ~/matic-cli/devnet && bash ganache-deployment-bor.sh'
+    await runSshCommand(ip, command, maxRetries)
 
-  await timer(60000)
-  console.log('📍Deploying state-sync contracts...')
-  command = 'cd ~/matic-cli/devnet && bash ganache-deployment-sync.sh'
-  await runSshCommand(ip, command, maxRetries)
+    await timer(60000)
+    console.log('📍Deploying state-sync contracts...')
+    command = 'cd ~/matic-cli/devnet && bash ganache-deployment-sync.sh'
+    await runSshCommand(ip, command, maxRetries)
+  }
 
   await timer(60000)
   console.log('📍Executing bor ipc tests...')
@@ -375,15 +377,17 @@ async function runRemoteSetupWithMaticCLI(ips, devnetId) {
     'cd ~/matic-cli/devnet && ../bin/matic-cli setup devnet -c ../configs/devnet/remote-setup-config.yaml'
   await runSshCommand(ip, command, maxRetries)
 
-  console.log('📍Deploying contracts for bor on machine ' + ip + ' ...')
-  await timer(60000)
-  command = 'cd ~/matic-cli/devnet && bash ganache-deployment-bor.sh'
-  await runSshCommand(ip, command, maxRetries)
+  if (!process.env.NETWORK) {
+    console.log('📍Deploying contracts for bor on machine ' + ip + ' ...')
+    await timer(60000)
+    command = 'cd ~/matic-cli/devnet && bash ganache-deployment-bor.sh'
+    await runSshCommand(ip, command, maxRetries)
 
-  console.log('📍Deploying state-sync contracts on machine ' + ip + ' ...')
-  await timer(60000)
-  command = 'cd ~/matic-cli/devnet && bash ganache-deployment-sync.sh'
-  await runSshCommand(ip, command, maxRetries)
+    console.log('📍Deploying state-sync contracts on machine ' + ip + ' ...')
+    await timer(60000)
+    command = 'cd ~/matic-cli/devnet && bash ganache-deployment-sync.sh'
+    await runSshCommand(ip, command, maxRetries)
+  }
 }
 
 export async function start() {

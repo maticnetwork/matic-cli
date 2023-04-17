@@ -33,14 +33,12 @@ export async function stopServices(doc) {
       await runSshCommand(ip, command, maxRetries)
     }
 
-    console.log('📍Stopping heimdall on machine ' + ip + '...')
-    let command =
-      'sudo systemctl stop heimdalld.service || echo "heimdall not running on current machine..."'
+    console.log('📍Stopping bor on machine ' + ip + ' ...')
+    let command = 'sudo systemctl stop bor.service'
     await runSshCommand(ip, command, maxRetries)
 
-    console.log('📍Stopping bor on machine ' + ip + ' ...')
-    command =
-      'sudo systemctl stop bor.service || echo "bor not running on current machine..."'
+    console.log('📍Stopping heimdall on machine ' + ip + '...')
+    command = 'sudo systemctl stop heimdalld.service'
     await runSshCommand(ip, command, maxRetries)
   })
 
