@@ -6,7 +6,7 @@ import {
 } from '../src/express/common/config-utils'
 import fs from 'fs'
 import { maxRetries, runScpCommand } from '../src/express/common/remote-worker'
-import { fundAccount } from './test-utils'
+import { fundAccount, santizeIterations } from './test-utils'
 const Web3 = require('web3')
 const bigInt = require('big-integer')
 const HDWalletProvider = require('@truffle/hdwallet-provider')
@@ -183,7 +183,8 @@ export async function testEip1559(n) {
     await web3.eth.accounts.wallet.add(sender.privateKey)
     const accounts = await web3.eth.getAccounts()
 
-    for (let i = 0; i < process.env.COUNT; i++) {
+    const count = santizeIterations(process.env.COUNT)
+    for (let i = 0; i < count; i++) {
       await runTest(web3, accounts, sender)
     }
     console.log('All tests successfuly executed!')

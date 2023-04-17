@@ -10,7 +10,7 @@ import assert from 'assert'
 import { loadDevnetConfig } from '../../src/express/common/config-utils'
 import HDWalletProvider from '@truffle/hdwallet-provider'
 import { timer } from '../../src/express/common/time-utils'
-import { fundAccount } from '../test-utils'
+import { fundAccount, santizeIterations } from '../test-utils'
 const axios = require('axios/dist/node/axios.cjs')
 const Web3 = require('web3')
 const ethUtil = require('ethereumjs-util')
@@ -50,11 +50,7 @@ async function init() {
   let machine, ip
   if (process.env.RPC_URL) {
     machine = process.env.RPC_URL
-    const web3 = await initWeb3(machine)
-    const sender = web3.eth.accounts.privateKeyToAccount(
-      process.env.PRIVATE_KEY
-    )
-    return [machine, web3, sender.address]
+    return [machine, null, null]
   } else {
     const doc = await loadDevnetConfig('remote')
     machine = doc.devnetBorHosts[0]
@@ -251,6 +247,305 @@ function isValidSignedMessage(message, signature, address) {
   return recoveredAddress === address && ethUtil.isValidSignature(v, r, s)
 }
 
+function validateEthPendingTransaction(response) {
+  return isValidTxHash(response.data.result)
+}
+
+function validateEthSendRawTransaction(response) {
+  return isValidTxHash(response.data.result)
+}
+
+function validateEthSendTransaction(response) {
+  return isValidTxHash(response.data.result)
+}
+
+function validateEthSign(response, sendTestData) {
+  return isValidSignedMessage(
+    sendTestData.req.params[1],
+    response.data.result,
+    sendTestData.req.params[0]
+  )
+}
+
+function validateEthSignTransaction(response, sendTestData) {
+  if (!response.data.result.raw.match(signedTxRegex)) {
+    console.error(
+      `❌ Invalid signed transaction returned : ${sendTestData.req.method} `,
+      response.data.result.raw
+    )
+    process.exit(1)
+  }
+
+  if (
+    response.data.result.tx.type !== '0x0' &&
+    response.data.result.tx.type !== '0x1' &&
+    response.data.result.tx.type !== '0x2'
+  ) {
+    console.error(
+      `❌ Invalid transaction type returned : ${sendTestData.req.method} `,
+      response.data.result.tx.type
+    )
+    process.exit(1)
+  }
+
+  if (response.data.result.tx.nonce !== sendTestData.req.params[0].nonce) {
+    console.error(
+      `❌ Invalid nonce returned : ${sendTestData.req.method} `,
+      response.data.result.tx.nonce
+    )
+    process.exit(1)
+  }
+
+  if (response.data.result.tx.gas !== sendTestData.req.params[0].gas) {
+    console.error(
+      `❌ Invalid gas returned : ${sendTestData.req.method} `,
+      response.data.result.tx.gas
+    )
+    process.exit(1)
+  }
+
+  if (response.data.result.tx.value !== sendTestData.req.params[0].value) {
+    console.error(
+      `❌ Invalid value returned : ${sendTestData.req.method} `,
+      response.data.result.tx.value
+    )
+    process.exit(1)
+  }
+
+  if (
+    response.data.result.tx.to.trim().toLowerCase() !==
+    sendTestData.req.params[0].to.trim().toLowerCase()
+  ) {
+    console.error(
+      `❌ Invalid to address returned : ${sendTestData.req.method} `,
+      response.data.result.tx.to,
+      sendTestData.req.params[0].to,
+      response.data.result.tx.to === sendTestData.req.params[0].to
+    )
+    process.exit(1)
+  }
+
+  if (
+    sendTestData.req.params[0].gasPrice !== null &&
+    sendTestData.req.params[0].gasPrice !== undefined &&
+    response.data.result.tx.gasPrice !== sendTestData.req.params[0].gasPrice
+  ) {
+    console.error(
+      `❌ Invalid gasPrice returned : ${sendTestData.req.method} `,
+      response.data.result.tx.gasPrice
+    )
+    process.exit(1)
+  }
+
+  if (
+    sendTestData.req.params[0].maxPriorityFeePerGas !== null &&
+    sendTestData.req.params[0].maxPriorityFeePerGas !== undefined &&
+    response.data.result.tx.maxPriorityFeePerGas !==
+      sendTestData.req.params[0].maxPriorityFeePerGas
+  ) {
+    console.error(
+      `❌ Invalid maxPriorityFeePerGas returned : ${sendTestData.req.method} `,
+      response.data.result.tx.maxPriorityFeePerGas
+    )
+    process.exit(1)
+  }
+
+  if (
+    sendTestData.req.params[0].maxFeePerGas !== null &&
+    sendTestData.req.params[0].maxFeePerGas !== undefined &&
+    response.data.result.tx.maxFeePerGas !==
+      sendTestData.req.params[0].maxFeePerGas
+  ) {
+    console.error(
+      `❌ Invalid maxFeePerGas returned : ${sendTestData.req.method} `,
+      response.data.result.tx.maxFeePerGas
+    )
+    process.exit(1)
+  }
+
+  if (
+    sendTestData.req.params[0].input !== null &&
+    sendTestData.req.params[0].input !== undefined &&
+    response.data.result.tx.input !== '0x'
+  ) {
+    console.error(
+      `❌ Invalid input returned : ${sendTestData.req.method} `,
+      response.data.result.tx.input
+    )
+    process.exit(1)
+  }
+
+  if (!response.data.result.tx.hash.match(txHashRegex)) {
+    console.error(
+      `❌ Invalid transaction hash returned : ${sendTestData.req.method} `,
+      response.data.result.tx.hash
+    )
+    process.exit(1)
+  }
+
+  const tx = new Transaction(response.data.result.raw)
+  const v = '0x' + tx.v.toString('hex').slice(1)
+
+  let r = tx.r.toString('hex')
+  if (r.charAt(0) === '0') {
+    r = '0x' + r.slice(1)
+  } else {
+    r = '0x' + r
+  }
+
+  let s = tx.s.toString('hex')
+  if (s.charAt(0) === '0') {
+    s = '0x' + s.slice(1)
+  } else {
+    s = '0x' + s
+  }
+
+  if (r !== response.data.result.tx.r) {
+    console.error(
+      `❌ Invalid r field returned: ${sendTestData.req.method} `,
+      response.data.result.tx.r,
+      r
+    )
+    process.exit(1)
+  }
+
+  if (s !== response.data.result.tx.s) {
+    console.error(
+      `❌ Invalid s field returned: ${sendTestData.req.method} `,
+      response.data.result.tx.s,
+      s
+    )
+    process.exit(1)
+  }
+
+  if (v !== response.data.result.tx.v) {
+    console.error(
+      `❌ Invalid v field returned: ${sendTestData.req.method} `,
+      response.data.result.tx.v,
+      v
+    )
+    process.exit(1)
+  }
+}
+
+async function validateEthNewFilter(response, getFilterLogs, axiosInstance) {
+  if (!response.data.result.match(filterIdRegex)) {
+    console.error(
+      '❌ Invalid filter ID returned : eth_newFilter',
+      response.data.result
+    )
+    process.exit(1)
+  }
+
+  getFilterLogs.params[0] = response.data.result
+  const filterLogsResponse = await axiosInstance.post('/', getFilterLogs)
+
+  if (
+    filterLogsResponse.data.error !== undefined &&
+    filterLogsResponse.data.error !== null
+  ) {
+    console.error(
+      '❌ Error while fetching the changes for the filter : eth_newFilter',
+      filterLogsResponse.data,
+      filterLogsResponse.data.error
+    )
+    process.exit(1)
+  }
+
+  if (
+    filterLogsResponse.data.result.length > 0 &&
+    !isValidFilterLog(filterLogsResponse.data.result)
+  ) {
+    console.error(
+      '❌ Invalid log returned : eth_newFilter',
+      filterLogsResponse.data
+    )
+    process.exit(1)
+  }
+  console.log('eth_getFilterLogs: ', JSON.stringify(filterLogsResponse.data))
+}
+
+async function validateEthGetFilterChanges(
+  response,
+  getFilterChanges,
+  axiosInstance
+) {
+  if (!response.data.result.match(filterIdRegex)) {
+    console.error(
+      '❌ Invalid filter ID returned : eth_getFilterChanges',
+      response.data.result
+    )
+    process.exit(1)
+  }
+
+  getFilterChanges.params[0] = response.data.result
+  const filterResponse = await axiosInstance.post('/', getFilterChanges)
+
+  if (
+    filterResponse.data.error !== undefined &&
+    filterResponse.data.error !== null
+  ) {
+    console.error(
+      '❌ Error while fetching the changes for the filter : eth_getFilterChanges',
+      filterResponse.data,
+      filterResponse.data.error
+    )
+    process.exit(1)
+  }
+
+  return filterResponse
+}
+
+async function validateEthNewBlockFilter(
+  response,
+  getFilterChanges,
+  axiosInstance
+) {
+  const filterResponse = await validateEthGetFilterChanges(
+    response,
+    getFilterChanges,
+    axiosInstance
+  )
+
+  if (
+    filterResponse.data.result.length > 0 &&
+    !isValidBlockHash(filterResponse.data.result)
+  ) {
+    console.error(
+      '❌ Invalid block hash returned : eth_newBlockFilter',
+      filterResponse.data.result
+    )
+    process.exit(1)
+  }
+
+  console.log('eth_getFilterChanges: ', JSON.stringify(filterResponse.data))
+}
+
+async function validateEthNewPendingTransactionFilter(
+  response,
+  getFilterChanges,
+  axiosInstance
+) {
+  const filterResponse = await validateEthGetFilterChanges(
+    response,
+    getFilterChanges,
+    axiosInstance
+  )
+
+  if (
+    filterResponse.data.result.length > 0 &&
+    !isValidTxHash(filterResponse.data.result)
+  ) {
+    console.error(
+      '❌ Invalid transaction hash returned : eth_newPendingTransactionFilter',
+      filterResponse.data.result
+    )
+    process.exit(1)
+  }
+
+  console.log('eth_getFilterChanges: ', JSON.stringify(filterResponse.data))
+}
+
 async function updateSenderTestData(
   sendTestData,
   web3,
@@ -261,13 +556,7 @@ async function updateSenderTestData(
   let response
   // prepare sender address
   for (let i = 0; i < sendTestData.length; i++) {
-    if (
-      process.env.RPC_URL &&
-      (sendTestData[i].req.method === 'eth_sendRawTransaction' ||
-        sendTestData[i].req.method === 'eth_sign' ||
-        sendTestData[i].req.method === 'eth_signTransaction' ||
-        sendTestData[i].req.method === 'eth_sendTransaction')
-    ) {
+    if (process.env.RPC_URL && sendTestData[i].requiresPK) {
       continue
     }
 
@@ -335,16 +624,11 @@ export async function rpcTest() {
       })
     }
 
-    let response
+    let response, currentSnapshotResponse
 
-    let getterIterattions = process.env.EXECUTION_COUNT_GETTERS
-    if (
-      getterIterattions <= 0 ||
-      getterIterattions === null ||
-      getterIterattions === undefined
-    ) {
-      getterIterattions = 1
-    }
+    const getterIterattions = santizeIterations(
+      process.env.EXECUTION_COUNT_GETTERS
+    )
 
     for (let iter = 0; iter < getterIterattions; iter++) {
       console.log('📍Executing getter rpc calls. Iteration: ', iter)
@@ -353,7 +637,7 @@ export async function rpcTest() {
         response = await axiosInstance.post('/', getTestData[i].req)
 
         if (getTestData[i].req.method === 'bor_getCurrentProposer') {
-          const currentSnapshotResponse = await axiosInstance.post(
+          currentSnapshotResponse = await axiosInstance.post(
             '/',
             getCurrentSnapshot
           )
@@ -367,7 +651,7 @@ export async function rpcTest() {
         }
 
         if (getTestData[i].req.method === 'bor_getCurrentValidators') {
-          const currentSnapshotResponse = await axiosInstance.post(
+          currentSnapshotResponse = await axiosInstance.post(
             '/',
             getCurrentSnapshot
           )
@@ -380,7 +664,8 @@ export async function rpcTest() {
           continue
         }
 
-        if (getTestData[i].req.method === 'eth_createAccessList') {
+        if (getTestData[i].isList) {
+          // sort the access lists before comparing
           assert.deepStrictEqual(
             sortAccessList(response.data.result.accessList),
             sortAccessList(getTestData[i].res.result.accessList)
@@ -400,7 +685,10 @@ export async function rpcTest() {
       `../../tests/rpc-tests/RPC-testdata/${process.env.RPC_NETWORK}/senders`
     )
 
-    let nonce = await web3.eth.getTransactionCount(sender)
+    let nonce
+    if (sender != null) {
+      nonce = await web3.eth.getTransactionCount(sender)
+    }
 
     const getFilterChanges = {
       method: 'eth_getFilterChanges',
@@ -408,7 +696,6 @@ export async function rpcTest() {
       id: 1,
       jsonrpc: '2.0'
     }
-    let filterResponse
 
     const getFilterLogs = {
       method: 'eth_getFilterLogs',
@@ -416,16 +703,10 @@ export async function rpcTest() {
       id: 1,
       jsonrpc: '2.0'
     }
-    let filterLogsResponse
 
-    let senderrIterattions = process.env.EXECUTION_COUNT_SENDERS
-    if (
-      senderrIterattions <= 0 ||
-      senderrIterattions === null ||
-      senderrIterattions === undefined
-    ) {
-      senderrIterattions = 1
-    }
+    const senderrIterattions = santizeIterations(
+      process.env.EXECUTION_COUNT_SENDERS
+    )
 
     // Finally, fire 'em
     for (let iter = 0; iter < senderrIterattions; iter++) {
@@ -438,13 +719,7 @@ export async function rpcTest() {
       )
       console.log('📍Executing sender rpc calls. Iteration: ', iter)
       for (let i = 0; i < sendTestData.length; i++) {
-        if (
-          process.env.RPC_URL &&
-          (sendTestData[i].req.method === 'eth_sendRawTransaction' ||
-            sendTestData[i].req.method === 'eth_sign' ||
-            sendTestData[i].req.method === 'eth_signTransaction' ||
-            sendTestData[i].req.method === 'eth_sendTransaction')
-        ) {
+        if (process.env.RPC_URL && sendTestData[i].requiresPK) {
           continue
         }
         console.log('📍 Executing: ', sendTestData[i].req.method)
@@ -461,7 +736,7 @@ export async function rpcTest() {
         if (
           sendTestData[i].req.method === 'eth_pendingTransactions' &&
           response.data.result.length > 0 &&
-          !isValidTxHash(response.data.result)
+          !validateEthPendingTransaction(response)
         ) {
           console.error(
             `❌ Invalid transaction hash returned : ${sendTestData[i].req.method} `,
@@ -471,9 +746,19 @@ export async function rpcTest() {
         }
 
         if (
-          (sendTestData[i].req.method === 'eth_sendRawTransaction' ||
-            sendTestData[i].req.method === 'eth_sendTransaction') &&
-          !isValidTxHash(response.data.result)
+          sendTestData[i].req.method === 'eth_sendRawTransaction' &&
+          !validateEthSendRawTransaction(response)
+        ) {
+          console.error(
+            `❌ Invalid transaction hash returned : ${sendTestData[i].req.method} `,
+            response.data.result
+          )
+          process.exit(1)
+        }
+
+        if (
+          sendTestData[i].req.method === 'eth_sendTransaction' &&
+          !validateEthSendTransaction(response)
         ) {
           console.error(
             `❌ Invalid transaction hash returned : ${sendTestData[i].req.method} `,
@@ -484,11 +769,7 @@ export async function rpcTest() {
 
         if (
           sendTestData[i].req.method === 'eth_sign' &&
-          isValidSignedMessage(
-            sendTestData[i].req.params[1],
-            response.data.result,
-            sendTestData[i].req.params[0]
-          )
+          !validateEthSign(response, sendTestData[i])
         ) {
           console.error(
             `❌ Invalid signature returned : ${sendTestData[i].req.method} `,
@@ -498,270 +779,30 @@ export async function rpcTest() {
         }
 
         if (sendTestData[i].req.method === 'eth_signTransaction') {
-          if (!response.data.result.raw.match(signedTxRegex)) {
-            console.error(
-              `❌ Invalid signed transaction returned : ${sendTestData[i].req.method} `,
-              response.data.result.raw
-            )
-            process.exit(1)
-          }
-
-          if (
-            response.data.result.tx.type !== '0x0' &&
-            response.data.result.tx.type !== '0x1' &&
-            response.data.result.tx.type !== '0x2'
-          ) {
-            console.error(
-              `❌ Invalid transaction type returned : ${sendTestData[i].req.method} `,
-              response.data.result.tx.type
-            )
-            process.exit(1)
-          }
-
-          if (
-            response.data.result.tx.nonce !==
-            sendTestData[i].req.params[0].nonce
-          ) {
-            console.error(
-              `❌ Invalid nonce returned : ${sendTestData[i].req.method} `,
-              response.data.result.tx.nonce
-            )
-            process.exit(1)
-          }
-
-          if (
-            response.data.result.tx.gas !== sendTestData[i].req.params[0].gas
-          ) {
-            console.error(
-              `❌ Invalid gas returned : ${sendTestData[i].req.method} `,
-              response.data.result.tx.gas
-            )
-            process.exit(1)
-          }
-
-          if (
-            response.data.result.tx.value !==
-            sendTestData[i].req.params[0].value
-          ) {
-            console.error(
-              `❌ Invalid value returned : ${sendTestData[i].req.method} `,
-              response.data.result.tx.value
-            )
-            process.exit(1)
-          }
-
-          if (
-            response.data.result.tx.to.trim().toLowerCase() !==
-            sendTestData[i].req.params[0].to.trim().toLowerCase()
-          ) {
-            console.error(
-              `❌ Invalid to address returned : ${sendTestData[i].req.method} `,
-              response.data.result.tx.to,
-              sendTestData[i].req.params[0].to,
-              response.data.result.tx.to === sendTestData[i].req.params[0].to
-            )
-            process.exit(1)
-          }
-
-          if (
-            sendTestData[i].req.params[0].gasPrice !== null &&
-            sendTestData[i].req.params[0].gasPrice !== undefined &&
-            response.data.result.tx.gasPrice !==
-              sendTestData[i].req.params[0].gasPrice
-          ) {
-            console.error(
-              `❌ Invalid gasPrice returned : ${sendTestData[i].req.method} `,
-              response.data.result.tx.gasPrice
-            )
-            process.exit(1)
-          }
-
-          if (
-            sendTestData[i].req.params[0].maxPriorityFeePerGas !== null &&
-            sendTestData[i].req.params[0].maxPriorityFeePerGas !== undefined &&
-            response.data.result.tx.maxPriorityFeePerGas !==
-              sendTestData[i].req.params[0].maxPriorityFeePerGas
-          ) {
-            console.error(
-              `❌ Invalid maxPriorityFeePerGas returned : ${sendTestData[i].req.method} `,
-              response.data.result.tx.maxPriorityFeePerGas
-            )
-            process.exit(1)
-          }
-
-          if (
-            sendTestData[i].req.params[0].maxFeePerGas !== null &&
-            sendTestData[i].req.params[0].maxFeePerGas !== undefined &&
-            response.data.result.tx.maxFeePerGas !==
-              sendTestData[i].req.params[0].maxFeePerGas
-          ) {
-            console.error(
-              `❌ Invalid maxFeePerGas returned : ${sendTestData[i].req.method} `,
-              response.data.result.tx.maxFeePerGas
-            )
-            process.exit(1)
-          }
-
-          if (
-            sendTestData[i].req.params[0].input !== null &&
-            sendTestData[i].req.params[0].input !== undefined &&
-            response.data.result.tx.input !== '0x'
-          ) {
-            console.error(
-              `❌ Invalid input returned : ${sendTestData[i].req.method} `,
-              response.data.result.tx.input
-            )
-            process.exit(1)
-          }
-
-          if (!response.data.result.tx.hash.match(txHashRegex)) {
-            console.error(
-              `❌ Invalid transaction hash returned : ${sendTestData[i].req.method} `,
-              response.data.result.tx.hash
-            )
-            process.exit(1)
-          }
-
-          const tx = new Transaction(response.data.result.raw)
-          const v = '0x' + tx.v.toString('hex').slice(1)
-
-          let r = tx.r.toString('hex')
-          if (r.charAt(0) === '0') {
-            r = '0x' + r.slice(1)
-          } else {
-            r = '0x' + r
-          }
-
-          let s = tx.s.toString('hex')
-          if (s.charAt(0) === '0') {
-            s = '0x' + s.slice(1)
-          } else {
-            s = '0x' + s
-          }
-
-          if (r !== response.data.result.tx.r) {
-            console.error(
-              `❌ Invalid r field returned: ${sendTestData[i].req.method} `,
-              response.data.result.tx.r,
-              r
-            )
-            process.exit(1)
-          }
-
-          if (s !== response.data.result.tx.s) {
-            console.error(
-              `❌ Invalid s field returned: ${sendTestData[i].req.method} `,
-              response.data.result.tx.s,
-              s
-            )
-            process.exit(1)
-          }
-
-          if (v !== response.data.result.tx.v) {
-            console.error(
-              `❌ Invalid v field returned: ${sendTestData[i].req.method} `,
-              response.data.result.tx.v,
-              v
-            )
-            process.exit(1)
-          }
-        }
-        console.log(
-          `${JSON.stringify(sendTestData[i].req.method)}: `,
-          response.data
-        )
-
-        if (sendTestData[i].req.method === 'eth_newFilter') {
-          if (!response.data.result.match(filterIdRegex)) {
-            console.error(
-              `❌ Invalid filter ID returned : ${sendTestData[i].req.method} `,
-              response.data.result
-            )
-            process.exit(1)
-          }
-          getFilterLogs.params[0] = response.data.result
-          filterLogsResponse = await axiosInstance.post('/', getFilterLogs)
-
-          if (
-            filterLogsResponse.data.error !== undefined &&
-            filterLogsResponse.data.error !== null
-          ) {
-            console.error(
-              `❌ Error while fetching the changes for the filter : ${sendTestData[i].req.method} `,
-              filterLogsResponse.data,
-              filterLogsResponse.data.error
-            )
-            process.exit(1)
-          }
-
-          if (
-            filterLogsResponse.data.result.length > 0 &&
-            !isValidFilterLog(filterLogsResponse.data.result)
-          ) {
-            console.error(
-              `❌ Invalid log returned : ${sendTestData[i].req.method} `,
-              filterLogsResponse.data
-            )
-            process.exit(1)
-          }
+          validateEthSignTransaction(response, sendTestData[i])
           console.log(
-            'eth_getFilterLogs: ',
-            JSON.stringify(filterLogsResponse.data)
+            `${JSON.stringify(sendTestData[i].req.method)}: `,
+            response.data
           )
         }
 
-        if (
-          sendTestData[i].req.method === 'eth_newBlockFilter' ||
-          sendTestData[i].req.method === 'eth_newPendingTransactionFilter'
-        ) {
-          if (!response.data.result.match(filterIdRegex)) {
-            console.error(
-              `❌ Invalid filter ID returned : ${sendTestData[i].req.method} `,
-              response.data.result
-            )
-            process.exit(1)
-          }
-          getFilterChanges.params[0] = response.data.result
-          filterResponse = await axiosInstance.post('/', getFilterChanges)
+        if (sendTestData[i].req.method === 'eth_newFilter') {
+          await validateEthNewFilter(response, getFilterLogs, axiosInstance)
+        }
 
-          if (
-            filterResponse.data.error !== undefined &&
-            filterResponse.data.error !== null
-          ) {
-            console.error(
-              `❌ Error while fetching the changes for the filter : ${sendTestData[i].req.method} `,
-              filterResponse.data,
-              filterResponse.data.error
-            )
-            process.exit(1)
-          }
+        if (sendTestData[i].req.method === 'eth_newBlockFilter') {
+          await validateEthNewBlockFilter(
+            response,
+            getFilterChanges,
+            axiosInstance
+          )
+        }
 
-          if (
-            sendTestData[i].req.method === 'eth_newBlockFilter' &&
-            filterResponse.data.result.length > 0 &&
-            !isValidBlockHash(filterResponse.data.result)
-          ) {
-            console.error(
-              `❌ Invalid block hash returned : ${sendTestData[i].req.method} `,
-              filterResponse.data.result
-            )
-            process.exit(1)
-          }
-
-          if (
-            sendTestData[i].req.method === 'eth_newPendingTransactionFilter' &&
-            filterResponse.data.result.length > 0 &&
-            !isValidTxHash(filterResponse.data.result)
-          ) {
-            console.error(
-              `❌ Invalid transaction hash returned : ${sendTestData[i].req.method} `,
-              filterResponse.data.result
-            )
-            process.exit(1)
-          }
-          console.log(
-            'eth_getFilterChanges: ',
-            JSON.stringify(filterResponse.data)
+        if (sendTestData[i].req.method === 'eth_newPendingTransactionFilter') {
+          await validateEthNewPendingTransactionFilter(
+            response,
+            getFilterChanges,
+            axiosInstance
           )
         }
       }

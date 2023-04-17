@@ -1,7 +1,3 @@
-// export const TxTypes {
-
-// }
-
 export async function fundAccount(
   web3,
   sender,
@@ -21,4 +17,13 @@ export async function fundAccount(
     maxPriorityFeePerGas
   }
   await web3.eth.sendTransaction(tx)
+}
+
+export function santizeIterations(iter) {
+  let iteration = iter
+  if (iteration <= 0 || iteration === null || iteration === undefined) {
+    iteration = 1
+  }
+
+  return iteration
 }
