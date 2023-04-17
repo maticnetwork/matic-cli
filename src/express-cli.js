@@ -30,7 +30,6 @@ import { shadow } from './express/commands/shadow'
 import { relay } from './express/commands/relay'
 import { awsKeypairAdd } from './express/commands/aws-keypair-add'
 import { awsKeypairDestroy } from './express/commands/aws-keypair-destroy'
-import { shadow } from './express/commands/shadow'
 import { rpcTest } from '../tests/rpc-tests/rpc-test'
 
 program
@@ -465,20 +464,7 @@ export async function cli() {
     )
 
     await relay()
-  } else if (options.shadowFork) {
-    console.log('📍Command --shadow-fork [blockNumber]')
-    if (!checkDir(false)) {
-      console.log(
-        '❌ The command is not called from the appropriate devnet directory!'
-      )
-      process.exit(1)
-    }
-    console.log(
-      '⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...'
-    )
-
-    await shadow(options.shadowFork)
-  } else if (options.rpcTest) {
+  }  else if (options.rpcTest) {
     console.log('📍Command --rpc-test')
     if (!checkDir(false)) {
       console.log(
