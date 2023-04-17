@@ -236,7 +236,9 @@ The `express-cli` also comes with additional utility commands, listed below. Som
     that VM to send the tx. Otherwise, it will target the first VM.
 
 - `../../bin/express-cli --aws-key-add`
+
   - Generates an additional `aws` key-pair remotely and stores it locally in the devnet folder. The public key is added to the ssh authorized keys of the devnet's machines. The key can be shared - on a secure channel! - with other devs to grant them access to the remote devnet.
+
 - `../../bin/express-cli --aws-key-des [keyName]`
 
   - Destroys an `aws` key-pair given its `keyName`. The key gets deleted remotely from `aws`, cancelled from the authorized ssh keys of the devnet's machines and removed from local devnet folder.
@@ -256,6 +258,8 @@ The `express-cli` also comes with additional utility commands, listed below. Som
     git submodule init
     git submodule update
     ```
+- `../../bin/express-cli --relay`
+  - Relay transactions from testnet or mainnet to shadow node running in the devnet.
 
 ## `matic-cli`
 

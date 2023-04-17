@@ -59,6 +59,6 @@ export async function awsKeypairAdd() {
     `🔑 You can now share ${keyName}.pem with other devs - on a secure channel - to let them access the devnet`
   )
   console.log(
-    `🚨 Do not forget to destroy the key when no longer needed, using the command "../../bin/express-cli --des-aws-key ${keyName}"`
+    `🚨 Do not forget to destroy the key when no longer needed, using the command "../../bin/express-cli --aws-key-des ${keyName}"`
   )
 }

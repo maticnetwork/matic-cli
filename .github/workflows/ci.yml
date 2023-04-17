@@ -118,9 +118,9 @@ jobs:
       - name: Run smart contracts events tests
         run: |
           cd matic-cli/deployments/devnet-1
-          timeout 5m ../../bin/express-cli --send-staked-event
-          timeout 5m ../../bin/express-cli --send-stakeupdate-event
-          timeout 5m ../../bin/express-cli --send-topupfee-event
+          timeout 5m ../../bin/express-cli --send-staked-event 1
+          timeout 5m ../../bin/express-cli --send-stakeupdate-event 1
+          timeout 5m ../../bin/express-cli --send-topupfee-event 1
           timeout 10m ../../bin/express-cli --send-unstakeinit-event 1
 
       - name: Destroy devnet

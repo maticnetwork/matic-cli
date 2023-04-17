@@ -409,7 +409,7 @@ export class Devnet {
                 '-i',
                 '~/cert.pem',
                   `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                  `sudo systemctl stop heimdalld.service && sudo rm -rf ~/.heimdalld/data/* && sudo wget -O- ${this.config.heimdallSnapshotUrl} | sudo tar zxf - -C ~/.heimdalld/data && sudo chmod 777 -R ~/.heimdalld/data && sudo systemctl restart heimdalld.service`
+                  `sudo systemctl stop heimdalld.service && sudo rm -rf /var/lib/heimdall/data/* && sudo wget -O- ${this.config.heimdallSnapshotUrl} | tar -I zstd -xf - -C /var/lib/heimdall/data && sudo chmod 777 -R /var/lib/heimdall/data && sudo systemctl restart heimdalld.service`
               ],
               { stdio: getRemoteStdio() })
           }
