@@ -258,6 +258,7 @@ The `express-cli` also comes with additional utility commands, listed below. Som
     git submodule init
     git submodule update
     ```
+
 - `../../bin/express-cli --relay`
   - Relay transactions from testnet or mainnet to shadow node running in the devnet.
 

@@ -464,7 +464,7 @@ export async function cli() {
     )
 
     await relay()
-  }  else if (options.rpcTest) {
+  } else if (options.rpcTest) {
     console.log('📍Command --rpc-test')
     if (!checkDir(false)) {
       console.log(
