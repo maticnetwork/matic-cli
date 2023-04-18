@@ -6,33 +6,13 @@ import {
 } from '../src/express/common/config-utils'
 import fs from 'fs'
 import { maxRetries, runScpCommand } from '../src/express/common/remote-worker'
-
+import { fundAccount, sanitizeIterations } from './test-utils'
 const Web3 = require('web3')
 const bigInt = require('big-integer')
 const HDWalletProvider = require('@truffle/hdwallet-provider')
 const assert = require('assert')
 
 require('dotenv').config({ path: `${process.cwd()}/.env` })
-
-async function fundAccount(
-  web3,
-  sender,
-  accounts,
-  maxFeePerGas,
-  maxPriorityFeePerGas,
-  nonce
-) {
-  const tx = {
-    from: sender.address,
-    to: accounts[0],
-    value: '2000000000000000000',
-    nonce,
-    gasLimit: 22000,
-    maxFeePerGas,
-    maxPriorityFeePerGas
-  }
-  await web3.eth.sendTransaction(tx)
-}
 
 async function runTest(web3, accounts, sender) {
   try {
@@ -54,7 +34,8 @@ async function runTest(web3, accounts, sender) {
       accounts,
       maxFeePerGas,
       maxPriorityFeePerGas,
-      nonce
+      nonce,
+      '2000000000000000000'
     )
 
     let initialMinerBal = await web3.eth.getBalance(miner)
@@ -202,7 +183,8 @@ export async function testEip1559(n) {
     await web3.eth.accounts.wallet.add(sender.privateKey)
     const accounts = await web3.eth.getAccounts()
 
-    for (let i = 0; i < process.env.COUNT; i++) {
+    const count = sanitizeIterations(process.env.COUNT)
+    for (let i = 0; i < count; i++) {
       await runTest(web3, accounts, sender)
     }
     console.log('All tests successfuly executed!')

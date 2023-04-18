@@ -248,7 +248,18 @@ The `express-cli` also comes with additional utility commands, listed below. Som
   - Run (mumbai/mainnet) nodes in shadow mode. Please note that there might be an offset of ~3-4 blocks from [block] number
     specified when restarting the (shadow) node. Currently only works with remote setup (no docker support).
 
-- `../../bin/express-cli --relay'
+- `../../bin/express-cli --rpc-test`
+
+  - Executes RPC methods against the provided test data and verifies the response data's compatibility and correctness.
+    Since the `tests/rpc-tests/RPC-testdata` is a [submodule](https://github.com/maticnetwork/RPC-testdata) , do the following
+    to initialize and fetch the testdata:
+
+    ```bash
+    git submodule init
+    git submodule update
+    ```
+
+- `../../bin/express-cli --relay`
   - Relay transactions from testnet or mainnet to shadow node running in the devnet.
 
 ## `matic-cli`
