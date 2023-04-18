@@ -19,11 +19,9 @@ export async function fundAccount(
   await web3.eth.sendTransaction(tx)
 }
 
-export function santizeIterations(iter) {
-  let iteration = iter
-  if (iteration <= 0 || iteration === null || iteration === undefined) {
-    iteration = 1
+export function sanitizeIterations(iter) {
+  if (iter <= 0 || iter === null || iter === undefined) {
+    return 1
   }
-
-  return iteration
+  return iter
 }

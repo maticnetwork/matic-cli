@@ -10,7 +10,7 @@ import assert from 'assert'
 import { loadDevnetConfig } from '../../src/express/common/config-utils'
 import HDWalletProvider from '@truffle/hdwallet-provider'
 import { timer } from '../../src/express/common/time-utils'
-import { fundAccount, santizeIterations } from '../test-utils'
+import { fundAccount, sanitizeIterations } from '../test-utils'
 const axios = require('axios/dist/node/axios.cjs')
 const Web3 = require('web3')
 const ethUtil = require('ethereumjs-util')
@@ -626,7 +626,7 @@ export async function rpcTest() {
 
     let response, currentSnapshotResponse
 
-    const getterIterattions = santizeIterations(
+    const getterIterattions = sanitizeIterations(
       process.env.EXECUTION_COUNT_GETTERS
     )
 
@@ -704,7 +704,7 @@ export async function rpcTest() {
       jsonrpc: '2.0'
     }
 
-    const senderrIterattions = santizeIterations(
+    const senderrIterattions = sanitizeIterations(
       process.env.EXECUTION_COUNT_SENDERS
     )
 
