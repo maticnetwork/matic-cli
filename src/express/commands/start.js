@@ -56,12 +56,13 @@ async function installRequiredSoftwareOnRemoteMachines(
 
   const ipsArray = splitToArray(ips)
   const borUsers = splitToArray(doc.devnetBorUsers.toString())
+  const erigonUsers = splitToArray(doc.devnetErigonUsers.toString())
   let user, ip
   const nodeIps = []
   const isHostMap = new Map()
 
   for (let i = 0; i < ipsArray.length; i++) {
-    i === 0 ? (user = `${doc.ethHostUser}`) : (user = `${borUsers[i]}`)
+    i === 0 ? (user = `${doc.ethHostUser}`) : (i >= borUsers.length ? user = `${erigonUsers[i - borUsers.length]}` : user = `${borUsers[i]}`)
     ip = `${user}@${ipsArray[i]}`
     nodeIps.push(ip)
 
@@ -113,8 +114,8 @@ async function installCommonPackages(ip) {
   let command = 'sudo apt update -y'
   await runSshCommand(ip, command, maxRetries)
 
-  console.log('📍Installing build-essential...')
-  command = 'sudo apt install build-essential -y'
+  console.log('📍Installing jq...');
+  command = 'sudo apt install jq -y'
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Installing go...')
@@ -226,12 +227,13 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType, devnetId) {
 
   const ipsArray = splitToArray(ips)
   const borUsers = splitToArray(doc.devnetBorUsers.toString())
+  const erigonUsers = splitToArray(doc.devnetErigonUsers.toString())
   let user, ip
   const nodeIps = []
   const isHostMap = new Map()
 
   for (let i = 0; i < ipsArray.length; i++) {
-    i === 0 ? (user = `${doc.ethHostUser}`) : (user = `${borUsers[i]}`)
+    i === 0 ? (user = `${doc.ethHostUser}`) : (i >= borUsers.length ? user = `${erigonUsers[i - borUsers.length]}` : user = `${borUsers[i]}`)
     ip = `${user}@${ipsArray[i]}`
     nodeIps.push(ip)
 
@@ -403,7 +405,12 @@ export async function start() {
   const tfOutput = await terraformOutput()
   const dnsIps = JSON.parse(tfOutput).instance_dns_ips.value.toString()
   const ids = JSON.parse(tfOutput).instance_ids.value.toString()
-  process.env.DEVNET_BOR_HOSTS = dnsIps
+  const borUserArray = splitToArray(process.env.DEVNET_BOR_USERS)
+  const dnsIpsArray = splitToArray(dnsIps)
+  const borHosts = dnsIpsArray.slice(0, borUserArray.length)
+  const erigonHosts = dnsIpsArray.slice(borUserArray.length)
+  process.env.DEVNET_BOR_HOSTS = borHosts
+  process.env.DEVNET_ERIGON_HOSTS = erigonHosts
   process.env.INSTANCES_IDS = ids
 
   await validateConfigs()

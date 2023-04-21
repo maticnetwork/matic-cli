@@ -16,10 +16,10 @@ provider "aws" {
 }
 
 # ec2 instances
-resource "aws_instance" "node_server" {
-  count = (var.DOCKERIZED == "yes") ? 1 : (var.VALIDATOR_COUNT + var.SENTRY_COUNT + var.ARCHIVE_COUNT)
+resource "aws_instance" "bor_node_server" {
+  count = (var.DOCKERIZED == "yes") ? 1 : (var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT + var.BOR_ARCHIVE_COUNT)
   ami                    = var.INSTANCE_AMI
-  instance_type          = (count.index >= var.VALIDATOR_COUNT + var.SENTRY_COUNT) ? var.ARCHIVE_INSTANCE_TYPE: var.INSTANCE_TYPE
+  instance_type          = (count.index >= var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT) ? var.BOR_ARCHIVE_INSTANCE_TYPE: var.BOR_INSTANCE_TYPE
   key_name               = var.PEM_FILE
   vpc_security_group_ids = [aws_security_group.internet_facing_load_balancer_sg.id]
   subnet_id              = aws_subnet.devnet_public_subnet.id
@@ -27,9 +27,29 @@ resource "aws_instance" "node_server" {
   # instances' disks
   ebs_block_device {
     device_name = "/dev/sda1"
-    volume_size = (count.index >= var.VALIDATOR_COUNT + var.SENTRY_COUNT) ? var.ARCHIVE_DISK_SIZE_GB : var.DISK_SIZE_GB
-    volume_type = (count.index >= var.VALIDATOR_COUNT + var.SENTRY_COUNT) ? var.ARCHIVE_VOLUME_TYPE : var.VOLUME_TYPE
-    iops = (count.index >= var.VALIDATOR_COUNT + var.SENTRY_COUNT ) ? var.ARCHIVE_IOPS : var.IOPS
+    volume_size = (count.index >= var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT) ? var.BOR_ARCHIVE_DISK_SIZE_GB : var.BOR_DISK_SIZE_GB
+    volume_type = (count.index >= var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT) ? var.BOR_ARCHIVE_VOLUME_TYPE : var.BOR_VOLUME_TYPE
+    iops = (count.index >= var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT ) ? var.BOR_ARCHIVE_IOPS : var.BOR_IOPS
+  }
+
+  tags = {
+    Name = "${var.VM_NAME}_${count.index + 1}"
+  }
+}
+resource "aws_instance" "erigon_node_server" {
+  count = (var.DOCKERIZED == "yes") ? 1 : (var.ERIGON_VALIDATOR_COUNT + var.ERIGON_SENTRY_COUNT + var.ERIGON_ARCHIVE_COUNT)
+  ami                    = var.INSTANCE_AMI
+  instance_type          = (count.index >= var.ERIGON_VALIDATOR_COUNT + var.ERIGON_SENTRY_COUNT) ? var.ERIGON_ARCHIVE_INSTANCE_TYPE: var.ERIGON_INSTANCE_TYPE
+  key_name               = var.PEM_FILE
+  vpc_security_group_ids = [aws_security_group.internet_facing_load_balancer_sg.id]
+  subnet_id              = aws_subnet.devnet_public_subnet.id
+
+  # instances' disks
+  ebs_block_device {
+    device_name = "/dev/sda1"
+    volume_size = (count.index >= var.ERIGON_VALIDATOR_COUNT + var.ERIGON_SENTRY_COUNT) ? var.ERIGON_ARCHIVE_DISK_SIZE_GB : var.ERIGON_DISK_SIZE_GB
+    volume_type = (count.index >= var.ERIGON_VALIDATOR_COUNT + var.ERIGON_SENTRY_COUNT) ? var.ERIGON_ARCHIVE_VOLUME_TYPE : var.ERIGON_VOLUME_TYPE
+    iops = (count.index >= var.ERIGON_VALIDATOR_COUNT + var.ERIGON_SENTRY_COUNT ) ? var.ERIGON_ARCHIVE_IOPS : var.ERIGON_IOPS
   }
 
   tags = {
@@ -40,8 +60,8 @@ resource "aws_instance" "node_server" {
 # elastic ips
 resource "aws_eip" "eip" {
   vpc = true
-  count = (var.DOCKERIZED == "yes") ? 1 : (var.VALIDATOR_COUNT + var.SENTRY_COUNT + var.ARCHIVE_COUNT)
-  instance                  = aws_instance.node_server[count.index].id
+  count = (var.DOCKERIZED == "yes") ? 1 : (var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT + var.BOR_ARCHIVE_COUNT + var.ERIGON_VALIDATOR_COUNT + var.ERIGON_SENTRY_COUNT + var.ERIGON_ARCHIVE_COUNT)
+  instance                  = (count.index >= var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT + var.BOR_ARCHIVE_COUNT ) ? aws_instance.erigon_node_server[count.index - (var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT + var.BOR_ARCHIVE_COUNT)].id : aws_instance.bor_node_server[count.index].id
   depends_on                = [aws_internet_gateway.devnet_internet_gateway]
 
   tags = {
@@ -51,8 +71,8 @@ resource "aws_eip" "eip" {
 
 # elastic ips association
 resource "aws_eip_association" "eip_association" {
-  count = (var.DOCKERIZED == "yes") ? 1 : (var.VALIDATOR_COUNT + var.SENTRY_COUNT + var.ARCHIVE_COUNT)
-  instance_id   = aws_instance.node_server[count.index].id
+  count = (var.DOCKERIZED == "yes") ? 1 : (var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT + var.BOR_ARCHIVE_COUNT + var.ERIGON_VALIDATOR_COUNT + var.ERIGON_SENTRY_COUNT + var.ERIGON_ARCHIVE_COUNT)
+  instance_id   = (count.index >= var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT + var.BOR_ARCHIVE_COUNT ) ? aws_instance.erigon_node_server[count.index - (var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT + var.BOR_ARCHIVE_COUNT)].id : aws_instance.bor_node_server[count.index].id
   allocation_id = aws_eip.eip[count.index].id
 }
 
@@ -157,5 +177,5 @@ output "instance_dns_ips" {
 }
 
 output "instance_ids" {
-  value = aws_instance.node_server.*.id
+  value = concat(aws_instance.bor_node_server.*.id , aws_instance.erigon_node_server.*.id) 
 }
