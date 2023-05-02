@@ -18,7 +18,8 @@ const queryTimer = (milestoneLength / 4) * 1000
 
 export async function milestoneBase() {
   // Get users and hosts
-  let borUsers, borHosts = await getUsersAndHosts()
+  let borUsers,
+    borHosts = await getUsersAndHosts()
 
   // Check for number of validators
   if (borUsers.length < 4) {
@@ -27,7 +28,8 @@ export async function milestoneBase() {
   }
 
   // Get IPs and enodes of all nodes
-  let ips, enodes = await getIpsAndEnode(borUsers, borHosts)
+  let ips,
+    enodes = await getIpsAndEnode(borUsers, borHosts)
 
   console.log('📍Rejoining clusters before performing tests')
   let joined = await joinAllPeers(ips, enodes)
@@ -69,9 +71,7 @@ export async function milestoneBase() {
     }
   }
 
-  console.log(
-    '📍Partition clusters for testing created. Proceeding to test'
-  )
+  console.log('📍Partition clusters for testing created. Proceeding to test')
 
   // Reaching this step means that we've created 2 clusters for testing.
   // Cluster 1 has a single primary producer whose difficulty should always be higher.
@@ -121,7 +121,7 @@ export async function milestoneBase() {
   console.log('📍Checking for rewind')
   await checkForRewind(ips[0])
 
-  // Validate reorg by checking if cluster 1 got reorged to majority 
+  // Validate reorg by checking if cluster 1 got reorged to majority
   // fork i.e. cluster 2
   await validateReorg(borHosts[0], majorityForkBlock)
   console.log(
@@ -132,7 +132,7 @@ export async function milestoneBase() {
     '📍Trying to fetch last finalized block from all nodes and validate'
   )
   await validateFinalizedBlock(borHosts, latestMilestone)
-  
+
   console.log('📍Finalized block matches with the last milestone')
   console.log('✅ Test Passed')
 }

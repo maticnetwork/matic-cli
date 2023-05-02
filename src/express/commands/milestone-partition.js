@@ -22,7 +22,8 @@ const queryTimer = (milestoneLength / 8) * 1000
 
 export async function milestonePartition() {
   // Get users and hosts
-  let borUsers, borHosts = await getUsersAndHosts
+  let borUsers,
+    borHosts = await getUsersAndHosts
 
   // Check for number of validators
   if (borUsers.length < 4) {
@@ -31,7 +32,8 @@ export async function milestonePartition() {
   }
 
   // Get IPs and enodes of all nodes
-  let ips, enodes = await getIpsAndEnode(borUsers, borHosts)
+  let ips,
+    enodes = await getIpsAndEnode(borUsers, borHosts)
 
   console.log('📍Rejoining clusters before performing tests')
   let joined = await joinAllPeers(ips, enodes)
@@ -63,7 +65,7 @@ export async function milestonePartition() {
 
   // Next step is to create 2 clusters where primary node is separated from the
   // rest of the network. For a partition based test case, the split will be 50:50
-  // i.e. out of 4 nodes equal partition of 2-2 nodes will be created. 
+  // i.e. out of 4 nodes equal partition of 2-2 nodes will be created.
   await createClusters(ips, enodes, 2)
   if (!valid) {
     console.log(`📍Failed to create partition clusters, retrying`)
@@ -74,9 +76,7 @@ export async function milestonePartition() {
     }
   }
 
-  console.log(
-    '📍Partition clusters for testing created. Proceeding to test'
-  )
+  console.log('📍Partition clusters for testing created. Proceeding to test')
 
   // Reaching this step means that we've created 2 clusters for testing.
   // Cluster 1 has 2 nodes with 1 primary producer whose difficulty will always be higher.
@@ -89,7 +89,7 @@ export async function milestonePartition() {
 
   // Fetch same height blocks from different clusters and validate partition
   let majorityForkBlock = await fetchSameHeightBlocks(borHosts[0], borHosts[2])
- 
+
   // Expect no milestone to be proposed
   let latestMilestone = await fetchLatestMilestone(
     milestoneLength,
@@ -117,7 +117,7 @@ export async function milestonePartition() {
   await timer(4000)
 
   // Fetch block from cluster 2 to see if it got reorged to cluster 1
-  // Validate reorg by checking if cluster 2 got reorged to majority 
+  // Validate reorg by checking if cluster 2 got reorged to majority
   // fork i.e. cluster 1
   await validateReorg(borHosts[2], majorityForkBlock)
   console.log(
