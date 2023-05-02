@@ -20,12 +20,15 @@ export async function getUsersAndHosts() {
   const borUsers = splitToArray(doc['devnetBorUsers'].toString())
   const borHosts = splitToArray(doc['devnetBorHosts'].toString())
 
-  return borUsers, borHosts
+  return {
+    borUsers,
+    borHosts
+  }
 }
 
 export async function getIpsAndEnode(borUsers, borHosts) {
+  const tasks = []
   let enodes = []
-  let tasks = []
   const ips = []
   for (let i = 0; i < borUsers.length; i++) {
     const ip = `${borUsers[i]}@${borHosts[i]}`
@@ -42,7 +45,10 @@ export async function getIpsAndEnode(borUsers, borHosts) {
     process.exit(1)
   }
 
-  return ips, enodes
+  return {
+    ips,
+    enodes
+  }
 }
 
 export async function getBlock(ip, number = 'latest') {
@@ -294,14 +300,14 @@ export async function createClusters(ips, enodes, split = 1) {
 
   await timer(100)
 
-  let expectedPeers = Array(ips.length).fill(split - 1)
+  const expectedPeers = Array(ips.length).fill(split - 1)
   expectedPeers.fill(ips.length - split - 1, split)
 
   return await validateClusters(ips, expectedPeers)
 }
 
 export async function validateClusters(ips, expectedPeers) {
-  let tasks = []
+  const tasks = []
   for (let i = 0; i < ips.length; i++) {
     tasks.push(getPeerLength(ips[i]))
   }
@@ -322,7 +328,7 @@ export async function validateClusters(ips, expectedPeers) {
     return true
   }
 
-  console.log(`Peer length mismatch, got: ${peers}, expected: ${expected}`)
+  console.log(`Peer length mismatch, got: ${peers}, expected: ${expectedPeers}`)
   return false
 }
 
@@ -447,7 +453,7 @@ export async function fetchLatestMilestone(
 // block number but different hash.
 export async function fetchAndValidateSameHeightBlocks(host1, host2) {
   // We'll fetch block from cluster 2 first as it'll be behind in terms of block height
-  console.log(`📍Attempting to fetch latest block from cluster 2`)
+  console.log('📍Attempting to fetch latest block from cluster 2')
   const latestBlockCluster2 = await runCommand(
     getBlock,
     host2,
@@ -513,7 +519,7 @@ export async function fetchAndValidateSameHeightBlocks(host1, host2) {
 // block number and same hash.
 export async function fetchAndValidateSameBlocks(host1, host2) {
   // We'll fetch block from cluster 2 first as it'll be behind in terms of block height
-  console.log(`📍Attempting to fetch latest block from cluster 1`)
+  console.log('📍Attempting to fetch latest block from cluster 1')
   const latestBlockCluster1 = await runCommand(
     getBlock,
     host1,
@@ -527,7 +533,7 @@ export async function fetchAndValidateSameBlocks(host1, host2) {
 
   console.log(
     `📍Attempting to fetch block ${Number(
-      latestBlockCluster2.number
+      latestBlockCluster1.number
     )} from cluster 2`
   )
   const latestBlockCluster2 = await runCommand(
@@ -576,7 +582,7 @@ export async function validateReorg(host1, expectedBlock) {
   console.log(
     `📍Attempting to fetch block ${Number(expectedBlock.number)} from cluster 1`
   )
-  latestBlockCluster1 = await runCommand(
+  const latestBlockCluster1 = await runCommand(
     getBlock,
     host1,
     expectedBlock.number,
@@ -585,7 +591,7 @@ export async function validateReorg(host1, expectedBlock) {
   if (latestBlockCluster1 === undefined || latestBlockCluster1.number) {
     console.log(
       `📍Unable to fetch block ${Number(
-        latestBlockCluster2.number
+        latestBlockCluster1.number
       )} in cluster 1, exiting`
     )
     process.exit(1)

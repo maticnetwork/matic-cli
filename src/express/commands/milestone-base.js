@@ -9,7 +9,7 @@ import {
   checkForRewind,
   getUsersAndHosts,
   getIpsAndEnode,
-  fetchSameHeightBlocks,
+  fetchAndValidateSameHeightBlocks,
   validateReorg
 } from '../common/milestone-utils'
 
@@ -18,8 +18,7 @@ const queryTimer = (milestoneLength / 4) * 1000
 
 export async function milestoneBase() {
   // Get users and hosts
-  let borUsers,
-    borHosts = await getUsersAndHosts()
+  const { borUsers, borHosts } = await getUsersAndHosts()
 
   // Check for number of validators
   if (borUsers.length < 4) {
@@ -28,8 +27,7 @@ export async function milestoneBase() {
   }
 
   // Get IPs and enodes of all nodes
-  let ips,
-    enodes = await getIpsAndEnode(borUsers, borHosts)
+  const { ips, enodes } = await getIpsAndEnode(borUsers, borHosts)
 
   console.log('📍Rejoining clusters before performing tests')
   let joined = await joinAllPeers(ips, enodes)
@@ -63,10 +61,10 @@ export async function milestoneBase() {
   // rest of the network.
   let valid = await createClusters(ips, enodes, 1)
   if (!valid) {
-    console.log(`📍Failed to create partition clusters, retrying`)
+    console.log('📍Failed to create partition clusters, retrying')
     valid = await createClusters(ips, enodes, 1)
     if (!valid) {
-      console.log(`📍Failed to create partition clusters, exiting`)
+      console.log('📍Failed to create partition clusters, exiting')
       process.exit(1)
     }
   }
@@ -83,7 +81,10 @@ export async function milestoneBase() {
   await timer(10000)
 
   // Fetch same height blocks from different clusters and validate partition
-  let majorityForkBlock = await fetchSameHeightBlocks(borHosts[0], borHosts[1])
+  const majorityForkBlock = await fetchAndValidateSameHeightBlocks(
+    borHosts[0],
+    borHosts[1]
+  )
 
   // Wait for the next milestone to get proposed and validate
   const latestMilestone = await fetchLatestMilestone(

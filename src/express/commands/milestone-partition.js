@@ -1,29 +1,24 @@
 /* eslint-disable dot-notation */
-import { loadDevnetConfig, splitToArray } from '../common/config-utils'
 import { timer } from '../common/time-utils'
 
 import {
-  getBlock,
-  getPeerLength,
   createClusters,
-  getEnode,
   validateFinalizedBlock,
   fetchLatestMilestone,
   joinAllPeers,
   getUsersAndHosts,
   getIpsAndEnode,
-  fetchAndValidateSameBlocks
+  fetchAndValidateSameHeightBlocks,
+  fetchAndValidateSameBlocks,
+  validateReorg
 } from '../common/milestone-utils'
-
-const { maxRetries, runCommand } = require('../common/remote-worker')
 
 const milestoneLength = 12
 const queryTimer = (milestoneLength / 8) * 1000
 
 export async function milestonePartition() {
   // Get users and hosts
-  let borUsers,
-    borHosts = await getUsersAndHosts
+  const { borUsers, borHosts } = await getUsersAndHosts()
 
   // Check for number of validators
   if (borUsers.length < 4) {
@@ -32,8 +27,7 @@ export async function milestonePartition() {
   }
 
   // Get IPs and enodes of all nodes
-  let ips,
-    enodes = await getIpsAndEnode(borUsers, borHosts)
+  const { ips, enodes } = await getIpsAndEnode(borUsers, borHosts)
 
   console.log('📍Rejoining clusters before performing tests')
   let joined = await joinAllPeers(ips, enodes)
@@ -66,12 +60,12 @@ export async function milestonePartition() {
   // Next step is to create 2 clusters where primary node is separated from the
   // rest of the network. For a partition based test case, the split will be 50:50
   // i.e. out of 4 nodes equal partition of 2-2 nodes will be created.
-  await createClusters(ips, enodes, 2)
+  let valid = await createClusters(ips, enodes, 2)
   if (!valid) {
-    console.log(`📍Failed to create partition clusters, retrying`)
+    console.log('📍Failed to create partition clusters, retrying')
     valid = await createClusters(ips, enodes, 2)
     if (!valid) {
-      console.log(`📍Failed to create partition clusters, exiting`)
+      console.log('📍Failed to create partition clusters, exiting')
       process.exit(1)
     }
   }
@@ -88,7 +82,10 @@ export async function milestonePartition() {
   await timer(10000)
 
   // Fetch same height blocks from different clusters and validate partition
-  let majorityForkBlock = await fetchSameHeightBlocks(borHosts[0], borHosts[2])
+  const majorityForkBlock = await fetchAndValidateSameHeightBlocks(
+    borHosts[0],
+    borHosts[2]
+  )
 
   // Expect no milestone to be proposed
   let latestMilestone = await fetchLatestMilestone(
@@ -145,7 +142,7 @@ export async function milestonePartition() {
   console.log(
     '📍Trying to fetch last finalized block from all nodes and validate'
   )
-  const valid = await validateFinalizedBlock(borHosts, latestMilestone)
+  valid = await validateFinalizedBlock(borHosts, latestMilestone)
   if (!valid) {
     console.log(
       '📍Unable to fetch or validate last finalized block from all nodes with last milestone, exiting'
