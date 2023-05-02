@@ -1,3 +1,5 @@
+/* eslint-disable dot-notation */
+import { loadDevnetConfig, splitToArray } from '../common/config-utils'
 import { checkLatestMilestone } from '../commands/monitor'
 import { timer } from './time-utils'
 
@@ -7,6 +9,41 @@ const {
   runSshCommandWithReturn,
   runCommand
 } = require('../common/remote-worker')
+
+export async function getUsersAndHosts() {
+  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  const devnetType =
+    process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
+
+  const doc = await loadDevnetConfig(devnetType)
+
+  const borUsers = splitToArray(doc['devnetBorUsers'].toString())
+  const borHosts = splitToArray(doc['devnetBorHosts'].toString())
+
+  return borUsers, borHosts
+}
+
+export async function getIpsAndEnode(borUsers, borHosts) {
+  let enodes = []
+  let tasks = []
+  const ips = []
+  for (let i = 0; i < borUsers.length; i++) {
+    const ip = `${borUsers[i]}@${borHosts[i]}`
+    ips.push(ip)
+    tasks.push(getEnode(borUsers[i], borHosts[i]))
+  }
+
+  await Promise.all(tasks).then((values) => {
+    enodes = values
+  })
+
+  if (enodes.includes('')) {
+    console.log('📍Unable to fetch enode, exiting')
+    process.exit(1)
+  }
+
+  return ips, enodes
+}
 
 export async function getBlock(ip, number = 'latest') {
   const url = `http://${ip}:8545`
@@ -29,13 +66,43 @@ export async function getBlock(ip, number = 'latest') {
 
   const responseJson = await response.json()
   if (responseJson.result) {
-    // console.log(`📍Request. number: ${number}, opts: ${JSON.stringify(opts)}`)
     return responseJson.result
   } else {
     console.log(
       `📍Error fetching block. number: ${number}, opts: ${JSON.stringify(opts)}`
     )
     console.log('📍Response received:', responseJson)
+  }
+
+  return undefined
+}
+
+export async function getMiner(ip, number) {
+  const url = `http://${ip}:8545`
+  number = '0x' + Number(number).toString(16) // hexify
+
+  const opts = {
+    jsonrpc: '2.0',
+    id: 1,
+    method: 'bor_getAuthor',
+    params: [number]
+  }
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(opts)
+  })
+
+  const responseJson = await response.json()
+  if (responseJson.result) {
+    return responseJson.result
+  } else {
+    console.log(
+      `📍Error fetching miner. number: ${number}, response: ${JSON.stringify(
+        response
+      )}, opts: ${JSON.stringify(opts)}`
+    )
   }
 
   return undefined
@@ -195,7 +262,7 @@ export async function joinAllPeers(ips, enodes) {
 }
 
 export async function createClusters(ips, enodes, split = 1) {
-  // `split` defines how clusters are created and which index to use to seperate nodes.
+  // `split` defines how clusters are created and which index to use to separate nodes.
   // e.g. for split = 1, clusters created would be of 1 and 3 nodes (nodes[:split], nodes[split:])
   const tasks = []
   const ips1 = ips.slice(0, split)
@@ -220,34 +287,43 @@ export async function createClusters(ips, enodes, split = 1) {
       console.log('📍Unable to remove peers, error:', error)
     })
 
-  return response
+  if (response === false) {
+    console.log('📍Unable to create clusters, exiting')
+    process.exit(1)
+  }
+
+  await timer(100)
+
+  let expectedPeers = Array(ips.length).fill(split-1)
+  expectedPeers.fill(ips.length - split - 1, split)
+
+  return await validateClusters(ips, expectedPeers)
 }
 
-export async function rejoinClusters(ips, enodes, split = 1) {
-  // `split` defines how clusters are joined and which index to use to join nodes.
-  // e.g. for split = 1, clusters of 1 and 3 nodes would be joined (nodes[:split], nodes[split:])
-  const tasks = []
-  for (let i = 0; i < ips.slice(0, split); i++) {
-    tasks.push(addPeers(ips[i], enodes.slice(split)))
-  }
-  for (let i = 0; i < ips.slice(split); i++) {
-    tasks.push(addPeers(ips[i], enodes.slice(0, split)))
+export async function validateClusters(ips, expectedPeers) {
+  let tasks = []
+  for (let i = 0; i < ips.length; i++) {
+    tasks.push(getPeerLength(ips[i]))
   }
 
-  let response = false
-  await Promise.all(tasks)
-    .then((values) => {
-      if (values.includes(false) || values.includes(undefined)) {
-        console.log('📍Unable to add peers, exiting')
-      } else {
-        response = true
-      }
-    })
-    .catch((error) => {
-      console.log('📍Unable to add peers, error', error)
-    })
+  let peers = []
+  await Promise.all(tasks).then((values) => {
+    // Check if there's no validation error
+    if (values.includes(-1)) {
+      console.log('📍Unable to query peer length, exiting')
+      process.exit(1)
+    }
+    peers = values
+  })
 
-  return response
+  await timer(100)
+
+  if (JSON.stringify(peers) === JSON.stringify(expectedPeers)) {
+    return true
+  }
+
+  console.log(`Peer length mismatch, got: ${peers}, expected: ${expected}`)
+  return false
 }
 
 export async function getEnode(user, host) {
@@ -270,27 +346,6 @@ export async function getEnode(user, host) {
   return ''
 }
 
-export async function validateNumberOfPeers(peers) {
-  let recreate = false
-
-  // 1st node should have 0 peers
-  if (peers[0] > 0) {
-    console.log('📍Unexpected peer length received for 1st cluster, retrying')
-    recreate = true
-  }
-
-  // Remaining nodes should have total-1 peers
-  for (let i = 1; i < peers.length; i++) {
-    if (peers[i] !== peers.length - 2) {
-      console.log('📍Unexpected peer length received for 2nd cluster, retrying')
-      recreate = true
-      break
-    }
-  }
-
-  return recreate
-}
-
 export async function validateFinalizedBlock(hosts, milestone) {
   // Fetch the last 'finalized' block from all nodes
   const tasks = []
@@ -305,17 +360,11 @@ export async function validateFinalizedBlock(hosts, milestone) {
       console.log(
         `📍Error in fetching last finalized block, responses: ${values}, exiting`
       )
-      return false
+      process.exit(1)
     }
     finalizedBlocks = values
   })
 
-  // if (finalizedBlocks.length != hosts) {
-  //   await timer(500)
-  //   if (finalizedBlocks.length != hosts) {
-  //     return false
-  //   }
-  // }
   await timer(100)
 
   // Check if the number and hash matches with the last milestone
@@ -331,11 +380,9 @@ export async function validateFinalizedBlock(hosts, milestone) {
           milestone.end_block
         )}, Hash: ${milestone.hash} exiting`
       )
-      return false
+      process.exit(1)
     }
   }
-
-  return true
 }
 
 export async function fetchLatestMilestone(
@@ -393,4 +440,167 @@ export async function fetchLatestMilestone(
     }`
   )
   return latestMilestone
+}
+
+// fetchAndValidateSameHeightBlocks attempts to fetch same (by height) blocks
+// from different clusters and validates them. Ideally they should have same 
+// block number but different hash. 
+export async function fetchAndValidateSameHeightBlocks(host1, host2) {
+  // We'll fetch block from cluster 2 first as it'll be behind in terms of block height
+  console.log(
+    `📍Attempting to fetch latest block from cluster 2`
+  )
+  const latestBlockCluster2 = await runCommand(
+    getBlock,
+    host2,
+    'latest',
+    maxRetries
+  )
+  if (latestBlockCluster2 === undefined || latestBlockCluster2.number) {
+    console.log('📍Unable to fetch latest block in cluster 2, exiting')
+    process.exit(1)
+  }
+
+  console.log(
+    `📍Attempting to fetch block ${Number(
+      latestBlockCluster2.number
+    )} from cluster 1`
+  )
+  const latestBlockCluster1 = await runCommand(
+    getBlock,
+    host1,
+    latestBlockCluster2.number,
+    maxRetries
+  )
+  if (latestBlockCluster1 === undefined || latestBlockCluster1.number) {
+    console.log(
+      `📍Unable to fetch block ${Number(
+        latestBlockCluster2.number
+      )} in cluster 1, exiting`
+    )
+    process.exit(1)
+  }
+
+  // Check for same block number
+  if (latestBlockCluster1.number !== latestBlockCluster2.number) {
+    console.log(
+      `📍Block number mismatch from clusters. Cluster 1: ${Number(
+        latestBlockCluster1.number
+      )}, Cluster 2: ${Number(latestBlockCluster2.number)}, exiting`
+    )
+    process.exit(1)
+  }
+  
+  // Check if same block numbers have different hash or not
+  if (latestBlockCluster1.hash === latestBlockCluster2.hash) {
+    console.log(
+      `📍Block hash matched. Clusters are not created properly. Cluster 1: ${latestBlockCluster1.hash}, Cluster 2: ${latestBlockCluster2.hash}, exiting`
+    )
+    process.exit(1)
+  }
+
+  console.log(
+    `📍Same block found with different hash. Block number: ${Number(
+      latestBlockCluster1.number
+    )}, Cluster 1 hash: ${latestBlockCluster1.hash}, Cluster 2 hash: ${
+      latestBlockCluster2.hash
+    }`
+  )
+
+  return latestBlockCluster2
+}
+
+// fetchAndValidateSameBlocks attempts to fetch same (by height) blocks
+// from different clusters and validates them. Ideally they should have same 
+// block number and same hash. 
+export async function fetchAndValidateSameBlocks(host1, host2) {
+  // We'll fetch block from cluster 2 first as it'll be behind in terms of block height
+  console.log(
+    `📍Attempting to fetch latest block from cluster 1`
+  )
+  const latestBlockCluster1 = await runCommand(
+    getBlock,
+    host1,
+    'latest',
+    maxRetries
+  )
+  if (latestBlockCluster1 === undefined || latestBlockCluster1.number) {
+    console.log('📍Unable to fetch latest block in cluster 1, exiting')
+    process.exit(1)
+  }
+
+  console.log(
+    `📍Attempting to fetch block ${Number(
+      latestBlockCluster2.number
+    )} from cluster 2`
+  )
+  const latestBlockCluster2 = await runCommand(
+    getBlock,
+    host2,
+    latestBlockCluster1.number,
+    maxRetries
+  )
+  if (latestBlockCluster2 === undefined || latestBlockCluster2.number) {
+    console.log(
+      `📍Unable to fetch block ${Number(
+        latestBlockCluster1.number
+      )} in cluster 2, exiting`
+    )
+    process.exit(1)
+  }
+
+  // Check for same block number
+  if (latestBlockCluster1.number !== latestBlockCluster2.number) {
+    console.log(
+      `📍Block number mismatch from clusters. Cluster 1: ${Number(
+        latestBlockCluster1.number
+      )}, Cluster 2: ${Number(latestBlockCluster2.number)}, exiting`
+    )
+    process.exit(1)
+  }
+  
+  // Check for same hash
+  if (latestBlockCluster1.hash !== latestBlockCluster2.hash) {
+    console.log(
+      `📍Block hash mismatch, failed reorg. Cluster 1: ${latestBlockCluster1.hash}, Cluster 2: ${latestBlockCluster2.hash}, exiting`
+    )
+    process.exit(1)
+  }
+
+  console.log(
+    `📍Same block found on both clusters. Block number: ${Number(
+      latestBlockCluster1.number
+    )}, Cluster 1 hash: ${latestBlockCluster1.hash}, Cluster 2 hash: ${
+      latestBlockCluster2.hash
+    }`
+  )
+}
+
+export async function validateReorg(host1, expectedBlock) {
+  console.log(
+    `📍Attempting to fetch block ${Number(
+      expectedBlock.number
+    )} from cluster 1`
+  )
+  latestBlockCluster1 = await runCommand(
+    getBlock,
+    host1,
+    expectedBlock.number,
+    maxRetries
+  )
+  if (latestBlockCluster1 === undefined || latestBlockCluster1.number) {
+    console.log(
+      `📍Unable to fetch block ${Number(
+        latestBlockCluster2.number
+      )} in cluster 1, exiting`
+    )
+    process.exit(1)
+  }
+
+  if (latestBlockCluster1.hash !== expectedBlock.hash) {
+    console.log(
+      `📍Hash mismatch among clusters. Cluster 1 hash: ${latestBlockCluster1.hash}, Cluster 2 hash: ${expectedBlock.hash}, exiting`
+    )
+    process.exit(1)
+  }
 }

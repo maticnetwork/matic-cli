@@ -28,7 +28,6 @@ import { startInstances } from './express/commands/aws-instances-start'
 import { rewind } from './express/commands/rewind'
 import { milestoneBase } from './express/commands/milestone-base'
 import { milestonePartition } from './express/commands/milestone-partition'
-import { milestoneHelper } from './express/commands/milestone-helper'
 import { awsKeypairAdd } from './express/commands/aws-keypair-add'
 import { awsKeypairDestroy } from './express/commands/aws-keypair-destroy'
 
@@ -100,10 +99,6 @@ program
   .option(
     '-milestone-partition, --milestone-partition',
     'Run milestone partition tests'
-  )
-  .option(
-    '-milestone-helper, --milestone-helper',
-    'Helper utility for milestone'
   )
   .option(
     '-rewind, --rewind [numberOfBlocks]',
@@ -464,16 +459,5 @@ export async function cli() {
     }
 
     await milestonePartition()
-  } else if (options.milestoneHelper) {
-    console.log('📍Command --milestone-helper')
-
-    if (!checkDir(false)) {
-      console.log(
-        '❌ The command is not called from the appropriate devnet directory!'
-      )
-      process.exit(1)
-    }
-
-    await milestoneHelper()
   }
 }
