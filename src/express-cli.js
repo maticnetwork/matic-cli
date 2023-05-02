@@ -28,8 +28,11 @@ import { startInstances } from './express/commands/aws-instances-start'
 import { rewind } from './express/commands/rewind'
 import { milestoneBase } from './express/commands/milestone-base'
 import { milestonePartition } from './express/commands/milestone-partition'
+import { shadow } from './express/commands/shadow'
+import { relay } from './express/commands/relay'
 import { awsKeypairAdd } from './express/commands/aws-keypair-add'
 import { awsKeypairDestroy } from './express/commands/aws-keypair-destroy'
+import { rpcTest } from '../tests/rpc-tests/rpc-test'
 
 program
   .option('-i, --init', 'Initiate the terraform setup')
@@ -112,6 +115,12 @@ program
     '-key-d, --aws-key-des [keyName]',
     'Destroy aws keypair from devnet, given its keyName'
   )
+  .option(
+    '-sf, --shadow-fork [blockNumber]',
+    'Run nodes in shadow mode. Please note that there might be an offset of ~3-4 blocks from [blockNumber] specified when restarting the (shadow) node'
+  )
+  .option('-relay, --relay', 'Relay transaction to shadow node')
+  .option('-rpc, --rpc-test', 'Run the rpc test command')
   .version(pkg.version)
 
 export async function cli() {
@@ -441,6 +450,7 @@ export async function cli() {
     await awsKeypairDestroy(options.awsKeyDes)
   } else if (options.milestoneBase) {
     console.log('📍Command --milestone-base')
+
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -451,6 +461,7 @@ export async function cli() {
     await milestoneBase()
   } else if (options.milestonePartition) {
     console.log('📍Command --milestone-partition')
+
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -459,5 +470,44 @@ export async function cli() {
     }
 
     await milestonePartition()
+  } else if (options.shadowFork) {
+    console.log('📍Command --shadow-fork [blockNumber]')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    console.log(
+      '⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...'
+    )
+
+    await shadow(options.shadowFork)
+  } else if (options.relay) {
+    console.log('📍Command --relay')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    console.log(
+      '⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...'
+    )
+
+    await relay()
+  } else if (options.rpcTest) {
+    console.log('📍Command --rpc-test')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+
+    console.log(
+      '⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...'
+    )
+    await rpcTest()
   }
 }
