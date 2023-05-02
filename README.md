@@ -262,6 +262,10 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 - `../../bin/express-cli --relay`
   - Relay transactions from testnet or mainnet to shadow node running in the devnet.
 
+## `Milestone tests`
+
+The `express-cli` can also be used to perform few simulation based tests for the upcoming milestone feature. Please refer to the steps and requirements mentioned over [here](./docs/milestones.md) for running the tests. 
+
 ## `matic-cli`
 
 `matic-cli` has to be installed on a `ubuntu` VM (_host_) and - through a config file - it will point to
