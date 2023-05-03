@@ -26,6 +26,7 @@ import { testEip1559 } from '../tests/test-eip-1559'
 import { stopInstances } from './express/commands/aws-instances-stop'
 import { startInstances } from './express/commands/aws-instances-start'
 import { rewind } from './express/commands/rewind'
+import { reorg } from './express/commands/reorg'
 import { milestoneBase } from './express/commands/milestone-base'
 import { milestonePartition } from './express/commands/milestone-partition'
 import { shadow } from './express/commands/shadow'
@@ -98,6 +99,10 @@ program
   .option('-istop, --instances-stop', 'Stop aws ec2 instances')
   .option('-istart, --instances-start', 'Start aws ec2 instances')
   .option('-rewind, --rewind [numberOfBlocks]', 'Rewind the chain')
+  .option(
+    '-reorg, --reorg [index]',
+    'Reorg the chain by creating clusters in the network using node at [index]'
+  )
   .option('-milestone-base, --milestone-base', 'Run milestone base tests')
   .option(
     '-milestone-partition, --milestone-partition',
@@ -448,6 +453,17 @@ export async function cli() {
     }
 
     await awsKeypairDestroy(options.awsKeyDes)
+  } else if (options.reorg) {
+    console.log('📍Command --reorg [index]')
+
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+
+    await reorg(options.reorg)
   } else if (options.milestoneBase) {
     console.log('📍Command --milestone-base')
 

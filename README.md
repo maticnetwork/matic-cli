@@ -243,6 +243,10 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
   - Destroys an `aws` key-pair given its `keyName`. The key gets deleted remotely from `aws`, cancelled from the authorized ssh keys of the devnet's machines and removed from local devnet folder.
 
+- `../../bin/express-cli --reorg [index]`
+
+  - Create 2 clusters of nodes by splitting the network on a given node index to simulate a chain reorg.
+
 - `../../bin/express-cli --shadow-fork [blockNumber]`
 
   - Run (mumbai/mainnet) nodes in shadow mode. Please note that there might be an offset of ~3-4 blocks from [block] number
@@ -264,7 +268,7 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
 ## `Milestone tests`
 
-The `express-cli` can also be used to perform few simulation based tests for the upcoming milestone feature. Please refer to the steps and requirements mentioned over [here](./docs/milestones.md) for running the tests. 
+The `express-cli` can also be used to perform few simulation based tests for the upcoming milestone feature. Please refer to the steps and requirements mentioned over [here](./docs/milestones.md) for running the tests.
 
 ## `matic-cli`
 

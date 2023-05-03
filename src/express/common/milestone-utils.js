@@ -269,7 +269,7 @@ export async function joinAllPeers(ips, enodes) {
 
 export async function createClusters(ips, enodes, split = 1) {
   // `split` defines how clusters are created and which index to use to separate nodes.
-  // e.g. for split = 1, clusters created would be of 1 and 3 nodes (nodes[:split], nodes[split:])
+  // e.g. for a 4-nodes devnet, with split = 1, clusters created would be of 1 and 3 nodes (nodes[:split], nodes[split:])
   const tasks = []
   const ips1 = ips.slice(0, split)
   const ips2 = ips.slice(split)
