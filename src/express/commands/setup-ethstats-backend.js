@@ -41,7 +41,8 @@ export async function setupEthstats() {
   console.log('📍Docker installed')
 
   console.log('📍Cloning ethstats-backend')
-  let command = 'git clone https://github.com/maticnetwork/ethstats-backend.git && cd ethstats-backend'
+  let command =
+    'git clone https://github.com/maticnetwork/ethstats-backend.git && cd ethstats-backend'
   await runSshCommand(`${user0}@${host0}`, command, maxRetries)
 
   console.log('📍Installing ethstats-backend deps')
@@ -65,7 +66,8 @@ export async function setupEthstats() {
   await runSshCommand(`${user0}@${host0}`, command, maxRetries)
 
   console.log('📍Starting ethstats docker environment')
-  command = 'sudo apt install docker-compose -y && cd ethstats-backend && sudo docker-compose up -d'
+  command =
+    'sudo apt install docker-compose -y && cd ethstats-backend && sudo docker-compose up -d'
   console.log(command)
   await runSshCommand(`${user0}@${host0}`, command, maxRetries)
 
@@ -76,7 +78,11 @@ export async function setupEthstats() {
 
     command = `cat ${startFileLocation} | grep -i ethstats`
 
-    ethstatsFlag = await runSshCommandWithReturnWithoutExit(`${user}@${host}`, command, maxRetries)
+    ethstatsFlag = await runSshCommandWithReturnWithoutExit(
+      `${user}@${host}`,
+      command,
+      maxRetries
+    )
     if (ethstatsFlag) {
       console.log('📍Ethstats flag already added')
     } else {
