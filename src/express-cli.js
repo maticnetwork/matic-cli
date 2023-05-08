@@ -17,6 +17,7 @@ import {
 } from './express/commands/restart'
 import { cleanup } from './express/commands/cleanup'
 import { setupDatadog } from './express/commands/setup-datadog'
+import { setupEthstats } from './express/commands/setup-ethstats-backend'
 import { chaos } from './express/commands/chaos'
 import { checkDir } from './express/common/files-utils'
 import { timer } from './express/common/time-utils'
@@ -92,6 +93,7 @@ program
     'Test EIP 1559 txs. In case of a non-dockerized devnet, if an integer [index] is specified, it will use that VM to send the tx. Otherwise, it will target the first VM.'
   )
   .option('-dd, --setup-datadog', 'Setup DataDog')
+  .option('-ethstats, --setup-ethstats', 'Setup Ethstats')
   .option('-xxx, --chaos [intensity]', 'Start Chaos')
   .option('-istop, --instances-stop', 'Stop aws ec2 instances')
   .option('-istart, --instances-start', 'Start aws ec2 instances')
@@ -372,6 +374,17 @@ export async function cli() {
 
     await timer(3000)
     await setupDatadog()
+  } else if (options.setupEthstats) {
+    console.log('📍Command --setup-ethstats')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+
+    await timer(3000)
+    await setupEthstats()
   } else if (options.chaos) {
     console.log('📍Command --chaos [intensity]')
     if (!checkDir(false)) {
