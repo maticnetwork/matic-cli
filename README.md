@@ -243,9 +243,13 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
   - Destroys an `aws` key-pair given its `keyName`. The key gets deleted remotely from `aws`, cancelled from the authorized ssh keys of the devnet's machines and removed from local devnet folder.
 
-- `../../bin/express-cli --reorg [index]`
+- `../../bin/express-cli --reorg-start [split]`
 
-  - Create 2 clusters of nodes by splitting the network on a given node index to simulate a chain reorg.
+  - Reorg the chain by creating two clusters in the network, where [split] param represents the number of nodes that one of the clusters will have (with other being [total number of nodes - split])
+
+- `../../bin/express-cli --reorg-stop`
+
+  - Stops the reorg previously created by reconnecting all the nodes
 
 - `../../bin/express-cli --shadow-fork [blockNumber]`
 

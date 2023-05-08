@@ -1,17 +1,8 @@
-export function isValidBlockNum(targetBlock) {
+export function isValidPositiveNum(targetBlock) {
   return (
     targetBlock !== undefined &&
     targetBlock !== null &&
     targetBlock !== '' &&
     parseInt(targetBlock, 10) > 0
-  )
-}
-
-export function isValidNodeIndex(index) {
-  return (
-    index !== undefined &&
-    index !== null &&
-    index !== '' &&
-    parseInt(index, 10) >= 0
   )
 }

@@ -26,7 +26,8 @@ import { testEip1559 } from '../tests/test-eip-1559'
 import { stopInstances } from './express/commands/aws-instances-stop'
 import { startInstances } from './express/commands/aws-instances-start'
 import { rewind } from './express/commands/rewind'
-import { reorg } from './express/commands/reorg'
+import { startReorg } from './express/commands/reorg-start'
+import { stopReorg } from './express/commands/reorg-stop'
 import { milestoneBase } from './express/commands/milestone-base'
 import { milestonePartition } from './express/commands/milestone-partition'
 import { shadow } from './express/commands/shadow'
@@ -100,8 +101,12 @@ program
   .option('-istart, --instances-start', 'Start aws ec2 instances')
   .option('-rewind, --rewind [numberOfBlocks]', 'Rewind the chain')
   .option(
-    '-reorg, --reorg [index]',
-    'Reorg the chain by creating clusters in the network using node at [index]'
+    '-reorg-start, --reorg-start [split]',
+    'Reorg the chain by creating two clusters in the network, where [split] param represents the number of nodes that one of the clusters will have (with other being [total number of nodes - split])'
+  )
+  .option(
+    '-reorg-stop, --reorg-stop',
+    'Stops the reorg previously created by reconnecting all the nodes'
   )
   .option('-milestone-base, --milestone-base', 'Run milestone base tests')
   .option(
@@ -453,8 +458,8 @@ export async function cli() {
     }
 
     await awsKeypairDestroy(options.awsKeyDes)
-  } else if (options.reorg) {
-    console.log('📍Command --reorg [index]')
+  } else if (options.reorgStart) {
+    console.log('📍Command --reorg-start [split]')
 
     if (!checkDir(false)) {
       console.log(
@@ -463,7 +468,18 @@ export async function cli() {
       process.exit(1)
     }
 
-    await reorg(options.reorg)
+    await startReorg(options.reorg)
+  } else if (options.reorgStop) {
+    console.log('📍Command --reorg-stop')
+
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+
+    await stopReorg()
   } else if (options.milestoneBase) {
     console.log('📍Command --milestone-base')
 

@@ -3,27 +3,19 @@ import {
   getIpsAndEnode,
   getUsersAndHosts
 } from '../common/milestone-utils'
-import { isValidNodeIndex } from '../common/num-utils'
+import { isValidPositiveNum } from '../common/num-utils'
 
-export async function reorg(index) {
-  // validate split
-  if (!isValidNodeIndex(index)) {
-    console.log('❌ Invalid [index] parameter! Exiting ...')
-    process.exit(1)
-  }
+export async function startReorg(split) {
   // Get users and hosts
   const { borUsers, borHosts } = await getUsersAndHosts()
-
   // Check for number of validators
   if (borUsers.length < 2) {
     console.log('❌ Cannot reorg on a single node devnet! Exiting...')
     process.exit(1)
   }
-  // Check for split validity
-  if (index >= borUsers.length - 1) {
-    console.log(
-      `❌ Cannot split on node with index ${index} for a ${borUsers.length}-node network! Exiting...`
-    )
+  // Validate split param
+  if (!isValidPositiveNum(split) || split >= borUsers.length - 1) {
+    console.log('❌ Invalid [split] parameter! Exiting ...')
     process.exit(1)
   }
 
@@ -33,10 +25,10 @@ export async function reorg(index) {
   console.log('📍Creating reorg...')
 
   // Next step is to create 2 clusters of the network given the split
-  let valid = await createClusters(ips, enodes, index)
+  let valid = await createClusters(ips, enodes, split)
   if (!valid) {
     console.log('📍Failed to create partition clusters, retrying')
-    valid = await createClusters(ips, enodes, index)
+    valid = await createClusters(ips, enodes, split)
     if (!valid) {
       console.log('📍Failed to create partition clusters, exiting')
       process.exit(1)
