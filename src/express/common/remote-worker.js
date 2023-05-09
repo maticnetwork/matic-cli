@@ -109,7 +109,7 @@ export async function runSshCommandWithoutExit(ip, command, retries) {
     if (retries - 1 > 0) {
       await runSshCommandWithoutExit(ip, command, retries - 1)
     } else {
-      console.log('Command  `' + command + '` failed (Not Serious)')
+      console.log('Warning: command  `' + command + '` failed')
     }
   }
 }
@@ -138,7 +138,7 @@ export async function runSshCommandWithReturnWithoutExit(ip, command, retries) {
     if (retries - 1 > 0) {
       await runSshCommandWithReturnWithoutExit(ip, command, retries - 1)
     } else {
-      console.log('Command  `' + command + '` failed (Not Serious)')
+      console.log('Warning: command  `' + command + '` failed')
     }
   }
 }

@@ -1,6 +1,5 @@
-// noinspection JSCheckFunctionSignatures,JSUnresolvedVariable
-
 import { loadDevnetConfig, splitToArray } from '../common/config-utils'
+
 const {
   runSshCommand,
   maxRetries,
@@ -23,9 +22,7 @@ export async function setupEthstats() {
     doc = await loadDevnetConfig('remote')
   }
 
-  if (doc.devnetBorHosts.length > 0) {
-    console.log('📍Monitoring the nodes', doc.devnetBorHosts[0])
-  } else {
+  if (doc.devnetBorHosts.length <= 0) {
     console.log('📍No nodes to monitor, please check your configs! Exiting...')
     process.exit(1)
   }
@@ -35,14 +32,17 @@ export async function setupEthstats() {
   const host0 = doc.devnetBorHosts[0]
   const user0 = borUsers[0]
 
-  console.log('📍Monitoring the node', host0)
+  console.log('📍Monitoring the node: ', host0)
 
   await installDocker(`${user0}@${host0}`, user0)
   console.log('📍Docker installed')
+  console.log('📍Installing docker-compose')
+  let command = 'sudo apt install docker-compose -y'
+  console.log(command)
+  await runSshCommand(`${user0}@${host0}`, command, maxRetries)
 
   console.log('📍Cloning ethstats-backend')
-  let command =
-    'git clone https://github.com/maticnetwork/ethstats-backend.git && cd ethstats-backend'
+  command = 'git clone https://github.com/maticnetwork/ethstats-backend.git'
   await runSshCommand(`${user0}@${host0}`, command, maxRetries)
 
   console.log('📍Installing ethstats-backend deps')
@@ -66,8 +66,7 @@ export async function setupEthstats() {
   await runSshCommand(`${user0}@${host0}`, command, maxRetries)
 
   console.log('📍Starting ethstats docker environment')
-  command =
-    'sudo apt install docker-compose -y && cd ethstats-backend && sudo docker-compose up -d'
+  command = 'cd ethstats-backend && sudo docker-compose up -d'
   console.log(command)
   await runSshCommand(`${user0}@${host0}`, command, maxRetries)
 
