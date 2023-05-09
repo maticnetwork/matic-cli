@@ -19,4 +19,6 @@ erigon \
     --bor.heimdall "http://localhost:1317" \
     --datadir $ERIGON_DATA_DIR \
     --staticpeers=$STATIC_PEERS \
+    --nodekey $ERIGON_HOME/nodekey \
+    --http.api "eth,admin,debug,web3,txpool,trace,net,bor" \
     --snapshots=false

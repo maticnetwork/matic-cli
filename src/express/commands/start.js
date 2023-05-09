@@ -55,8 +55,14 @@ async function installRequiredSoftwareOnRemoteMachines(
   )
 
   const ipsArray = splitToArray(ips)
-  const borUsers = splitToArray(doc.devnetBorUsers.toString())
-  const erigonUsers = splitToArray(doc.devnetErigonUsers.toString())
+  let borUsers = []
+  let erigonUsers = []
+  if (doc.devnetBorUsers) {
+    borUsers = splitToArray(doc.devnetBorUsers.toString())
+  }
+  if (doc.devnetErigonUsers) {
+    erigonUsers = splitToArray(doc.devnetErigonUsers.toString())
+  }
   let user, ip
   const nodeIps = []
   const isHostMap = new Map()
@@ -226,8 +232,14 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType, devnetId) {
   )
 
   const ipsArray = splitToArray(ips)
-  const borUsers = splitToArray(doc.devnetBorUsers.toString())
-  const erigonUsers = splitToArray(doc.devnetErigonUsers.toString())
+  let borUsers = []
+  let erigonUsers = []
+  if (doc.devnetBorUsers) {
+    borUsers = splitToArray(doc.devnetBorUsers.toString())
+  }
+  if (doc.devnetErigonUsers) {
+    erigonUsers = splitToArray(doc.devnetErigonUsers.toString())
+  }
   let user, ip
   const nodeIps = []
   const isHostMap = new Map()
@@ -262,6 +274,11 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType, devnetId) {
     console.log('📍Stopping bor (if present) on machine ' + ip + ' ...')
     command =
       "sudo systemctl stop bor.service || echo 'bor not running on current machine...'"
+    await runSshCommand(ip, command, maxRetries)
+
+    console.log('📍Stopping erigon (if present) on machine ' + ip + ' ...')
+    command =
+      "sudo systemctl stop erigon.service || echo 'erigon not running on current machine...'"
     await runSshCommand(ip, command, maxRetries)
 
     console.log('📍Removing .bor folder (if present) on machine ' + ip + ' ...')
@@ -405,12 +422,27 @@ export async function start() {
   const tfOutput = await terraformOutput()
   const dnsIps = JSON.parse(tfOutput).instance_dns_ips.value.toString()
   const ids = JSON.parse(tfOutput).instance_ids.value.toString()
-  const borUserArray = splitToArray(process.env.DEVNET_BOR_USERS)
   const dnsIpsArray = splitToArray(dnsIps)
-  const borHosts = dnsIpsArray.slice(0, borUserArray.length)
-  const erigonHosts = dnsIpsArray.slice(borUserArray.length)
-  process.env.DEVNET_BOR_HOSTS = borHosts
-  process.env.DEVNET_ERIGON_HOSTS = erigonHosts
+
+  let borUserArray, erigonUserArray, borHosts, erigonHosts
+  if (process.env.DEVNET_BOR_USERS) {
+    borUserArray = splitToArray(process.env.DEVNET_BOR_USERS)
+    borHosts = dnsIpsArray.slice(0, borUserArray.length)
+  }
+  if (process.env.DEVNET_ERIGON_USERS) {
+    erigonUserArray = splitToArray(process.env.DEVNET_ERIGON_USERS)
+    if (process.env.DEVNET_BOR_USERS) {
+      erigonHosts = dnsIpsArray.slice(borUserArray.length)
+    } else {
+      erigonHosts = dnsIpsArray.slice(0, erigonUserArray.length)
+    }
+  }
+  if (borHosts) {
+    process.env.DEVNET_BOR_HOSTS = borHosts
+  } 
+  if (erigonHosts) {
+    process.env.DEVNET_ERIGON_HOSTS = erigonHosts
+  }
   process.env.INSTANCES_IDS = ids
 
   await validateConfigs()
