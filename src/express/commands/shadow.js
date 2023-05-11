@@ -2,7 +2,7 @@ import Web3 from 'web3'
 import { loadDevnetConfig, splitToArray } from '../common/config-utils'
 import { maxRetries, runSshCommand } from '../common/remote-worker'
 import { stopServices } from './cleanup'
-import { isValidBlockNum } from '../common/num-utils'
+import { isValidPositiveNum } from '../common/num-utils'
 const fs = require('fs')
 
 async function initWeb3(provider) {
@@ -10,7 +10,7 @@ async function initWeb3(provider) {
 }
 
 export async function shadow(targetBlock) {
-  if (!isValidBlockNum(targetBlock)) {
+  if (!isValidPositiveNum(targetBlock)) {
     console.log('❌ Invalid [blockNumber] parameter! Exiting ...')
     process.exit(1)
   }

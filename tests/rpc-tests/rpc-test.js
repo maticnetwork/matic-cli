@@ -39,7 +39,7 @@ async function initWeb3(machine) {
     mnemonic: {
       phrase: process.env.MNEMONIC
     },
-    providerOrUrl: providerOrUrl
+    providerOrUrl
   })
 
   return new Web3(provider)

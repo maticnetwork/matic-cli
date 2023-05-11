@@ -1,4 +1,4 @@
-export function isValidBlockNum(targetBlock) {
+export function isValidPositiveNum(targetBlock) {
   return (
     targetBlock !== undefined &&
     targetBlock !== null &&

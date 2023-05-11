@@ -26,6 +26,10 @@ import { testEip1559 } from '../tests/test-eip-1559'
 import { stopInstances } from './express/commands/aws-instances-stop'
 import { startInstances } from './express/commands/aws-instances-start'
 import { rewind } from './express/commands/rewind'
+import { startReorg } from './express/commands/reorg-start'
+import { stopReorg } from './express/commands/reorg-stop'
+import { milestoneBase } from './express/commands/milestone-base'
+import { milestonePartition } from './express/commands/milestone-partition'
 import { shadow } from './express/commands/shadow'
 import { relay } from './express/commands/relay'
 import { awsKeypairAdd } from './express/commands/aws-keypair-add'
@@ -95,6 +99,20 @@ program
   .option('-xxx, --chaos [intensity]', 'Start Chaos')
   .option('-istop, --instances-stop', 'Stop aws ec2 instances')
   .option('-istart, --instances-start', 'Start aws ec2 instances')
+  .option('-rewind, --rewind [numberOfBlocks]', 'Rewind the chain')
+  .option(
+    '-reorg-start, --reorg-start [split]',
+    'Reorg the chain by creating two clusters in the network, where [split] param represents the number of nodes that one of the clusters will have (with other being [total number of nodes - split])'
+  )
+  .option(
+    '-reorg-stop, --reorg-stop',
+    'Stops the reorg previously created by reconnecting all the nodes'
+  )
+  .option('-milestone-base, --milestone-base', 'Run milestone base tests')
+  .option(
+    '-milestone-partition, --milestone-partition',
+    'Run milestone partition tests'
+  )
   .option(
     '-rewind, --rewind [numberOfBlocks]',
     'Rewind the chain by a given number of blocks'
@@ -428,6 +446,7 @@ export async function cli() {
       )
       process.exit(1)
     }
+
     await awsKeypairAdd()
   } else if (options.awsKeyDes) {
     console.log('📍 Command --aws-key-des')
@@ -437,7 +456,52 @@ export async function cli() {
       )
       process.exit(1)
     }
+
     await awsKeypairDestroy(options.awsKeyDes)
+  } else if (options.reorgStart) {
+    console.log('📍Command --reorg-start [split]')
+
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+
+    await startReorg(options.reorg)
+  } else if (options.reorgStop) {
+    console.log('📍Command --reorg-stop')
+
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+
+    await stopReorg()
+  } else if (options.milestoneBase) {
+    console.log('📍Command --milestone-base')
+
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+
+    await milestoneBase()
+  } else if (options.milestonePartition) {
+    console.log('📍Command --milestone-partition')
+
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+
+    await milestonePartition()
   } else if (options.shadowFork) {
     console.log('📍Command --shadow-fork [blockNumber]')
     if (!checkDir(false)) {
