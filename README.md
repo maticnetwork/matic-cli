@@ -243,6 +243,14 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
   - Destroys an `aws` key-pair given its `keyName`. The key gets deleted remotely from `aws`, cancelled from the authorized ssh keys of the devnet's machines and removed from local devnet folder.
 
+- `../../bin/express-cli --reorg-start [split]`
+
+  - Reorg the chain by creating two clusters in the network, where [split] param represents the number of nodes that one of the clusters will have (with other being [total number of nodes - split])
+
+- `../../bin/express-cli --reorg-stop`
+
+  - Stops the reorg previously created by reconnecting all the nodes
+
 - `../../bin/express-cli --shadow-fork [blockNumber]`
 
   - Run (mumbai/mainnet) nodes in shadow mode. Please note that there might be an offset of ~3-4 blocks from [block] number
@@ -261,6 +269,10 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
 - `../../bin/express-cli --relay`
   - Relay transactions from testnet or mainnet to shadow node running in the devnet.
+
+## `Milestone tests`
+
+The `express-cli` can also be used to perform few simulation based tests for the upcoming milestone feature. Please refer to the steps and requirements mentioned over [here](./docs/milestones.md) for running the tests.
 
 ## `matic-cli`
 

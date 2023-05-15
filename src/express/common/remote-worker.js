@@ -107,7 +107,7 @@ export async function runSshCommandWithoutExit(ip, command, retries) {
     )
   } catch (error) {
     if (retries - 1 > 0) {
-      await runSshCommand(ip, command, retries - 1)
+      await runSshCommandWithoutExit(ip, command, retries - 1)
     } else {
       console.log('Command  `' + command + '` failed (Not Serious)')
     }
@@ -146,6 +146,24 @@ export async function runScpCommand(src, dest, retries) {
       await runScpCommand(src, dest, retries - 1)
     } else {
       console.log('❌ SCP copy failed too many times, exiting... \n')
+      process.exit(1)
+    }
+  }
+}
+
+export async function runCommand(fn, ip, number, retries) {
+  if (retries < 0) {
+    console.log('❌ runCommand called with negative retries number: ', retries)
+    process.exit(1)
+  }
+  try {
+    const response = await fn(ip, number)
+    return response
+  } catch (error) {
+    if (retries - 1 > 0) {
+      await runCommand(fn, ip, number, retries - 1)
+    } else {
+      console.log('❌ Command failed too many times with error: \n', error)
       process.exit(1)
     }
   }

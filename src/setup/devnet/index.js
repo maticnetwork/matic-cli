@@ -181,7 +181,12 @@ export class Devnet {
       title: 'Setup enode',
       task: async () => {
         const staticNodes = []
+        let hosts = []
         let erigonValCount = this.config.numOfErigonValidators
+        hosts = this.config.devnetBorHosts.slice(0,this.config.numOfBorValidators)
+        hosts.push(...this.config.devnetErigonHosts.slice(0, this.config.numOfErigonValidators))
+        hosts.push(...this.config.devnetBorHosts.slice(this.config.numOfBorValidators, this.config.devnetBorHosts.length))
+        hosts.push(...this.config.devnetErigonHosts.slice(this.config.numOfErigonValidators, this.config.devnetErigonHosts.length))
         // create new enode
         for (let i = 0; i < this.totalNodes; i++) {
           const enodeObj = await getNewPrivateKey()
@@ -190,10 +195,7 @@ export class Devnet {
           ).replace('0x', '')
 
           // draft enode
-          let enode = `enode://${pubKey}@${this.config.devnetBorHosts[i]}:30303`
-          if (i >= this.totalBorNodes) {
-            enode = `enode://${pubKey}@${this.config.devnetErigonHosts[i - this.totalBorNodes]}:30303`
-          }
+          let enode = `enode://${pubKey}@${hosts[i]}:30303`
           // add into static nodes
           staticNodes.push(enode)
 
@@ -628,7 +630,7 @@ export class Devnet {
               { stdio: getRemoteStdio() }
             )
 
-            if (i === 0 && !this.config.network) {
+            if (i === 0 && !this.config.network && this.config.numOfBorValidators !== 0) {
               await execa('ssh', [
                 '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
                 '-i', '~/cert.pem',
@@ -691,7 +693,7 @@ export class Devnet {
               { stdio: getRemoteStdio() }
             )
 
-            if (i === 0 && !this.config.network && this.totalBorNodes === 0) {
+            if (i === 0 && !this.config.network && this.config.numOfBorValidators === 0) {
               await execa('ssh', [
                 '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
                 '-i', '~/cert.pem',
@@ -806,7 +808,7 @@ export class Devnet {
             )
 
             // Execute service files
-            if (i === 0 && !this.config.network) {
+            if (i === 0 && !this.config.network && this.config.numOfBorValidators !== 0) {
               await execa(
                 'ssh',
                 [
@@ -990,7 +992,7 @@ export class Devnet {
             )
 
             // Execute service files
-            if (i === 0 && !this.config.network && this.totalBorNodes === 0) {
+            if (i === 0 && !this.config.network && this.config.numOfBorValidators === 0) {
               await execa(
                 'ssh',
                 [
@@ -1021,13 +1023,14 @@ export class Devnet {
               if (chain === 'mainnet') {
                 chain = 'bor-mainnet'
               }
-              await execa('ssh', [
-                '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
-                '-i', '~/cert.pem',
-                      `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
-                      // eslint-disable-next-line
-                      `sed -i "s|\\$ERIGON_HOME/genesis.json|${chain}|g" ~/node/erigon-start.sh`
-              ], { stdio: getRemoteStdio() })
+              // TODO: Finalize when running a public node
+              // await execa('ssh', [
+              //   '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
+              //   '-i', '~/cert.pem',
+              //         `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
+              //         // eslint-disable-next-line
+              //         `sed -i "s|\\$ERIGON_HOME/genesis.json|${chain}|g" ~/node/erigon-start.sh`
+              // ], { stdio: getRemoteStdio() })
             }
 
             await execa(
