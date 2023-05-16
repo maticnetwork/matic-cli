@@ -116,7 +116,7 @@ function validateEnvVars() {
     ERIGON_REPO: url({
       default: 'https://github.com/maticnetwork/erigon.git'
     }),
-    ERIGON_BRANCH: validStr({default: 'devel'}),
+    ERIGON_BRANCH: validStr({ default: 'devel' }),
     HEIMDALL_REPO: url({
       default: 'https://github.com/maticnetwork/heimdall.git'
     }),
@@ -176,25 +176,28 @@ function validateAwsKeyAndCertificate() {
 }
 
 function validateUsersAndHosts() {
-  console.log('📍Validating DEVNET_BOR_USERS, DEVNET_BOR_HOSTS, DEVNET_ERIGON_USERS and DEVNET_ERIGON_HOSTS...')
+  console.log(
+    '📍Validating DEVNET_BOR_USERS, DEVNET_BOR_HOSTS, DEVNET_ERIGON_USERS and DEVNET_ERIGON_HOSTS...'
+  )
   let borUsers, borHosts, erigonUsers, erigonHosts
   if (process.env.DEVNET_BOR_USERS && process.env.DEVNET_BOR_HOSTS) {
-     borUsers = process.env.DEVNET_BOR_USERS.split(',')
-     borHosts = process.env.DEVNET_BOR_HOSTS.split(',')
+    borUsers = process.env.DEVNET_BOR_USERS.split(',')
+    borHosts = process.env.DEVNET_BOR_HOSTS.split(',')
   }
   if (process.env.DEVNET_ERIGON_USERS && process.env.DEVNET_ERIGON_HOSTS) {
     erigonUsers = process.env.DEVNET_ERIGON_USERS.split(',')
     erigonHosts = process.env.DEVNET_ERIGON_HOSTS.split(',')
- }
+  }
   const borValCount = Number(process.env.TF_VAR_BOR_VALIDATOR_COUNT)
   const borSenCount = Number(process.env.TF_VAR_BOR_SENTRY_COUNT)
   const borArchiveCount = Number(process.env.TF_VAR_BOR_ARCHIVE_COUNT)
   const erigonValCount = Number(process.env.TF_VAR_ERIGON_VALIDATOR_COUNT)
   const erigonSenCount = Number(process.env.TF_VAR_ERIGON_SENTRY_COUNT)
   const erigonArchiveCount = Number(process.env.TF_VAR_ERIGON_ARCHIVE_COUNT)
-  
+
   if (
-    process.env.TF_VAR_DOCKERIZED === 'yes' && borUsers &&
+    process.env.TF_VAR_DOCKERIZED === 'yes' &&
+    borUsers &&
     borUsers.length !== borValCount + borSenCount + borArchiveCount
   ) {
     console.log(
@@ -202,30 +205,36 @@ function validateUsersAndHosts() {
         '(TF_VAR_BOR_VALIDATOR_COUNT+TF_VAR_BOR_SENTRY_COUNT+TF_VAR_BOR_ARCHIVE_COUNT), please check your configs!'
     )
     process.exit(1)
-  } else if (
-    process.env.TF_VAR_DOCKERIZED === 'no') {
-    if (borUsers && (borUsers.length !== borHosts.length ||
-      borUsers.length !== borValCount + borSenCount + borArchiveCount ||
-      borHosts.length !== borValCount + borSenCount + borArchiveCount)) {
-        console.log(
-          '❌ DEVNET_BOR_USERS or DEVNET_BOR_HOSTS lengths are not equal to the nodes count ' +
-            '(TF_VAR_BOR_VALIDATOR_COUNT+TF_VAR_BOR_SENTRY_COUNT+TF_VAR_BOR_ARCHIVE_COUNT), please check your configs!'
-        )
+  } else if (process.env.TF_VAR_DOCKERIZED === 'no') {
+    if (
+      borUsers &&
+      (borUsers.length !== borHosts.length ||
+        borUsers.length !== borValCount + borSenCount + borArchiveCount ||
+        borHosts.length !== borValCount + borSenCount + borArchiveCount)
+    ) {
+      console.log(
+        '❌ DEVNET_BOR_USERS or DEVNET_BOR_HOSTS lengths are not equal to the nodes count ' +
+          '(TF_VAR_BOR_VALIDATOR_COUNT+TF_VAR_BOR_SENTRY_COUNT+TF_VAR_BOR_ARCHIVE_COUNT), please check your configs!'
+      )
 
-        process.exit(1)
+      process.exit(1)
     }
 
-    if ( erigonUsers && (erigonUsers.length !== erigonHosts.length ||
-      erigonUsers.length !== erigonValCount + erigonSenCount + erigonArchiveCount ||
-      erigonHosts.length !== erigonValCount + erigonSenCount + erigonArchiveCount)) {
-        console.log(
-          '❌ DEVNET_BOR_USERS or DEVNET_BOR_HOSTS lengths are not equal to the nodes count ' +
-            '(TF_VAR_ERIGON_VALIDATOR_COUNT+TF_VAR_ERIGON_SENTRY_COUNT+TF_VAR_ERIGON_ARCHIVE_COUNT), please check your configs!'
-        )
+    if (
+      erigonUsers &&
+      (erigonUsers.length !== erigonHosts.length ||
+        erigonUsers.length !==
+          erigonValCount + erigonSenCount + erigonArchiveCount ||
+        erigonHosts.length !==
+          erigonValCount + erigonSenCount + erigonArchiveCount)
+    ) {
+      console.log(
+        '❌ DEVNET_ERIGON_USERS or DEVNET_ERIGON_HOSTS lengths are not equal to the nodes count ' +
+          '(TF_VAR_ERIGON_VALIDATOR_COUNT+TF_VAR_ERIGON_SENTRY_COUNT+TF_VAR_ERIGON_ARCHIVE_COUNT), please check your configs!'
+      )
 
-        process.exit(1)
+      process.exit(1)
     }
-   
   }
 
   if (borUsers) {
@@ -494,12 +503,12 @@ function setConfigList(key, value, doc) {
               setEthHostUser(valueArray[i], doc)
             }
           }
-          if (key === 'devnetErigonHosts'&& !doc['ethURL']) {
+          if (key === 'devnetErigonHosts' && doc.numOfBorValidators === 0) {
             if (valueArray[i]) {
               setEthURL(valueArray[i], doc)
             }
           }
-          if (key === 'devnetErigonUsers' && !doc['ethHostUser']) {
+          if (key === 'devnetErigonUsers' && doc.numOfBorValidators === 0) {
             if (valueArray[i]) {
               setEthHostUser(valueArray[i], doc)
             }
@@ -605,8 +614,35 @@ export async function editMaticCliRemoteYAMLConfig() {
     setConfigList('devnetBorUsers', process.env.DEVNET_BOR_USERS, doc)
     setConfigList('devnetErigonHosts', process.env.DEVNET_ERIGON_HOSTS, doc)
     setConfigList('devnetErigonUsers', process.env.DEVNET_ERIGON_USERS, doc)
-    setConfigList('devnetHeimdallUsers', process.env.DEVNET_BOR_USERS.concat(",", process.env.DEVNET_ERIGON_USERS), doc)
-    setConfigList('devnetHeimdallHosts', process.env.DEVNET_BOR_HOSTS.concat(",",process.env.DEVNET_ERIGON_HOSTS), doc)
+    setConfigList(
+      'devnetHeimdallUsers',
+      process.env.DEVNET_BOR_USERS.concat(',', process.env.DEVNET_ERIGON_USERS),
+      doc
+    )
+
+    const heimdallHosts = []
+    heimdallHosts.push(
+      ...doc.devnetBorHosts.slice(0, process.env.TF_VAR_BOR_VALIDATOR_COUNT)
+    )
+    heimdallHosts.push(
+      ...doc.devnetErigonHosts.slice(
+        0,
+        process.env.TF_VAR_ERIGON_VALIDATOR_COUNT
+      )
+    )
+    heimdallHosts.push(
+      ...doc.devnetBorHosts.slice(
+        process.env.TF_VAR_BOR_VALIDATOR_COUNT,
+        doc.devnetBorHosts.length
+      )
+    )
+    heimdallHosts.push(
+      ...doc.devnetErigonHosts.slice(
+        process.env.TF_VAR_ERIGON_VALIDATOR_COUNT,
+        doc.devnetErigonHosts.length
+      )
+    )
+    setConfigList('devnetHeimdallHosts', heimdallHosts.join(','), doc)
   }
   setConfigValue('devnetType', 'remote', doc)
 
@@ -622,6 +658,53 @@ export async function editMaticCliRemoteYAMLConfig() {
   )
 }
 
+export function setBorAndErigonHosts(dnsIps) {
+  const dnsIpsArray = splitToArray(dnsIps)
+  const startIndex =
+    parseInt(process.env.TF_VAR_BOR_SENTRY_COUNT) +
+    parseInt(process.env.TF_VAR_BOR_ARCHIVE_COUNT)
+  const endIndex =
+    startIndex + parseInt(process.env.TF_VAR_ERIGON_VALIDATOR_COUNT)
+
+  let borUserArray, erigonUserArray, borHosts, erigonHosts
+  if (parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) === 0) {
+    const subarray = dnsIpsArray.splice(startIndex, endIndex - startIndex)
+    dnsIpsArray.unshift(...subarray)
+    dnsIps = dnsIpsArray.join(',')
+  }
+  if (process.env.DEVNET_BOR_USERS) {
+    borUserArray = splitToArray(process.env.DEVNET_BOR_USERS)
+    borHosts = dnsIpsArray.slice(0, borUserArray.length)
+    if (parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) === 0) {
+      borHosts = dnsIpsArray.slice(
+        process.env.TF_VAR_ERIGON_VALIDATOR_COUNT,
+        endIndex
+      )
+    }
+  }
+  if (process.env.DEVNET_ERIGON_USERS) {
+    erigonUserArray = splitToArray(process.env.DEVNET_ERIGON_USERS)
+    if (!process.env.DEVNET_BOR_USERS) {
+      erigonHosts = dnsIpsArray.slice(0, erigonUserArray.length)
+    } else if (parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) === 0) {
+      erigonHosts = dnsIpsArray.slice(
+        0,
+        process.env.TF_VAR_ERIGON_VALIDATOR_COUNT
+      )
+      erigonHosts.push(...dnsIpsArray.slice(endIndex))
+    } else {
+      erigonHosts = dnsIpsArray.slice(borUserArray.length)
+    }
+  }
+  if (borHosts) {
+    process.env.DEVNET_BOR_HOSTS = borHosts
+  }
+  if (erigonHosts) {
+    process.env.DEVNET_ERIGON_HOSTS = erigonHosts
+  }
+
+  return dnsIps
+}
 export async function editMaticCliDockerYAMLConfig() {
   console.log('📍Editing matic-cli docker YAML configs...')
 

@@ -6,7 +6,8 @@ import {
   editMaticCliRemoteYAMLConfig,
   getDevnetId,
   splitAndGetHostIp,
-  splitToArray
+  splitToArray,
+  setBorAndErigonHosts
 } from '../common/config-utils'
 import {
   maxRetries,
@@ -68,9 +69,15 @@ async function installRequiredSoftwareOnRemoteMachines(
   const isHostMap = new Map()
 
   for (let i = 0; i < ipsArray.length; i++) {
-    i === 0 ? (user = `${doc.ethHostUser}`) : (i >= borUsers.length ? user = `${erigonUsers[i - borUsers.length]}` : user = `${borUsers[i]}`)
+    /* eslint-disable */
+    i === 0
+      ? (user = `${doc.ethHostUser}`)
+      : i >= borUsers.length
+      ? (user = `${erigonUsers[i - borUsers.length]}`)
+      : (user = `${borUsers[i]}`)
     ip = `${user}@${ipsArray[i]}`
     nodeIps.push(ip)
+    /* eslint-disable */
 
     i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
   }
@@ -120,7 +127,7 @@ async function installCommonPackages(ip) {
   let command = 'sudo apt update -y'
   await runSshCommand(ip, command, maxRetries)
 
-  console.log('📍Installing jq...');
+  console.log('📍Installing jq...')
   command = 'sudo apt install jq -y'
   await runSshCommand(ip, command, maxRetries)
 
@@ -245,10 +252,15 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType, devnetId) {
   const isHostMap = new Map()
 
   for (let i = 0; i < ipsArray.length; i++) {
-    i === 0 ? (user = `${doc.ethHostUser}`) : (i >= borUsers.length ? user = `${erigonUsers[i - borUsers.length]}` : user = `${borUsers[i]}`)
+    /* eslint-disable */
+    i === 0
+      ? (user = `${doc.ethHostUser}`)
+      : i >= borUsers.length
+      ? (user = `${erigonUsers[i - borUsers.length]}`)
+      : (user = `${borUsers[i]}`)
     ip = `${user}@${ipsArray[i]}`
     nodeIps.push(ip)
-
+    /* eslint-disable */
     i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
   }
 
@@ -420,29 +432,10 @@ export async function start() {
 
   await terraformApply(devnetId)
   const tfOutput = await terraformOutput()
-  const dnsIps = JSON.parse(tfOutput).instance_dns_ips.value.toString()
+  let dnsIps = JSON.parse(tfOutput).instance_dns_ips.value.toString()
   const ids = JSON.parse(tfOutput).instance_ids.value.toString()
-  const dnsIpsArray = splitToArray(dnsIps)
 
-  let borUserArray, erigonUserArray, borHosts, erigonHosts
-  if (process.env.DEVNET_BOR_USERS) {
-    borUserArray = splitToArray(process.env.DEVNET_BOR_USERS)
-    borHosts = dnsIpsArray.slice(0, borUserArray.length)
-  }
-  if (process.env.DEVNET_ERIGON_USERS) {
-    erigonUserArray = splitToArray(process.env.DEVNET_ERIGON_USERS)
-    if (process.env.DEVNET_BOR_USERS) {
-      erigonHosts = dnsIpsArray.slice(borUserArray.length)
-    } else {
-      erigonHosts = dnsIpsArray.slice(0, erigonUserArray.length)
-    }
-  }
-  if (borHosts) {
-    process.env.DEVNET_BOR_HOSTS = borHosts
-  } 
-  if (erigonHosts) {
-    process.env.DEVNET_ERIGON_HOSTS = erigonHosts
-  }
+  dnsIps = setBorAndErigonHosts(dnsIps)
   process.env.INSTANCES_IDS = ids
 
   await validateConfigs()

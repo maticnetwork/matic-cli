@@ -7,11 +7,7 @@ import path from 'path'
 import fs from 'fs-extra'
 
 import { loadConfig } from '../config'
-import {
-  cloneRepository,
-  getKeystoreFile,
-  processTemplateFiles
-} from '../../lib/utils'
+import { cloneRepository, getKeystoreFile } from '../../lib/utils'
 import { getDefaultBranch } from '../helper'
 import { Genesis } from '../genesis'
 import { getRemoteStdio } from '../../express/common/remote-worker'
@@ -101,27 +97,7 @@ export class Erigon {
               }
             )
           }
-        },
-        // {
-        //   title: 'Process template scripts',
-        //   task: async () => {
-        //     if (this.config.devnetType === 'remote') {
-        //       return
-        //     }
-        //     const templateDir = path.resolve(
-        //       new URL(import.meta.url).pathname,
-        //       '../templates'
-        //     )
-
-        //     // copy all templates to target directory
-        //     await fs.copy(templateDir, this.config.targetDirectory)
-
-        //     // process all njk templates
-        //     await processTemplateFiles(this.config.targetDirectory, {
-        //       obj: this
-        //     })
-        //   }
-        // }
+        }
       ],
       {
         concurrent: true
