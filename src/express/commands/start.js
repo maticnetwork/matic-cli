@@ -127,6 +127,9 @@ async function installCommonPackages(ip) {
   let command = 'sudo apt update -y'
   await runSshCommand(ip, command, maxRetries)
 
+  console.log('📍Installing build-essential...')
+  command = 'sudo apt install build-essential -y'
+  
   console.log('📍Installing jq...')
   command = 'sudo apt install jq -y'
   await runSshCommand(ip, command, maxRetries)
