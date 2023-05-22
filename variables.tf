@@ -87,7 +87,10 @@ variable "PORTS_IN" {
   // 9545: ganache
   // 1337:
   // 26656: heimdall comms
-  default = [22, 80, 443, 30303, 1317, 8545, 9545, 1337, 8546, 26656]
+  // 8080: hasura console
+  // 3000: ethstats-frontend dashboard
+  // 8000: ethstats-backend collector
+  default = [22, 80, 443, 30303, 1317, 8545, 9545, 1337, 8546, 26656, 8080, 3000, 8000]
 }
 
 // to allow all ports to outside, set to [0]

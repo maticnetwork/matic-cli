@@ -222,6 +222,10 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
   - Sets up datadog on the nodes and gets them ready to send metrics to Datadog Dashboard. `DD_API_KEY` env var is required for this.
 
+- `../../bin/express-cli --setup-ethstats`
+
+  - Sets up ethstats on the nodes and gets them ready to send metrics to Ethstats Backend which can be queried from Hasura Console and displayed on Reorgs Frontend.
+
 - `../../bin/express-cli --chaos [intensity]`
 
   - Adds dedicated chaos(de-peering) to the network. The `intensity` parameter is optional and can be set from `1` to `10`. If not set, `5` is used.

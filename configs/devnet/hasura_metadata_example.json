@@ -1,0 +1,176 @@
+{
+  "resource_version": 51,
+  "metadata": {
+    "version": 3,
+    "sources": [
+      {
+        "name": "Postgres",
+        "kind": "postgres",
+        "tables": [
+          {
+            "table": {
+              "schema": "public",
+              "name": "block_transactions"
+            },
+            "object_relationships": [
+              {
+                "name": "block",
+                "using": {
+                  "foreign_key_constraint_on": "block_hash"
+                }
+              }
+            ]
+          },
+          {
+            "table": {
+              "schema": "public",
+              "name": "blocks"
+            },
+            "array_relationships": [
+              {
+                "name": "block_transactions",
+                "using": {
+                  "foreign_key_constraint_on": {
+                    "column": "block_hash",
+                    "table": {
+                      "schema": "public",
+                      "name": "block_transactions"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "table": {
+              "schema": "public",
+              "name": "headentry"
+            },
+            "object_relationships": [
+              {
+                "name": "block",
+                "using": {
+                  "manual_configuration": {
+                    "remote_table": {
+                      "schema": "public",
+                      "name": "blocks"
+                    },
+                    "insertion_order": null,
+                    "column_mapping": {
+                      "block_hash": "hash"
+                    }
+                  }
+                }
+              },
+              {
+                "name": "headevent",
+                "using": {
+                  "manual_configuration": {
+                    "remote_table": {
+                      "schema": "public",
+                      "name": "headevents"
+                    },
+                    "insertion_order": null,
+                    "column_mapping": {
+                      "event_id": "event_id"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "table": {
+              "schema": "public",
+              "name": "headevents"
+            },
+            "object_relationships": [
+              {
+                "name": "entry",
+                "using": {
+                  "manual_configuration": {
+                    "remote_table": {
+                      "schema": "public",
+                      "name": "headentry"
+                    },
+                    "insertion_order": null,
+                    "column_mapping": {
+                      "event_id": "event_id"
+                    }
+                  }
+                }
+              },
+              {
+                "name": "nodeinfo",
+                "using": {
+                  "foreign_key_constraint_on": "node_id"
+                }
+              }
+            ]
+          },
+          {
+            "table": {
+              "schema": "public",
+              "name": "nodeinfo"
+            },
+            "array_relationships": [
+              {
+                "name": "headevents",
+                "using": {
+                  "foreign_key_constraint_on": {
+                    "column": "node_id",
+                    "table": {
+                      "schema": "public",
+                      "name": "headevents"
+                    }
+                  }
+                }
+              },
+              {
+                "name": "nodestats",
+                "using": {
+                  "foreign_key_constraint_on": {
+                    "column": "node_id",
+                    "table": {
+                      "schema": "public",
+                      "name": "nodestats"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "table": {
+              "schema": "public",
+              "name": "nodestats"
+            },
+            "object_relationships": [
+              {
+                "name": "nodeinfo",
+                "using": {
+                  "foreign_key_constraint_on": "node_id"
+                }
+              }
+            ]
+          }
+        ],
+        "configuration": {
+          "connection_info": {
+            "use_prepared_statements": true,
+            "database_url": {
+              "from_env": "HASURA_GRAPHQL_DATABASE_URL"
+            },
+            "isolation_level": "read-committed",
+            "pool_settings": {
+              "connection_lifetime": 600,
+              "retries": 1,
+              "idle_timeout": 180,
+              "max_connections": 50
+            }
+          }
+        }
+      }
+    ]
+  }
+}
