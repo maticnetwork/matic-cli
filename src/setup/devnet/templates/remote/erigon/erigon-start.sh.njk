@@ -4,7 +4,7 @@ set -x #echo on
 
 ERIGON_HOME=$HOME/.erigon
 ERIGON_DATA_DIR=$ERIGON_HOME/data
-CHAIN_ID=7805
+CHAIN_ID={{ obj.config.borChainId }}
 
 mkdir -p $ERIGON_HOME
 
