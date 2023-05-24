@@ -15,7 +15,7 @@ export async function pullAndRestartBor(ip, i, isPull) {
   await runSshCommand(ip, command, maxRetries)
 
   if (isPull) {
-    if (i === 0) {
+    if (i === 0 && parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) > 0) {
       console.log(
         '📍Pulling bor latest changes for branch ' + borBranch + ' ...'
       )
@@ -47,6 +47,53 @@ export async function pullAndRestartBor(ip, i, isPull) {
   await runSshCommand(ip, command, maxRetries)
 }
 
+export async function pullAndRestartErigon(ip, i, isPull, erigonHostsLength) {
+  console.log('📍Working on erigon for machine ' + ip + '...')
+
+  const erigonRepo = process.env.ERIGON_REPO
+  const erigonBranch = process.env.ERIGON_BRANCH
+
+  console.log('📍Stopping erigon...')
+  let command =
+    'sudo systemctl stop erigon.service || echo "erigon not running on current machine..."'
+  await runSshCommand(ip, command, maxRetries)
+
+  if (isPull) {
+    if (
+      (i === 0 || i - erigonHostsLength === 0) &&
+      parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) === 0
+    ) {
+      console.log(
+        '📍Pulling erigon latest changes for branch ' + erigonBranch + ' ...'
+      )
+      command = `cd ~/matic-cli/devnet/code/erigon && git fetch && git checkout ${erigonBranch} && git pull origin ${erigonBranch} `
+      await runSshCommand(ip, command, maxRetries)
+
+      console.log('📍Installing erigon...')
+      command = 'cd ~/matic-cli/devnet/code/erigon && make erigon'
+      await runSshCommand(ip, command, maxRetries)
+    } else {
+      console.log('📍Cloning erigon repo...')
+      command = `cd ~ && git clone ${erigonRepo} || (cd ~/erigon; git fetch)`
+      await runSshCommand(ip, command, maxRetries)
+
+      console.log(
+        '📍Pulling erigon latest changes for branch ' + erigonBranch + ' ...'
+      )
+      command = `cd ~/erigon && git fetch && git checkout ${erigonBranch} && git pull origin ${erigonBranch} `
+      await runSshCommand(ip, command, maxRetries)
+
+      console.log('📍Installing erigon...')
+      command = 'cd ~/erigon && make erigon'
+      await runSshCommand(ip, command, maxRetries)
+    }
+  }
+
+  console.log('📍Starting erigon...')
+  command = 'sudo systemctl start erigon.service'
+  await runSshCommand(ip, command, maxRetries)
+}
+
 export async function pullAndRestartHeimdall(ip, i, isPull) {
   console.log('📍Working on heimdall for machine ' + ip + '...')
 
@@ -59,7 +106,14 @@ export async function pullAndRestartHeimdall(ip, i, isPull) {
   await runSshCommand(ip, command, maxRetries)
 
   if (isPull) {
-    if (i === 0) {
+    if (
+      (i === 0 && parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) > 0) ||
+      (parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) === 0 &&
+        i ===
+          parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) +
+            parseInt(process.env.TF_VAR_BOR_SENTRY_COUNT) +
+            parseInt(process.env.TF_VAR_BOR_ARCHIVE_COUNT))
+    ) {
       console.log(
         '📍Pulling heimdall latest changes for branch ' +
           heimdallBranch +
@@ -99,31 +153,61 @@ export async function updateAll(n) {
   require('dotenv').config({ path: `${process.cwd()}/.env` })
   const doc = await loadDevnetConfig('remote')
   const vmIndex = await checkAndReturnVMIndex(n, doc)
-  const borUsers = splitToArray(doc.devnetBorUsers.toString())
+  const totalHosts = []
+  const totalUsers = []
   const nodeIps = []
+  if (doc.devnetBorHosts) {
+    totalHosts.push(...splitToArray(doc.devnetBorHosts.toString()))
+  }
+  if (doc.devnetErigonHosts) {
+    totalHosts.push(...splitToArray(doc.devnetErigonHosts.toString()))
+  }
+
+  if (doc.devnetBorUsers) {
+    totalUsers.push(...splitToArray(doc.devnetBorUsers.toString()))
+  }
+  if (doc.devnetErigonUsers) {
+    totalUsers.push(...splitToArray(doc.devnetErigonUsers.toString()))
+  }
+
   const hostToIndexMap = new Map()
-  let user, ip
+  let ip
 
   if (vmIndex === undefined) {
-    for (let i = 0; i < doc.devnetBorHosts.length; i++) {
-      i === 0 ? (user = `${doc.ethHostUser}`) : (user = `${borUsers[i]}`)
-      ip = `${user}@${doc.devnetBorHosts[i]}`
+    for (let i = 0; i < totalHosts.length; i++) {
+      ip = `${totalUsers[i]}@${totalHosts[i]}`
       nodeIps.push(ip)
       hostToIndexMap.set(ip, i)
     }
 
     const updateAllTasks = nodeIps.map(async (ip) => {
-      await pullAndRestartBor(ip, hostToIndexMap.get(ip), true)
+      if (hostToIndexMap.get(ip) < doc.devnetBorHosts.length) {
+        await pullAndRestartBor(ip, hostToIndexMap.get(ip), true)
+      } else {
+        await pullAndRestartErigon(
+          ip,
+          hostToIndexMap.get(ip),
+          true,
+          doc.devnetErigonHosts.length
+        )
+      }
       await pullAndRestartHeimdall(ip, hostToIndexMap.get(ip), true)
     })
 
     await Promise.all(updateAllTasks)
   } else {
-    vmIndex === 0
-      ? (user = `${doc.ethHostUser}`)
-      : (user = `${borUsers[vmIndex]}`)
-    ip = `${user}@${doc.devnetBorHosts[vmIndex]}`
-    await pullAndRestartBor(ip, vmIndex, true)
+    ip = `${totalUsers[vmIndex]}@${totalHosts[vmIndex]}`
+
+    if (vmIndex < doc.devnetBorHosts.length) {
+      await pullAndRestartBor(ip, vmIndex, true)
+    } else {
+      await pullAndRestartErigon(
+        ip,
+        vmIndex,
+        true,
+        doc.devnetErigonHosts.length
+      )
+    }
     await pullAndRestartHeimdall(ip, vmIndex, true)
   }
 }
@@ -135,12 +219,11 @@ export async function updateBor(n) {
   const borUsers = splitToArray(doc.devnetBorUsers.toString())
   const nodeIps = []
   const hostToIndexMap = new Map()
-  let user, ip
+  let ip
 
   if (vmIndex === undefined) {
     for (let i = 0; i < doc.devnetBorHosts.length; i++) {
-      i === 0 ? (user = `${doc.ethHostUser}`) : (user = `${borUsers[i]}`)
-      ip = `${user}@${doc.devnetBorHosts[i]}`
+      ip = `${borUsers[i]}@${doc.devnetBorHosts[i]}`
       nodeIps.push(ip)
       hostToIndexMap.set(ip, i)
     }
@@ -151,11 +234,50 @@ export async function updateBor(n) {
 
     await Promise.all(updateBorTasks)
   } else {
-    vmIndex === 0
-      ? (user = `${doc.ethHostUser}`)
-      : (user = `${borUsers[vmIndex]}`)
-    ip = `${user}@${doc.devnetBorHosts[vmIndex]}`
+    if (vmIndex >= doc.devnetBorHosts.length) {
+      console.log('📍Wrong VM index, please check your configs! Exiting...')
+      process.exit(1)
+    }
+    ip = `${borUsers[vmIndex]}@${doc.devnetBorHosts[vmIndex]}`
     await pullAndRestartBor(ip, vmIndex, true)
+  }
+}
+
+export async function updateErigon(n) {
+  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  const doc = await loadDevnetConfig('remote')
+  const vmIndex = await checkAndReturnVMIndex(n, doc)
+  const erigonUsers = splitToArray(doc.devnetErigonUsers.toString())
+  const nodeIps = []
+  const hostToIndexMap = new Map()
+  let ip
+
+  if (vmIndex === undefined) {
+    for (let i = 0; i < doc.devnetErigonHosts.length; i++) {
+      ip = `${erigonUsers[i]}@${doc.devnetErigonHosts[i]}`
+      nodeIps.push(ip)
+      hostToIndexMap.set(ip, i)
+    }
+
+    const updateErigonTasks = nodeIps.map(async (ip) => {
+      await pullAndRestartErigon(
+        ip,
+        hostToIndexMap.get(ip),
+        true,
+        doc.devnetErigonHosts.length
+      )
+    })
+
+    await Promise.all(updateErigonTasks)
+  } else {
+    if (vmIndex < doc.devnetBorHosts.length) {
+      console.log('📍Wrong VM index, please check your configs! Exiting...')
+      process.exit(1)
+    }
+    ip = `${doc.devnetErigonUsers[vmIndex - doc.devnetBorHosts.length]}@${
+      doc.devnetErigonHosts[vmIndex - doc.devnetBorHosts.length]
+    }`
+    await pullAndRestartErigon(ip, vmIndex, true, doc.devnetErigonHosts.length)
   }
 }
 
@@ -163,15 +285,29 @@ export async function updateHeimdall(n) {
   require('dotenv').config({ path: `${process.cwd()}/.env` })
   const doc = await loadDevnetConfig('remote')
   const vmIndex = await checkAndReturnVMIndex(n, doc)
-  const borUsers = splitToArray(doc.devnetBorUsers.toString())
+  const totalHosts = []
+  const totalUsers = []
   const nodeIps = []
+  if (doc.devnetBorHosts) {
+    totalHosts.push(...splitToArray(doc.devnetBorHosts.toString()))
+  }
+  if (doc.devnetErigonHosts) {
+    totalHosts.push(...splitToArray(doc.devnetErigonHosts.toString()))
+  }
+
+  if (doc.devnetBorUsers) {
+    totalUsers.push(...splitToArray(doc.devnetBorUsers.toString()))
+  }
+  if (doc.devnetErigonUsers) {
+    totalUsers.push(...splitToArray(doc.devnetErigonUsers.toString()))
+  }
+
   const hostToIndexMap = new Map()
-  let user, ip
+  let ip
 
   if (vmIndex === undefined) {
-    for (let i = 0; i < doc.devnetBorHosts.length; i++) {
-      i === 0 ? (user = `${doc.ethHostUser}`) : (user = `${borUsers[i]}`)
-      ip = `${user}@${doc.devnetBorHosts[i]}`
+    for (let i = 0; i < totalHosts.length; i++) {
+      ip = `${totalUsers[i]}@${totalHosts[i]}`
       nodeIps.push(ip)
       hostToIndexMap.set(ip, i)
     }
@@ -182,10 +318,7 @@ export async function updateHeimdall(n) {
 
     await Promise.all(updateHeimdallTasks)
   } else {
-    vmIndex === 0
-      ? (user = `${doc.ethHostUser}`)
-      : (user = `${borUsers[vmIndex]}`)
-    ip = `${user}@${doc.devnetBorHosts[vmIndex]}`
+    ip = `${totalUsers[vmIndex]}@${totalHosts[vmIndex]}`
     await pullAndRestartHeimdall(ip, vmIndex, true)
   }
 }

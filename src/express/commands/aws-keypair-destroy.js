@@ -1,8 +1,4 @@
-import {
-  loadDevnetConfig,
-  splitAndGetHostIp,
-  splitToArray
-} from '../common/config-utils'
+import { loadDevnetConfig, splitToArray } from '../common/config-utils'
 import { maxRetries, runSshCommand } from '../common/remote-worker'
 
 const shell = require('shelljs')
@@ -28,19 +24,30 @@ export async function awsKeypairDestroy(keyName) {
   }
   const pubKey = JSON.parse(output).KeyPairs[0].PublicKey.toString()
 
-  const ipsArray = splitToArray(doc.devnetBorHosts.toString())
-  const borUsers = splitToArray(doc.devnetBorUsers.toString())
-  let user, ip
+  const totalHosts = []
+  const totalUsers = []
   const nodeIps = []
+  if (doc.devnetBorHosts) {
+    totalHosts.push(...splitToArray(doc.devnetBorHosts.toString()))
+  }
+  if (doc.devnetErigonHosts) {
+    totalHosts.push(...splitToArray(doc.devnetErigonHosts.toString()))
+  }
 
-  for (let i = 0; i < ipsArray.length; i++) {
-    i === 0 ? (user = `${doc.ethHostUser}`) : (user = `${borUsers[i]}`)
-    ip = `${user}@${ipsArray[i]}`
+  if (doc.devnetBorUsers) {
+    totalUsers.push(...splitToArray(doc.devnetBorUsers.toString()))
+  }
+  if (doc.devnetErigonUsers) {
+    totalUsers.push(...splitToArray(doc.devnetErigonUsers.toString()))
+  }
+  let ip
+
+  for (let i = 0; i < totalHosts.length; i++) {
+    ip = `${totalUsers[i]}@${totalHosts[i]}`
     nodeIps.push(ip)
   }
 
   const removeKeyTasks = nodeIps.map(async (ip) => {
-    user = splitAndGetHostIp(ip)
     console.log(`📍 Removing ssh pubKey for ${keyName} from host ${ip} ...`)
     const command = `sed -i 's,${pubKey}, ,' ~/.ssh/authorized_keys`
     await runSshCommand(ip, command, maxRetries)

@@ -1,5 +1,10 @@
 import { start } from './express/commands/start'
-import { updateAll, updateBor, updateHeimdall } from './express/commands/update'
+import {
+  updateAll,
+  updateBor,
+  updateErigon,
+  updateHeimdall
+} from './express/commands/update'
 import { terraformInit } from './express/commands/init'
 import { terraformDestroy } from './express/commands/destroy'
 import { startStressTest } from './express/commands/stress'
@@ -13,6 +18,7 @@ import { monitor } from './express/commands/monitor'
 import {
   restartAll,
   restartBor,
+  restartErigon,
   restartHeimdall
 } from './express/commands/restart'
 import { cleanup } from './express/commands/cleanup'
@@ -42,11 +48,15 @@ program
   .option('-d, --destroy', 'Destroy the setup')
   .option(
     '-uall, --update-all [index]',
-    'Update bor and heimdall on all machines. If an integer [index] is specified, it will only update the VM corresponding to that index'
+    'Update bor/erigon and heimdall on all machines. If an integer [index] is specified, it will only update the VM corresponding to that index'
   )
   .option(
     '-ubor, --update-bor [index]',
     'Update bor on all machines. If an integer [index] is specified, it will only update the VM corresponding to that index'
+  )
+  .option(
+    '-uerigon, --update-erigon [index]',
+    'Update erigon on all machines. If an integer [index] is specified, it will only update the VM corresponding to that index'
   )
   .option(
     '-uheimdall, --update-heimdall [index]',
@@ -54,11 +64,15 @@ program
   )
   .option(
     '-rall, --restart-all [index]',
-    'Restart both bor and heimdall on all machines. If an integer [index] is specified, it will only update the VM corresponding to that index'
+    'Restart both bor/erigon and heimdall on all machines. If an integer [index] is specified, it will only update the VM corresponding to that index'
   )
   .option(
     '-rbor, --restart-bor [index]',
     'Restart bor on all machines. If an integer [index] is specified, it will only update the VM corresponding to that index'
+  )
+  .option(
+    '-rerigon, --restart-erigon [index]',
+    'Restart erigon on all machines. If an integer [index] is specified, it will only update the VM corresponding to that index'
   )
   .option(
     '-rheimdall, --restart-heimdall [index]',
@@ -205,6 +219,22 @@ export async function cli() {
     )
     await timer(3000)
     await updateBor(options.updateBor)
+  } else if (options.updateErigon) {
+    console.log('📍Command --update-erigon [index] ')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    console.log(
+      '⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...'
+    )
+    console.log(
+      '⛔ This will only work if all bor ipc sessions have been manually closed...'
+    )
+    await timer(3000)
+    await updateErigon(options.updateErigon)
   } else if (options.updateHeimdall) {
     console.log('📍Command --update-heimdall [index] ')
     if (!checkDir(false)) {
@@ -250,6 +280,22 @@ export async function cli() {
     )
     await timer(3000)
     await restartBor(options.restartBor)
+  } else if (options.restartErigon) {
+    console.log('📍Command --restart-erigon [index] ')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    console.log(
+      '⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...'
+    )
+    console.log(
+      '⛔ This will only work if all bor ipc sessions have been manually closed...'
+    )
+    await timer(3000)
+    await restartErigon(options.restartErigon)
   } else if (options.restartHeimdall) {
     console.log('📍Command --restart-heimdall [index] ')
     if (!checkDir(false)) {
@@ -387,7 +433,9 @@ export async function cli() {
       )
       process.exit(1)
     }
-
+    console.log(
+      '⛔ This command currently cannot be executed against an erigon node'
+    )
     await timer(3000)
     await setupDatadog()
   } else if (options.chaos) {
@@ -398,6 +446,9 @@ export async function cli() {
       )
       process.exit(1)
     }
+    console.log(
+      '⛔ This command currently cannot be executed against an erigon node'
+    )
     if (options.chaos === true) {
       options.chaos = 5
     }
@@ -432,6 +483,9 @@ export async function cli() {
       )
       process.exit(1)
     }
+    console.log(
+      '⛔ This command currently cannot be executed against an erigon node'
+    )
     if (options.rewind === true) {
       options.rewind = 100
     }
@@ -468,6 +522,9 @@ export async function cli() {
       process.exit(1)
     }
 
+    console.log(
+      '⛔ This command currently cannot be executed against an erigon node'
+    )
     await startReorg(options.reorg)
   } else if (options.reorgStop) {
     console.log('📍Command --reorg-stop')
@@ -479,6 +536,9 @@ export async function cli() {
       process.exit(1)
     }
 
+    console.log(
+      '⛔ This command currently cannot be executed against an erigon node'
+    )
     await stopReorg()
   } else if (options.milestoneBase) {
     console.log('📍Command --milestone-base')
@@ -490,6 +550,9 @@ export async function cli() {
       process.exit(1)
     }
 
+    console.log(
+      '⛔ This command currently cannot be executed against an erigon node'
+    )
     await milestoneBase()
   } else if (options.milestonePartition) {
     console.log('📍Command --milestone-partition')
@@ -501,6 +564,9 @@ export async function cli() {
       process.exit(1)
     }
 
+    console.log(
+      '⛔ This command currently cannot be executed against an erigon node'
+    )
     await milestonePartition()
   } else if (options.shadowFork) {
     console.log('📍Command --shadow-fork [blockNumber]')
@@ -510,6 +576,9 @@ export async function cli() {
       )
       process.exit(1)
     }
+    console.log(
+      '⛔ This command currently cannot be executed against an erigon node'
+    )
     console.log(
       '⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...'
     )
@@ -524,6 +593,9 @@ export async function cli() {
       process.exit(1)
     }
     console.log(
+      '⛔ This command currently cannot be executed against an erigon node'
+    )
+    console.log(
       '⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...'
     )
 
@@ -536,7 +608,9 @@ export async function cli() {
       )
       process.exit(1)
     }
-
+    console.log(
+      '⛔ This command currently cannot be executed against an erigon node'
+    )
     console.log(
       '⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...'
     )

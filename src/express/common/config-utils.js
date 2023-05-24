@@ -561,11 +561,15 @@ export async function checkAndReturnVMIndex(n, doc) {
     console.log('📍Targeting all VMs ...')
     return undefined
   }
-
+  const totalHosts = []
+  totalHosts.push(
+    ...splitToArray(doc.devnetBorHosts.toString()),
+    ...splitToArray(doc.devnetErigonHosts.toString())
+  )
   if (typeof n === 'string') {
     const vmIndex = parseInt(n, 10)
-    if (vmIndex >= 0 && vmIndex < doc.devnetBorHosts.length) {
-      console.log(`📍Targeting VM with IP ${doc.devnetBorHosts[vmIndex]} ...`)
+    if (vmIndex >= 0 && vmIndex < totalHosts.length) {
+      console.log(`📍Targeting VM with IP ${totalHosts[vmIndex]} ...`)
       return vmIndex
     } else {
       console.log('📍Wrong VM index, please check your configs! Exiting...')

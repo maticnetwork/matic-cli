@@ -18,23 +18,31 @@ export async function sendTopUpFeeEvent(validatorID) {
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
 
   const doc = await loadDevnetConfig(devnetType)
+  let machine0
 
-  if (!isValidatorIdCorrect(validatorID, doc.numOfValidators)) {
+  if (
+    !isValidatorIdCorrect(
+      validatorID,
+      doc.numOfBorValidators + doc.numOfErigonValidators
+    )
+  ) {
     console.log(
       '📍Invalid validatorID used, please try with a valid argument! Exiting...'
     )
     process.exit(1)
   }
-  if (doc.devnetBorHosts.length > 0) {
+  if (doc.numOfBorValidators > 0) {
+    machine0 = doc.devnetBorHosts[0]
     console.log('📍Monitoring the first node', doc.devnetBorHosts[0])
+  } else if (devnetType === 'remote') {
+    machine0 = doc.devnetErigonHosts[0]
+    console.log('📍Monitoring the first node', doc.devnetErigonHosts[0])
   } else {
     console.log('📍No nodes to monitor, please check your configs! Exiting...')
     process.exit(1)
   }
 
   validatorID = Number(validatorID)
-
-  const machine0 = doc.devnetBorHosts[0]
   const rootChainWeb3 = new Web3(`http://${machine0}:9545`)
 
   let src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/devnet/signer-dump.json`
@@ -88,7 +96,11 @@ export async function sendTopUpFeeEvent(validatorID) {
     rootChainWeb3.utils.toWei('100')
   )
 
-  const oldValidatorBalance = await getValidatorBalance(doc, validatorAccount)
+  const oldValidatorBalance = await getValidatorBalance(
+    doc,
+    machine0,
+    validatorAccount
+  )
   console.log('Old Validator Balance:  ' + oldValidatorBalance)
 
   signedTx = await getSignedTx(
@@ -103,12 +115,20 @@ export async function sendTopUpFeeEvent(validatorID) {
   )
   console.log('TopUpForFee Receipt txHash:  ' + Receipt.transactionHash)
 
-  let newValidatorBalance = await getValidatorBalance(doc, validatorAccount)
+  let newValidatorBalance = await getValidatorBalance(
+    doc,
+    machine0,
+    validatorAccount
+  )
 
   while (parseInt(newValidatorBalance) <= parseInt(oldValidatorBalance)) {
     console.log('Waiting 3 secs for topupfee')
     await timer(3000) // waiting 3 secs
-    newValidatorBalance = await getValidatorBalance(doc, validatorAccount)
+    newValidatorBalance = await getValidatorBalance(
+      doc,
+      machine0,
+      validatorAccount
+    )
     console.log('newValidatorBalance : ', newValidatorBalance)
   }
 
@@ -118,8 +138,7 @@ export async function sendTopUpFeeEvent(validatorID) {
   )
 }
 
-async function getValidatorBalance(doc, valAddr) {
-  const machine0 = doc.devnetBorHosts[0]
+async function getValidatorBalance(doc, machine0, valAddr) {
   const command = `curl http://localhost:1317/bank/balances/${valAddr}`
   const out = await runSshCommandWithReturn(
     `${doc.ethHostUser}@${machine0}`,
