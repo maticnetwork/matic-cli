@@ -33,7 +33,6 @@ export async function stopServices(doc) {
     totalUsers.push(...splitToArray(doc.devnetErigonUsers.toString()))
   }
 
-  // let user, ip
   let ip
   const isHostMap = new Map()
   const hostToIndexMap = new Map()

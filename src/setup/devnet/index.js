@@ -35,7 +35,7 @@ const getAllFiles = function (dirPath, arrayOfFiles) {
 
   files.forEach(function (file) {
     if (fs.statSync(dirPath + '/' + file).isDirectory()) {
-      if (file === 'bor' || file === 'heimdall' || file === 'erigon') {
+      if (file === 'bor' || file === 'heimdall' || file === 'erigon' || file === 'snapshot') {
         arrayOfFiles = getAllFiles(dirPath + '/' + file, arrayOfFiles)
       }
     } else {
@@ -444,6 +444,10 @@ export class Devnet {
                   continue
                 }
 
+                if ((!this.config.network || !this.config.snapshot || this.config.snapshot === 'false') && file2.indexOf('snapshot') !== -1) {
+                  continue
+                }
+
                 fs.writeFileSync(
                   path.join(this.nodeDir(i), file2.replace('.njk', '')),
                   nunjucks.render(file, {
@@ -473,24 +477,70 @@ export class Devnet {
     })
   }
 
+  async getAria2cInsallTask(host, user) {
+    return new Listr([
+      {
+        title: 'Install Aria2c',
+        task: async () => {
+          await execa(
+            'ssh',
+            [
+              '-o',
+              'StrictHostKeyChecking=no',
+              '-o',
+              'UserKnownHostsFile=/dev/null',
+              '-i',
+              '~/cert.pem',
+                `${user}@${host}`,
+                'sudo apt-get update -y && sudo apt-get install -y zstd pv aria2'
+            ],
+            { stdio: getRemoteStdio() })
+        },
+        enabled: () => {
+          return this.config.network && this.config.snapshot === 'true'
+        }
+      }
+    ])
+  }
+
   async getSnapshotSyncTasks() {
-    let host, user, snapshotUrl, service, chaindata
+    const hosts = []
+    const users = []
+    const serviceArr = []
+    const chaindataArr = []
+    let erigonValCount = this.config.numOfErigonValidators
+    for (let i = 0; i < this.totalNodes; i++) {
+      hosts[i] = this.config.devnetBorHosts[i]
+      users[i] = this.config.devnetBorUsers[i]
+      serviceArr[i] = 'bor.service'
+      chaindataArr[i] = '.bor/data/bor/chaindata'
+      if (i >= this.config.numOfBorValidators && erigonValCount > 0) {
+        hosts[i] = this.config.devnetErigonHosts[i - this.config.numOfNonBorValidators]
+        users[i] = this.config.devnetErigonUsers[i - this.config.numOfBorValidators]
+        serviceArr[i] = 'erigon.service'
+        chaindataArr[i] = '.erigon/data/erigon/chaindata'
+      }
+      if (i >= this.totalBorNodes + this.config.numOfErigonValidators) {
+        hosts[i] = this.config.devnetErigonHosts[i - (this.totalBorNodes + this.config.numOfErigonValidators)]
+        users[i] = this.config.devnetErigonUsers[i - (this.totalBorNodes + this.config.numOfErigonValidators)]
+        serviceArr[i] = 'erigon.service'
+        chaindataArr[i] = '.erigon/data/erigon/chaindata'
+      }
+      if (i >= this.config.numOfBorValidators) {
+        erigonValCount--
+      }
+    }
+
+    for (let i = 0; i < hosts.length; i++) {
+      const aria2cInstallTask = await this.getAria2cInsallTask(hosts[i], users[i])
+      await aria2cInstallTask.run()
+    }
+
     return new Listr([
       {
         title: 'Download heimdall snapshot',
         task: async () => {
-          let erigonValCount = this.config.numOfErigonValidators
-          for (let i = 0; i < this.totalNodes; i++) {
-            host = this.config.devnetBorHosts[i]
-            user = this.config.devnetBorUsers[i]
-            if (i >= this.config.numOfBorValidators && erigonValCount > 0) {
-              host = this.config.devnetErigonHosts[i - this.config.numOfBorValidators]
-              user = this.config.devnetErigonUsers[i - this.config.numOfBorValidators]
-            }
-            if (i >= this.totalBorNodes + this.config.numOfErigonValidators) {
-              host = this.config.devnetErigonHosts[i - (this.totalBorNodes + this.config.numOfErigonValidators)]
-              user = this.config.devnetErigonUsers[i - (this.totalBorNodes + this.config.numOfErigonValidators)]
-            }
+          for (let i = 0; i < hosts.length; i++) {
             await execa(
               'ssh',
               [
@@ -500,43 +550,68 @@ export class Devnet {
                 'UserKnownHostsFile=/dev/null',
                 '-i',
                 '~/cert.pem',
-                  `${user}@${host}`,
-                  `sudo systemctl stop heimdalld.service && sudo rm -rf /var/lib/heimdall/data/* && sudo wget -O- ${this.config.heimdallSnapshotUrl} | tar -I zstd -xf - -C /var/lib/heimdall/data && sudo chmod 777 -R /var/lib/heimdall/data && sudo systemctl restart heimdalld.service`
+                  `${users[i]}@${hosts[i]}`,
+                  'sudo systemctl stop heimdalld.service && sudo rm -rf /var/lib/heimdall/data/*'
               ],
               { stdio: getRemoteStdio() })
-            if (i >= this.config.numOfBorValidators) {
-              erigonValCount--
-            }
+
+            // await execa(
+            //   'ssh',
+            //   [
+            //     '-o',
+            //     'StrictHostKeyChecking=no',
+            //     '-o',
+            //     'UserKnownHostsFile=/dev/null',
+            //     '-o',
+            //      'ServerAliveInterval=6000',
+            //     '-i',
+            //     '~/cert.pem',
+            //     `${users[i]}@${hosts[i]}`,
+            //     `tmux new -d -s snapshot; tmux new-window -t snapshot 'bash ~/node/inc-snapshot.sh <<< $"${this.config.network}\nheimdall\n/var/lib/heimdall/data\n"; tmux wait-for -S snapshot-done' && tmux send-keys -t snapshot:0 ENTER && tmux wait-for snapshot-done`
+            //   ],
+            //   { stdio: getRemoteStdio() }
+            // )
+
+            await execa(
+              'ssh',
+              [
+                '-o',
+                'StrictHostKeyChecking=no',
+                '-o',
+                'UserKnownHostsFile=/dev/null',
+                '-o',
+                'ServerAliveInterval=6000',
+                '-i',
+                '~/cert.pem',
+                `${users[i]}@${hosts[i]}`,
+                `bash ~/node/inc-snapshot.sh <<< $'${this.config.network}\nheimdall\n/var/lib/heimdall/data\n'`
+              ],
+              { stdio: getRemoteStdio() }
+            )
+
+            await execa(
+              'ssh',
+              [
+                '-o',
+                'StrictHostKeyChecking=no',
+                '-o',
+                'UserKnownHostsFile=/dev/null',
+                '-i',
+                '~/cert.pem',
+                  `${users[i]}@${hosts[i]}`,
+                  'sudo systemctl restart heimdalld.service'
+              ],
+              { stdio: getRemoteStdio() })
           }
         },
         enabled: () => {
-          return this.config.heimdallSnapshotUrl !== undefined && this.config.heimdallSnapshotUrl !== null && this.config.heimdallSnapshotUrl !== ''
+          return this.config.network && this.config.snapshot === 'true'
         }
       },
       {
         title: 'Download bor snapshot',
         task: async () => {
-          let erigonValCount = this.config.numOfErigonValidators
-          for (let i = 0; i < this.totalNodes; i++) {
-            host = this.config.devnetBorHosts[i]
-            user = this.config.devnetBorUsers[i]
-            snapshotUrl = this.config.borSnapshotUrl
-            service = 'bor.service'
-            chaindata = '~/.bor/data/bor/chaindata'
-            if (i >= this.config.numOfBorValidators && erigonValCount > 0) {
-              host = this.config.devnetErigonHosts[i - this.config.numOfBorSentries]
-              user = this.config.devnetErigonUsers[i - this.config.numOfBorValidators]
-              snapshotUrl = this.config.erigonSnapshotUrl
-              service = 'erigon.service'
-              chaindata = '~/.erigon/data/erigon/chaindata'
-            }
-            if (i >= this.totalBorNodes + this.config.numOfErigonValidators) {
-              host = this.config.devnetErigonHosts[i - (this.totalBorNodes + this.config.numOfErigonValidators)]
-              user = this.config.devnetErigonUsers[i - (this.totalBorNodes + this.config.numOfErigonValidators)]
-              snapshotUrl = this.config.erigonSnapshotUrl
-              service = 'erigon.service'
-              chaindata = '~/.erigon/data/erigon/chaindata'
-            }
+          for (let i = 0; i < hosts.length; i++) {
             await execa(
               'ssh',
               [
@@ -546,18 +621,62 @@ export class Devnet {
                 'UserKnownHostsFile=/dev/null',
                 '-i',
                 '~/cert.pem',
-                `${user}@${host}`,
-                `sudo systemctl stop ${service} && sudo rm -rf ${chaindata}/* && sudo wget -O- ${snapshotUrl} | tar -I zstd -xf - -C ${chaindata} && sudo chmod 777 -R ${chaindata} && sudo systemctl restart ${service}`
+                `${users[i]}@${hosts[i]}`,
+                `sudo systemctl stop ${serviceArr[i]} && sudo rm -rf ${chaindataArr[i]}/*`
               ],
               { stdio: getRemoteStdio() })
 
-            if (i >= this.config.numOfBorValidators) {
-              erigonValCount--
-            }
+            // await execa(
+            //   'ssh',
+            //   [
+            //     '-o',
+            //     'StrictHostKeyChecking=no',
+            //     '-o',
+            //     'UserKnownHostsFile=/dev/null',
+            //      '-o',
+            //      'ServerAliveInterval=6000',
+            //     '-i',
+            //     '~/cert.pem',
+            //     `${users[i]}@${hosts[i]}`,
+            //     `tmux new-window -t snapshot 'bash ~/node/inc-snapshot.sh <<< $"${this.config.network}\nbor\n${chaindataArr[i]}\n"; tmux wait-for -S snapshot-done' && tmux send-keys -t snapshot:1 ENTER && tmux wait-for snapshot-done`
+            //   ],
+            //   { stdio: getRemoteStdio() }
+            // )
+
+            await execa(
+              'ssh',
+              [
+                '-o',
+                'StrictHostKeyChecking=no',
+                '-o',
+                'UserKnownHostsFile=/dev/null',
+                '-o',
+                'ServerAliveInterval=6000',
+                '-i',
+                '~/cert.pem',
+                  `${users[i]}@${hosts[i]}`,
+                  `bash ~/node/inc-snapshot.sh <<< $'${this.config.network}\nbor\n${chaindataArr[i]}\n'`
+              ],
+              { stdio: getRemoteStdio() }
+            )
+
+            await execa(
+              'ssh',
+              [
+                '-o',
+                'StrictHostKeyChecking=no',
+                '-o',
+                'UserKnownHostsFile=/dev/null',
+                '-i',
+                '~/cert.pem',
+                    `${users[i]}@${hosts[i]}`,
+                    `sudo systemctl restart ${serviceArr[i]}`
+              ],
+              { stdio: getRemoteStdio() })
           }
         },
         enabled: () => {
-          return this.config.borSnapshotUrl !== undefined && this.config.borSnapshotUrl !== null && this.config.borSnapshotUrl !== '' && this.config.erigonSnapshotUrl !== undefined && this.config.erigonSnapshotUrl !== null && this.config.erigonSnapshotUrl !== ''
+          return this.config.network && this.config.snapshot === 'true'
         }
       }
     ],
