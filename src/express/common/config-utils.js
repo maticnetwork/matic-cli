@@ -358,10 +358,18 @@ function setCommonConfigs(doc) {
 
   let borChainId, heimdallChainId
 
-  if (!process.env.BOR_CHAIN_ID && !process.env.HEIMDALL_CHAIN_ID) {
+  if (process.env.NETWORK) {
+    setConfigValue('network', process.env.NETWORK, doc)
+    if (process.env.NETWORK === 'mainnet') {
+      borChainId = 137
+      heimdallChainId = 'heimdall-137'
+    } else if (process.env.NETWORK === 'mumbai') {
+      borChainId = 80001
+      heimdallChainId = 'heimdall-80001'
+    }
+  } else if (!process.env.BOR_CHAIN_ID && !process.env.HEIMDALL_CHAIN_ID) {
     borChainId = Math.floor(Math.random() * 10000 + 1000)
-    setConfigValue('borChainId', parseInt(borChainId), doc)
-    setConfigValue('heimdallChainId', 'heimdall-' + borChainId, doc)
+    heimdallChainId = 'heimdall-' + borChainId
   } else if (!process.env.BOR_CHAIN_ID) {
     try {
       if (process.env.HEIMDALL_CHAIN_ID > 0) {
@@ -370,9 +378,6 @@ function setCommonConfigs(doc) {
       } else {
         borChainId = process.env.HEIMDALL_CHAIN_ID.split('-')[1]
       }
-
-      setConfigValue('borChainId', parseInt(borChainId), doc)
-      setConfigValue('heimdallChainId', heimdallChainId, doc)
     } catch (error) {
       console.log(
         '❌ Error occured while processing heimdall chain id (Heimdall chain id should be like: heimdall-4052)!'
@@ -381,19 +386,18 @@ function setCommonConfigs(doc) {
     }
   } else if (!process.env.HEIMDALL_CHAIN_ID) {
     borChainId = process.env.BOR_CHAIN_ID
-    setConfigValue('borChainId', parseInt(process.env.BOR_CHAIN_ID), doc)
-    setConfigValue('heimdallChainId', 'heimdall-' + borChainId, doc)
+    heimdallChainId = 'heimdall-' + borChainId
   } else {
+    borChainId = process.env.BOR_CHAIN_ID
     if (process.env.HEIMDALL_CHAIN_ID > 0) {
       heimdallChainId = 'heimdall-' + process.env.HEIMDALL_CHAIN_ID
     } else {
       heimdallChainId = process.env.HEIMDALL_CHAIN_ID
     }
-
-    setConfigValue('heimdallChainId', heimdallChainId, doc)
-    setConfigValue('borChainId', parseInt(process.env.BOR_CHAIN_ID), doc)
   }
 
+  setConfigValue('borChainId', borChainId, doc)
+  setConfigValue('heimdallChainId', heimdallChainId, doc)
   setConfigList('sprintSize', process.env.SPRINT_SIZE, doc)
   setConfigList(
     'sprintSizeBlockNumber',
@@ -406,6 +410,7 @@ function setCommonConfigs(doc) {
   setConfigValue('borBranch', process.env.BOR_BRANCH, doc)
   setConfigValue('heimdallRepo', process.env.HEIMDALL_REPO, doc)
   setConfigValue('heimdallBranch', process.env.HEIMDALL_BRANCH, doc)
+  setConfigList('heimdallSeeds', process.env.HEIMDALL_SEEDS, doc)
   setConfigValue('contractsRepo', process.env.CONTRACTS_REPO, doc)
   setConfigValue('contractsBranch', process.env.CONTRACTS_BRANCH, doc)
   setConfigValue(
@@ -445,6 +450,8 @@ function setCommonConfigs(doc) {
     doc
   )
   setConfigList('instancesIds', process.env.INSTANCES_IDS, doc)
+  setConfigValue('borSnapshotUrl', process.env.BOR_SNAPSHOT_URL, doc)
+  setConfigValue('heimdallSnapshotUrl', process.env.HEIMDALL_SNAPSHOT_URL, doc)
 }
 
 function setConfigValue(key, value, doc) {

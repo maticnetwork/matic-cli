@@ -17,6 +17,7 @@ import {
 } from './express/commands/restart'
 import { cleanup } from './express/commands/cleanup'
 import { setupDatadog } from './express/commands/setup-datadog'
+import { setupEthstats } from './express/commands/setup-ethstats-backend'
 import { chaos } from './express/commands/chaos'
 import { checkDir } from './express/common/files-utils'
 import { timer } from './express/common/time-utils'
@@ -26,8 +27,15 @@ import { testEip1559 } from '../tests/test-eip-1559'
 import { stopInstances } from './express/commands/aws-instances-stop'
 import { startInstances } from './express/commands/aws-instances-start'
 import { rewind } from './express/commands/rewind'
+import { startReorg } from './express/commands/reorg-start'
+import { stopReorg } from './express/commands/reorg-stop'
+import { milestoneBase } from './express/commands/milestone-base'
+import { milestonePartition } from './express/commands/milestone-partition'
+import { shadow } from './express/commands/shadow'
+import { relay } from './express/commands/relay'
 import { awsKeypairAdd } from './express/commands/aws-keypair-add'
 import { awsKeypairDestroy } from './express/commands/aws-keypair-destroy'
+import { rpcTest } from '../tests/rpc-tests/rpc-test'
 
 program
   .option('-i, --init', 'Initiate the terraform setup')
@@ -68,13 +76,19 @@ program
     'Start the stress test. If the string `fund` is specified, the account will be funded. This option is mandatory when the command is executed the first time on a devnet.'
   )
   .option('-ss, --send-state-sync', 'Send state sync tx')
-  .option('-sstake, --send-staked-event', 'Send staked event')
-  .option('-sstakeupdate, --send-stakeupdate-event', 'Send staked-update event')
+  .option('-sstake, --send-staked-event [validatorID]', 'Send staked event')
   .option(
-    '-ssignerchange, --send-signerchange-event',
+    '-sstakeupdate, --send-stakeupdate-event [validatorID]',
+    'Send staked-update event'
+  )
+  .option(
+    '-ssignerchange, --send-signerchange-event [validatorID]',
     'Send signer-change event'
   )
-  .option('-stopupfee, --send-topupfee-event', 'Send topupfee event')
+  .option(
+    '-stopupfee, --send-topupfee-event [validatorID]',
+    'Send topupfee event'
+  )
   .option(
     '-sunstakeinit, --send-unstakeinit-event [validatorID]',
     'Send unstake-init event'
@@ -84,9 +98,24 @@ program
     'Test EIP 1559 txs. In case of a non-dockerized devnet, if an integer [index] is specified, it will use that VM to send the tx. Otherwise, it will target the first VM.'
   )
   .option('-dd, --setup-datadog', 'Setup DataDog')
+  .option('-ethstats, --setup-ethstats', 'Setup Ethstats')
   .option('-xxx, --chaos [intensity]', 'Start Chaos')
   .option('-istop, --instances-stop', 'Stop aws ec2 instances')
   .option('-istart, --instances-start', 'Start aws ec2 instances')
+  .option('-rewind, --rewind [numberOfBlocks]', 'Rewind the chain')
+  .option(
+    '-reorg-start, --reorg-start [split]',
+    'Reorg the chain by creating two clusters in the network, where [split] param represents the number of nodes that one of the clusters will have (with other being [total number of nodes - split])'
+  )
+  .option(
+    '-reorg-stop, --reorg-stop',
+    'Stops the reorg previously created by reconnecting all the nodes'
+  )
+  .option('-milestone-base, --milestone-base', 'Run milestone base tests')
+  .option(
+    '-milestone-partition, --milestone-partition',
+    'Run milestone partition tests'
+  )
   .option(
     '-rewind, --rewind [numberOfBlocks]',
     'Rewind the chain by a given number of blocks'
@@ -99,6 +128,12 @@ program
     '-key-d, --aws-key-des [keyName]',
     'Destroy aws keypair from devnet, given its keyName'
   )
+  .option(
+    '-sf, --shadow-fork [blockNumber]',
+    'Run nodes in shadow mode. Please note that there might be an offset of ~3-4 blocks from [blockNumber] specified when restarting the (shadow) node'
+  )
+  .option('-relay, --relay', 'Relay transaction to shadow node')
+  .option('-rpc, --rpc-test', 'Run the rpc test command')
   .version(pkg.version)
 
 export async function cli() {
@@ -288,7 +323,7 @@ export async function cli() {
     await timer(3000)
     await sendStateSyncTx()
   } else if (options.sendStakedEvent) {
-    console.log('📍Command --send-staked-event ')
+    console.log('📍Command --send-staked-event [validatorID]')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -296,9 +331,9 @@ export async function cli() {
       process.exit(1)
     }
     await timer(3000)
-    await sendStakedEvent()
+    await sendStakedEvent(options.sendStakedEvent)
   } else if (options.sendStakeupdateEvent) {
-    console.log('📍Command --send-stakeupdate-event ')
+    console.log('📍Command --send-stakeupdate-event [validatorID]')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -306,9 +341,9 @@ export async function cli() {
       process.exit(1)
     }
     await timer(3000)
-    await sendStakeUpdateEvent()
+    await sendStakeUpdateEvent(options.sendStakeupdateEvent)
   } else if (options.sendSignerchangeEvent) {
-    console.log('📍Command --send-signerchange-event ')
+    console.log('📍Command --send-signerchange-event [validatorID]')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -316,7 +351,7 @@ export async function cli() {
       process.exit(1)
     }
     await timer(3000)
-    await sendSignerChangeEvent()
+    await sendSignerChangeEvent(options.sendSignerchangeEvent)
   } else if (options.sendUnstakeinitEvent) {
     console.log('📍Command --send-unstakeinit-event [validatorID]')
     if (!checkDir(false)) {
@@ -325,15 +360,10 @@ export async function cli() {
       )
       process.exit(1)
     }
-    if (options.sendUnstakeinitEvent === true) {
-      if (parseInt(options.sendUnstakeinitEvent) < 1) {
-        options.sendUnstakeinitEvent = 1
-      }
-    }
     await timer(3000)
-    await sendUnstakeInitEvent(parseInt(options.sendUnstakeinitEvent))
+    await sendUnstakeInitEvent(options.sendUnstakeinitEvent)
   } else if (options.sendTopupfeeEvent) {
-    console.log('📍Command --send-topupfee-event ')
+    console.log('📍Command --send-topupfee-event [validatorID]')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -341,7 +371,7 @@ export async function cli() {
       process.exit(1)
     }
     await timer(3000)
-    await sendTopUpFeeEvent()
+    await sendTopUpFeeEvent(options.sendTopupfeeEvent)
   } else if (options.eip1559Test) {
     console.log('📍Command --eip-1559-test')
     if (!checkDir(false)) {
@@ -363,6 +393,17 @@ export async function cli() {
 
     await timer(3000)
     await setupDatadog()
+  } else if (options.setupEthstats) {
+    console.log('📍Command --setup-ethstats')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+
+    await timer(3000)
+    await setupEthstats()
   } else if (options.chaos) {
     console.log('📍Command --chaos [intensity]')
     if (!checkDir(false)) {
@@ -419,6 +460,7 @@ export async function cli() {
       )
       process.exit(1)
     }
+
     await awsKeypairAdd()
   } else if (options.awsKeyDes) {
     console.log('📍 Command --aws-key-des')
@@ -428,6 +470,90 @@ export async function cli() {
       )
       process.exit(1)
     }
+
     await awsKeypairDestroy(options.awsKeyDes)
+  } else if (options.reorgStart) {
+    console.log('📍Command --reorg-start [split]')
+
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+
+    await startReorg(options.reorg)
+  } else if (options.reorgStop) {
+    console.log('📍Command --reorg-stop')
+
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+
+    await stopReorg()
+  } else if (options.milestoneBase) {
+    console.log('📍Command --milestone-base')
+
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+
+    await milestoneBase()
+  } else if (options.milestonePartition) {
+    console.log('📍Command --milestone-partition')
+
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+
+    await milestonePartition()
+  } else if (options.shadowFork) {
+    console.log('📍Command --shadow-fork [blockNumber]')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    console.log(
+      '⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...'
+    )
+
+    await shadow(options.shadowFork)
+  } else if (options.relay) {
+    console.log('📍Command --relay')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    console.log(
+      '⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...'
+    )
+
+    await relay()
+  } else if (options.rpcTest) {
+    console.log('📍Command --rpc-test')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+
+    console.log(
+      '⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...'
+    )
+    await rpcTest()
   }
 }

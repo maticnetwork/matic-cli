@@ -33,14 +33,12 @@ export async function stopServices(doc) {
       await runSshCommand(ip, command, maxRetries)
     }
 
-    console.log('📍Stopping heimdall on machine ' + ip + '...')
-    let command =
-      'sudo systemctl stop heimdalld.service || echo "heimdall not running on current machine..."'
+    console.log('📍Stopping bor on machine ' + ip + ' ...')
+    let command = 'sudo systemctl stop bor.service'
     await runSshCommand(ip, command, maxRetries)
 
-    console.log('📍Stopping bor on machine ' + ip + ' ...')
-    command =
-      'sudo systemctl stop bor.service || echo "bor not running on current machine..."'
+    console.log('📍Stopping heimdall on machine ' + ip + '...')
+    command = 'sudo systemctl stop heimdalld.service'
     await runSshCommand(ip, command, maxRetries)
   })
 
@@ -70,7 +68,7 @@ async function cleanupServices(doc) {
     }
 
     console.log('📍Cleaning up heimdall on machine ' + ip + ' ...')
-    let command = 'heimdalld unsafe-reset-all'
+    let command = 'heimdalld unsafe-reset-all --home /var/lib/heimdall'
     await runSshCommand(ip, command, maxRetries)
 
     console.log('📍Purging queue for heimdall bridge on machine ' + ip + ' ...')
@@ -83,7 +81,7 @@ async function cleanupServices(doc) {
     await runSshCommand(ip, command, maxRetries)
 
     console.log('📍Cleaning up bridge storage on machine ' + ip + ' ...')
-    command = 'rm -rf var/lib/heimdall/bridge'
+    command = 'rm -rf /var/lib/heimdall/bridge'
     await runSshCommand(ip, command, maxRetries)
 
     console.log('📍Cleaning up bor on machine ' + ip + ' ...')

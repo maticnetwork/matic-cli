@@ -242,6 +242,10 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
   - Sets up datadog on the nodes and gets them ready to send metrics to Datadog Dashboard. `DD_API_KEY` env var is required for this.
 
+- `../../bin/express-cli --setup-ethstats`
+
+  - Sets up ethstats on the nodes and gets them ready to send metrics to Ethstats Backend which can be queried from Hasura Console and displayed on Reorgs Frontend.
+
 - `../../bin/express-cli --chaos [intensity]`
 
   - Adds dedicated chaos(de-peering) to the network. The `intensity` parameter is optional and can be set from `1` to `10`. If not set, `5` is used.
@@ -251,12 +255,48 @@ The `express-cli` also comes with additional utility commands, listed below. Som
   - Rewinds the chain by a defined number of blocks (not greater than `128`). Default `numberOfBlocks` value is `100`.
 
 - `../../bin/express-cli --eip-1559-test [index]`
+
   - Executes a test to send EIP 1559 tx. In case of a non-dockerized devnet, if an integer [index] is specified, it will use
     that VM to send the tx. Otherwise, it will target the first VM.
+
 - `../../bin/express-cli --aws-key-add`
+
   - Generates an additional `aws` key-pair remotely and stores it locally in the devnet folder. The public key is added to the ssh authorized keys of the devnet's machines. The key can be shared - on a secure channel! - with other devs to grant them access to the remote devnet.
+
 - `../../bin/express-cli --aws-key-des [keyName]`
+
   - Destroys an `aws` key-pair given its `keyName`. The key gets deleted remotely from `aws`, cancelled from the authorized ssh keys of the devnet's machines and removed from local devnet folder.
+
+- `../../bin/express-cli --reorg-start [split]`
+
+  - Reorg the chain by creating two clusters in the network, where [split] param represents the number of nodes that one of the clusters will have (with other being [total number of nodes - split])
+
+- `../../bin/express-cli --reorg-stop`
+
+  - Stops the reorg previously created by reconnecting all the nodes
+
+- `../../bin/express-cli --shadow-fork [blockNumber]`
+
+  - Run (mumbai/mainnet) nodes in shadow mode. Please note that there might be an offset of ~3-4 blocks from [block] number
+    specified when restarting the (shadow) node. Currently only works with remote setup (no docker support).
+
+- `../../bin/express-cli --rpc-test`
+
+  - Executes RPC methods against the provided test data and verifies the response data's compatibility and correctness.
+    Since the `tests/rpc-tests/RPC-testdata` is a [submodule](https://github.com/maticnetwork/RPC-testdata) , do the following
+    to initialize and fetch the testdata:
+
+    ```bash
+    git submodule init
+    git submodule update
+    ```
+
+- `../../bin/express-cli --relay`
+  - Relay transactions from testnet or mainnet to shadow node running in the devnet.
+
+## `Milestone tests`
+
+The `express-cli` can also be used to perform few simulation based tests for the upcoming milestone feature. Please refer to the steps and requirements mentioned over [here](./docs/milestones.md) for running the tests.
 
 ## `matic-cli`
 
