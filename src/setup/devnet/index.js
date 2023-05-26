@@ -65,11 +65,11 @@ export class Devnet {
 
   get totalBorNodes() {
     // noinspection JSUnresolvedVariable
-    return this.config.numOfBorValidators + this.config.numOfNonBorValidators + this.config.numOfBorArchiveNodes
+    return this.config.numOfBorValidators + this.config.numOfBorSentries + this.config.numOfBorArchiveNodes
   }
 
   get totalErigonNodes() {
-    return this.config.numOfErigonValidators + this.config.numOfNonErigonValidators + this.config.numOfErigonArchiveNodes
+    return this.config.numOfErigonValidators + this.config.numOfErigonSentries + this.config.numOfErigonArchiveNodes
   }
 
   get totalNodes() {
@@ -524,7 +524,7 @@ export class Devnet {
             service = 'bor.service'
             chaindata = '~/.bor/data/bor/chaindata'
             if (i >= this.config.numOfBorValidators && erigonValCount > 0) {
-              host = this.config.devnetErigonHosts[i - this.config.numOfNonBorValidators]
+              host = this.config.devnetErigonHosts[i - this.config.numOfBorSentries]
               user = this.config.devnetErigonUsers[i - this.config.numOfBorValidators]
               snapshotUrl = this.config.erigonSnapshotUrl
               service = 'erigon.service'
@@ -826,7 +826,7 @@ export class Devnet {
               )
             }
 
-            if (i >= this.config.numOfBorValidators + this.config.numOfNonBorValidators) {
+            if (i >= this.config.numOfBorValidators + this.config.numOfBorSentries) {
               await execa('ssh', [
                 '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
                 '-i', '~/cert.pem',
@@ -1123,7 +1123,7 @@ export class Devnet {
             '--v',
             this.config.numOfBorValidators + this.config.numOfErigonValidators,
             '--n',
-            this.config.numOfNonBorValidators + this.config.numOfBorArchiveNodes + this.config.numOfNonErigonValidators + this.config.numOfErigonArchiveNodes,
+            this.config.numOfBorSentries + this.config.numOfBorArchiveNodes + this.config.numOfErigonSentries + this.config.numOfErigonArchiveNodes,
             '--chain-id',
             this.config.heimdallChainId,
             '--node-host-prefix',
@@ -1648,7 +1648,7 @@ export default async function (command) {
   const devnetHeimdallUsers = config.devnetHeimdallUsers || []
   const devnetErigonHosts = config.devnetErigonHosts || []
   const devnetErigonUsers = config.devnetErigonUsers || []
-  const totalBorNodes = config.numOfBorValidators + config.numOfNonBorValidators + config.numOfBorArchiveNodes
+  const totalBorNodes = config.numOfBorValidators + config.numOfBorSentries + config.numOfBorArchiveNodes
 
   // For docker, the devnetBorHosts conform to the subnet 172.20.1.0/24
   if (config.devnetType === 'docker') {
