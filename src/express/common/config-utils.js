@@ -114,7 +114,7 @@ function validateEnvVars() {
     }),
     BOR_BRANCH: validStr({ default: 'develop' }),
     ERIGON_REPO: url({
-      default: 'https://github.com/maticnetwork/erigon.git'
+      default: 'https://github.com/ledgerwatch/erigon.git'
     }),
     ERIGON_BRANCH: validStr({ default: 'devel' }),
     HEIMDALL_REPO: url({
@@ -436,7 +436,7 @@ function setCommonConfigs(doc) {
     doc
   )
   setConfigValue(
-    'numOfNonBorValidators',
+    'numOfBorSentries',
     parseInt(process.env.TF_VAR_BOR_SENTRY_COUNT),
     doc
   )
@@ -451,7 +451,7 @@ function setCommonConfigs(doc) {
     doc
   )
   setConfigValue(
-    'numOfNonErigonValidators',
+    'numOfErigonSentries',
     parseInt(process.env.TF_VAR_ERIGON_SENTRY_COUNT),
     doc
   )

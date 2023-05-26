@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 NODE_DIR=$HOME/node
-BOR_HOME=$HOME/.bor
+ERIGON_HOME=$HOME/.erigon
 BIN_DIR=$(go env GOPATH)/bin
 USER=$(whoami)
 source $HOME/.nvm/nvm.sh
@@ -9,7 +9,7 @@ NODE=$(nvm which node)
 GO=$(go env GOROOT)/bin
 PATH=$NODE:$BIN_DIR:$GO:$PATH
 
-VALIDATOR_ADDRESS="`cat $BOR_HOME/address.txt`"
+VALIDATOR_ADDRESS="`cat $ERIGON_HOME/address.txt`"
 
 cat > metadata <<EOF
 VALIDATOR_ADDRESS=

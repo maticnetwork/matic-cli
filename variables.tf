@@ -9,11 +9,11 @@ variable "VM_NAME" {
 }
 
 variable "BOR_DISK_SIZE_GB" {
-  default = "100"
+  default = "20"
 }
 
 variable "ERIGON_DISK_SIZE_GB" {
-  default = "100"
+  default = "20"
 }
 
 variable "BOR_ARCHIVE_DISK_SIZE_GB" {
@@ -87,7 +87,7 @@ variable "BOR_INSTANCE_TYPE" {
 }
 
 variable "ERIGON_INSTANCE_TYPE" {
-  default = "t2.xlarge"
+  default = "r5b.large"
 }
 
 variable "BOR_ARCHIVE_INSTANCE_TYPE" {
@@ -95,7 +95,7 @@ variable "BOR_ARCHIVE_INSTANCE_TYPE" {
 }
 
 variable "ERIGON_ARCHIVE_INSTANCE_TYPE" {
-  default = "t2.xlarge"
+  default = "r5b.large"
 }
 
 variable "INSTANCE_AMI" {
