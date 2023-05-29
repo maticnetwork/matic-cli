@@ -38,34 +38,22 @@ export async function setupDatadog() {
   } else {
     doc = await loadDevnetConfig('remote')
   }
-  const totalHosts = []
-  const totalUsers = []
-  if (doc.devnetBorHosts) {
-    totalHosts.push(...splitToArray(doc.devnetBorHosts.toString()))
-  }
-  if (doc.devnetErigonHosts) {
-    totalHosts.push(...splitToArray(doc.devnetErigonHosts.toString()))
-  }
 
-  if (doc.devnetBorUsers) {
-    totalUsers.push(...splitToArray(doc.devnetBorUsers.toString()))
-  }
-  if (doc.devnetErigonUsers) {
-    totalUsers.push(...splitToArray(doc.devnetErigonUsers.toString()))
-  }
-
-  if (totalHosts.length > 0) {
-    console.log('📍Monitoring the nodes', totalHosts[0])
+  if (doc.devnetBorHosts.length > 0) {
+    console.log('📍Monitoring the nodes', doc.devnetBorHosts[0])
   } else {
-    console.log('📍No nodes to monitor, please check your configs! Exiting...')
+    console.log(
+      '📍No nodes to monitor since this command is not yet supported on Erigon devnets, please check your configs! Exiting...'
+    )
     process.exit(1)
   }
 
+  const borUsers = splitToArray(doc.devnetBorUsers.toString())
   let envName
 
-  for (let i = 0; i < totalHosts.length; i++) {
-    const host = totalHosts[i]
-    const user = totalUsers[i]
+  for (let i = 0; i < doc.devnetBorHosts.length; i++) {
+    const host = doc.devnetBorHosts[i]
+    const user = borUsers[i]
 
     console.log('📍Monitoring the node', host)
 

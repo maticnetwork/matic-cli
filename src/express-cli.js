@@ -332,6 +332,7 @@ export async function cli() {
       )
       process.exit(1)
     }
+    console.log('📍Note that checkpoints do not come through on erigon yet')
     await timer(3000)
     if (options.monitor === 'exit') {
       await monitor(true)
@@ -403,6 +404,9 @@ export async function cli() {
       )
       process.exit(1)
     }
+    console.log(
+      '📍Note that this command does not properly work for erigon yet'
+    )
     await timer(3000)
     await sendUnstakeInitEvent(options.sendUnstakeinitEvent)
   } else if (options.sendTopupfeeEvent) {

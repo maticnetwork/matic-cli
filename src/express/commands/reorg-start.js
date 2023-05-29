@@ -8,6 +8,12 @@ import { isValidPositiveNum } from '../common/num-utils'
 export async function startReorg(split) {
   // Get users and hosts
   const { borUsers, borHosts } = await getUsersAndHosts()
+  if (!borHosts) {
+    console.log(
+      '❌ This command is not yet supported for Erigon devnets! Exiting...'
+    )
+    process.exit(1)
+  }
   // Check for number of validators
   if (borUsers.length < 2) {
     console.log('❌ Cannot reorg on a single node devnet! Exiting...')

@@ -39,11 +39,18 @@ export async function stopServices(doc) {
     ip = `${totalUsers[i]}@${totalHosts[i]}`
     hostToIndexMap.set(ip, i)
     nodeIps.push(ip)
-    i === 0 && parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) > 0
-      ? isHostMap.set(ip, true)
-      : i === doc.devnetBorHosts.length
-      ? isHostMap.set(ip, true)
-      : isHostMap.set(ip, false)
+    if (
+      (i === 0 && parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) > 0) ||
+      (i ===
+        parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) +
+          parseInt(process.env.TF_VAR_BOR_SENTRY_COUNT) +
+          parseInt(process.env.TF_VAR_BOR_ARCHIVE_COUNT) &&
+        parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) === 0)
+    ) {
+      isHostMap.set(ip, true)
+    } else {
+      isHostMap.set(ip, false)
+    }
     /* eslint-disable */
   }
 
@@ -101,7 +108,10 @@ async function cleanupServices(doc) {
     nodeIps.push(ip)
     if (
       (i === 0 && parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) > 0) ||
-      (i === doc.devnetBorHosts.length &&
+      (i ===
+        parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) +
+          parseInt(process.env.TF_VAR_BOR_SENTRY_COUNT) +
+          parseInt(process.env.TF_VAR_BOR_ARCHIVE_COUNT) &&
         parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) === 0)
     ) {
       isHostMap.set(ip, true)
@@ -172,7 +182,10 @@ async function startServices(doc) {
     nodeIps.push(ip)
     if (
       (i === 0 && parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) > 0) ||
-      (i === doc.devnetBorHosts.length &&
+      (i ===
+        parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) +
+          parseInt(process.env.TF_VAR_BOR_SENTRY_COUNT) +
+          parseInt(process.env.TF_VAR_BOR_ARCHIVE_COUNT) &&
         parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) === 0)
     ) {
       isHostMap.set(ip, true)

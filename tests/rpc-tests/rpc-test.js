@@ -53,6 +53,12 @@ async function init() {
     return [machine, null, null]
   } else {
     const doc = await loadDevnetConfig('remote')
+    if (!doc.devnetBorHosts) {
+      console.log(
+        '❌ This command is not yet supported for Erigon devnets! Exiting ...'
+      )
+      process.exit(1)
+    }
     machine = doc.devnetBorHosts[0]
     const user = doc.devnetBorUsers[0]
     ip = `${user}@${machine}`
