@@ -1,4 +1,8 @@
-import { loadDevnetConfig, splitToArray } from '../common/config-utils'
+import {
+  loadDevnetConfig,
+  returnTotalBorNodes,
+  splitToArray
+} from '../common/config-utils'
 import { maxRetries, runSshCommand } from '../common/remote-worker'
 import { timer } from '../common/time-utils'
 
@@ -41,10 +45,7 @@ export async function stopServices(doc) {
     nodeIps.push(ip)
     if (
       (i === 0 && parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) > 0) ||
-      (i ===
-        parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) +
-          parseInt(process.env.TF_VAR_BOR_SENTRY_COUNT) +
-          parseInt(process.env.TF_VAR_BOR_ARCHIVE_COUNT) &&
+      (i === returnTotalBorNodes(doc) &&
         parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) === 0)
     ) {
       isHostMap.set(ip, true)
@@ -63,7 +64,7 @@ export async function stopServices(doc) {
       await runSshCommand(ip, command, maxRetries)
     }
 
-    if (hostToIndexMap.get(ip) < doc.devnetBorHosts.length) {
+    if (hostToIndexMap.get(ip) < returnTotalBorNodes(doc)) {
       console.log('📍Stopping bor on machine ' + ip + ' ...')
       command = 'sudo systemctl stop bor.service'
       await runSshCommand(ip, command, maxRetries)
@@ -108,10 +109,7 @@ async function cleanupServices(doc) {
     nodeIps.push(ip)
     if (
       (i === 0 && parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) > 0) ||
-      (i ===
-        parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) +
-          parseInt(process.env.TF_VAR_BOR_SENTRY_COUNT) +
-          parseInt(process.env.TF_VAR_BOR_ARCHIVE_COUNT) &&
+      (i === returnTotalBorNodes(doc) &&
         parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) === 0)
     ) {
       isHostMap.set(ip, true)
@@ -146,7 +144,7 @@ async function cleanupServices(doc) {
     command = 'rm -rf /var/lib/heimdall/bridge'
     await runSshCommand(ip, command, maxRetries)
 
-    if (hostToIndexMap.get(ip) < doc.devnetBorHosts.length) {
+    if (hostToIndexMap.get(ip) < returnTotalBorNodes(doc)) {
       console.log('📍Cleaning up bor on machine ' + ip + ' ...')
       command = 'rm -rf ~/.bor/data'
       await runSshCommand(ip, command, maxRetries)
@@ -164,14 +162,19 @@ async function startServices(doc) {
   const totalHosts = []
   const totalUsers = []
   const nodeIps = []
-  totalUsers.push(
-    ...splitToArray(doc.devnetBorUsers.toString()),
-    ...splitToArray(doc.devnetErigonUsers.toString())
-  )
-  totalHosts.push(
-    ...splitToArray(doc.devnetBorHosts.toString()),
-    ...splitToArray(doc.devnetErigonHosts.toString())
-  )
+  if (doc.devnetBorHosts) {
+    totalHosts.push(...splitToArray(doc.devnetBorHosts.toString()))
+  }
+  if (doc.devnetErigonHosts) {
+    totalHosts.push(...splitToArray(doc.devnetErigonHosts.toString()))
+  }
+
+  if (doc.devnetBorUsers) {
+    totalUsers.push(...splitToArray(doc.devnetBorUsers.toString()))
+  }
+  if (doc.devnetErigonUsers) {
+    totalUsers.push(...splitToArray(doc.devnetErigonUsers.toString()))
+  }
   let ip
   const isHostMap = new Map()
   const hostToIndexMap = new Map()
@@ -181,12 +184,8 @@ async function startServices(doc) {
     hostToIndexMap.set(ip, i)
     nodeIps.push(ip)
     if (
-      (i === 0 && parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) > 0) ||
-      (i ===
-        parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) +
-          parseInt(process.env.TF_VAR_BOR_SENTRY_COUNT) +
-          parseInt(process.env.TF_VAR_BOR_ARCHIVE_COUNT) &&
-        parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) === 0)
+      (i === 0 && doc.numOfBorValidators > 0) ||
+      (i === returnTotalBorNodes(doc) && doc.numOfBorValidators === 0)
     ) {
       isHostMap.set(ip, true)
     } else {
@@ -218,7 +217,7 @@ async function startServices(doc) {
     command = 'sudo systemctl start heimdalld.service'
     await runSshCommand(ip, command, maxRetries)
 
-    if (hostToIndexMap.get(ip) < doc.devnetBorHosts.length) {
+    if (hostToIndexMap.get(ip) < returnTotalBorNodes(doc)) {
       console.log('📍Setting bor on machine ' + ip + ' ...')
       command = 'bash ~/node/bor-setup.sh'
       await runSshCommand(ip, command, maxRetries)
@@ -242,12 +241,14 @@ async function startServices(doc) {
 
 async function deployBorContractsAndStateSync(doc) {
   const user = `${doc.ethHostUser}`
-  const borHosts = splitToArray(doc.devnetBorHosts.toString())
-  const erigonHosts = splitToArray(doc.devnetErigonHosts.toString())
-  const host =
-    parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) > 0
-      ? borHosts[0]
-      : erigonHosts[0]
+  let borHosts, erigonHosts
+  if (doc.devnetBorHosts) {
+    borHosts = splitToArray(doc.devnetBorHosts.toString())
+  }
+  if (doc.devnetErigonHosts) {
+    erigonHosts = splitToArray(doc.devnetErigonHosts.toString())
+  }
+  const host = doc.numOfBorValidators > 0 ? borHosts[0] : erigonHosts[0]
   const ip = `${user}@${host}`
 
   console.log('📍Deploying contracts for bor on machine ' + ip + ' ...')

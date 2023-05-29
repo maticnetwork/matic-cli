@@ -3,7 +3,11 @@ import {
   pullAndRestartErigon,
   pullAndRestartHeimdall
 } from './update'
-import { checkAndReturnVMIndex, loadDevnetConfig } from '../common/config-utils'
+import {
+  checkAndReturnVMIndex,
+  loadDevnetConfig,
+  returnTotalBorNodes
+} from '../common/config-utils'
 
 const { splitToArray } = require('../common/config-utils')
 
@@ -39,7 +43,7 @@ export async function restartAll(n) {
     }
 
     const restartAllTasks = nodeIps.map(async (ip) => {
-      if (hostToIndexMap.get(ip) < doc.devnetBorHosts.length) {
+      if (hostToIndexMap.get(ip) < returnTotalBorNodes(doc)) {
         await pullAndRestartBor(ip, hostToIndexMap.get(ip), false)
       } else {
         await pullAndRestartErigon(
@@ -49,13 +53,13 @@ export async function restartAll(n) {
           doc.devnetErigonHosts.length
         )
       }
-      await pullAndRestartHeimdall(ip, hostToIndexMap.get(ip), false)
+      await pullAndRestartHeimdall(doc, ip, hostToIndexMap.get(ip), false)
     })
 
     await Promise.all(restartAllTasks)
   } else {
     ip = `${totalUsers[vmIndex]}@${totalHosts[vmIndex]}`
-    if (vmIndex < doc.devnetBorHosts.length) {
+    if (vmIndex < returnTotalBorNodes(doc)) {
       await pullAndRestartBor(ip, vmIndex, false)
     } else {
       await pullAndRestartErigon(
@@ -65,7 +69,7 @@ export async function restartAll(n) {
         doc.devnetErigonHosts.length
       )
     }
-    await pullAndRestartHeimdall(ip, vmIndex, false)
+    await pullAndRestartHeimdall(doc, ip, vmIndex, false)
   }
 }
 
@@ -127,12 +131,12 @@ export async function restartErigon(n) {
 
     await Promise.all(restartErigonTasks)
   } else {
-    if (vmIndex < doc.devnetBorHosts.length) {
+    if (vmIndex < returnTotalBorNodes(doc)) {
       console.log('📍Wrong VM index, please check your configs! Exiting...')
       process.exit(1)
     }
-    ip = `${doc.devnetErigonUsers[vmIndex - doc.devnetBorHosts.length]}@${
-      doc.devnetErigonHosts[vmIndex - doc.devnetBorHosts.length]
+    ip = `${doc.devnetErigonUsers[vmIndex - returnTotalBorNodes(doc)]}@${
+      doc.devnetErigonHosts[vmIndex - returnTotalBorNodes(doc)]
     }`
     await pullAndRestartErigon(ip, vmIndex, false, doc.devnetErigonHosts.length)
   }
@@ -170,12 +174,12 @@ export async function restartHeimdall(n) {
     }
 
     const updateHeimdallTasks = nodeIps.map(async (ip) => {
-      await pullAndRestartHeimdall(ip, hostToIndexMap.get(ip), false)
+      await pullAndRestartHeimdall(doc, ip, hostToIndexMap.get(ip), false)
     })
 
     await Promise.all(updateHeimdallTasks)
   } else {
     ip = `${totalUsers[vmIndex]}@${totalHosts[vmIndex]}`
-    await pullAndRestartHeimdall(ip, vmIndex, false)
+    await pullAndRestartHeimdall(doc, ip, vmIndex, false)
   }
 }

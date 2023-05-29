@@ -562,10 +562,12 @@ export async function checkAndReturnVMIndex(n, doc) {
     return undefined
   }
   const totalHosts = []
-  totalHosts.push(
-    ...splitToArray(doc.devnetBorHosts.toString()),
-    ...splitToArray(doc.devnetErigonHosts.toString())
-  )
+  if (doc.devnetBorHosts) {
+    totalHosts.push(...splitToArray(doc.devnetBorHosts.toString()))
+  }
+  if (doc.devnetErigonHosts) {
+    totalHosts.push(...splitToArray(doc.devnetErigonHosts.toString()))
+  }
   if (typeof n === 'string') {
     const vmIndex = parseInt(n, 10)
     if (vmIndex >= 0 && vmIndex < totalHosts.length) {
@@ -709,6 +711,13 @@ export function setBorAndErigonHosts(dnsIps) {
 
   return dnsIps
 }
+
+export function returnTotalBorNodes(doc) {
+  return (
+    doc.numOfBorValidators + doc.numOfBorSentries + doc.numOfBorArchiveNodes
+  )
+}
+
 export async function editMaticCliDockerYAMLConfig() {
   console.log('📍Editing matic-cli docker YAML configs...')
 

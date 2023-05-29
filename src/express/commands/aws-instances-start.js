@@ -8,9 +8,11 @@ import { timer } from '../common/time-utils'
 const shell = require('shelljs')
 
 async function startGanache(doc) {
-  let ip = `${doc.ethHostUser}@${doc.devnetBorHosts[0]}`
+  let ip
   if (doc.numOfBorValidators === 0) {
     ip = `${doc.ethHostUser}@${doc.devnetErigonHosts[0]}`
+  } else {
+    ip = `${doc.ethHostUser}@${doc.devnetBorHosts[0]}`
   }
   console.log('📍Running ganache in machine ' + ip + ' ...')
   const command =
