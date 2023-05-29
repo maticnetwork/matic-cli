@@ -1585,20 +1585,56 @@ export default async function (command) {
   config.set(answers)
 
   const questions = []
-  if (!('numOfValidators' in config)) {
+  if (!('numOfBorValidators' in config)) {
     questions.push({
       type: 'number',
-      name: 'numOfValidators',
-      message: 'Please enter number of validator nodes',
+      name: 'numOfBorValidators',
+      message: 'Please enter number of Bor validator nodes',
       default: 2
     })
   }
 
-  if (!('numOfNonValidators' in config)) {
+  if (!('numOfBorSentries' in config)) {
     questions.push({
       type: 'number',
-      name: 'numOfNonValidators',
-      message: 'Please enter number of non-validator nodes',
+      name: 'numOfBorSentries',
+      message: 'Please enter number of Bor sentry nodes',
+      default: 0
+    })
+  }
+
+  if (!('numOfBorArchiveNodes' in config)) {
+    questions.push({
+      type: 'number',
+      name: 'numOfBorArchiveNodes',
+      message: 'Please enter number of Bor archive nodes',
+      default: 0
+    })
+  }
+
+  if (!('numOfErigonValidators' in config)) {
+    questions.push({
+      type: 'number',
+      name: 'numOfErigonValidators',
+      message: 'Please enter number of Erigon validator nodes',
+      default: 2
+    })
+  }
+
+  if (!('numOfErigonSentries' in config)) {
+    questions.push({
+      type: 'number',
+      name: 'numOfErigonSentries',
+      message: 'Please enter number of Erigon sentry nodes',
+      default: 0
+    })
+  }
+
+  if (!('numOfErigonArchiveNodes' in config)) {
+    questions.push({
+      type: 'number',
+      name: 'numOfErigonArchiveNodes',
+      message: 'Please enter number of Erigon archive nodes',
       default: 0
     })
   }
