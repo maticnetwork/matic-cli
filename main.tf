@@ -17,7 +17,7 @@ provider "aws" {
 
 # ec2 instances
 resource "aws_instance" "bor_node_server" {
-  count = (var.DOCKERIZED == "yes") ? 1 : (var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT + var.BOR_ARCHIVE_COUNT)
+  count = (var.DOCKERIZED == "yes") ? 0 : (var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT + var.BOR_ARCHIVE_COUNT)
   ami                    = var.INSTANCE_AMI
   instance_type          = (count.index >= var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT) ? var.BOR_ARCHIVE_INSTANCE_TYPE: var.BOR_INSTANCE_TYPE
   key_name               = var.PEM_FILE
@@ -33,11 +33,11 @@ resource "aws_instance" "bor_node_server" {
   }
 
   tags = {
-    Name = "${var.VM_NAME}_${count.index + 1}"
+    Name = "${var.VM_NAME}_bor_${count.index + 1}"
   }
 }
 resource "aws_instance" "erigon_node_server" {
-  count = (var.DOCKERIZED == "yes") ? 1 : (var.ERIGON_VALIDATOR_COUNT + var.ERIGON_SENTRY_COUNT + var.ERIGON_ARCHIVE_COUNT)
+  count = (var.DOCKERIZED == "yes") ? 0 : (var.ERIGON_VALIDATOR_COUNT + var.ERIGON_SENTRY_COUNT + var.ERIGON_ARCHIVE_COUNT)
   ami                    = var.INSTANCE_AMI
   instance_type          = (count.index >= var.ERIGON_VALIDATOR_COUNT + var.ERIGON_SENTRY_COUNT) ? var.ERIGON_ARCHIVE_INSTANCE_TYPE: var.ERIGON_INSTANCE_TYPE
   key_name               = var.PEM_FILE
@@ -53,7 +53,28 @@ resource "aws_instance" "erigon_node_server" {
   }
 
   tags = {
-    Name = "${var.VM_NAME}_${count.index + 1}"
+    Name = "${var.VM_NAME}_erigon_${count.index + 1}"
+  }
+}
+
+resource "aws_instance" "dockerized_server" {
+  count = (var.DOCKERIZED == "yes") ? 1 : 0
+  ami                    = var.INSTANCE_AMI
+  instance_type          = var.BOR_INSTANCE_TYPE
+  key_name               = var.PEM_FILE
+  vpc_security_group_ids = [aws_security_group.internet_facing_load_balancer_sg.id]
+  subnet_id              = aws_subnet.devnet_public_subnet.id
+
+  # instances' disks
+  ebs_block_device {
+    device_name = "/dev/sda1"
+    volume_size =  var.BOR_DISK_SIZE_GB
+    volume_type =  var.BOR_VOLUME_TYPE
+    iops = var.BOR_IOPS
+  }
+
+  tags = {
+    Name = "${var.VM_NAME}_docker_${count.index + 1}"
   }
 }
 
@@ -61,7 +82,7 @@ resource "aws_instance" "erigon_node_server" {
 resource "aws_eip" "eip" {
   vpc = true
   count = (var.DOCKERIZED == "yes") ? 1 : (var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT + var.BOR_ARCHIVE_COUNT + var.ERIGON_VALIDATOR_COUNT + var.ERIGON_SENTRY_COUNT + var.ERIGON_ARCHIVE_COUNT)
-  instance                  = (count.index >= var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT + var.BOR_ARCHIVE_COUNT ) ? aws_instance.erigon_node_server[count.index - (var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT + var.BOR_ARCHIVE_COUNT)].id : aws_instance.bor_node_server[count.index].id
+  instance                  = (var.DOCKERIZED == "yes") ? aws_instance.dockerized_server[count.index].id : (count.index >= var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT + var.BOR_ARCHIVE_COUNT ) ? aws_instance.erigon_node_server[count.index - (var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT + var.BOR_ARCHIVE_COUNT)].id : aws_instance.bor_node_server[count.index].id
   depends_on                = [aws_internet_gateway.devnet_internet_gateway]
 
   tags = {
@@ -72,7 +93,7 @@ resource "aws_eip" "eip" {
 # elastic ips association
 resource "aws_eip_association" "eip_association" {
   count = (var.DOCKERIZED == "yes") ? 1 : (var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT + var.BOR_ARCHIVE_COUNT + var.ERIGON_VALIDATOR_COUNT + var.ERIGON_SENTRY_COUNT + var.ERIGON_ARCHIVE_COUNT)
-  instance_id   = (count.index >= var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT + var.BOR_ARCHIVE_COUNT ) ? aws_instance.erigon_node_server[count.index - (var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT + var.BOR_ARCHIVE_COUNT)].id : aws_instance.bor_node_server[count.index].id
+  instance_id   = (var.DOCKERIZED == "yes") ? aws_instance.dockerized_server[count.index].id : (count.index >= var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT + var.BOR_ARCHIVE_COUNT ) ? aws_instance.erigon_node_server[count.index - (var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT + var.BOR_ARCHIVE_COUNT)].id : aws_instance.bor_node_server[count.index].id
   allocation_id = aws_eip.eip[count.index].id
 }
 
