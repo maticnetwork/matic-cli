@@ -2,7 +2,8 @@
 
 import {
   checkAndReturnVMIndex,
-  loadDevnetConfig
+  loadDevnetConfig,
+  splitToArray
 } from '../src/express/common/config-utils'
 import fs from 'fs'
 import { maxRetries, runScpCommand } from '../src/express/common/remote-worker'
@@ -155,17 +156,26 @@ export async function testEip1559(n) {
       process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
     const doc = await loadDevnetConfig(devnetType)
     const vmIndex = await checkAndReturnVMIndex(n, doc)
-    let machine
+    const totalHosts = []
+    totalHosts.push(
+      ...splitToArray(doc.devnetBorHosts.toString()),
+      ...splitToArray(doc.devnetErigonHosts.toString())
+    )
+    let machine, machine0
     if (vmIndex === undefined) {
-      machine = doc.devnetBorHosts[0]
+      machine = totalHosts[0]
       console.log(
-        `📍No index provided. Targeting the first VM by default: ${doc.devnetBorHosts[0]}...`
+        `📍No index provided. Targeting the first VM by default: ${machine}...`
       )
     } else {
-      machine = doc.devnetBorHosts[vmIndex]
+      machine = totalHosts[vmIndex]
     }
     const web3 = await initWeb3(machine)
-    const machine0 = doc.devnetBorHosts[0]
+    if (doc.numOfBorValidators > 0) {
+      machine0 = doc.devnetBorHosts[0]
+    } else if (devnetType === 'remote') {
+      machine0 = doc.devnetErigonHosts[0]
+    }
     const src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/devnet/signer-dump.json`
     const dest = './signer-dump.json'
 

@@ -19,7 +19,12 @@ const queryTimer = (milestoneLength / 4) * 1000
 export async function milestoneBase() {
   // Get users and hosts
   const { borUsers, borHosts } = await getUsersAndHosts()
-
+  if (!borHosts) {
+    console.log(
+      '❌ This command is not yet supported for Erigon devnets! Exiting...'
+    )
+    process.exit(1)
+  }
   // Check for number of validators
   if (borUsers.length < 4) {
     console.log('📍Cannot run milestone tests on less than 4 validator nodes')

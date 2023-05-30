@@ -10,12 +10,18 @@ async function initWeb3(provider) {
 }
 
 export async function shadow(targetBlock) {
+  const doc = await loadDevnetConfig('remote')
+  if (!doc.devnetBorHosts) {
+    console.log(
+      '❌ This command is not yet supported for Erigon devnets! Exiting ...'
+    )
+    process.exit(1)
+  }
   if (!isValidPositiveNum(targetBlock)) {
     console.log('❌ Invalid [blockNumber] parameter! Exiting ...')
     process.exit(1)
   }
   require('dotenv').config({ path: `${process.cwd()}/.env` })
-  const doc = await loadDevnetConfig('remote')
   const borUsers = splitToArray(doc.devnetBorUsers.toString())
   const providerToNodeIp = new Map()
   let ip

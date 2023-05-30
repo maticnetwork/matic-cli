@@ -18,23 +18,31 @@ export async function sendStakeUpdateEvent(validatorID) {
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
 
   const doc = await loadDevnetConfig(devnetType)
+  let machine0
 
-  if (!isValidatorIdCorrect(validatorID, doc.numOfValidators)) {
+  if (
+    !isValidatorIdCorrect(
+      validatorID,
+      doc.numOfBorValidators + doc.numOfErigonValidators
+    )
+  ) {
     console.log(
       '📍Invalid validatorID used, please try with a valid argument! Exiting...'
     )
     process.exit(1)
   }
-  if (doc.devnetBorHosts.length > 0) {
+  if (doc.numOfBorValidators > 0) {
+    machine0 = doc.devnetBorHosts[0]
     console.log('📍Monitoring the first node', doc.devnetBorHosts[0])
+  } else if (devnetType === 'remote') {
+    machine0 = doc.devnetErigonHosts[0]
+    console.log('📍Monitoring the first node', doc.devnetErigonHosts[0])
   } else {
     console.log('📍No nodes to monitor, please check your configs! Exiting...')
     process.exit(1)
   }
 
   validatorID = Number(validatorID)
-
-  const machine0 = doc.devnetBorHosts[0]
   const rootChainWeb3 = new Web3(`http://${machine0}:9545`)
 
   let src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/devnet/signer-dump.json`
@@ -82,7 +90,7 @@ export async function sendStakeUpdateEvent(validatorID) {
     '\n\nApproval Receipt txHash:  ' + approvalReceipt.transactionHash
   )
 
-  const oldValidatorPower = await getValidatorPower(doc, validatorID)
+  const oldValidatorPower = await getValidatorPower(doc, machine0, validatorID)
   console.log('Old Validator Power:  ' + oldValidatorPower)
 
   // Adding 100 MATIC stake
@@ -103,12 +111,12 @@ export async function sendStakeUpdateEvent(validatorID) {
   )
   console.log('Restake Receipt txHash:  ' + Receipt.transactionHash)
 
-  let newValidatorPower = await getValidatorPower(doc, validatorID)
+  let newValidatorPower = await getValidatorPower(doc, machine0, validatorID)
 
   while (parseInt(newValidatorPower) !== parseInt(oldValidatorPower) + 100) {
     console.log('Waiting 3 secs for stakeupdate')
     await timer(3000) // waiting 3 secs
-    newValidatorPower = await getValidatorPower(doc, validatorID)
+    newValidatorPower = await getValidatorPower(doc, machine0, validatorID)
     console.log('newValidatorPower : ', newValidatorPower)
   }
 
@@ -118,8 +126,7 @@ export async function sendStakeUpdateEvent(validatorID) {
   )
 }
 
-async function getValidatorPower(doc, validatorID) {
-  const machine0 = doc.devnetBorHosts[0]
+async function getValidatorPower(doc, machine0, validatorID) {
   const command = `curl localhost:1317/staking/validator/${validatorID}`
   const out = await runSshCommandWithReturn(
     `${doc.ethHostUser}@${machine0}`,

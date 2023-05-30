@@ -70,6 +70,12 @@ function fetchTxData(ip) {
 export async function relay() {
   require('dotenv').config({ path: `${process.cwd()}/.env` })
   const doc = await loadDevnetConfig('remote')
+  if (!doc.devnetBorHosts) {
+    console.log(
+      '❌ This command is not yet supported for Erigon devnets! Exiting ...'
+    )
+    process.exit(1)
+  }
   const borUsers = splitToArray(doc.devnetBorUsers.toString())
   const providerToNodeIp = new Map()
   let ip, provider
