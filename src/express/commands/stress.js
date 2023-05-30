@@ -9,11 +9,17 @@ export async function startStressTest(fund) {
   const doc = await loadDevnetConfig('remote')
   const devnetId = getDevnetId()
   require('dotenv').config({ path: `${process.cwd()}/.env` })
-
-  if (doc.devnetBorHosts.length > 1) {
+  let machine0
+  if (
+    doc.devnetBorHosts.length > 0 &&
+    parseInt(process.env.TF_VAR_BOR_VALIDATOR_COUNT) > 0
+  ) {
     console.log('📍Monitoring the first node', doc.devnetBorHosts[0])
+    machine0 = doc.devnetBorHosts[0]
+  } else {
+    console.log('📍Monitoring the first node', doc.devnetErigonHosts[0])
+    machine0 = doc.devnetErigonHosts[0]
   }
-  const machine0 = doc.devnetBorHosts[0]
 
   const src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/devnet/signer-dump.json`
   const dest = './signer-dump.json'

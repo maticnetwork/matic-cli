@@ -1,0 +1,28 @@
+#!/usr/bin/env sh
+
+set -x #echo on
+
+ERIGON_HOME=$HOME/.erigon
+ERIGON_DATA_DIR=$ERIGON_HOME/data
+CHAIN_ID={{ obj.config.borChainId }}
+
+mkdir -p $ERIGON_HOME
+
+# dump static peers
+STATIC_PEERS=$(cat $ERIGON_HOME/static-nodes.json | awk -F\" '/enode:\/\// { if (length(peers)>0) peers=peers","; peers=peers$2 } END {print peers}')
+
+# init genesis
+erigon init --datadir $ERIGON_DATA_DIR $ERIGON_HOME/genesis.json
+
+erigon \
+    --networkid $CHAIN_ID \
+    --bor.heimdall "http://localhost:1317" \
+    --datadir $ERIGON_DATA_DIR \
+    --staticpeers=$STATIC_PEERS \
+    --nodekey $ERIGON_HOME/nodekey \
+    --http.api "eth,admin,debug,web3,txpool,trace,net,bor" \
+    --http.vhosts '*' \
+    --http.corsdomain '*' \
+    --http.addr '0.0.0.0' \
+    --http.port=8545 \
+    --snapshots=false

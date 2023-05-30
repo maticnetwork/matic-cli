@@ -6,7 +6,8 @@ import {
   editMaticCliRemoteYAMLConfig,
   getDevnetId,
   splitAndGetHostIp,
-  splitToArray
+  splitToArray,
+  setBorAndErigonHosts
 } from '../common/config-utils'
 import {
   maxRetries,
@@ -55,15 +56,28 @@ async function installRequiredSoftwareOnRemoteMachines(
   )
 
   const ipsArray = splitToArray(ips)
-  const borUsers = splitToArray(doc.devnetBorUsers.toString())
+  let borUsers = []
+  let erigonUsers = []
+  if (doc.devnetBorUsers) {
+    borUsers = splitToArray(doc.devnetBorUsers.toString())
+  }
+  if (doc.devnetErigonUsers) {
+    erigonUsers = splitToArray(doc.devnetErigonUsers.toString())
+  }
   let user, ip
   const nodeIps = []
   const isHostMap = new Map()
 
   for (let i = 0; i < ipsArray.length; i++) {
-    i === 0 ? (user = `${doc.ethHostUser}`) : (user = `${borUsers[i]}`)
+    /* eslint-disable */
+    i === 0
+      ? (user = `${doc.ethHostUser}`)
+      : i >= borUsers.length
+      ? (user = `${erigonUsers[i - borUsers.length]}`)
+      : (user = `${borUsers[i]}`)
     ip = `${user}@${ipsArray[i]}`
     nodeIps.push(ip)
+    /* eslint-disable */
 
     i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
   }
@@ -115,6 +129,10 @@ async function installCommonPackages(ip) {
 
   console.log('📍Installing build-essential...')
   command = 'sudo apt install build-essential -y'
+  await runSshCommand(ip, command, maxRetries)
+
+  console.log('📍Installing jq...')
+  command = 'sudo apt install jq -y'
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Installing go...')
@@ -225,16 +243,28 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType, devnetId) {
   )
 
   const ipsArray = splitToArray(ips)
-  const borUsers = splitToArray(doc.devnetBorUsers.toString())
+  let borUsers = []
+  let erigonUsers = []
+  if (doc.devnetBorUsers) {
+    borUsers = splitToArray(doc.devnetBorUsers.toString())
+  }
+  if (doc.devnetErigonUsers) {
+    erigonUsers = splitToArray(doc.devnetErigonUsers.toString())
+  }
   let user, ip
   const nodeIps = []
   const isHostMap = new Map()
 
   for (let i = 0; i < ipsArray.length; i++) {
-    i === 0 ? (user = `${doc.ethHostUser}`) : (user = `${borUsers[i]}`)
+    /* eslint-disable */
+    i === 0
+      ? (user = `${doc.ethHostUser}`)
+      : i >= borUsers.length
+      ? (user = `${erigonUsers[i - borUsers.length]}`)
+      : (user = `${borUsers[i]}`)
     ip = `${user}@${ipsArray[i]}`
     nodeIps.push(ip)
-
+    /* eslint-disable */
     i === 0 ? isHostMap.set(ip, true) : isHostMap.set(ip, false)
   }
 
@@ -260,6 +290,11 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType, devnetId) {
     console.log('📍Stopping bor (if present) on machine ' + ip + ' ...')
     command =
       "sudo systemctl stop bor.service || echo 'bor not running on current machine...'"
+    await runSshCommand(ip, command, maxRetries)
+
+    console.log('📍Stopping erigon (if present) on machine ' + ip + ' ...')
+    command =
+      "sudo systemctl stop erigon.service || echo 'erigon not running on current machine...'"
     await runSshCommand(ip, command, maxRetries)
 
     console.log('📍Removing .bor folder (if present) on machine ' + ip + ' ...')
@@ -401,9 +436,10 @@ export async function start() {
 
   await terraformApply(devnetId)
   const tfOutput = await terraformOutput()
-  const dnsIps = JSON.parse(tfOutput).instance_dns_ips.value.toString()
+  let dnsIps = JSON.parse(tfOutput).instance_dns_ips.value.toString()
   const ids = JSON.parse(tfOutput).instance_ids.value.toString()
-  process.env.DEVNET_BOR_HOSTS = dnsIps
+
+  dnsIps = setBorAndErigonHosts(dnsIps)
   process.env.INSTANCES_IDS = ids
 
   await validateConfigs()

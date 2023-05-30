@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+
+NODE_DIR=$HOME/node
+ERIGON_HOME=$HOME/.erigon
+LOG_HOME=$HOME/logs
+
+# create heimdall file
+mkdir -p $ERIGON_HOME $LOG_HOME
+
+# copy node directories to home directories
+cp -rf $NODE_DIR/erigon/* $ERIGON_HOME/
+
+# setup erigon
+ERIGON_DATA_DIR=$ERIGON_HOME/data
+
+# copy erigon files
+mkdir -p $ERIGON_DATA_DIR/erigon;
+cp $ERIGON_HOME/nodekey $ERIGON_DATA_DIR/erigon/
+cp $ERIGON_HOME/static-nodes.json $ERIGON_DATA_DIR/
+cp $ERIGON_HOME/static-nodes.json $ERIGON_DATA_DIR/erigon/
