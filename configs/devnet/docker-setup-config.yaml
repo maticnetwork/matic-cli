@@ -14,9 +14,9 @@ sprintSize: 64
 sprintSizeBlockNumber: 0
 blockNumber: '0'
 blockTime: '2'
-numOfValidators: 1
-numOfNonValidators: 1
-numOfArchiveNodes: 0
+numOfBorValidators: 1
+numOfBorSentries: 1
+numOfBorArchiveNodes: 0
 ethURL: http://ganache:9545
 ethHostUser: ubuntu
 devnetType: docker

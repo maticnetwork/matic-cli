@@ -14,15 +14,17 @@ export async function sendStateSyncTx() {
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
 
   const doc = await loadDevnetConfig(devnetType)
-
-  if (doc.devnetBorHosts.length > 0) {
+  let machine0
+  if (doc.numOfBorValidators > 0) {
+    machine0 = doc.devnetBorHosts[0]
     console.log('📍Monitoring the first node', doc.devnetBorHosts[0])
+  } else if (devnetType === 'remote') {
+    machine0 = doc.devnetErigonHosts[0]
+    console.log('📍Monitoring the first node', doc.devnetErigonHosts[0])
   } else {
     console.log('📍No nodes to monitor, please check your configs! Exiting...')
     process.exit(1)
   }
-
-  const machine0 = doc.devnetBorHosts[0]
 
   const src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/code/contracts/contractAddresses.json`
   const dest = './contractAddresses.json'

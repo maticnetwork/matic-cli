@@ -42,7 +42,9 @@ export async function setupDatadog() {
   if (doc.devnetBorHosts.length > 0) {
     console.log('📍Monitoring the nodes', doc.devnetBorHosts[0])
   } else {
-    console.log('📍No nodes to monitor, please check your configs! Exiting...')
+    console.log(
+      '📍No nodes to monitor since this command is not yet supported on Erigon devnets, please check your configs! Exiting...'
+    )
     process.exit(1)
   }
 

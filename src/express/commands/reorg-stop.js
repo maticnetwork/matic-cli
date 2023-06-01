@@ -7,6 +7,12 @@ import {
 export async function stopReorg() {
   // Get users and hosts
   const { borUsers, borHosts } = await getUsersAndHosts()
+  if (!borHosts) {
+    console.log(
+      '❌ This command is not yet supported for Erigon devnets! Exiting...'
+    )
+    process.exit(1)
+  }
   // Get IPs and enodes of all nodes
   const { ips, enodes } = await getIpsAndEnode(borUsers, borHosts)
 

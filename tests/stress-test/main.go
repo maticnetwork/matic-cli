@@ -124,7 +124,8 @@ func getSecretKey(devnetId int) string {
 }
 
 type YamlFile struct {
-	DevnetBorHosts []string `yaml:"devnetBorHosts"`
+	DevnetBorHosts    []string `yaml:"devnetBorHosts"`
+	DevnetErigonHosts []string `yaml:"devnetErigonHosts"`
 }
 
 func getRPCs(devnetId int) []string {
@@ -143,9 +144,14 @@ func getRPCs(devnetId int) []string {
 	if err != nil {
 		log.Fatalf("Unmarshal: %v", err)
 	}
+	hosts := append(yamldoc.DevnetBorHosts, yamldoc.DevnetErigonHosts...)
+	for i, rpc := range hosts {
+		if i < len(yamldoc.DevnetBorHosts) {
+			rpcs = append(rpcs, "ws://"+rpc+":8546")
+		} else {
+			rpcs = append(rpcs, "http://"+rpc+":8545")
+		}
 
-	for _, rpc := range yamldoc.DevnetBorHosts {
-		rpcs = append(rpcs, "ws://"+rpc+":8546")
 	}
 	fmt.Println(rpcs)
 	return rpcs

@@ -18,23 +18,31 @@ export async function sendSignerChangeEvent(validatorID) {
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
 
   const doc = await loadDevnetConfig(devnetType)
+  let machine0
 
-  if (!isValidatorIdCorrect(validatorID, doc.numOfValidators)) {
+  if (
+    !isValidatorIdCorrect(
+      validatorID,
+      doc.numOfBorValidators + doc.numOfErigonValidators
+    )
+  ) {
     console.log(
       '📍Invalid validatorID used, please try with a valid argument! Exiting...'
     )
     process.exit(1)
   }
-  if (doc.devnetBorHosts.length > 0) {
+  if (doc.numOfBorValidators > 0) {
+    machine0 = doc.devnetBorHosts[0]
     console.log('📍Monitoring the first node', doc.devnetBorHosts[0])
+  } else if (devnetType === 'remote') {
+    machine0 = doc.devnetErigonHosts[0]
+    console.log('📍Monitoring the first node', doc.devnetErigonHosts[0])
   } else {
     console.log('📍No nodes to monitor, please check your configs! Exiting...')
     process.exit(1)
   }
 
   validatorID = Number(validatorID)
-
-  const machine0 = doc.devnetBorHosts[0]
   const rootChainWeb3 = new Web3(`http://${machine0}:9545`)
 
   let src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/devnet/signer-dump.json`
@@ -58,7 +66,7 @@ export async function sendSignerChangeEvent(validatorID) {
     StakeManagerProxyAddress
   )
 
-  const oldSigner = await getValidatorSigner(doc, validatorID)
+  const oldSigner = await getValidatorSigner(doc, machine0, validatorID)
   console.log('OldValidatorSigner', oldSigner)
 
   const RandomSeed = 'random' + Math.random()
@@ -86,12 +94,12 @@ export async function sendSignerChangeEvent(validatorID) {
   )
   console.log('UpdateSigner Receipt', Receipt.transactionHash)
 
-  let newSigner = await getValidatorSigner(doc, validatorID)
+  let newSigner = await getValidatorSigner(doc, machine0, validatorID)
 
   while (newSigner === oldSigner) {
     console.log('Waiting 3 secs for signer to be updated')
     await timer(3000) // waiting 3 secs
-    newSigner = await getValidatorSigner(doc, validatorID)
+    newSigner = await getValidatorSigner(doc, machine0, validatorID)
     console.log('newSigner : ', newSigner)
   }
 
@@ -101,8 +109,7 @@ export async function sendSignerChangeEvent(validatorID) {
   )
 }
 
-async function getValidatorSigner(doc, validatorID) {
-  const machine0 = doc.devnetBorHosts[0]
+async function getValidatorSigner(doc, machine0, validatorID) {
   const command = `curl localhost:1317/staking/validator/${validatorID}`
   const out = await runSshCommandWithReturn(
     `${doc.ethHostUser}@${machine0}`,

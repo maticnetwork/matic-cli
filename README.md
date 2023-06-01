@@ -160,35 +160,43 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
 - `../../bin/express-cli --update-all [index]`
 
-  - Fetches `heimdall` and `bor` branches defined as `HEIMDALL_BRANCH` and `BOR_BRANCH` in `.env.devnet<id>` file,
-    pulls relative changes and restarts those services on the remote machines. If an integer `index` is used, the job will be
-    performed only on the VM corresponding to that index.
+  - Fetches `heimdall`,`bor` and `erigon` branches defined as `HEIMDALL_BRANCH`, `BOR_BRANCH` and `ERIGON_BRANCH` in `.env. devnet<id>` file, pulls relative changes and restarts those services on the remote machines. If an integer `index` is used, the job will be performed only on the VM corresponding to that index. For example if the devnet consists of 2 bor and erigon nodes, then the indices for bor machines would be 0 and 1 and for erigon it'll be 2 and 3.
 
 - `../../bin/express-cli --update-bor [index]`
 
   - Fetches `bor` branch defined as `BOR_BRANCH` in `.env.devnet<id>` file, pulls relative changes and restarts it on
     the remote machines. If an integer `index` is used, the job will be performed only on the VM corresponding to that index.
 
+- `../../bin/express-cli --update-erigon [index]`
+
+  - Fetches `erigon` branch defined as `ERIGON_BRANCH` in `.env.devnet<id>` file, pulls relative changes and restarts it on
+    the remote machines. If an integer `index` is used, the job will be performed only on the VM corresponding to that index. For example if the devnet consists of 2 bor and erigon nodes and you wanted to target the first erigon node, `index` will be 2.
+
 - `../../bin/express-cli --update-heimdall [index]`
 
   - Fetches `heimdall` branch defined as `HEIMDALL_BRANCH` in `.env.devnet<id>` file, pulls relative changes and restarts it on
     the remote machines. If an integer `index` is used, the job will be performed only on the VM corresponding to that
-    index.
+    index. For example if the devnet consists of 2 bor and erigon nodes, then the indices for bor machines would be 0 and 1 and for erigon it'll be 2 and 3.
 
 - `../../bin/express-cli --restart-all [index]`
 
-  - Restarts `bor` and `heimdall` on all the remote machines. If an integer `index` is used, the job will be performed
-    only on the VM corresponding to that index.
+  - Restarts `bor`, `erigon` and `heimdall` on all the remote machines. If an integer `index` is used, the job will be performed
+    only on the VM corresponding to that index. For example if the devnet consists of 2 bor and erigon nodes, then the indices for bor machines would be 0 and 1 and for erigon it'll be 2 and 3.
 
 - `../../bin/express-cli --restart-bor [index]`
 
   - Restarts `bor` on all the remote machines. If an integer `index` is used, the job will be performed only on the VM
     corresponding to that index.
 
+- `../../bin/express-cli --restart-erigon [index]`
+
+  - Restarts `erigon` on all the remote machines. If an integer `index` is used, the job will be performed only on the VM
+    corresponding to that index. For example if the devnet consists of 2 bor and erigon nodes and you wanted to target the first erigon node, `index` will be 2.
+
 - `../../bin/express-cli --restart-heimdall [index]`
 
   - Restarts `heimdall` on all the remote machines. If an integer `index` is used, the job will be performed only on
-    the VM corresponding to that index.
+    the VM corresponding to that index. For example if the devnet consists of 2 bor and erigon nodes, then the indices for bor machines would be 0 and 1 and for erigon it'll be 2 and 3.
 
 - `../../bin/express-cli --cleanup`
 
@@ -199,19 +207,19 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
   - Create a `state-sync` transaction on the remote network
 
-- `../../bin/express-cli --send-staked-event`
+- `../../bin/express-cli --send-staked-event [validatorID]`
 
   - Create a `Staked` transaction on the remote network and adds a new validator.
 
-- `../../bin/express-cli --send-stakeupdate-event`
+- `../../bin/express-cli --send-stakeupdate-event [validatorID]`
 
   - Create a `StakeUpdate` transaction on the remote network and increase stake of 1st validator by 100 MATIC.
 
-- `../../bin/express-cli --send-signerchange-event`
+- `../../bin/express-cli --send-signerchange-event [validatorID]`
 
   - Create a `SignerChange` transaction on the remote network and changes the signer of the 1st validator.
 
-- `../../bin/express-cli --send-topupfee-event`
+- `../../bin/express-cli --send-topupfee-event [validatorID]`
 
   - Create a `TopUpFee` transaction on the remote network and adds balance/heimdallFee for the first validator on Heimdall.
 

@@ -24,6 +24,7 @@ import {
 import { loadConfig } from '../config'
 import fileReplacer from '../../lib/file-replacer'
 import { getRemoteStdio } from '../../express/common/remote-worker'
+import { Erigon } from '../erigon'
 
 const timer = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -34,7 +35,7 @@ const getAllFiles = function (dirPath, arrayOfFiles) {
 
   files.forEach(function (file) {
     if (fs.statSync(dirPath + '/' + file).isDirectory()) {
-      if (file === 'bor' || file === 'heimdall') {
+      if (file === 'bor' || file === 'heimdall' || file === 'erigon') {
         arrayOfFiles = getAllFiles(dirPath + '/' + file, arrayOfFiles)
       }
     } else {
@@ -62,9 +63,17 @@ export class Devnet {
     return require(this.signerDumpPath)
   }
 
-  get totalNodes() {
+  get totalBorNodes() {
     // noinspection JSUnresolvedVariable
-    return this.config.numOfValidators + this.config.numOfNonValidators + this.config.numOfArchiveNodes
+    return this.config.numOfBorValidators + this.config.numOfBorSentries + this.config.numOfBorArchiveNodes
+  }
+
+  get totalErigonNodes() {
+    return this.config.numOfErigonValidators + this.config.numOfErigonSentries + this.config.numOfErigonArchiveNodes
+  }
+
+  get totalNodes() {
+    return this.totalBorNodes + this.totalErigonNodes
   }
 
   nodeDir(index) {
@@ -127,12 +136,57 @@ export class Devnet {
     return path.join(this.borDir(index), 'static-nodes.json')
   }
 
+  erigonDir(index) {
+    return path.join(this.nodeDir(index), 'erigon')
+  }
+
+  erigonDataDir(index) {
+    return path.join(this.erigonDir(index), 'data')
+  }
+
+  erigonKeystoreDir(index) {
+    return path.join(this.erigonDir(index), 'keystore')
+  }
+
+  erigonGenesisFilePath(index) {
+    return path.join(this.erigonDir(index), 'genesis.json')
+  }
+
+  erigonPasswordFilePath(index) {
+    return path.join(this.erigonDir(index), 'password.txt')
+  }
+
+  erigonPrivateKeyFilePath(index) {
+    return path.join(this.erigonDir(index), 'privatekey.txt')
+  }
+
+  erigonAddressFilePath(index) {
+    return path.join(this.erigonDir(index), 'address.txt')
+  }
+
+  erigonNodeKeyPath(index) {
+    return path.join(this.erigonDir(index), 'nodekey')
+  }
+
+  erigonEnodeFilePath(index) {
+    return path.join(this.erigonDir(index), 'enode.txt')
+  }
+
+  erigonStaticNodesPath(index) {
+    return path.join(this.erigonDir(index), 'static-nodes.json')
+  }
+
   async getEnodeTask() {
     return {
       title: 'Setup enode',
       task: async () => {
         const staticNodes = []
-
+        let hosts = []
+        let erigonValCount = this.config.numOfErigonValidators
+        hosts = this.config.devnetBorHosts.slice(0, this.config.numOfBorValidators)
+        hosts.push(...this.config.devnetErigonHosts.slice(0, this.config.numOfErigonValidators))
+        hosts.push(...this.config.devnetBorHosts.slice(this.config.numOfBorValidators, this.config.devnetBorHosts.length))
+        hosts.push(...this.config.devnetErigonHosts.slice(this.config.numOfErigonValidators, this.config.devnetErigonHosts.length))
         // create new enode
         for (let i = 0; i < this.totalNodes; i++) {
           const enodeObj = await getNewPrivateKey()
@@ -141,31 +195,47 @@ export class Devnet {
           ).replace('0x', '')
 
           // draft enode
-          const enode = `enode://${pubKey}@${this.config.devnetBorHosts[i]}:30303`
-
+          const enode = `enode://${pubKey}@${hosts[i]}:30303`
           // add into static nodes
           staticNodes.push(enode)
 
           // store data into nodekey and enode
+          let nodeKeyPath = this.borNodeKeyPath(i)
+          let enodeFilePath = this.borEnodeFilePath(i)
+          if ((i >= this.config.numOfBorValidators && erigonValCount > 0) || i >= this.totalBorNodes + this.config.numOfErigonValidators) {
+            nodeKeyPath = this.erigonNodeKeyPath(i)
+            enodeFilePath = this.erigonEnodeFilePath(i)
+          }
           const p = [
             // create nodekey file
             fs.writeFile(
-              this.borNodeKeyPath(i),
+              nodeKeyPath,
               `${enodeObj.privateKey.replace('0x', '')}\n`,
               { mode: 0o600 }
             ),
             // create enode file
-            fs.writeFile(this.borEnodeFilePath(i), `${enode}\n`, {
+            fs.writeFile(enodeFilePath, `${enode}\n`, {
               mode: 0o600
             })
           ]
           await Promise.all(p)
+          if (i >= this.config.numOfBorValidators) {
+            erigonValCount--
+          }
         }
 
         // create static-nodes
+        erigonValCount = this.config.numOfErigonValidators
         const data = JSON.stringify(staticNodes, null, 2)
         for (let i = 0; i < this.totalNodes; i++) {
-          await fs.writeFile(this.borStaticNodesPath(i), data, { mode: 0o600 })
+          let staticNodesPath = this.borStaticNodesPath(i)
+          if ((i >= this.config.numOfBorValidators && erigonValCount > 0) || i >= this.totalBorNodes + this.config.numOfErigonValidators) {
+            staticNodesPath = this.erigonStaticNodesPath(i)
+          }
+          await fs.writeFile(staticNodesPath, data, { mode: 0o600 })
+          if (i >= this.config.numOfBorValidators) {
+            erigonValCount--
+          }
         }
       }
     }
@@ -179,7 +249,7 @@ export class Devnet {
         title: 'Process Heimdall configs',
         task: async () => {
           // set heimdall
-          for (let i = 0; i < this.totalNodes; i++) {
+          for (let i = 0; i < this.totalBorNodes; i++) {
             fileReplacer(this.heimdallHeimdallConfigFilePath(i))
               .replace(
                 /eth_rpc_url[ ]*=[ ]*".*"/gi,
@@ -212,7 +282,7 @@ export class Devnet {
           const rootContracts = this.config.contractAddresses.root
 
           // set heimdall peers with devnet heimdall hosts
-          for (let i = 0; i < this.totalNodes; i++) {
+          for (let i = 0; i < this.totalBorNodes; i++) {
             fileReplacer(this.heimdallGenesisFilePath(i))
               .replace(
                 /"matic_token_address":[ ]*".*"/gi,
@@ -258,7 +328,7 @@ export class Devnet {
           // TODO: Uncomment when finalised for docker setup
           // if (this.config.network) {
           //   const chain = this.config.network
-          //   for (let i = 0; i < this.totalNodes; i++) {
+          //   for (let i = 0; i < this.totalBorNodes; i++) {
           //     fileReplacer(this.borGenesisFilePath(i))
           //       .replace(
           //         /NODE_DIR\/genesis.json/gi,
@@ -358,12 +428,22 @@ export class Devnet {
           // process njk files
           for (const file of getAllFiles(this.config.targetDirectory, [])) {
             if (file.indexOf('.njk') !== -1) {
+              let erigonValCount = this.config.numOfErigonValidators
               const fp = path.join(this.config.targetDirectory, file)
 
               // process all njk files and copy to each node directory
               for (let i = 0; i < this.totalNodes; i++) {
                 const file2array = file.split('/')
                 const file2 = file2array[file2array.length - 1]
+                if (((i >= this.config.numOfBorValidators && erigonValCount > 0) || i >= this.totalBorNodes + this.config.numOfErigonValidators) && file2.indexOf('bor') !== -1) {
+                  erigonValCount--
+                  continue
+                }
+
+                if ((i < this.config.numOfBorValidators || (i >= this.config.numOfBorValidators + this.config.numOfErigonValidators && i < this.totalBorNodes + this.config.numOfErigonValidators)) && file2.indexOf('erigon') !== -1) {
+                  continue
+                }
+
                 fs.writeFileSync(
                   path.join(this.nodeDir(i), file2.replace('.njk', '')),
                   nunjucks.render(file, {
@@ -394,11 +474,23 @@ export class Devnet {
   }
 
   async getSnapshotSyncTasks() {
+    let host, user, snapshotUrl, service, chaindata
     return new Listr([
       {
         title: 'Download heimdall snapshot',
         task: async () => {
+          let erigonValCount = this.config.numOfErigonValidators
           for (let i = 0; i < this.totalNodes; i++) {
+            host = this.config.devnetBorHosts[i]
+            user = this.config.devnetBorUsers[i]
+            if (i >= this.config.numOfBorValidators && erigonValCount > 0) {
+              host = this.config.devnetErigonHosts[i - this.config.numOfBorValidators]
+              user = this.config.devnetErigonUsers[i - this.config.numOfBorValidators]
+            }
+            if (i >= this.totalBorNodes + this.config.numOfErigonValidators) {
+              host = this.config.devnetErigonHosts[i - (this.totalBorNodes + this.config.numOfErigonValidators)]
+              user = this.config.devnetErigonUsers[i - (this.totalBorNodes + this.config.numOfErigonValidators)]
+            }
             await execa(
               'ssh',
               [
@@ -408,10 +500,13 @@ export class Devnet {
                 'UserKnownHostsFile=/dev/null',
                 '-i',
                 '~/cert.pem',
-                  `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                  `${user}@${host}`,
                   `sudo systemctl stop heimdalld.service && sudo rm -rf /var/lib/heimdall/data/* && sudo wget -O- ${this.config.heimdallSnapshotUrl} | tar -I zstd -xf - -C /var/lib/heimdall/data && sudo chmod 777 -R /var/lib/heimdall/data && sudo systemctl restart heimdalld.service`
               ],
               { stdio: getRemoteStdio() })
+            if (i >= this.config.numOfBorValidators) {
+              erigonValCount--
+            }
           }
         },
         enabled: () => {
@@ -421,7 +516,27 @@ export class Devnet {
       {
         title: 'Download bor snapshot',
         task: async () => {
+          let erigonValCount = this.config.numOfErigonValidators
           for (let i = 0; i < this.totalNodes; i++) {
+            host = this.config.devnetBorHosts[i]
+            user = this.config.devnetBorUsers[i]
+            snapshotUrl = this.config.borSnapshotUrl
+            service = 'bor.service'
+            chaindata = '~/.bor/data/bor/chaindata'
+            if (i >= this.config.numOfBorValidators && erigonValCount > 0) {
+              host = this.config.devnetErigonHosts[i - this.config.numOfBorSentries]
+              user = this.config.devnetErigonUsers[i - this.config.numOfBorValidators]
+              snapshotUrl = this.config.erigonSnapshotUrl
+              service = 'erigon.service'
+              chaindata = '~/.erigon/data/erigon/chaindata'
+            }
+            if (i >= this.totalBorNodes + this.config.numOfErigonValidators) {
+              host = this.config.devnetErigonHosts[i - (this.totalBorNodes + this.config.numOfErigonValidators)]
+              user = this.config.devnetErigonUsers[i - (this.totalBorNodes + this.config.numOfErigonValidators)]
+              snapshotUrl = this.config.erigonSnapshotUrl
+              service = 'erigon.service'
+              chaindata = '~/.erigon/data/erigon/chaindata'
+            }
             await execa(
               'ssh',
               [
@@ -431,14 +546,18 @@ export class Devnet {
                 'UserKnownHostsFile=/dev/null',
                 '-i',
                 '~/cert.pem',
-                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                `sudo systemctl stop bor.service && sudo rm -rf ~/.bor/data/bor/chaindata/* && sudo wget -O- ${this.config.borSnapshotUrl} | tar -I zstd -xf - -C ~/.bor/data/bor/chaindata && sudo chmod 777 -R ~/.bor/data/bor/chaindata && sudo systemctl restart bor.service`
+                `${user}@${host}`,
+                `sudo systemctl stop ${service} && sudo rm -rf ${chaindata}/* && sudo wget -O- ${snapshotUrl} | tar -I zstd -xf - -C ${chaindata} && sudo chmod 777 -R ${chaindata} && sudo systemctl restart ${service}`
               ],
               { stdio: getRemoteStdio() })
+
+            if (i >= this.config.numOfBorValidators) {
+              erigonValCount--
+            }
           }
         },
         enabled: () => {
-          return this.config.borSnapshotUrl !== undefined && this.config.borSnapshotUrl !== null && this.config.borSnapshotUrl !== ''
+          return this.config.borSnapshotUrl !== undefined && this.config.borSnapshotUrl !== null && this.config.borSnapshotUrl !== '' && this.config.erigonSnapshotUrl !== undefined && this.config.erigonSnapshotUrl !== null && this.config.erigonSnapshotUrl !== ''
         }
       }
     ],
@@ -453,7 +572,7 @@ export class Devnet {
       {
         title: 'Copy files to remote servers',
         task: async () => {
-          if (this.config.devnetBorHosts === undefined) {
+          if (this.config.devnetBorHosts === undefined || this.config.devnetErigonHosts === undefined) {
             return
           }
           // copy the Ganache files to the first node
@@ -495,7 +614,8 @@ export class Devnet {
           }
 
           // Generate service files
-          for (let i = 0; i < this.totalNodes; i++) {
+          // Bor
+          for (let i = 0; i < this.totalBorNodes; i++) {
             await execa(
               'scp',
               [
@@ -505,18 +625,18 @@ export class Devnet {
                 'UserKnownHostsFile=/dev/null',
                 '-i',
                 '~/cert.pem',
-                `${this.config.targetDirectory}/service.sh`,
-                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:~/service.sh`
+                `${this.config.targetDirectory}/bor-service.sh`,
+                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:~/bor-service.sh`
               ],
               { stdio: getRemoteStdio() }
             )
 
-            if (i === 0 && !this.config.network) {
+            if (i === 0 && !this.config.network && this.config.numOfBorValidators !== 0) {
               await execa('ssh', [
                 '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
                 '-i', '~/cert.pem',
                                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                                `bash ${this.config.targetDirectory}/service-host.sh`
+                                `bash ${this.config.targetDirectory}/bor-service-host.sh`
               ], { stdio: getRemoteStdio() })
 
               // NOTE: Target location would vary depending on bor/heimdall version. Currently the setup works with bor and heimdall v0.3.x
@@ -531,7 +651,7 @@ export class Devnet {
               '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
               '-i', '~/cert.pem',
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                            'bash ~/service.sh'
+                            'bash ~/bor-service.sh'
             ], { stdio: getRemoteStdio() })
 
             await execa('ssh', [
@@ -557,7 +677,71 @@ export class Devnet {
             )
           }
 
-          for (let i = 0; i < this.totalNodes; i++) {
+          // Erigon
+          for (let i = 0; i < this.totalErigonNodes; i++) {
+            await execa(
+              'scp',
+              [
+                '-o',
+                'StrictHostKeyChecking=no',
+                '-o',
+                'UserKnownHostsFile=/dev/null',
+                '-i',
+                '~/cert.pem',
+                `${this.config.targetDirectory}/erigon-service.sh`,
+                `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}:~/erigon-service.sh`
+              ],
+              { stdio: getRemoteStdio() }
+            )
+
+            if (i === 0 && !this.config.network && this.config.numOfBorValidators === 0) {
+              await execa('ssh', [
+                '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
+                '-i', '~/cert.pem',
+                                `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
+                                `bash ${this.config.targetDirectory}/erigon-service-host.sh`
+              ], { stdio: getRemoteStdio() })
+
+              // NOTE: Target location would vary depending on bor/heimdall version. Currently the setup works with bor and heimdall v0.3.x
+              await execa('ssh', [
+                '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
+                '-i', '~/cert.pem',
+                                `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
+                                'sudo mv ~/ganache.service /lib/systemd/system/'
+              ], { stdio: getRemoteStdio() })
+            }
+            await execa('ssh', [
+              '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
+              '-i', '~/cert.pem',
+                            `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
+                            'bash ~/erigon-service.sh'
+            ], { stdio: getRemoteStdio() })
+
+            await execa('ssh', [
+              '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
+              '-i', '~/cert.pem',
+                            `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
+                            'sudo mv ~/erigon.service /lib/systemd/system/'
+            ], { stdio: getRemoteStdio() })
+
+            await execa(
+              'ssh',
+              [
+                '-o',
+                'StrictHostKeyChecking=no',
+                '-o',
+                'UserKnownHostsFile=/dev/null',
+                '-i',
+                '~/cert.pem',
+                `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
+                'sudo mv ~/heimdalld.service /lib/systemd/system/'
+              ],
+              { stdio: getRemoteStdio() }
+            )
+          }
+
+          // Bor
+          for (let i = 0; i < this.totalBorNodes; i++) {
             // copy files to remote servers
             await execa(
               'scp',
@@ -604,6 +788,10 @@ export class Devnet {
               { stdio: getRemoteStdio() }
             )
 
+            let nodeDir = `${this.testnetDir}/node${i}/`
+            if (i >= this.config.numOfBorValidators) {
+              nodeDir = `${this.testnetDir}/node${i + this.config.numOfErigonValidators}/`
+            }
             await execa(
               'scp',
               [
@@ -614,14 +802,14 @@ export class Devnet {
                 '-r',
                 '-i',
                 '~/cert.pem',
-                `${this.testnetDir}/node${i}/`,
+                nodeDir,
                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:~/node/`
               ],
               { stdio: getRemoteStdio() }
             )
 
             // Execute service files
-            if (i === 0 && !this.config.network) {
+            if (i === 0 && !this.config.network && this.config.numOfBorValidators !== 0) {
               await execa(
                 'ssh',
                 [
@@ -638,7 +826,7 @@ export class Devnet {
               )
             }
 
-            if (i >= this.config.numOfValidators + this.config.numOfNonValidators) {
+            if (i >= this.config.numOfBorValidators + this.config.numOfBorSentries) {
               await execa('ssh', [
                 '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
                 '-i', '~/cert.pem',
@@ -734,6 +922,189 @@ export class Devnet {
                 'sudo systemctl start bor.service'
             ], { stdio: getRemoteStdio() })
           }
+
+          // Erigon
+          let j = this.totalBorNodes + this.config.numOfErigonValidators
+          for (let i = 0; i < this.totalErigonNodes; i++) {
+            // copy files to remote servers
+            await execa(
+              'scp',
+              [
+                '-o',
+                'StrictHostKeyChecking=no',
+                '-o',
+                'UserKnownHostsFile=/dev/null',
+                '-i',
+                '~/cert.pem',
+                `${this.config.targetDirectory}/code/erigon/build/bin/erigon`,
+                `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}:~/go/bin/erigon`
+              ],
+              { stdio: getRemoteStdio() }
+            )
+
+            await execa(
+              'scp',
+              [
+                '-o',
+                'StrictHostKeyChecking=no',
+                '-o',
+                'UserKnownHostsFile=/dev/null',
+                '-i',
+                '~/cert.pem',
+                `${this.config.targetDirectory}/code/heimdall/build/heimdalld`,
+                `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}:~/go/bin/heimdalld`
+              ],
+              { stdio: getRemoteStdio() }
+            )
+
+            await execa(
+              'scp',
+              [
+                '-o',
+                'StrictHostKeyChecking=no',
+                '-o',
+                'UserKnownHostsFile=/dev/null',
+                '-i',
+                '~/cert.pem',
+                `${this.config.targetDirectory}/code/heimdall/build/heimdallcli`,
+                `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}:~/go/bin/heimdallcli`
+              ],
+              { stdio: getRemoteStdio() }
+            )
+
+            let nodeDir = `${this.testnetDir}/node${j}/`
+            if (i < this.config.numOfErigonValidators) {
+              nodeDir = `${this.testnetDir}/node${this.config.numOfBorValidators + i}/`
+            }
+            await execa(
+              'scp',
+              [
+                '-o',
+                'StrictHostKeyChecking=no',
+                '-o',
+                'UserKnownHostsFile=/dev/null',
+                '-r',
+                '-i',
+                '~/cert.pem',
+                nodeDir,
+                `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}:~/node/`
+              ],
+              { stdio: getRemoteStdio() }
+            )
+
+            // Execute service files
+            if (i === 0 && !this.config.network && this.config.numOfBorValidators === 0) {
+              await execa(
+                'ssh',
+                [
+                  '-o',
+                  'StrictHostKeyChecking=no',
+                  '-o',
+                  'UserKnownHostsFile=/dev/null',
+                  '-i',
+                  '~/cert.pem',
+                  `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
+                  'sudo systemctl start ganache.service'
+                ],
+                { stdio: getRemoteStdio() }
+              )
+            }
+
+            if (i < this.config.numOfErigonValidators) {
+              await execa('ssh', [
+                '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
+                '-i', '~/cert.pem', `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
+                // eslint-no-multi-spaces
+                'sed -i \'s|snapshots=false$|snapshots=false \\\\\\\n    --mine \\\\\\\n    --miner.etherbase $(cat "$ERIGON_HOME/address.txt") \\\\\\\n    --miner.sigfile "$ERIGON_HOME/privatekey.txt"|\' ~/node/erigon-start.sh'
+              ], { stdio: getRemoteStdio() })
+            }
+
+            if (this.config.network) {
+              let chain = this.config.network
+              if (chain === 'mainnet') {
+                chain = 'bor-mainnet'
+              }
+              // TODO: Finalize when running a public node
+              // await execa('ssh', [
+              //   '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
+              //   '-i', '~/cert.pem',
+              //         `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
+              //         // eslint-disable-next-line
+              //         `sed -i "s|\\$ERIGON_HOME/genesis.json|${chain}|g" ~/node/erigon-start.sh`
+              // ], { stdio: getRemoteStdio() })
+            }
+
+            await execa(
+              'ssh',
+              [
+                '-o',
+                'StrictHostKeyChecking=no',
+                '-o',
+                'UserKnownHostsFile=/dev/null',
+                '-i',
+                '~/cert.pem',
+                `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
+                'bash ~/node/heimdalld-setup.sh'
+              ],
+              { stdio: getRemoteStdio() }
+            )
+
+            await execa(
+              'ssh',
+              [
+                '-o',
+                'StrictHostKeyChecking=no',
+                '-o',
+                'UserKnownHostsFile=/dev/null',
+                '-i',
+                '~/cert.pem',
+                `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
+                'sudo ln -sf ~/go/bin/heimdalld /usr/bin/heimdalld'
+              ],
+              { stdio: getRemoteStdio() }
+            )
+
+            await execa(
+              'ssh',
+              [
+                '-o',
+                'StrictHostKeyChecking=no',
+                '-o',
+                'UserKnownHostsFile=/dev/null',
+                '-i',
+                '~/cert.pem',
+                `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
+                'sudo systemctl start heimdalld.service'
+              ],
+              { stdio: getRemoteStdio() }
+            )
+
+            await execa(
+              'ssh',
+              [
+                '-o',
+                'StrictHostKeyChecking=no',
+                '-o',
+                'UserKnownHostsFile=/dev/null',
+                '-i',
+                '~/cert.pem',
+                `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
+                'bash ~/node/erigon-setup.sh '
+              ],
+              { stdio: getRemoteStdio() }
+            )
+
+            await execa('ssh', [
+              '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
+              '-i', '~/cert.pem',
+                `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
+                'sudo systemctl start erigon.service'
+            ], { stdio: getRemoteStdio() })
+
+            if (i >= this.config.numOfErigonValidators) {
+              j++
+            }
+          }
         }
       }
     ]
@@ -750,9 +1121,9 @@ export class Devnet {
             'create-testnet',
             '--home', 'devnet',
             '--v',
-            this.config.numOfValidators,
+            this.config.numOfBorValidators + this.config.numOfErigonValidators,
             '--n',
-            this.config.numOfNonValidators + this.config.numOfArchiveNodes,
+            this.config.numOfBorSentries + this.config.numOfBorArchiveNodes + this.config.numOfErigonSentries + this.config.numOfErigonArchiveNodes,
             '--chain-id',
             this.config.heimdallChainId,
             '--node-host-prefix',
@@ -764,11 +1135,18 @@ export class Devnet {
           // Create heimdall folders
           if (this.config.devnetType === 'remote') {
             // create heimdall folder for all the nodes in remote setup
+            let host, user
             for (let i = 0; i < this.totalNodes; i++) {
+              user = this.config.devnetBorUsers[i]
+              host = this.config.devnetBorHosts[i]
+              if (i >= this.totalBorNodes) {
+                user = this.config.devnetErigonUsers[i - this.totalBorNodes]
+                host = this.config.devnetErigonHosts[i - this.totalBorNodes]
+              }
               await execa('ssh', [
                 '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
                 '-i', '~/cert.pem',
-                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                 `${user}@${host}`,
                  'sudo mkdir -p /var/lib/heimdall && sudo chmod 777 -R /var/lib/heimdall/'
               ], { stdio: getRemoteStdio() })
             }
@@ -852,20 +1230,38 @@ export class Devnet {
         // set validator addresses
         const genesisAddresses = []
         const signerDumpData = this.signerDumpData
-        for (let i = 0; i < this.config.numOfValidators; i++) {
+        for (let i = 0; i < this.config.numOfBorValidators; i++) {
           const d = signerDumpData[i]
           genesisAddresses.push(d.address)
         }
 
+        let j = this.config.numOfBorValidators
+        for (let i = 0; i < this.config.numOfErigonValidators; i++) {
+          const d = signerDumpData[j]
+          genesisAddresses.push(d.address)
+          j++
+        }
         // set genesis addresses
         this.config.genesisAddresses = genesisAddresses
 
         // setup accounts from signer dump data (based on number of validators)
         this.config.accounts = this.signerDumpData
-          .slice(0, this.config.numOfValidators)
+          .slice(0, this.config.numOfBorValidators)
           .map((s) => {
             return getAccountFromPrivateKey(s.priv_key)
           })
+
+        if (this.config.numOfErigonValidators > 0) {
+          const erigonAccounts = this.signerDumpData
+            .slice(this.config.numOfBorValidators, this.config.numOfBorValidators + this.config.numOfErigonValidators)
+            .map((s) => {
+              return getAccountFromPrivateKey(s.priv_key)
+            })
+
+          erigonAccounts.forEach((acc) => {
+            this.config.accounts.push(acc)
+          })
+        }
       }
     }])
   }
@@ -898,6 +1294,7 @@ export class Devnet {
     const heimdall = this.heimdall
     const bor = this.bor
     const genesis = this.genesis
+    const erigon = this.erigon
 
     // create testnet tasks
     const createTestnetTasks = await this.getCreateTestnetTask(heimdall)
@@ -918,21 +1315,38 @@ export class Devnet {
           return bor.getTasks()
         },
         enabled: () => {
-          return this.config.devnetType === 'remote'
+          return this.config.devnetType === 'remote' && this.totalBorNodes > 0
         }
       },
       {
-        title: 'Setup Bor keystore and genesis files',
+        title: erigon.taskTitle,
+        task: () => {
+          return erigon.getTasks()
+        },
+        enabled: () => {
+          return this.config.devnetType === 'remote' && this.totalErigonNodes > 0
+        }
+      },
+      {
+        title: 'Setup Bor/Erigon keystore and genesis files',
         task: async () => {
           const signerDumpData = this.signerDumpData
-
+          let erigonValCount = this.config.numOfErigonValidators
           for (let i = 0; i < this.totalNodes; i++) {
             // create directories
-            await execa(
-              'mkdir',
-              ['-p', this.borDataDir(i), this.borKeystoreDir(i)],
-              { stdio: getRemoteStdio() }
-            )
+            if ((i >= this.config.numOfBorValidators && erigonValCount > 0) || i >= this.totalBorNodes + this.config.numOfErigonValidators) {
+              await execa(
+                'mkdir',
+                ['-p', this.erigonDataDir(i), this.erigonKeystoreDir(i)],
+                { stdio: getRemoteStdio() }
+              )
+            } else {
+              await execa(
+                'mkdir',
+                ['-p', this.borDataDir(i), this.borKeystoreDir(i)],
+                { stdio: getRemoteStdio() }
+              )
+            }
             const password = `password${i}`
 
             // create keystore files
@@ -942,37 +1356,75 @@ export class Devnet {
             )
             const p = [
               // save password file
-              fs.writeFile(this.borPasswordFilePath(i), `${password}\n`),
+              ((i >= this.config.numOfBorValidators && erigonValCount > 0) || i >= this.totalBorNodes + this.config.numOfErigonValidators) ? fs.writeFile(this.erigonPasswordFilePath(i), `${password}\n`) : fs.writeFile(this.borPasswordFilePath(i), `${password}\n`),
+
               // save private key file
-              fs.writeFile(
-                this.borPrivateKeyFilePath(i),
-                `${signerDumpData[i].priv_key}\n`
-              ),
-              // save address file
-              fs.writeFile(
-                this.borAddressFilePath(i),
-                `${signerDumpData[i].address}\n`
-              ),
-              // save keystore file
-              fs.writeFile(
-                path.join(
-                  this.borKeystoreDir(i),
-                  keystoreFileObj.keystoreFilename
+              ((i >= this.config.numOfBorValidators && erigonValCount > 0) || i >= this.totalBorNodes + this.config.numOfErigonValidators)
+                ? fs.writeFile(
+                  this.erigonPrivateKeyFilePath(i),
+                  `${signerDumpData[i].priv_key.substring(2)}\n`
+                )
+                : fs.writeFile(
+                  this.borPrivateKeyFilePath(i),
+                  `${signerDumpData[i].priv_key}\n`
                 ),
-                JSON.stringify(keystoreFileObj.keystore, null, 2)
-              )
+
+              // save address file
+              ((i >= this.config.numOfBorValidators && erigonValCount > 0) || i >= this.totalBorNodes + this.config.numOfErigonValidators)
+                ? fs.writeFile(
+                  this.erigonAddressFilePath(i),
+                  `${signerDumpData[i].address}\n`
+                )
+                : fs.writeFile(
+                  this.borAddressFilePath(i),
+                  `${signerDumpData[i].address}\n`
+                ),
+              // save keystore file
+              ((i >= this.config.numOfBorValidators && erigonValCount > 0) || i >= this.totalBorNodes + this.config.numOfErigonValidators)
+                ? fs.writeFile(
+                  path.join(
+                    this.erigonKeystoreDir(i),
+                    keystoreFileObj.keystoreFilename
+                  ),
+                  JSON.stringify(keystoreFileObj.keystore, null, 2)
+                )
+                : fs.writeFile(
+                  path.join(
+                    this.borKeystoreDir(i),
+                    keystoreFileObj.keystoreFilename
+                  ),
+                  JSON.stringify(keystoreFileObj.keystore, null, 2)
+                )
             ]
 
             if (!this.config.network) {
               // copy genesis file to each node bor directory if a public network isn't specified
-              p.push(execa(
-                'cp',
-                [genesis.borGenesisFilePath, this.borGenesisFilePath(i)],
-                { stdio: getRemoteStdio() }
-              )
-              )
+              // Add additional fields for erigon
+              if ((i >= this.config.numOfBorValidators && erigonValCount > 0) || i >= this.totalBorNodes + this.config.numOfErigonValidators) {
+                p.push(execa(
+                  'cp',
+                  [genesis.borGenesisFilePath, this.erigonGenesisFilePath(i)],
+                  { stdio: getRemoteStdio() }
+                ),
+                execa(
+                  'jq',
+                  ['\'.config.consensus = "bor" | .config.eip1559FeeCollectorTransition = .config.londonBlock | .config.eip1559FeeCollector = .config.bor.burntContract."0"\'', `${this.erigonGenesisFilePath(i)} > ~/tmp.json && mv ~/tmp.json ${this.erigonGenesisFilePath(i)}`],
+                  { shell: true }
+                )
+                )
+              } else {
+                p.push(execa(
+                  'cp',
+                  [genesis.borGenesisFilePath, this.borGenesisFilePath(i)],
+                  { stdio: getRemoteStdio() }
+                )
+                )
+              }
             }
             await Promise.all(p)
+            if (i >= this.config.numOfBorValidators) {
+              erigonValCount--
+            }
           }
         }
       },
@@ -988,14 +1440,24 @@ export class Devnet {
       {
         title: 'Remove multiple keystore files',
         task: async () => {
+          let erigonValCount = this.config.numOfErigonValidators
           for (let i = 0; i < this.totalNodes; i++) {
             // remove multiple keystore files from node[i]/bor/keystore
-            const keystoreDir = path.join(
+            let keystoreDir
+            keystoreDir = path.join(
               this.testnetDir,
               `node${i}`,
               'bor',
               'keystore'
             )
+            if ((i >= this.config.numOfBorValidators && erigonValCount > 0) || i >= this.totalBorNodes + this.config.numOfErigonValidators) {
+              keystoreDir = path.join(
+                this.testnetDir,
+                `node${i}`,
+                'erigon',
+                'keystore'
+              )
+            }
             fs.readdir(keystoreDir, async (err, files) => {
               if (err) console.log(err) // harmless
               if (files) {
@@ -1005,6 +1467,9 @@ export class Devnet {
               }
             })
             await timer(2000)
+            if (i >= this.config.numOfBorValidators) {
+              erigonValCount--
+            }
           }
         },
         enabled: () => {
@@ -1027,6 +1492,10 @@ async function setupDevnet(config) {
     repositoryUrl: config.borRepo,
     repositoryBranch: config.borBranch,
     dockerContext: config.borDockerBuildContext
+  })
+  devnet.erigon = new Erigon(config, {
+    repositoryUrl: config.erigonRepo,
+    repositoryBranch: config.erigonBranch
   })
   devnet.heimdall = new Heimdall(config, {
     repositoryUrl: config.heimdallRepo,
@@ -1116,20 +1585,56 @@ export default async function (command) {
   config.set(answers)
 
   const questions = []
-  if (!('numOfValidators' in config)) {
+  if (!('numOfBorValidators' in config)) {
     questions.push({
       type: 'number',
-      name: 'numOfValidators',
-      message: 'Please enter number of validator nodes',
+      name: 'numOfBorValidators',
+      message: 'Please enter number of Bor validator nodes',
       default: 2
     })
   }
 
-  if (!('numOfNonValidators' in config)) {
+  if (!('numOfBorSentries' in config)) {
     questions.push({
       type: 'number',
-      name: 'numOfNonValidators',
-      message: 'Please enter number of non-validator nodes',
+      name: 'numOfBorSentries',
+      message: 'Please enter number of Bor sentry nodes',
+      default: 0
+    })
+  }
+
+  if (!('numOfBorArchiveNodes' in config)) {
+    questions.push({
+      type: 'number',
+      name: 'numOfBorArchiveNodes',
+      message: 'Please enter number of Bor archive nodes',
+      default: 0
+    })
+  }
+
+  if (!('numOfErigonValidators' in config)) {
+    questions.push({
+      type: 'number',
+      name: 'numOfErigonValidators',
+      message: 'Please enter number of Erigon validator nodes',
+      default: 2
+    })
+  }
+
+  if (!('numOfErigonSentries' in config)) {
+    questions.push({
+      type: 'number',
+      name: 'numOfErigonSentries',
+      message: 'Please enter number of Erigon sentry nodes',
+      default: 0
+    })
+  }
+
+  if (!('numOfErigonArchiveNodes' in config)) {
+    questions.push({
+      type: 'number',
+      name: 'numOfErigonArchiveNodes',
+      message: 'Please enter number of Erigon archive nodes',
       default: 0
     })
   }
@@ -1174,55 +1679,29 @@ export default async function (command) {
 
   // set devent hosts
   let devnetBorHosts = config.devnetBorHosts || []
-  let devnetBorUsers = config.devnetBorUsers || []
+  const devnetBorUsers = config.devnetBorUsers || []
   let devnetHeimdallHosts = config.devnetHeimdallHosts || []
-  let devnetHeimdallUsers = config.devnetHeimdallUsers || []
-  const totalValidators = config.numOfValidators + config.numOfNonValidators + config.numOfArchiveNodes
+  const devnetHeimdallUsers = config.devnetHeimdallUsers || []
+  const devnetErigonHosts = config.devnetErigonHosts || []
+  const devnetErigonUsers = config.devnetErigonUsers || []
+  const totalBorNodes = config.numOfBorValidators + config.numOfBorSentries + config.numOfBorArchiveNodes
 
   // For docker, the devnetBorHosts conform to the subnet 172.20.1.0/24
   if (config.devnetType === 'docker') {
     devnetBorHosts = []
     devnetHeimdallHosts = []
-    for (let i = 0; i < totalValidators; i++) {
+    for (let i = 0; i < totalBorNodes; i++) {
       devnetBorHosts.push(`172.20.1.${i + 100}`)
       devnetHeimdallHosts.push(`heimdall${i}`)
-    }
-  } else {
-    const missing = [
-      'devnetBorHosts',
-      'devnetBorUsers',
-      'devnetHeimdallHosts',
-      'devnetHeimdallUsers'
-    ].filter((c) => {
-      if (
-        c in config &&
-        config[c].length !== totalValidators &&
-        !config.interactive
-      ) {
-        console.error(
-          `Wrong number of hosts provided in ${c}, got ${config[c].length}, expect ${totalValidators}.`
-        )
-        process.exit(1)
-      }
-      return !(c in config) || config[c].length !== totalValidators
-    })
-    if (missing.length > 0) {
-      const hosts = await getHosts(totalValidators)
-      devnetBorHosts = hosts
-      devnetHeimdallHosts = hosts
-    }
-
-    if (missing.length > 0) {
-      const users = await getUsers(totalValidators)
-      devnetBorUsers = users
-      devnetHeimdallUsers = users
     }
   }
   config.set({
     devnetBorHosts,
     devnetBorUsers,
     devnetHeimdallHosts,
-    devnetHeimdallUsers
+    devnetHeimdallUsers,
+    devnetErigonHosts,
+    devnetErigonUsers
   })
 
   // start setup
