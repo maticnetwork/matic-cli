@@ -680,7 +680,7 @@ export class Devnet {
         }
       }
     ],
-    { concurrent: true })
+    { concurrent: false })
   }
 
   async getRemoteTasks() {

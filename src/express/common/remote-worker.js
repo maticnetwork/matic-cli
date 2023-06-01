@@ -25,6 +25,8 @@ export async function runSshCommand(ip, command, retries) {
         'StrictHostKeyChecking=no',
         '-o',
         'UserKnownHostsFile=/dev/null',
+        '-o',
+        'ServerAliveInterval=30',
         '-i',
         `${process.env.PEM_FILE_PATH}`,
         ip,
