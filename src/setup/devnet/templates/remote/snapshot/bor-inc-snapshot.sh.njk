@@ -17,13 +17,11 @@ function validate_client() {
 # ask user for network and client type
 read -p "PoSV1 Network (mainnet/mumbai): " network_input
 validate_network "$network_input"
-read -p "Client Type (heimdall/bor): " client_input
-validate_client "$client_input"
 read -p "Directory to Download/Extract: " extract_dir_input
 
 # set default values if user input is blank
 network=${network_input:-mumbai}
-client=${client_input:-heimdall}
+client=bor
 extract_dir=${extract_dir_input:-"${client}_extract"}
 
 # cursor to extract directory
@@ -53,5 +51,5 @@ function extract_files() {
 }
 
 # execute final data extraction step
-echo "Extracting...$$client-$network-incremental-compiled-files.txt"
+echo "Extracting...$client-$network-incremental-compiled-files.txt"
 extract_files $client-$network-incremental-compiled-files.txt

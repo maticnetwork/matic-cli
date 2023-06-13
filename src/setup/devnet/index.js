@@ -584,7 +584,7 @@ export class Devnet {
                 '-i',
                 '~/cert.pem',
                 `${users[i]}@${hosts[i]}`,
-                `bash ~/node/inc-snapshot.sh <<< $'${this.config.network}\nheimdall\n/var/lib/heimdall/data\n'`
+                `bash ~/node/heimdall-inc-snapshot.sh <<< $'${this.config.network}\n/var/lib/heimdall/data\n'`
               ],
               { stdio: getRemoteStdio() }
             )
@@ -655,7 +655,7 @@ export class Devnet {
                 '-i',
                 '~/cert.pem',
                   `${users[i]}@${hosts[i]}`,
-                  `bash ~/node/inc-snapshot.sh <<< $'${this.config.network}\nbor\n${chaindataArr[i]}\n'`
+                  `bash ~/node/bor-inc-snapshot.sh <<< $'${this.config.network}\n${chaindataArr[i]}\n'`
               ],
               { stdio: getRemoteStdio() }
             )
@@ -680,7 +680,7 @@ export class Devnet {
         }
       }
     ],
-    { concurrent: true })
+    { concurrent: false })
   }
 
   async getRemoteTasks() {

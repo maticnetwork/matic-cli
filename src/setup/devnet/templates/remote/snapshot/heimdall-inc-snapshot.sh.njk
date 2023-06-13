@@ -1,0 +1,55 @@
+#!/bin/bash
+
+function validate_network() {
+  if [[ "$1" != "mainnet" && "$1" != "mumbai" ]]; then
+    echo "Invalid network input. Please enter 'mainnet' or 'mumbai'."
+    exit 1
+  fi
+}
+
+function validate_client() {
+  if [[ "$1" != "heimdall" && "$1" != "bor" ]]; then
+    echo "Invalid client input. Please enter 'heimdall' or 'bor'."
+    exit 1
+  fi
+}
+
+# ask user for network and client type
+read -p "PoSV1 Network (mainnet/mumbai): " network_input
+validate_network "$network_input"
+read -p "Directory to Download/Extract: " extract_dir_input
+
+# set default values if user input is blank
+network=${network_input:-mumbai}
+client=heimdall
+extract_dir=${extract_dir_input:-"${client}_extract"}
+
+# cursor to extract directory
+mkdir -p "$extract_dir"
+cd "$extract_dir"
+
+# download compiled incremental snapshot files list
+aria2c -x6 -s6 "https://snapshot-download.polygon.technology/$client-$network-incremental-compiled-files.txt"
+
+# download all incremental files, includes automatic checksum verification per increment
+aria2c -x6 -s6 -i $client-$network-incremental-compiled-files.txt
+
+# helper method to extract all files and delete already-extracted download data to minimize disk use
+function extract_files() {
+    compiled_files=$1
+    while read -r line; do
+        if [[ "$line" == checksum* ]]; then
+            continue
+        fi
+        filename=`echo $line | awk -F/ '{print $NF}'`
+        if echo "$filename" | grep -q "bulk"; then
+            pv $filename | tar -I zstd -xf - -C . && rm $filename
+        else
+            pv $filename | tar -I zstd -xf - -C . --strip-components=3 && rm $filename
+        fi
+    done < $compiled_files
+}
+
+# execute final data extraction step
+echo "Extracting...$client-$network-incremental-compiled-files.txt"
+extract_files $client-$network-incremental-compiled-files.txt
