@@ -555,23 +555,6 @@ export class Devnet {
               ],
               { stdio: getRemoteStdio() })
 
-            // await execa(
-            //   'ssh',
-            //   [
-            //     '-o',
-            //     'StrictHostKeyChecking=no',
-            //     '-o',
-            //     'UserKnownHostsFile=/dev/null',
-            //     '-o',
-            //      'ServerAliveInterval=6000',
-            //     '-i',
-            //     '~/cert.pem',
-            //     `${users[i]}@${hosts[i]}`,
-            //     `tmux new -d -s snapshot; tmux new-window -t snapshot 'bash ~/node/inc-snapshot.sh <<< $"${this.config.network}\nheimdall\n/var/lib/heimdall/data\n"; tmux wait-for -S snapshot-done' && tmux send-keys -t snapshot:0 ENTER && tmux wait-for snapshot-done`
-            //   ],
-            //   { stdio: getRemoteStdio() }
-            // )
-
             await execa(
               'ssh',
               [
@@ -580,14 +563,31 @@ export class Devnet {
                 '-o',
                 'UserKnownHostsFile=/dev/null',
                 '-o',
-                'ServerAliveInterval=6000',
+                'ServerAliveInterval=30',
                 '-i',
                 '~/cert.pem',
                 `${users[i]}@${hosts[i]}`,
-                `bash ~/node/heimdall-inc-snapshot.sh <<< $'${this.config.network}\n/var/lib/heimdall/data\n'`
+                `tmux new -d -s snapshot; tmux new-window -t snapshot 'bash ~/node/heimdall-inc-snapshot.sh <<< $"${this.config.network}\n/var/lib/heimdall/data\n"; tmux wait-for -S snapshot-done' && tmux send-keys -t snapshot:0 ENTER && tmux wait-for snapshot-done`
               ],
               { stdio: getRemoteStdio() }
             )
+
+            // await execa(
+            //   'ssh',
+            //   [
+            //     '-o',
+            //     'StrictHostKeyChecking=no',
+            //     '-o',
+            //     'UserKnownHostsFile=/dev/null',
+            //     '-o',
+            //     'ServerAliveInterval=6000',
+            //     '-i',
+            //     '~/cert.pem',
+            //     `${users[i]}@${hosts[i]}`,
+            //     `bash ~/node/heimdall-inc-snapshot.sh <<< $'${this.config.network}\n/var/lib/heimdall/data\n'`
+            //   ],
+            //   { stdio: getRemoteStdio() }
+            // )
 
             await execa(
               'ssh',
@@ -626,23 +626,6 @@ export class Devnet {
               ],
               { stdio: getRemoteStdio() })
 
-            // await execa(
-            //   'ssh',
-            //   [
-            //     '-o',
-            //     'StrictHostKeyChecking=no',
-            //     '-o',
-            //     'UserKnownHostsFile=/dev/null',
-            //      '-o',
-            //      'ServerAliveInterval=6000',
-            //     '-i',
-            //     '~/cert.pem',
-            //     `${users[i]}@${hosts[i]}`,
-            //     `tmux new-window -t snapshot 'bash ~/node/inc-snapshot.sh <<< $"${this.config.network}\nbor\n${chaindataArr[i]}\n"; tmux wait-for -S snapshot-done' && tmux send-keys -t snapshot:1 ENTER && tmux wait-for snapshot-done`
-            //   ],
-            //   { stdio: getRemoteStdio() }
-            // )
-
             await execa(
               'ssh',
               [
@@ -651,14 +634,31 @@ export class Devnet {
                 '-o',
                 'UserKnownHostsFile=/dev/null',
                 '-o',
-                'ServerAliveInterval=6000',
+                'ServerAliveInterval=30',
                 '-i',
                 '~/cert.pem',
-                  `${users[i]}@${hosts[i]}`,
-                  `bash ~/node/bor-inc-snapshot.sh <<< $'${this.config.network}\n${chaindataArr[i]}\n'`
+                `${users[i]}@${hosts[i]}`,
+                `tmux new-window -t snapshot 'bash ~/node/bor-inc-snapshot.sh <<< $"${this.config.network}\n${chaindataArr[i]}\n"; tmux wait-for -S snapshot-done' && tmux send-keys -t snapshot:1 ENTER && tmux wait-for snapshot-done`
               ],
               { stdio: getRemoteStdio() }
             )
+
+            // await execa(
+            //   'ssh',
+            //   [
+            //     '-o',
+            //     'StrictHostKeyChecking=no',
+            //     '-o',
+            //     'UserKnownHostsFile=/dev/null',
+            //     '-o',
+            //     'ServerAliveInterval=6000',
+            //     '-i',
+            //     '~/cert.pem',
+            //       `${users[i]}@${hosts[i]}`,
+            //       `bash ~/node/bor-inc-snapshot.sh <<< $'${this.config.network}\n${chaindataArr[i]}\n'`
+            //   ],
+            //   { stdio: getRemoteStdio() }
+            // )
 
             await execa(
               'ssh',
