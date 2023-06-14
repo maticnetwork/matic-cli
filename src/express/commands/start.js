@@ -84,6 +84,7 @@ async function installRequiredSoftwareOnRemoteMachines(
 
   const requirementTasks = nodeIps.map(async (ip) => {
     user = splitAndGetHostIp(ip)
+    await modifySshConfig(ip)
     await configureCertAndPermissions(user, ip)
     await installCommonPackages(ip)
 
@@ -98,6 +99,21 @@ async function installRequiredSoftwareOnRemoteMachines(
   })
 
   await Promise.all(requirementTasks)
+}
+
+async function modifySshConfig(ip) {
+  console.log('📍Modifying ssh config in instance...')
+  const config = `TCPKeepAlive no
+  ClientAliveInterval 30
+  ClientAliveCountMax 240`
+  let command = `sudo sh -c 'cat << EOF >> /etc/ssh/sshd_config
+  ${config}'`
+
+  await runSshCommand(ip, command, maxRetries)
+  
+  console.log('📍Restarting sshd service...')
+  command = 'sudo systemctl restart ssh'
+  await runSshCommand(ip, command, maxRetries)
 }
 
 async function configureCertAndPermissions(user, ip) {
