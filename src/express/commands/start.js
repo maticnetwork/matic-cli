@@ -110,7 +110,7 @@ async function modifySshConfig(ip) {
   ${config}'`
 
   await runSshCommand(ip, command, maxRetries)
-  
+
   console.log('📍Restarting sshd service...')
   command = 'sudo systemctl restart ssh'
   await runSshCommand(ip, command, maxRetries)
