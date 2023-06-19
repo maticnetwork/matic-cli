@@ -66,9 +66,15 @@ function validateEnvVars(cloud) {
   if (cloud == 'aws') {
     cleanEnv(process.env, {
       TF_VAR_IOPS: num({ default: 3000 }),
+      TF_VAR_BOR_IOPS: num({ default: 3000 }),
+      TF_VAR_ERIGON_IOPS: num({ default: 3000 }),
       TF_VAR_INSTANCE_TYPE: validStr({ default: 't2.xlarge' }),
+      TF_VAR_BOR_INSTANCE_TYPE: validStr({ default: 't2.xlarge' }),
+      TF_VAR_ERIGON_INSTANCE_TYPE: validStr({ default: 't2.xlarge' }),
+      TF_VAR_BOR_ARCHIVE_INSTANCE_TYPE: validStr({ default: 't2.xlarge' }),
+      TF_VAR_ERIGON_ARCHIVE_INSTANCE_TYPE: validStr({ default: 't2.xlarge' }),
       TF_VAR_INSTANCE_AMI: validAmiStr({ default: 'ami-017fecd1353bcc96e' }),
-      TF_VAR_PEM_FILE: validStr({ default: 'aws-key' }),
+      // TF_VAR_PEM_FILE: validStr({ default: 'aws-key' }),
       TF_VAR_REGION: validStr({
         default: 'us-west-2',
         choices: [
@@ -111,7 +117,11 @@ function validateEnvVars(cloud) {
   // validating GCP infra vars
   } else if (cloud == 'gcp') {
     cleanEnv(process.env, {
-      TF_VAR_MACHINE_TYPE: validStr({ default: 'c3-highcpu-22' }),
+      TF_VAR_MACHINE_TYPE: validStr({ default: 'n2d-standard-4' }),
+      TF_VAR_BOR_INSTANCE_TYPE: validStr({ default: 'n2d-standard-4' }),
+      TF_VAR_ERIGON_INSTANCE_TYPE: validStr({ default: 'n2d-standard-4' }),
+      TF_VAR_BOR_ARCHIVE_INSTANCE_TYPE: validStr({ default: 'n2d-standard-4' }),
+      TF_VAR_ERIGON_ARCHIVE_INSTANCE_TYPE: validStr({ default: 'n2d-standard-4' }),
       TF_VAR_INSTANCE_IMAGE: validGCPVmImageStr({ default: 'ubuntu-2204-jammy-v20230302' }),
       TF_VAR_REGION: validStr({
         default: 'us-central1',
@@ -157,7 +167,7 @@ function validateEnvVars(cloud) {
       }),
       TF_VAR_ZONE: validZone({ default: 'us-central1-a' }),
       PEM_FILE_PATH: validCertPathStr({ default: '/home/ubuntu/ubuntu.pem' }),
-      TF_VAR_GCE_PUB_KEY_FILE: validStr({ default: '/home/ubuntu/ubuntu.pem.pub' }),
+      TF_VAR_GCE_PUB_KEY_FILE: validStr({ default: '/home/ubuntu/aws-key.pem.pub' }),
     })
   }
 
@@ -166,56 +176,13 @@ function validateEnvVars(cloud) {
     TF_VAR_DOCKERIZED: validStr({ choices: ['yes', 'no'] }),
     TF_VAR_BOR_DISK_SIZE_GB: num({ default: 500 }),
     TF_VAR_ERIGON_DISK_SIZE_GB: num({ default: 500 }),
-    TF_VAR_BOR_IOPS: num({ default: 3000 }),
-    TF_VAR_ERIGON_IOPS: num({ default: 3000 }),
     TF_VAR_BOR_VALIDATOR_COUNT: num({ default: 2 }),
     TF_VAR_ERIGON_VALIDATOR_COUNT: num({ default: 0 }),
     TF_VAR_BOR_SENTRY_COUNT: num({ default: 1 }),
     TF_VAR_ERIGON_SENTRY_COUNT: num({ default: 0 }),
     TF_VAR_BOR_ARCHIVE_COUNT: num({ default: 0 }),
     TF_VAR_ERIGON_ARCHIVE_COUNT: num({ default: 0 }),
-    TF_VAR_BOR_INSTANCE_TYPE: validStr({ default: 't2.xlarge' }),
-    TF_VAR_ERIGON_INSTANCE_TYPE: validStr({ default: 't2.xlarge' }),
-    TF_VAR_BOR_ARCHIVE_INSTANCE_TYPE: validStr({ default: 't2.xlarge' }),
-    TF_VAR_ERIGON_ARCHIVE_INSTANCE_TYPE: validStr({ default: 't2.xlarge' }),
-    TF_VAR_INSTANCE_AMI: validAmiStr({ default: 'ami-017fecd1353bcc96e' }),
     TF_VAR_PEM_FILE: validStr({ default: 'aws-key' }),
-    TF_VAR_REGION: validStr({
-      default: 'us-west-2',
-      choices: [
-        'us-east-2',
-        'us-east-1',
-        'us-west-1',
-        'us-west-2',
-        'af-south-1',
-        'ap-east-1',
-        'ap-south-2',
-        'ap-southeast-3',
-        'ap-south-1',
-        'ap-northeast-3',
-        'ap-northeast-2',
-        'ap-southeast-1',
-        'ap-southeast-2',
-        'ap-northeast-1',
-        'ca-central-1',
-        'eu-central-1',
-        'eu-west-1',
-        'eu-west-2',
-        'eu-south-1',
-        'eu-west-3',
-        'eu-south-2',
-        'eu-north-1',
-        'eu-central-2',
-        'me-south-1',
-        'me-central-1',
-        'sa-east-1',
-        'us-gov-east-1',
-        'us-gov-west-1'
-      ],
-      docs:
-        'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/' +
-        'Concepts.RegionsAndAvailabilityZones.html'
-    }),
     PEM_FILE_PATH: validCertPathStr({ default: '/home/ubuntu/aws-key.pem' }),
     DEFAULT_STAKE: num({ default: 10000 }),
     DEFAULT_FEE: num({ default: 2000 }),
@@ -298,6 +265,8 @@ function validateUsersAndHosts() {
   if (process.env.DEVNET_BOR_USERS && process.env.DEVNET_BOR_HOSTS) {
     borUsers = process.env.DEVNET_BOR_USERS.split(',')
     borHosts = process.env.DEVNET_BOR_HOSTS.split(',')
+    console.log(process.env.DEVNET_BOR_USERS)
+    console.log(process.env.DEVNET_BOR_HOSTS)
   }
   if (process.env.DEVNET_ERIGON_USERS && process.env.DEVNET_ERIGON_HOSTS) {
     erigonUsers = process.env.DEVNET_ERIGON_USERS.split(',')
@@ -319,6 +288,10 @@ function validateUsersAndHosts() {
       '❌ DEVNET_BOR_USERS lengths are not equal to the nodes count ' +
         '(TF_VAR_BOR_VALIDATOR_COUNT+TF_VAR_BOR_SENTRY_COUNT+TF_VAR_BOR_ARCHIVE_COUNT), please check your configs!'
     )
+    console.log(1)
+    console.log(borValCount)
+    console.log(borSenCount)
+    console.log(borArchiveCount)
     process.exit(1)
   } else if (process.env.TF_VAR_DOCKERIZED === 'no') {
     if (
@@ -331,7 +304,10 @@ function validateUsersAndHosts() {
         '❌ DEVNET_BOR_USERS or DEVNET_BOR_HOSTS lengths are not equal to the nodes count ' +
           '(TF_VAR_BOR_VALIDATOR_COUNT+TF_VAR_BOR_SENTRY_COUNT+TF_VAR_BOR_ARCHIVE_COUNT), please check your configs!'
       )
-
+      console.log(2)
+      console.log(borValCount)
+      console.log(borSenCount)
+      console.log(borArchiveCount)
       process.exit(1)
     }
 
@@ -347,7 +323,10 @@ function validateUsersAndHosts() {
         '❌ DEVNET_ERIGON_USERS or DEVNET_ERIGON_HOSTS lengths are not equal to the nodes count ' +
           '(TF_VAR_ERIGON_VALIDATOR_COUNT+TF_VAR_ERIGON_SENTRY_COUNT+TF_VAR_ERIGON_ARCHIVE_COUNT), please check your configs!'
       )
-
+      console.log(3)
+      console.log(borValCount)
+      console.log(borSenCount)
+      console.log(borArchiveCount)
       process.exit(1)
     }
   }

@@ -10,10 +10,19 @@ export async function awsKeypairAdd() {
 
   const time = new Date().getTime()
   const keyName = `temp-key-${time}`
-  console.log('📍 Generating aws key-pair...')
-  shell.exec(
-    `aws ec2 create-key-pair --key-name ${keyName} --key-type rsa --key-format pem --query "KeyMaterial" --output text > ${keyName}.pem`
-  )
+  const cloud = doc.cloud.toString()
+
+  if (cloud === 'aws') {
+    console.log('📍 Generating aws key-pair...')
+    shell.exec(
+      `aws ec2 create-key-pair --key-name ${keyName} --key-type rsa --key-format pem --query "KeyMaterial" --output text > ${keyName}.pem`
+    )
+  } else if (cloud == 'gcp') {
+    console.log('📍 Generating gcp key-pair...')
+    shell.exec(
+      `ssh-keygen`
+    )
+  }
   if (shell.error() !== null) {
     console.log('📍 Creation of aws key-pair failed')
     process.exit(1)
