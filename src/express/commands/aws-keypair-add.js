@@ -18,11 +18,10 @@ export async function awsKeypairAdd() {
       `aws ec2 create-key-pair --key-name ${keyName} --key-type rsa --key-format pem --query "KeyMaterial" --output text > ${keyName}.pem`
     )
   } else if (cloud == 'gcp') {
-    console.log('📍 Generating gcp key-pair...')
-    shell.exec(
-      `ssh-keygen`
-    )
+    console.log('📍 Not supported for gcp at the moment')
+    return
   }
+
   if (shell.error() !== null) {
     console.log('📍 Creation of aws key-pair failed')
     process.exit(1)

@@ -14,6 +14,13 @@ export async function awsKeypairDestroy(keyName) {
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
   const doc = await loadDevnetConfig(devnetType)
 
+  const cloud = doc.cloud.toString()
+  
+  if (cloud == 'gcp'){
+    console.log('📍 Not supported for gcp at the moment')
+    return
+  }
+
   console.log(`📍 Getting pubKey for ${keyName} ...`)
   const output = shell.exec(
     `aws ec2 describe-key-pairs --key-names ${keyName} --include-public-key --output json`
