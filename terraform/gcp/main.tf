@@ -12,7 +12,7 @@ terraform {
 
 provider "google" {
   project = var.PROJECT_ID
-  region  = var.REGION
+  region  = var.REGION_GCP
   zone    = var.ZONE
 }
 
@@ -26,7 +26,7 @@ resource "google_compute_network" "vpc_network" {
 resource "google_compute_subnetwork" "public-subnetwork" {
   name          = "${var.VM_NAME}-public-subnet"
   ip_cidr_range = var.SUBNET_CIDR_RANGE
-  region        = var.REGION
+  region        = var.REGION_GCP
   network       = google_compute_network.vpc_network.name
 
 }
@@ -59,7 +59,7 @@ resource "google_compute_instance" "bor_node_server" {
   count = (var.DOCKERIZED == "yes") ? 0 : (var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT + var.BOR_ARCHIVE_COUNT)
 
   name         = "${var.VM_NAME}-bor-${count.index + 1}"
-  machine_type = (count.index >= var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT) ? var.BOR_ARCHIVE_INSTANCE_TYPE : var.BOR_INSTANCE_TYPE
+  machine_type = (count.index >= var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT) ? var.BOR_ARCHIVE_MACHINE_TYPE : var.BOR_MACHINE_TYPE
 
   boot_disk {
     initialize_params {
@@ -67,7 +67,7 @@ resource "google_compute_instance" "bor_node_server" {
 
       size = (count.index >= var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT) ? var.BOR_ARCHIVE_DISK_SIZE_GB : var.BOR_DISK_SIZE_GB
 
-      type = (count.index >= var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT) ? var.BOR_ARCHIVE_VOLUME_TYPE : var.BOR_VOLUME_TYPE
+      type = (count.index >= var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT) ? var.BOR_ARCHIVE_VOLUME_TYPE_GCP : var.BOR_VOLUME_TYPE_GCP
     }
   }
 
@@ -97,13 +97,13 @@ resource "google_compute_instance" "erigon_node_server" {
 
   name = "${var.VM_NAME}-erigon-${count.index + 1}"
 
-  machine_type = (count.index >= var.ERIGON_VALIDATOR_COUNT + var.ERIGON_SENTRY_COUNT) ? var.ERIGON_ARCHIVE_INSTANCE_TYPE : var.ERIGON_INSTANCE_TYPE
+  machine_type = (count.index >= var.ERIGON_VALIDATOR_COUNT + var.ERIGON_SENTRY_COUNT) ? var.ERIGON_ARCHIVE_MACHINE_TYPE : var.ERIGON_MACHINE_TYPE
 
   boot_disk {
     initialize_params {
       image = var.INSTANCE_IMAGE
       size  = (count.index >= var.ERIGON_VALIDATOR_COUNT + var.ERIGON_SENTRY_COUNT) ? var.ERIGON_ARCHIVE_DISK_SIZE_GB : var.ERIGON_DISK_SIZE_GB
-      type  = (count.index >= var.ERIGON_VALIDATOR_COUNT + var.ERIGON_SENTRY_COUNT) ? var.ERIGON_ARCHIVE_VOLUME_TYPE : var.ERIGON_VOLUME_TYPE
+      type  = (count.index >= var.ERIGON_VALIDATOR_COUNT + var.ERIGON_SENTRY_COUNT) ? var.ERIGON_ARCHIVE_VOLUME_TYPE_GCP : var.ERIGON_VOLUME_TYPE_GCP
     }
   }
 
@@ -134,13 +134,13 @@ resource "google_compute_instance" "dockerized_server" {
   count = (var.DOCKERIZED == "yes") ? 1 : 0
 
   name         = "${var.VM_NAME}-docker-${count.index + 1}"
-  machine_type = var.BOR_INSTANCE_TYPE
+  machine_type = var.BOR_MACHINE_TYPE
 
   boot_disk {
     initialize_params {
       image = var.INSTANCE_IMAGE
       size  = var.BOR_DISK_SIZE_GB
-      type  = var.BOR_VOLUME_TYPE
+      type  = var.BOR_VOLUME_TYPE_GCP
     }
   }
 

@@ -27,22 +27,22 @@ variable "ERIGON_ARCHIVE_DISK_SIZE_GB" {
   default = 100
 }
 
-variable "BOR_VOLUME_TYPE" {
+variable "BOR_VOLUME_TYPE_GCP" {
   type    = string
   default = "pd-ssd"
 }
 
-variable "ERIGON_VOLUME_TYPE" {
+variable "ERIGON_VOLUME_TYPE_GCP" {
   type    = string
   default = "pd-ssd"
 }
 
-variable "BOR_ARCHIVE_VOLUME_TYPE" {
+variable "BOR_ARCHIVE_VOLUME_TYPE_GCP" {
   type    = string
   default = "pd-balanced"
 }
 
-variable "ERIGON_ARCHIVE_VOLUME_TYPE" {
+variable "ERIGON_ARCHIVE_VOLUME_TYPE_GCP" {
   type    = string
   default = "pd-balanced"
 }
@@ -82,22 +82,22 @@ variable "ERIGON_ARCHIVE_COUNT" {
   default = 0
 }
 
-variable "BOR_INSTANCE_TYPE" {
+variable "BOR_MACHINE_TYPE" {
   type    = string
   default = "e2-micro"
 }
 
-variable "ERIGON_INSTANCE_TYPE" {
+variable "ERIGON_MACHINE_TYPE" {
   type    = string
   default = "e2-micro"
 }
 
-variable "BOR_ARCHIVE_INSTANCE_TYPE" {
+variable "BOR_ARCHIVE_MACHINE_TYPE" {
   type    = string
   default = "e2-micro"
 }
 
-variable "ERIGON_ARCHIVE_INSTANCE_TYPE" {
+variable "ERIGON_ARCHIVE_MACHINE_TYPE" {
   type    = string
   default = "e2-micro"
 }
@@ -107,7 +107,7 @@ variable "INSTANCE_IMAGE" {
   default = "ubuntu-2204-jammy-v20230302"
 }
 
-variable "REGION" {
+variable "REGION_GCP" {
   type    = string
   default = "us-west2"
 }

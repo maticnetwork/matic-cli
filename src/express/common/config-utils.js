@@ -123,7 +123,7 @@ function validateEnvVars(cloud) {
       TF_VAR_BOR_ARCHIVE_INSTANCE_TYPE: validStr({ default: 'n2d-standard-4' }),
       TF_VAR_ERIGON_ARCHIVE_INSTANCE_TYPE: validStr({ default: 'n2d-standard-4' }),
       TF_VAR_INSTANCE_IMAGE: validGCPVmImageStr({ default: 'ubuntu-2204-jammy-v20230302' }),
-      TF_VAR_REGION: validStr({
+      TF_VAR_REGION_GCP: validStr({
         default: 'us-central1',
         choices: [
           "asia-east1",
@@ -165,7 +165,7 @@ function validateEnvVars(cloud) {
         docs:
           'https://cloud.google.com/compute/docs/regions-zones'
       }),
-      TF_VAR_ZONE: validZone({ default: 'us-central1-a' }),
+      // TF_VAR_ZONE: validZone({ default: 'us-central1-a' }),
       PEM_FILE_PATH: validCertPathStr({ default: '/home/ubuntu/ubuntu.pem' }),
       TF_VAR_GCE_PUB_KEY_FILE: validStr({ default: '/home/ubuntu/aws-key.pem.pub' }),
     })
@@ -265,8 +265,6 @@ function validateUsersAndHosts() {
   if (process.env.DEVNET_BOR_USERS && process.env.DEVNET_BOR_HOSTS) {
     borUsers = process.env.DEVNET_BOR_USERS.split(',')
     borHosts = process.env.DEVNET_BOR_HOSTS.split(',')
-    console.log(process.env.DEVNET_BOR_USERS)
-    console.log(process.env.DEVNET_BOR_HOSTS)
   }
   if (process.env.DEVNET_ERIGON_USERS && process.env.DEVNET_ERIGON_HOSTS) {
     erigonUsers = process.env.DEVNET_ERIGON_USERS.split(',')
@@ -288,10 +286,6 @@ function validateUsersAndHosts() {
       '❌ DEVNET_BOR_USERS lengths are not equal to the nodes count ' +
         '(TF_VAR_BOR_VALIDATOR_COUNT+TF_VAR_BOR_SENTRY_COUNT+TF_VAR_BOR_ARCHIVE_COUNT), please check your configs!'
     )
-    console.log(1)
-    console.log(borValCount)
-    console.log(borSenCount)
-    console.log(borArchiveCount)
     process.exit(1)
   } else if (process.env.TF_VAR_DOCKERIZED === 'no') {
     if (
@@ -304,10 +298,6 @@ function validateUsersAndHosts() {
         '❌ DEVNET_BOR_USERS or DEVNET_BOR_HOSTS lengths are not equal to the nodes count ' +
           '(TF_VAR_BOR_VALIDATOR_COUNT+TF_VAR_BOR_SENTRY_COUNT+TF_VAR_BOR_ARCHIVE_COUNT), please check your configs!'
       )
-      console.log(2)
-      console.log(borValCount)
-      console.log(borSenCount)
-      console.log(borArchiveCount)
       process.exit(1)
     }
 
@@ -323,10 +313,6 @@ function validateUsersAndHosts() {
         '❌ DEVNET_ERIGON_USERS or DEVNET_ERIGON_HOSTS lengths are not equal to the nodes count ' +
           '(TF_VAR_ERIGON_VALIDATOR_COUNT+TF_VAR_ERIGON_SENTRY_COUNT+TF_VAR_ERIGON_ARCHIVE_COUNT), please check your configs!'
       )
-      console.log(3)
-      console.log(borValCount)
-      console.log(borSenCount)
-      console.log(borArchiveCount)
       process.exit(1)
     }
   }

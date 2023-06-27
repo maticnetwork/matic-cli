@@ -45,7 +45,7 @@ import { rpcTest } from '../tests/rpc-tests/rpc-test'
 
 program
   .option('-i, --init', 'Initiate the terraform setup')
-  .option('--cloud [aws|gcp]', '--init will intiates the terraform with specified cloud', /^(aws|gcp)$/i, 'aws')
+  .option('--cloud <aws|gcp>', '--init will initiate Terraform with specified cloud', /^(aws|gcp)$/i)
   .option('-s, --start', 'Start the setup')
   .option('-d, --destroy', 'Destroy the setup')
   .option(
@@ -163,6 +163,12 @@ export async function cli() {
     if (!checkDir(true)) {
       console.log(
         "❌ The init command is supposed to be executed from the project root directory, named 'matic-cli'!"
+      )
+      process.exit(1)
+    }
+    if (!options.cloud){
+      console.log(
+        "❌ Cloud not provided! please define --cloud as aws or gcp."
       )
       process.exit(1)
     }
