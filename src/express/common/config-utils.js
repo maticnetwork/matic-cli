@@ -3,6 +3,8 @@
 import yaml from 'js-yaml'
 import fs from 'fs'
 import { cleanEnv, num, bool, url, host, makeValidator } from 'envalid'
+import constants from './constants'
+
 
 const shell = require('shelljs')
 
@@ -43,7 +45,7 @@ const validZone =  makeValidator((x) => {
     x !== undefined &&
     x !== null &&
     x !== '' &&
-    x.startsWith(process.env.TF_VAR_REGION + '-')
+    x.startsWith(process.env.TF_VAR_GCP_REGION + '-')
   ) {
     return x
   } else throw new Error(x + 'is not valid, please check your configs!')
@@ -57,13 +59,15 @@ const validCertPathStr = makeValidator((x) => {
     !x.startsWith('~') &&
     (x.endsWith('.pem') || x.endsWith('.cer'))
   ) {
+    console.log("Done Checking path..");
     return x
   } else throw new Error(x + 'is not valid, please check your configs!')
+  
 })
 
 function validateEnvVars(cloud) {
   // validating AWS infra vars
-  if (cloud == 'aws') {
+  if (cloud == constants.cloud.AWS) {
     cleanEnv(process.env, {
       TF_VAR_IOPS: num({ default: 3000 }),
       TF_VAR_BOR_IOPS: num({ default: 3000 }),
@@ -74,8 +78,8 @@ function validateEnvVars(cloud) {
       TF_VAR_BOR_ARCHIVE_INSTANCE_TYPE: validStr({ default: 't2.xlarge' }),
       TF_VAR_ERIGON_ARCHIVE_INSTANCE_TYPE: validStr({ default: 't2.xlarge' }),
       TF_VAR_INSTANCE_AMI: validAmiStr({ default: 'ami-017fecd1353bcc96e' }),
-      // TF_VAR_PEM_FILE: validStr({ default: 'aws-key' }),
-      TF_VAR_REGION: validStr({
+      TF_VAR_PEM_FILE: validStr({ default: 'aws-key' }),
+      TF_VAR_AWS_REGION: validStr({
         default: 'us-west-2',
         choices: [
           'us-east-2',
@@ -110,12 +114,11 @@ function validateEnvVars(cloud) {
         docs:
           'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/' +
           'Concepts.RegionsAndAvailabilityZones.html'
-      }),
-      PEM_FILE_PATH: validCertPathStr({ default: '/home/ubuntu/aws-key.pem' })
+      })
     })
 
   // validating GCP infra vars
-  } else if (cloud == 'gcp') {
+  } else if (cloud == constants.cloud.GCP) {
     cleanEnv(process.env, {
       TF_VAR_MACHINE_TYPE: validStr({ default: 'n2d-standard-4' }),
       TF_VAR_BOR_INSTANCE_TYPE: validStr({ default: 'n2d-standard-4' }),
@@ -123,7 +126,7 @@ function validateEnvVars(cloud) {
       TF_VAR_BOR_ARCHIVE_INSTANCE_TYPE: validStr({ default: 'n2d-standard-4' }),
       TF_VAR_ERIGON_ARCHIVE_INSTANCE_TYPE: validStr({ default: 'n2d-standard-4' }),
       TF_VAR_INSTANCE_IMAGE: validGCPVmImageStr({ default: 'ubuntu-2204-jammy-v20230302' }),
-      TF_VAR_REGION_GCP: validStr({
+      TF_VAR_GCP_REGION: validStr({
         default: 'us-central1',
         choices: [
           "asia-east1",
@@ -165,10 +168,12 @@ function validateEnvVars(cloud) {
         docs:
           'https://cloud.google.com/compute/docs/regions-zones'
       }),
-      // TF_VAR_ZONE: validZone({ default: 'us-central1-a' }),
-      PEM_FILE_PATH: validCertPathStr({ default: '/home/ubuntu/ubuntu.pem' }),
+      TF_VAR_ZONE: validZone({ default: 'us-central1-a' }),
       TF_VAR_GCE_PUB_KEY_FILE: validStr({ default: '/home/ubuntu/aws-key.pem.pub' }),
     })
+  } else {
+    console.log(`❌ Unsupported cloud provider ${cloud}`)
+    process.exit(1);
   }
 
   cleanEnv(process.env, {
@@ -182,7 +187,6 @@ function validateEnvVars(cloud) {
     TF_VAR_ERIGON_SENTRY_COUNT: num({ default: 0 }),
     TF_VAR_BOR_ARCHIVE_COUNT: num({ default: 0 }),
     TF_VAR_ERIGON_ARCHIVE_COUNT: num({ default: 0 }),
-    TF_VAR_PEM_FILE: validStr({ default: 'aws-key' }),
     PEM_FILE_PATH: validCertPathStr({ default: '/home/ubuntu/aws-key.pem' }),
     DEFAULT_STAKE: num({ default: 10000 }),
     DEFAULT_FEE: num({ default: 2000 }),
@@ -729,7 +733,14 @@ export async function editMaticCliRemoteYAMLConfig() {
     setConfigList('devnetHeimdallHosts', heimdallHosts.join(','), doc)
   }
   setConfigValue('devnetType', 'remote', doc)
-  setConfigValue('devnetRegion', process.env.TF_VAR_REGION, doc)
+  if (process.env.CLOUD === constants.cloud.AWS) {
+    setConfigValue('devnetRegion', process.env.TF_VAR_AWS_REGION, doc)
+  } else if (process.env.CLOUD === constants.cloud.GCP) {
+    setConfigValue('devnetRegion', process.env.TF_VAR_GCP_REGION, doc)
+  } else {
+    console.log(`❌ Unsupported cloud provider ${process.env.CLOUD}`)
+    process.exit(1);
+  }
   setConfigValue('cloud', process.env.CLOUD, doc)
 
   fs.writeFile(

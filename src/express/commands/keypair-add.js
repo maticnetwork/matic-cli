@@ -1,9 +1,10 @@
 import { loadDevnetConfig, splitToArray } from '../common/config-utils'
 import { maxRetries, runSshCommand } from '../common/remote-worker'
+import constants from '../common/constants';
 
 const shell = require('shelljs')
 const fs = require('fs');
-export async function awsKeypairAdd() {
+export async function keypairAdd() {
   require('dotenv').config({ path: `${process.cwd()}/.env` })
   const devnetType =
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
@@ -13,7 +14,7 @@ export async function awsKeypairAdd() {
   const keyName = `temp-key-${time}`
   const cloud = doc.cloud.toString()
 
-  if (cloud === 'aws') {
+  if (cloud === constants.cloud.AWS) {
     console.log('📍 Generating aws key-pair...')
     shell.exec(
       `aws ec2 create-key-pair --key-name ${keyName} --key-type rsa --key-format pem --query "KeyMaterial" --output text > ${keyName}.pem`
@@ -73,7 +74,7 @@ export async function awsKeypairAdd() {
     console.log(
       `🚨 Do not forget to destroy the key when no longer needed, using the command "../../bin/express-cli --aws-key-des ${keyName}"`
     )
-  } else if (cloud == 'gcp') {
+  } else if (cloud == constants.cloud.GCP) {
     const user = doc.ethHostUser.toString()
     const project = doc.instancesIds[0].split('/')[1].toString()
     const zone = doc.instancesIds[0].split('/')[3].toString()
@@ -115,5 +116,8 @@ export async function awsKeypairAdd() {
     console.log(
       `🚨 Do not forget to destroy the key when no longer needed, using the command "../../bin/express-cli --aws-key-des ${keyName}"`
     )
+  } else {
+    console.log(`❌ Unsupported cloud provider ${cloud}`)
+    process.exit(1);
   }
 }

@@ -3,6 +3,7 @@
 import { loadDevnetConfig } from '../common/config-utils'
 import { timer } from '../common/time-utils'
 import { stopServices } from './cleanup'
+import constants from '../common/constants'
 
 const shell = require('shelljs')
 
@@ -17,16 +18,20 @@ export async function stopInstances() {
 
   const cloud = doc.cloud.toString()
 
-  if (cloud === 'gcp') {
+  if (cloud === constants.cloud.GCP) {
     const project = doc.instancesIds[0].split('/')[1].toString()
     const zone = doc.instancesIds[0].split('/')[3].toString()
     const instances = doc.instancesIds.map(x => x.split('/').at(-1)).toString().replace(/,/g, ' ')
     shell.exec(`gcloud compute instances stop ${instances} --zone ${zone} --project ${project}`)
-  } else {
+  } else if (cloud === constants.cloud.AWS) {
     const instances = doc.instancesIds.toString().replace(/,/g, ' ')
     const region = doc.devnetRegion.toString()
     shell.exec(`aws ec2 stop-instances --region ${region} --instance-ids ${instances}`)
+  } else {
+    console.log(`❌ Unsupported cloud provider ${cloud}`)
+    process.exit(1);
   }
+
   if (shell.error() !== null) {
     console.log(
       `📍Stopping instances ${doc.instancesIds.toString()} didn't work. Please check AWS manually`

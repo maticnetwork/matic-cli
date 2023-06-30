@@ -27,22 +27,22 @@ variable "ERIGON_ARCHIVE_DISK_SIZE_GB" {
   default = 100
 }
 
-variable "BOR_VOLUME_TYPE_GCP" {
+variable "BOR_PERSISTENT_DISK_TYPE" {
   type    = string
   default = "pd-ssd"
 }
 
-variable "ERIGON_VOLUME_TYPE_GCP" {
+variable "ERIGON_PERSISTENT_DISK_TYPE" {
   type    = string
   default = "pd-ssd"
 }
 
-variable "BOR_ARCHIVE_VOLUME_TYPE_GCP" {
+variable "BOR_ARCHIVE_PERSISTENT_DISK_TYPE" {
   type    = string
   default = "pd-balanced"
 }
 
-variable "ERIGON_ARCHIVE_VOLUME_TYPE_GCP" {
+variable "ERIGON_ARCHIVE_PERSISTENT_DISK_TYPE" {
   type    = string
   default = "pd-balanced"
 }
@@ -107,7 +107,7 @@ variable "INSTANCE_IMAGE" {
   default = "ubuntu-2204-jammy-v20230302"
 }
 
-variable "REGION_GCP" {
+variable "GCP_REGION" {
   type    = string
   default = "us-west2"
 }
@@ -119,7 +119,6 @@ variable "ZONE" {
 
 variable "SG_CIDR_BLOCKS" {
   type =  list(string)
-  default = ["0.0.0.0/0"]
 }
 
 variable "GCE_PUB_KEY_FILE" {

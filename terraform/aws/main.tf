@@ -12,7 +12,7 @@ terraform {
 
 # aws provider
 provider "aws" {
-  region     = var.REGION
+  region     = var.AWS_REGION
 }
 
 # ec2 instances

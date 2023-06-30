@@ -39,13 +39,22 @@ import { milestoneBase } from './express/commands/milestone-base'
 import { milestonePartition } from './express/commands/milestone-partition'
 import { shadow } from './express/commands/shadow'
 import { relay } from './express/commands/relay'
-import { awsKeypairAdd } from './express/commands/aws-keypair-add'
-import { awsKeypairDestroy } from './express/commands/aws-keypair-destroy'
+import { keypairAdd } from './express/commands/keypair-add'
+import { keypairDestroy } from './express/commands/keypair-destroy'
 import { rpcTest } from '../tests/rpc-tests/rpc-test'
+import constants from './express/common/constants'
+
+function checkCloudProvider(provider, _) {
+  const supportedClouds = [constants.cloud.AWS, constants.cloud.GCP];
+  if (supportedClouds.includes(provider.toLowerCase())) {
+    return provider.toLowerCase()
+  }
+  console.log('❌Invalid cloud provider. Choose from: ' + supportedClouds)
+  process.exit(1)
+}
 
 program
-  .option('-i, --init', 'Initiate the terraform setup')
-  .option('--cloud <aws|gcp>', '--init will initiate Terraform with specified cloud', /^(aws|gcp)$/i)
+  .option('-i, --init <gcp|aws>', 'Initiate the terraform setup to specified cloud', checkCloudProvider)
   .option('-s, --start', 'Start the setup')
   .option('-d, --destroy', 'Destroy the setup')
   .option(
@@ -135,12 +144,12 @@ program
     'Rewind the chain by a given number of blocks'
   )
   .option(
-    '-key-a, --aws-key-add',
-    'Generate additional aws keypair for the devnet'
+    '-key-a, --ssh-key-add',
+    'Generate additional ssh keypair for the devnet'
   )
   .option(
-    '-key-d, --aws-key-des [keyName]',
-    'Destroy aws keypair from devnet, given its keyName'
+    '-key-d, --ssh-key-des [keyName]',
+    'Destroy ssh keypair from devnet, given its keyName'
   )
   .option(
     '-sf, --shadow-fork [blockNumber]',
@@ -159,21 +168,14 @@ export async function cli() {
   program.parse(process.argv)
   const options = program.opts()
   if (options.init) {
-    console.log('📍Command --init')
+    console.log('📍Command --init ' + options.init)
     if (!checkDir(true)) {
       console.log(
         "❌ The init command is supposed to be executed from the project root directory, named 'matic-cli'!"
       )
       process.exit(1)
     }
-    if (!options.cloud){
-      console.log(
-        "❌ Cloud not provided! please define --cloud as aws or gcp."
-      )
-      process.exit(1)
-    }
-    const cloud = options.cloud.toLowerCase()
-    await terraformInit(cloud)
+    await terraformInit(options.init)
   } else if (options.start) {
     console.log('📍Command --start')
     if (!checkDir(false)) {
@@ -516,8 +518,8 @@ export async function cli() {
 
     await timer(3000)
     await rewind(options.rewind)
-  } else if (options.awsKeyAdd) {
-    console.log('📍 Command --aws-key-add')
+  } else if (options.sshKeyAdd) {
+    console.log('📍 Command --ssh-key-add')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -525,9 +527,9 @@ export async function cli() {
       process.exit(1)
     }
 
-    await awsKeypairAdd()
-  } else if (options.awsKeyDes) {
-    console.log('📍 Command --aws-key-des')
+    await keypairAdd()
+  } else if (options.sshKeyDes) {
+    console.log('📍 Command --ssh-key-des')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
@@ -535,7 +537,7 @@ export async function cli() {
       process.exit(1)
     }
 
-    await awsKeypairDestroy(options.awsKeyDes)
+    await keypairDestroy(options.sshKeyDes)
   } else if (options.reorgStart) {
     console.log('📍Command --reorg-start [split]')
 

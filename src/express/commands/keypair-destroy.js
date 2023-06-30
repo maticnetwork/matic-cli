@@ -1,8 +1,9 @@
 import { loadDevnetConfig, splitToArray } from '../common/config-utils'
 import { maxRetries, runSshCommand } from '../common/remote-worker'
+import constants from '../common/constants'
 
 const shell = require('shelljs')
-export async function awsKeypairDestroy(keyName) {
+export async function keypairDestroy(keyName) {
   if (keyName === true || keyName === null || keyName === undefined) {
     console.log(
       '📍 Invalid keyName specified! Please use a valid keyName for this instance'
@@ -16,7 +17,7 @@ export async function awsKeypairDestroy(keyName) {
 
   const cloud = doc.cloud.toString()
 
-  if (cloud == 'aws') {
+  if (cloud == constants.cloud.AWS) {
     console.log(`📍 Getting pubKey for ${keyName} ...`)
     const output = shell.exec(
       `aws ec2 describe-key-pairs --key-names ${keyName} --include-public-key --output json`
@@ -72,7 +73,7 @@ export async function awsKeypairDestroy(keyName) {
     }
 
     console.log(`📍 Key-pair ${keyName} destroyed successfully!`)
-  } else if (cloud == 'gcp') {
+  } else if (cloud == constants.cloud.GCP) {
     const user = doc.ethHostUser.toString()
     const project = doc.instancesIds[0].split('/')[1].toString()
     const zone = doc.instancesIds[0].split('/')[3].toString()
@@ -86,7 +87,7 @@ export async function awsKeypairDestroy(keyName) {
       const existing_ssh_keys = existing_pub_keys.split("\n");
       const filtered_ssh_keys = existing_ssh_keys.filter(line => !line.trim().endsWith(keyName));
       
-      if(existing_pub_keys.length != filtered_ssh_keys.length){
+      if(existing_pub_keys.length == filtered_ssh_keys.length){
         console.log(`📍 Failed to get pubKey from ${keyName}`)
         process.exit(1)
       } 
@@ -106,5 +107,8 @@ export async function awsKeypairDestroy(keyName) {
     }
 
     console.log(`📍 Key-pair ${keyName} destroyed successfully!`)
+  } else {
+    console.log(`❌ Unsupported cloud provider ${cloud}`)
+    process.exit(1);
   }
 }

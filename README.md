@@ -136,14 +136,14 @@ Instructions to run `express-cli`.
 For the list of commands, please run `express-cli --help`
 First off, you need to `--init` terraform on your local machine, by executing the following command.
 
-- `./bin/express-cli --init` (For Google cloud: `./bin/express-cli --init --cloud gcp`)
+- `./bin/express-cli --init <aws|gcp>`
 
   - Initializes a new devnet folder with terraform and creates some git-ignored files locally. This step is mandatory
     before running any other command. The new devnet folder created will be `devnet-<id>` where `id` is a monotonically
     increasing count for the devnets. Once created, you can `cd deployments/devnet-<id>` and run the other commands.
     This allows you to work with multiple devnets at once.
     Then, a remote devnet can be created with the `--start` command, as follows.
-  - `--cloud` is an optional parmeter, where you can specify the cloud provider. Currently the supported values are `aws`(default) and `gcp`.
+  - You should specify the cloud provider. Currently the supported values are `aws` and `gcp`.
 
 - `../../bin/express-cli --start`
 

@@ -106,7 +106,7 @@ variable "PEM_FILE" {
   default = "aws-key"
 }
 
-variable "REGION" {
+variable "AWS_REGION" {
   default = "us-west-2"
 }
 

@@ -12,7 +12,7 @@ terraform {
 
 provider "google" {
   project = var.PROJECT_ID
-  region  = var.REGION_GCP
+  region  = var.GCP_REGION
   zone    = var.ZONE
 }
 
@@ -26,7 +26,7 @@ resource "google_compute_network" "vpc_network" {
 resource "google_compute_subnetwork" "public-subnetwork" {
   name          = "${var.VM_NAME}-public-subnet"
   ip_cidr_range = var.SUBNET_CIDR_RANGE
-  region        = var.REGION_GCP
+  region        = var.GCP_REGION
   network       = google_compute_network.vpc_network.name
 
 }
@@ -67,7 +67,7 @@ resource "google_compute_instance" "bor_node_server" {
 
       size = (count.index >= var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT) ? var.BOR_ARCHIVE_DISK_SIZE_GB : var.BOR_DISK_SIZE_GB
 
-      type = (count.index >= var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT) ? var.BOR_ARCHIVE_VOLUME_TYPE_GCP : var.BOR_VOLUME_TYPE_GCP
+      type = (count.index >= var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT) ? var.BOR_ARCHIVE_PERSISTENT_DISK_TYPE : var.BOR_PERSISTENT_DISK_TYPE
     }
   }
 
@@ -84,7 +84,7 @@ resource "google_compute_instance" "bor_node_server" {
       nat_ip = google_compute_address.bor_static_ip[count.index].address
     }
   }
-  tags = ["matic-cli"]
+  tags = [var.VM_NAME]
   labels = {
     name     = "polygon-matic"
     instance = "bor"
@@ -103,7 +103,7 @@ resource "google_compute_instance" "erigon_node_server" {
     initialize_params {
       image = var.INSTANCE_IMAGE
       size  = (count.index >= var.ERIGON_VALIDATOR_COUNT + var.ERIGON_SENTRY_COUNT) ? var.ERIGON_ARCHIVE_DISK_SIZE_GB : var.ERIGON_DISK_SIZE_GB
-      type  = (count.index >= var.ERIGON_VALIDATOR_COUNT + var.ERIGON_SENTRY_COUNT) ? var.ERIGON_ARCHIVE_VOLUME_TYPE_GCP : var.ERIGON_VOLUME_TYPE_GCP
+      type  = (count.index >= var.ERIGON_VALIDATOR_COUNT + var.ERIGON_SENTRY_COUNT) ? var.ERIGON_ARCHIVE_PERSISTENT_DISK_TYPE : var.ERIGON_PERSISTENT_DISK_TYPE
     }
   }
 
@@ -120,7 +120,7 @@ resource "google_compute_instance" "erigon_node_server" {
       nat_ip = google_compute_address.erigon_static_ip[count.index].address
     }
   }
-  tags = ["matic-cli"]
+  tags = [var.VM_NAME]
   labels = {
     name     = "polygon-matic",
     instance = "erigon"
@@ -140,7 +140,7 @@ resource "google_compute_instance" "dockerized_server" {
     initialize_params {
       image = var.INSTANCE_IMAGE
       size  = var.BOR_DISK_SIZE_GB
-      type  = var.BOR_VOLUME_TYPE_GCP
+      type  = var.BOR_PERSISTENT_DISK_TYPE
     }
   }
 
@@ -157,7 +157,7 @@ resource "google_compute_instance" "dockerized_server" {
       nat_ip = google_compute_address.docker_static_ip[count.index].address
     }
   }
-  tags = ["matic-cli"]
+  tags = [var.VM_NAME]
   labels = {
     name = "polygon-matic",
     instance = "docker"
@@ -165,10 +165,11 @@ resource "google_compute_instance" "dockerized_server" {
 }
 
 
-resource "google_compute_firewall" "firewall_rules" {
-  name    = format("%s-%s", var.VM_NAME, var.FW_RULE_SUFFIX)
+resource "google_compute_firewall" "allow_required_ports" {
+  name    = format("%s-%s-%s", var.VM_NAME, var.FW_RULE_SUFFIX, "ports")
   network = google_compute_network.vpc_network.name
-
+  direction = "INGRESS"
+  priority  = 1000
   allow {
     protocol = "tcp"
     ports    = var.PORTS_IN
@@ -176,21 +177,21 @@ resource "google_compute_firewall" "firewall_rules" {
   source_ranges = var.SG_CIDR_BLOCKS
 }
 
-resource "google_compute_firewall" "all_node_instances" {
-  name          = "allow-all-egress"
-  project       = var.PROJECT_ID
-  network       = google_compute_network.vpc_network.name
-  direction     = "EGRESS"
-  source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["all-node-instances"]
+resource "google_compute_firewall" "allow_internal_access" {
+  name    = format("%s-%s-%s", var.VM_NAME, var.FW_RULE_SUFFIX, "internal-access")
+  network = google_compute_network.vpc_network.name
+  direction = "INGRESS"
+  priority  = 1000
   allow {
     protocol = "all"
   }
+  source_tags = [var.VM_NAME]
+  target_tags = [var.VM_NAME]
 }
 
 # output values
 output "cloud" {
-  value = "gcp"
+  value = "gcp"  # Do not update this.
 }
 
 output "instance_dns_ips" {
