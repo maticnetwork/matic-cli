@@ -1,7 +1,3 @@
-variable "PROJECT_ID" {
-  type    = string
-}
-
 variable "VM_NAME" {
   type    = string
   default = "polygon-user"
@@ -27,26 +23,6 @@ variable "ERIGON_ARCHIVE_DISK_SIZE_GB" {
   default = 100
 }
 
-variable "BOR_PERSISTENT_DISK_TYPE" {
-  type    = string
-  default = "pd-ssd"
-}
-
-variable "ERIGON_PERSISTENT_DISK_TYPE" {
-  type    = string
-  default = "pd-ssd"
-}
-
-variable "BOR_ARCHIVE_PERSISTENT_DISK_TYPE" {
-  type    = string
-  default = "pd-balanced"
-}
-
-variable "ERIGON_ARCHIVE_PERSISTENT_DISK_TYPE" {
-  type    = string
-  default = "pd-balanced"
-}
-
 variable "DOCKERIZED" {
   type    = string
   default = "no"
@@ -67,6 +43,7 @@ variable "BOR_SENTRY_COUNT" {
   default = 1
 }
 
+
 variable "ERIGON_SENTRY_COUNT" {
   type    = number
   default = 0
@@ -82,56 +59,10 @@ variable "ERIGON_ARCHIVE_COUNT" {
   default = 0
 }
 
-variable "BOR_MACHINE_TYPE" {
-  type    = string
-  default = "e2-micro"
-}
-
-variable "ERIGON_MACHINE_TYPE" {
-  type    = string
-  default = "e2-micro"
-}
-
-variable "BOR_ARCHIVE_MACHINE_TYPE" {
-  type    = string
-  default = "e2-micro"
-}
-
-variable "ERIGON_ARCHIVE_MACHINE_TYPE" {
-  type    = string
-  default = "e2-micro"
-}
-
-variable "INSTANCE_IMAGE" {
-  type    = string
-  default = "ubuntu-2204-jammy-v20230302"
-}
-
-variable "GCP_REGION" {
-  type    = string
-  default = "us-west2"
-}
-
-variable "ZONE" {
-  type    = string
-  default = "us-west2-a"
-}
-
 variable "SG_CIDR_BLOCKS" {
+  description = "Contains allowed IPs. Please, set them into secret.tfvars (example available at secret.tfvars.example)"
+  sensitive = true
   type =  list(string)
-}
-
-variable "GCE_PUB_KEY_FILE" {
-  type    = string
-}
-
-variable "SUBNET_CIDR_RANGE" {
-  type = string
-}
-
-variable "FW_RULE_SUFFIX" {
-  type = string
-  default = "fw-rule"
 }
 
 variable "PORTS_IN" {
@@ -149,9 +80,4 @@ variable "PORTS_IN" {
   // 3000: ethstats-frontend dashboard
   // 8000: ethstats-backend collector
   default = [22, 80, 443, 30303, 1317, 8545, 9545, 1337, 8546, 26656, 8080, 3000, 8000]
-}
-
-
-variable "USER" {
-  type = string
 }

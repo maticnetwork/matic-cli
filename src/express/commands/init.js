@@ -19,6 +19,12 @@ export async function terraformInit(cloud) {
   shell.exec(
     `cp ./terraform/${cloud}/variables.tf ./deployments/devnet-${nextDevnetId}/variables.tf`
   )
+  shell.exec(
+    `cp ./terraform/variables/common_vars.tf ./deployments/devnet-${nextDevnetId}/common_vars.tf`
+  )
+  shell.exec(
+    `cp ./terraform/variables/${cloud}_vars.tf ./deployments/devnet-${nextDevnetId}/${cloud}_vars.tf`
+  )
 
   require('dotenv').config({
     path: `./deployments/devnet-${nextDevnetId}/.env`
