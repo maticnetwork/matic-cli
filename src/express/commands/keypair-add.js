@@ -87,6 +87,7 @@ export async function keypairAdd() {
     )
 
     await Promise.all(instances.map(async (instance) => {
+      // This command retrieves the SSH keys from Google Cloud (gcloud). Please note that the output may contain a lot of logs.
       const existing_keys = shell.exec(
         `gcloud compute instances describe ${instance} --project=${project} --zone=${zone} --format='value(metadata.ssh-keys)'`
       )
@@ -108,7 +109,7 @@ export async function keypairAdd() {
         `gcloud compute instances add-metadata ${instance} --metadata ssh-keys="${user}:${new_keys}" --project=${project} --zone=${zone}`
       )
     }));
-    
+
     console.log(`📍 Successfully added ${keyName} to all machines of the devnet`)
     console.log(
       `🔑 You can now share ${keyName}.pem with other devs - on a secure channel - to let them access the devnet`

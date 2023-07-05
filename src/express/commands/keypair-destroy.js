@@ -86,13 +86,14 @@ export async function keypairDestroy(keyName) {
       )
       const existing_ssh_keys = existing_pub_keys.split("\n");
       const filtered_ssh_keys = existing_ssh_keys.filter(line => !line.trim().endsWith(keyName));
-      
-      if(existing_pub_keys.length == filtered_ssh_keys.length){
+
+      if (existing_pub_keys.length == filtered_ssh_keys.length) {
         console.log(`📍 Failed to get pubKey from ${keyName}`)
         process.exit(1)
-      } 
-      
+      }
+
       const updated_ssh_keys = filtered_ssh_keys.join("\n");
+      // This command retrieves the SSH keys from Google Cloud (gcloud). Please note that the output may contain a lot of logs.
       shell.exec(
         `gcloud compute instances add-metadata ${instance} --metadata ssh-keys="${updated_ssh_keys}" --project=${project} --zone=${zone}`
       )

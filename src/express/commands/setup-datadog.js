@@ -2,6 +2,7 @@
 
 import { loadDevnetConfig, splitToArray } from '../common/config-utils'
 import { timer } from '../common/time-utils'
+import constants from '../common/constants'
 
 const {
   runScpCommand,
@@ -32,11 +33,17 @@ export async function setupDatadog() {
   let doc
   require('dotenv').config({ path: `${process.cwd()}/.env` })
 
-  if (process.env.TF_VAR_DOCKERIZED === 'yes' || process.env.TF_VAR_PROJECT_ID) {
+  if (process.env.TF_VAR_DOCKERIZED === 'yes') {
     console.log('📍Not supported for datadog at the moment')
     return
   } else {
     doc = await loadDevnetConfig('remote')
+  }
+
+  if (doc.cloud.toString() === constants.cloud.GCP) { 
+    // not tested datadog setup in GCP
+    console.log('📍Not supported for datadog at the moment in GCP')
+    return
   }
 
   if (doc.devnetBorHosts.length > 0) {

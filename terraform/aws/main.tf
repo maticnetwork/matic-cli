@@ -190,7 +190,7 @@ resource "aws_main_route_table_association" "route_table_association" {
 
 # output variables used by express-cli
 output "cloud" {
-  value = "aws"
+  value = "aws" # do not update this, value should match the corresponding value in the constants.js file.
 }
 
 output "instance_ips" {

@@ -191,7 +191,7 @@ resource "google_compute_firewall" "allow_internal_access" {
 
 # output values
 output "cloud" {
-  value = "gcp"  # Do not update this.
+  value = "gcp"  # do not update this, value should match the corresponding value in the constants.js file.
 }
 
 output "instance_dns_ips" {
