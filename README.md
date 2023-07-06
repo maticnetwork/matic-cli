@@ -21,16 +21,16 @@ Please, refer to the section of this file you are more interested in (`express-c
 
 To use the `express-cli` you have to execute the following steps.
 
-- [install aws cli](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+- [install aws cli](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) or [install gcloud tool](https://cloud.google.com/sdk/docs/install)
 - [install terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli) on your local machine
 - use [nvm](https://github.com/nvm-sh/nvm#installing-and-updating) to switch to the proper `node` version, `v16.17.1`,
   by running `nvm use` from the root folder
 - install `express-cli` and `matic-cli` locally with command `npm i`
-- generate a keypair on AWS EC2 and download its certificate locally (`.pem` file)
+- generate a keypair on AWS EC2 and download its certificate locally (`.pem` file). If you are on GCP, you can use your existing keypair or use `ssh-keygen` to generate. Check the [GCP guide](./docs/gcp_dev_guide.md).
 - copy `secret.tfvars.example` to `secret.tfvar` with command `cp secret.tfvars.example secret.tfvars` and check the commented file for details
 - **If you are a Polygon employee**, connect to the company VPN
 - modify `secret.tfvar` with addresses of the allowed IPs (as specified in `secret.tfvars.example` file)
-- copy `terraform/<aws|gcp>/.env.example` to `.env` with command `cp terraform/aws/.env.example .env`(for aws) and check the heavily commented file for details.
+- copy `.env.example` to `.env` with command `cp .env.example .env` and check the heavily commented file for details. If you're using GCP, you can ignore AWS specific terraform varibales and vice versa.
 - make sure `PEM_FILE_PATH` points to a correct AWS key certificate, the one you downloaded in the previous steps
 - define the number of nodes (`TF_VAR_VALIDATOR_COUNT` and `TF_VAR_SENTRY_COUNT`) and adjust the `DEVNET_BOR_USERS`
   accordingly
@@ -41,12 +41,8 @@ To use the `express-cli` you have to execute the following steps.
   be shown
 - **If you are a Polygon employee**, please refer to [this page](https://www.notion.so/polygontechnology/Testing-Toolkit-d47e098641d14c80b2e9a90b3b1b88d9) for more info
 
-In case you plan to utilize express-cli for Google Cloud, you will need to make following modifications. It's important to note that express-cli is not fully tested yet on GCP, and not all features are accessible.
+In case you plan to utilize express-cli for Google Cloud, you will need to make few modifications like SSH keys. It's important to note that express-cli is not fully tested yet on GCP, and not all features are accessible. Check the [GCP dev guide](./docs/gcp_dev_guide.md).
 
-- [install gcloud cli](https://cloud.google.com/sdk/docs/install)
-- You need to have a public and private key pair files. You can generate them using `ssh-keygen -f ~/.ssh/ubuntu.pem -N ""`.
-- copy `.env.example` under _terraform/gcp/_ to `.env` with command `cp terraform/gcp/.env.example .env` and check the heavily commented file for details.
-- `TF_VAR_GCE_PUB_KEY_FILE` will be the path to public key file and `PEM_FILE_PATH` will be the path to private key
 
 ### Auth Configuration
 
@@ -239,7 +235,7 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
 - ` ../../bin/express-cli --instances-start`
 
-  - Start the (previously stopped) AWS EC2 VM instances associated with the deployed devnet. Also, it starts all services, such as ganache, heimdall, and bor
+  - Start the (previously stopped) VM instances associated with the deployed devnet. Also, it starts all services, such as ganache, heimdall, and bor
 
 - `../../bin/express-cli --stress [fund]`
 
@@ -267,13 +263,13 @@ The `express-cli` also comes with additional utility commands, listed below. Som
   - Executes a test to send EIP 1559 tx. In case of a non-dockerized devnet, if an integer [index] is specified, it will use
     that VM to send the tx. Otherwise, it will target the first VM.
 
-- `../../bin/express-cli --aws-key-add`
+- `../../bin/express-cli --ssh-key-add`
 
-  - Generates an additional `aws` key-pair remotely and stores it locally in the devnet folder. The public key is added to the ssh authorized keys of the devnet's machines. The key can be shared - on a secure channel! - with other devs to grant them access to the remote devnet.
+  - Generates an additional ssh key-pair remotely and stores it locally in the devnet folder. The public key is added to the ssh authorized keys of the devnet's machines. The key can be shared - on a secure channel! - with other devs to grant them access to the remote devnet.
 
-- `../../bin/express-cli --aws-key-des [keyName]`
+- `../../bin/express-cli --ssh-key-des [keyName]`
 
-  - Destroys an `aws` key-pair given its `keyName`. The key gets deleted remotely from `aws`, cancelled from the authorized ssh keys of the devnet's machines and removed from local devnet folder.
+  - Destroys an ssh key-pair given its `keyName`. The key gets deleted remotely from `aws` or `gcp`, cancelled from the authorized ssh keys of the devnet's machines and removed from local devnet folder.
 
 - `../../bin/express-cli --reorg-start [split]`
 
