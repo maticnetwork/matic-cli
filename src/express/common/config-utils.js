@@ -133,7 +133,7 @@ function validateEnvVars(cloud) {
       TF_VAR_BOR_ARCHIVE_VOLUME_TYPE_GCP: validStr({ default: 'pd-balanced' }),
       TF_VAR_ERIGON_ARCHIVE_VOLUME_TYPE_GCP: validStr({ default: 'pd-balanced' }),
       TF_VAR_GCP_REGION: validStr({
-        default: 'us-central1',
+        default: 'europe-west2',
         choices: [
           "asia-east1",
           "asia-east2",
@@ -174,7 +174,7 @@ function validateEnvVars(cloud) {
         docs:
           'https://cloud.google.com/compute/docs/regions-zones'
       }),
-      TF_VAR_ZONE: validZone({ default: 'us-central1-a' }),
+      TF_VAR_ZONE: validZone({ default: 'europe-west2-a' }),
       TF_VAR_GCE_PUB_KEY_FILE: validStr({ default: '/home/ubuntu/aws-key.pem.pub' }),
     })
   } else {
