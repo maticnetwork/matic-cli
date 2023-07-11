@@ -66,7 +66,7 @@ In case there are multiple accounts available to you, please select
 
 Then, the command will ask for other configs, please use
 
-- CLI default client Region: us-west-2
+- CLI default client Region: eu-west-1
 - CLI default output format: json
 - CLI profile name: default
 

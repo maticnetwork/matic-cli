@@ -107,7 +107,7 @@ variable "PEM_FILE" {
 }
 
 variable "REGION" {
-  default = "us-west-2"
+  default = "eu-west-1"
 }
 
 variable "SG_CIDR_BLOCKS" {

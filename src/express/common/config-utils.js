@@ -66,7 +66,7 @@ function validateEnvVars() {
     TF_VAR_INSTANCE_AMI: validAmiStr({ default: 'ami-017fecd1353bcc96e' }),
     TF_VAR_PEM_FILE: validStr({ default: 'aws-key' }),
     TF_VAR_REGION: validStr({
-      default: 'us-west-2',
+      default: 'eu-west-1',
       choices: [
         'us-east-2',
         'us-east-1',
