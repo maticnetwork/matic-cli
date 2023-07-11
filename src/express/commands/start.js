@@ -84,7 +84,8 @@ async function installRequiredSoftwareOnRemoteMachines(
 
   const requirementTasks = nodeIps.map(async (ip) => {
     user = splitAndGetHostIp(ip)
-    await keepSshConfigAlive(ip)
+    // FIXME re-enable when fixed
+    // await keepSshConfigAlive(ip)
     await configureCertAndPermissions(user, ip)
     await installCommonPackages(ip)
 
@@ -106,14 +107,33 @@ async function keepSshConfigAlive(ip) {
   const config = `TCPKeepAlive no
   ClientAliveInterval 30
   ClientAliveCountMax 240`
+
+
+  // FIXME
+  //  maybe we need to check the config before restarting the service?
+  //  try `sshd -t`
+  //  Also, is this needed at all? Setting it every time from client
+  //  should let us achieve the same result (avoiding server side changes)
+  //  see https://www.simplified.guide/ssh/disable-timeout
   let command = `sudo sh -c 'cat << EOF >> /etc/ssh/sshd_config
   ${config}'`
 
   await runSshCommand(ip, command, maxRetries)
 
+  //  FIXME
+  //   runSshCommand requires sshd connection
+  //   despite that, restarting sshd won't disconnect the current session
+  //   hence - theoretically - the following command is fine
   console.log('📍Restarting ssh service...')
   command = 'sudo systemctl restart ssh'
   await runSshCommand(ip, command, maxRetries)
+
+  // FIXME
+  //  another issue might be that the method keepSshConfigAlive
+  //  is being called in as a requirement task in Promise.all(requirementTasks)
+  //  hence several ssh connections to the same machine
+  //  might be running in parallel (?)
+  //  this could potentially make the ssh restart fail
 }
 
 async function configureCertAndPermissions(user, ip) {
