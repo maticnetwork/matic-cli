@@ -108,7 +108,6 @@ async function keepSshConfigAlive(ip) {
   ClientAliveInterval 30
   ClientAliveCountMax 240`
 
-
   // FIXME
   //  maybe we need to check the config before restarting the service?
   //  try `sshd -t`
