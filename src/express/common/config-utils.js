@@ -179,7 +179,7 @@ function validateEnvVars(cloud) {
     })
   } else {
     console.log(`❌ Unsupported cloud provider ${cloud}`)
-    process.exit(1);
+    process.exit(1)
   }
 
   cleanEnv(process.env, {
@@ -745,7 +745,7 @@ export async function editMaticCliRemoteYAMLConfig() {
     setConfigValue('devnetRegion', process.env.TF_VAR_GCP_REGION, doc)
   } else {
     console.log(`❌ Unsupported cloud provider ${process.env.CLOUD}`)
-    process.exit(1);
+    process.exit(1)
   }
   setConfigValue('cloud', process.env.CLOUD, doc)
 

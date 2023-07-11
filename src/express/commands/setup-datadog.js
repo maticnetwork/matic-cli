@@ -34,7 +34,7 @@ export async function setupDatadog() {
   require('dotenv').config({ path: `${process.cwd()}/.env` })
 
   if (process.env.TF_VAR_DOCKERIZED === 'yes') {
-    console.log('📍Not supported for datadog at the moment')
+    console.log('📍Datadog setup currently not supported in GCP')
     return
   } else {
     doc = await loadDevnetConfig('remote')
@@ -42,7 +42,7 @@ export async function setupDatadog() {
 
   if (doc.cloud.toString() === constants.cloud.GCP) { 
     // not tested datadog setup in GCP
-    console.log('📍Not supported for datadog at the moment in GCP')
+    console.log('📍Datadog setup currently not supported in GCP')
     return
   }
 

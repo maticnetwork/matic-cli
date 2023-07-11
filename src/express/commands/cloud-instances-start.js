@@ -40,7 +40,7 @@ export async function startInstances() {
     shell.exec(`aws ec2 start-instances  --region ${region} --instance-ids ${instances}`)
   } else {
     console.log(`❌ Unsupported cloud provider ${cloud}`)
-    process.exit(1);
+    process.exit(1)
   }
   
   if (shell.error() !== null) {

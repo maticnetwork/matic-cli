@@ -1,9 +1,9 @@
 import { loadDevnetConfig, splitToArray } from '../common/config-utils'
 import { maxRetries, runSshCommand } from '../common/remote-worker'
-import constants from '../common/constants';
+import constants from '../common/constants'
 
 const shell = require('shelljs')
-const fs = require('fs');
+const fs = require('fs')
 export async function keypairAdd() {
   require('dotenv').config({ path: `${process.cwd()}/.env` })
   const devnetType =
@@ -72,14 +72,14 @@ export async function keypairAdd() {
       `🔑 You can now share ${keyName}.pem with other devs - on a secure channel - to let them access the devnet`
     )
     console.log(
-      `🚨 Do not forget to destroy the key when no longer needed, using the command "../../bin/express-cli --aws-key-des ${keyName}"`
+      `🚨 Do not forget to destroy the key when no longer needed, using the command "../../bin/express-cli --ssh-key-des ${keyName}"`
     )
   } else if (cloud == constants.cloud.GCP) {
     const user = doc.ethHostUser.toString()
     const project = doc.instancesIds[0].split('/')[1].toString()
     const zone = doc.instancesIds[0].split('/')[3].toString()
     const instances = doc.instancesIds.map(x => x.split('/').at(-1)).toString().replace(/,/g, ' ').split(" ")
-    const keyFilePath = `${keyName}.pem.pub`;
+    const keyFilePath = `${keyName}.pem.pub`
 
     console.log('📍 Generating gcp key-pair...')
     shell.exec(
@@ -95,30 +95,30 @@ export async function keypairAdd() {
       const new_public_key = await new Promise((resolve, reject) => {
         fs.readFile(keyFilePath, 'utf-8', (error, data) => {
           if (error) {
-            console.error('Error reading file:', error);
-            reject(error);
+            console.error('Error reading file:', error)
+            reject(error)
           } else {
-            resolve(data);
+            resolve(data)
           }
-        });
-      });
+        })
+      })
 
-      const new_keys = new_public_key + existing_keys;
+      const new_keys = new_public_key + existing_keys
 
       shell.exec(
         `gcloud compute instances add-metadata ${instance} --metadata ssh-keys="${user}:${new_keys}" --project=${project} --zone=${zone}`
       )
-    }));
+    }))
 
     console.log(`📍 Successfully added ${keyName} to all machines of the devnet`)
     console.log(
       `🔑 You can now share ${keyName}.pem with other devs - on a secure channel - to let them access the devnet`
     )
     console.log(
-      `🚨 Do not forget to destroy the key when no longer needed, using the command "../../bin/express-cli --aws-key-des ${keyName}"`
+      `🚨 Do not forget to destroy the key when no longer needed, using the command "../../bin/express-cli --ssh-key-des ${keyName}"`
     )
   } else {
     console.log(`❌ Unsupported cloud provider ${cloud}`)
-    process.exit(1);
+    process.exit(1)
   }
 }

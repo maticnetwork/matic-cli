@@ -30,8 +30,8 @@ import { timer } from './express/common/time-utils'
 import { program } from 'commander'
 import pkg from '../package.json'
 import { testEip1559 } from '../tests/test-eip-1559'
-import { stopInstances } from './express/commands/aws-instances-stop'
-import { startInstances } from './express/commands/aws-instances-start'
+import { stopInstances } from './express/commands/cloud-instances-stop'
+import { startInstances } from './express/commands/cloud-instances-start'
 import { rewind } from './express/commands/rewind'
 import { startReorg } from './express/commands/reorg-start'
 import { stopReorg } from './express/commands/reorg-stop'
@@ -45,7 +45,7 @@ import { rpcTest } from '../tests/rpc-tests/rpc-test'
 import constants from './express/common/constants'
 
 function checkCloudProvider(provider, _) {
-  const supportedClouds = [constants.cloud.AWS, constants.cloud.GCP];
+  const supportedClouds = [constants.cloud.AWS, constants.cloud.GCP]
   if (supportedClouds.includes(provider.toLowerCase())) {
     return provider.toLowerCase()
   }

@@ -1,8 +1,8 @@
 const constants = {
   cloud: {
     GCP: 'gcp',
-    AWS: 'aws',
+    AWS: 'aws'
   }
-};
+}
 
-module.exports = constants;
+module.exports = constants
