@@ -141,7 +141,7 @@ variable "devnet_public_subnet" {
 resource "aws_subnet" "devnet_public_subnet" {
   vpc_id                  = aws_vpc.devnet_vpc.id
   cidr_block              = var.devnet_public_subnet
-  availability_zone       = "us-west-2a"
+  availability_zone       = "eu-west-1a"
   map_public_ip_on_launch = true
 
   tags = {
@@ -198,5 +198,5 @@ output "instance_dns_ips" {
 }
 
 output "instance_ids" {
-  value = concat(aws_instance.bor_node_server.*.id , aws_instance.erigon_node_server.*.id, aws_instance.dockerized_server.*.id) 
+  value = concat(aws_instance.bor_node_server.*.id , aws_instance.erigon_node_server.*.id, aws_instance.dockerized_server.*.id)
 }

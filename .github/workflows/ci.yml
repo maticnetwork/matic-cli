@@ -76,7 +76,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@master
         with:
-          aws-region: us-west-2
+          aws-region: eu-west-1
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/MaticCLIGitHubActionsRole
           role-session-name: GithubActionsSession
 

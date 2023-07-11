@@ -24,4 +24,4 @@ borDockerBuildContext: https://github.com/maticnetwork/bor.git#develop
 heimdallDockerBuildContext: https://github.com/maticnetwork/heimdall.git#develop
 devnetBorUsers: ubuntu,ubuntu
 devnetBorHosts:
-  - ec2-xx-xxx-xx-xxx.us-west-2.compute.amazonaws.com # use localhost for local deployments
+  - ec2-xx-xxx-xx-xxx.eu-west-1.compute.amazonaws.com # use localhost for local deployments
