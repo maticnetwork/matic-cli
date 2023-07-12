@@ -202,5 +202,5 @@ output "instance_dns_ips" {
 }
 
 output "instance_ids" {
-  value = concat(aws_instance.bor_node_server.*.id , aws_instance.erigon_node_server.*.id, aws_instance.dockerized_server.*.id) 
+  value = concat(aws_instance.bor_node_server.*.id , aws_instance.erigon_node_server.*.id, aws_instance.dockerized_server.*.id)
 }

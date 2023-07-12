@@ -59,11 +59,11 @@ variable "PEM_FILE" {
 }
 
 variable "AWS_REGION" {
-  default = "us-west-2"
+  default = "us-west-1"
 }
 
 variable "AVAILABILITY_ZONE" {
-  default = "us-west-2a"
+  default = "us-west-1a"
 }
 
 variable "SG_CIDR_BLOCKS_OUT" {

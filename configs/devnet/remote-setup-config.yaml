@@ -20,15 +20,15 @@ numOfBorArchiveNodes: 0
 numOfErigonValidators: 1
 numOfErigonSentries: 1
 numOfErigonArchiveNodes: 0
-ethURL: http://ec2-xx-xxx-xxx-xx.us-west-2.compute.amazonaws.com:9545
+ethURL: http://ec2-xx-xxx-xxx-xx.eu-west-1.compute.amazonaws.com:9545
 ethHostUser: ubuntu
 devnetType: remote
 devnetBorHosts:
-  - ec2-xx-xxx-xxx-xx.us-west-2.compute.amazonaws.com
-  - ec2-yy-yyy-yyy-yy.us-west-2.compute.amazonaws.com
+  - ec2-xx-xxx-xxx-xx.eu-west-1.compute.amazonaws.com
+  - ec2-yy-yyy-yyy-yy.eu-west-1.compute.amazonaws.com
 devnetHeimdallHosts:
-  - ec2-xx-xxx-xxx-xx.us-west-2.compute.amazonaws.com
-  - ec2-yy-yyy-yyy-yy.us-west-2.compute.amazonaws.com
+  - ec2-xx-xxx-xxx-xx.eu-west-1.compute.amazonaws.com
+  - ec2-yy-yyy-yyy-yy.eu-west-1.compute.amazonaws.com
 devnetBorUsers:
   - ubuntu
   - ubuntu
