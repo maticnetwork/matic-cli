@@ -54,7 +54,11 @@ function checkCloudProvider(provider, _) {
 }
 
 program
-  .option('-i, --init <gcp|aws>', 'Initiate the terraform setup to specified cloud', checkCloudProvider)
+  .option(
+    '-i, --init <gcp|aws>',
+    'Initiate the terraform setup to specified cloud',
+    checkCloudProvider
+  )
   .option('-s, --start', 'Start the setup')
   .option('-d, --destroy', 'Destroy the setup')
   .option(

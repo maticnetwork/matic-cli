@@ -43,7 +43,6 @@ To use the `express-cli` you have to execute the following steps.
 
 In case you plan to utilize express-cli for Google Cloud, you will need to make few modifications like SSH keys. It's important to note that express-cli is not fully tested yet on GCP, and not all features are accessible. Check the [GCP dev guide](./docs/gcp_dev_guide.md).
 
-
 ### Auth Configuration
 
 As a prerequisite, you need to configure authentication on `aws`  
@@ -116,7 +115,7 @@ Congrats! You're all set to use `express-cli` commands.
 
 If you are using Google cloud platform, you need to configure authentication on `gcloud`.
 
-If you have downloaded the service account credentials, you can use the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to provide the location of thst credential JSON file. 
+If you have downloaded the service account credentials, you can use the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to provide the location of thst credential JSON file.
 
 ```bash
 gcloud auth application-default login

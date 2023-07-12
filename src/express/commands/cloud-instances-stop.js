@@ -21,15 +21,22 @@ export async function stopInstances() {
   if (cloud === constants.cloud.GCP) {
     const project = doc.instancesIds[0].split('/')[1].toString()
     const zone = doc.instancesIds[0].split('/')[3].toString()
-    const instances = doc.instancesIds.map(x => x.split('/').at(-1)).toString().replace(/,/g, ' ')
-    shell.exec(`gcloud compute instances stop ${instances} --zone ${zone} --project ${project}`)
+    const instances = doc.instancesIds
+      .map((x) => x.split('/').at(-1))
+      .toString()
+      .replace(/,/g, ' ')
+    shell.exec(
+      `gcloud compute instances stop ${instances} --zone ${zone} --project ${project}`
+    )
   } else if (cloud === constants.cloud.AWS) {
     const instances = doc.instancesIds.toString().replace(/,/g, ' ')
     const region = doc.devnetRegion.toString()
-    shell.exec(`aws ec2 stop-instances --region ${region} --instance-ids ${instances}`)
+    shell.exec(
+      `aws ec2 stop-instances --region ${region} --instance-ids ${instances}`
+    )
   } else {
     console.log(`❌ Unsupported cloud provider ${cloud}`)
-    process.exit(1);
+    process.exit(1)
   }
 
   if (shell.error() !== null) {

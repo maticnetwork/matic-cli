@@ -4,7 +4,6 @@ import yaml from 'js-yaml'
 import fs from 'fs'
 import { cleanEnv, num, bool, url, host, makeValidator } from 'envalid'
 import constants from './constants'
-
 const shell = require('shelljs')
 
 const validStr = makeValidator((x) => {
@@ -120,16 +119,22 @@ function validateEnvVars(cloud) {
     // validating GCP infra vars
   } else if (cloud === constants.cloud.GCP) {
     cleanEnv(process.env, {
-      TF_VAR_FW_RULE_SUFFIX:validStr({ default: 'matic' }),
+      TF_VAR_FW_RULE_SUFFIX: validStr({ default: 'matic' }),
       TF_VAR_BOR_MACHINE_TYPE: validStr({ default: 'n2d-standard-4' }),
       TF_VAR_ERIGON_MACHINE_TYPE: validStr({ default: 'n2d-standard-4' }),
       TF_VAR_BOR_ARCHIVE_MACHINE_TYPE: validStr({ default: 'n2d-standard-4' }),
-      TF_VAR_ERIGON_ARCHIVE_MACHINE_TYPE: validStr({ default: 'n2d-standard-4' }),
-      TF_VAR_INSTANCE_IMAGE: validGCPVmImageStr({ default: 'ubuntu-2204-jammy-v20230302' }),
+      TF_VAR_ERIGON_ARCHIVE_MACHINE_TYPE: validStr({
+        default: 'n2d-standard-4'
+      }),
+      TF_VAR_INSTANCE_IMAGE: validGCPVmImageStr({
+        default: 'ubuntu-2204-jammy-v20230302'
+      }),
       TF_VAR_BOR_VOLUME_TYPE_GCP: validStr({ default: 'pd-ssd' }),
       TF_VAR_ERIGON_VOLUME_TYPE_GCP: validStr({ default: 'pd-ssd' }),
       TF_VAR_BOR_ARCHIVE_VOLUME_TYPE_GCP: validStr({ default: 'pd-balanced' }),
-      TF_VAR_ERIGON_ARCHIVE_VOLUME_TYPE_GCP: validStr({ default: 'pd-balanced' }),
+      TF_VAR_ERIGON_ARCHIVE_VOLUME_TYPE_GCP: validStr({
+        default: 'pd-balanced'
+      }),
       TF_VAR_GCP_REGION: validStr({
         default: 'europe-west2',
         choices: [
@@ -169,11 +174,12 @@ function validateEnvVars(cloud) {
           'us-west3',
           'us-west4'
         ],
-        docs:
-          'https://cloud.google.com/compute/docs/regions-zones'
+        docs: 'https://cloud.google.com/compute/docs/regions-zones'
       }),
       TF_VAR_ZONE: validZone({ default: 'europe-west2-a' }),
-      TF_VAR_GCE_PUB_KEY_FILE: validStr({ default: '/home/ubuntu/aws-key.pem.pub' })
+      TF_VAR_GCE_PUB_KEY_FILE: validStr({
+        default: '/home/ubuntu/aws-key.pem.pub'
+      })
     })
   } else {
     console.log(`❌ Unsupported cloud provider ${cloud}`)
@@ -292,7 +298,7 @@ function validateUsersAndHosts() {
   ) {
     console.log(
       '❌ DEVNET_BOR_USERS lengths are not equal to the nodes count ' +
-      '(TF_VAR_BOR_VALIDATOR_COUNT+TF_VAR_BOR_SENTRY_COUNT+TF_VAR_BOR_ARCHIVE_COUNT), please check your configs!'
+        '(TF_VAR_BOR_VALIDATOR_COUNT+TF_VAR_BOR_SENTRY_COUNT+TF_VAR_BOR_ARCHIVE_COUNT), please check your configs!'
     )
     process.exit(1)
   } else if (process.env.TF_VAR_DOCKERIZED === 'no') {
@@ -304,7 +310,7 @@ function validateUsersAndHosts() {
     ) {
       console.log(
         '❌ DEVNET_BOR_USERS or DEVNET_BOR_HOSTS lengths are not equal to the nodes count ' +
-        '(TF_VAR_BOR_VALIDATOR_COUNT+TF_VAR_BOR_SENTRY_COUNT+TF_VAR_BOR_ARCHIVE_COUNT), please check your configs!'
+          '(TF_VAR_BOR_VALIDATOR_COUNT+TF_VAR_BOR_SENTRY_COUNT+TF_VAR_BOR_ARCHIVE_COUNT), please check your configs!'
       )
       process.exit(1)
     }
@@ -313,13 +319,13 @@ function validateUsersAndHosts() {
       erigonUsers &&
       (erigonUsers.length !== erigonHosts.length ||
         erigonUsers.length !==
-        erigonValCount + erigonSenCount + erigonArchiveCount ||
+          erigonValCount + erigonSenCount + erigonArchiveCount ||
         erigonHosts.length !==
-        erigonValCount + erigonSenCount + erigonArchiveCount)
+          erigonValCount + erigonSenCount + erigonArchiveCount)
     ) {
       console.log(
         '❌ DEVNET_ERIGON_USERS or DEVNET_ERIGON_HOSTS lengths are not equal to the nodes count ' +
-        '(TF_VAR_ERIGON_VALIDATOR_COUNT+TF_VAR_ERIGON_SENTRY_COUNT+TF_VAR_ERIGON_ARCHIVE_COUNT), please check your configs!'
+          '(TF_VAR_ERIGON_VALIDATOR_COUNT+TF_VAR_ERIGON_SENTRY_COUNT+TF_VAR_ERIGON_ARCHIVE_COUNT), please check your configs!'
       )
       process.exit(1)
     }

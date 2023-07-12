@@ -76,28 +76,35 @@ export async function keypairDestroy(keyName) {
   } else if (cloud === constants.cloud.GCP) {
     const project = doc.instancesIds[0].split('/')[1].toString()
     const zone = doc.instancesIds[0].split('/')[3].toString()
-    const instances = doc.instancesIds.map(x => x.split('/').at(-1)).toString().replace(/,/g, ' ').split(' ')
+    const instances = doc.instancesIds
+      .map((x) => x.split('/').at(-1))
+      .toString()
+      .replace(/,/g, ' ')
+      .split(' ')
 
-    await Promise.all(instances.map(async (instance) => {
-      console.log(`📍 Getting pubKey for ${keyName} ...`)
-      const existingPubKeys = shell.exec(
-        `gcloud compute instances describe ${instance} --project=${project} --zone=${zone} --format='value(metadata.ssh-keys)'`
-      )
-      const existingSshKeys = existingPubKeys.split('\n')
-      const filteredSshKeys = existingSshKeys.filter(line => !line.trim().endsWith(keyName))
+    await Promise.all(
+      instances.map(async (instance) => {
+        console.log(`📍 Getting pubKey for ${keyName} ...`)
+        const existingPubKeys = shell.exec(
+          `gcloud compute instances describe ${instance} --project=${project} --zone=${zone} --format='value(metadata.ssh-keys)'`
+        )
+        const existingSshKeys = existingPubKeys.split('\n')
+        const filteredSshKeys = existingSshKeys.filter(
+          (line) => !line.trim().endsWith(keyName)
+        )
 
-      if (existingPubKeys.length === filteredSshKeys.length) {
-        console.log(`📍 Failed to get pubKey from ${keyName}`)
-        process.exit(1)
-      }
+        if (existingPubKeys.length === filteredSshKeys.length) {
+          console.log(`📍 Failed to get pubKey from ${keyName}`)
+          process.exit(1)
+        }
 
-      const updatedSshKeys = filteredSshKeys.join('\n')
-      // This command retrieves the SSH keys from Google Cloud (gcloud). Please note that the output may contain a lot of logs.
-      shell.exec(
-        `gcloud compute instances add-metadata ${instance} --metadata ssh-keys='${updatedSshKeys}' --project=${project} --zone=${zone}`
-      )
-    }
-    ))
+        const updatedSshKeys = filteredSshKeys.join('\n')
+        // This command retrieves the SSH keys from Google Cloud (gcloud). Please note that the output may contain a lot of logs.
+        shell.exec(
+          `gcloud compute instances add-metadata ${instance} --metadata ssh-keys='${updatedSshKeys}' --project=${project} --zone=${zone}`
+        )
+      })
+    )
 
     console.log(`📍 Removing key-pair for ${keyName} locally ...`)
     shell.exec(`rm ./${keyName}.pem`)
