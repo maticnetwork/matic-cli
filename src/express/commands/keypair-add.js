@@ -79,6 +79,7 @@ export async function keypairAdd() {
     const zone = doc.instancesIds[0].split('/')[3].toString()
     const instances = doc.instancesIds.map(x => x.split('/').at(-1)).toString().replace(/,/g, ' ').split(' ')
     const keyFilePath = `${keyName}.pem.pub`
+    const user = doc.ethHostUser.toString()
 
     console.log('📍 Generating gcp key-pair...')
     shell.exec(
