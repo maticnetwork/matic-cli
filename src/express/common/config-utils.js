@@ -5,7 +5,6 @@ import fs from 'fs'
 import { cleanEnv, num, bool, url, host, makeValidator } from 'envalid'
 import constants from './constants'
 
-
 const shell = require('shelljs')
 
 const validStr = makeValidator((x) => {
@@ -59,15 +58,14 @@ const validCertPathStr = makeValidator((x) => {
     !x.startsWith('~') &&
     (x.endsWith('.pem') || x.endsWith('.cer'))
   ) {
-    console.log("Done Checking path..");
+    console.log('Done Checking path..')
     return x
   } else throw new Error(x + 'is not valid, please check your configs!')
-
 })
 
 function validateEnvVars(cloud) {
   // validating AWS infra vars
-  if (cloud == constants.cloud.AWS) {
+  if (cloud === constants.cloud.AWS) {
     cleanEnv(process.env, {
       TF_VAR_BOR_IOPS: num({ default: 3000 }),
       TF_VAR_ERIGON_IOPS: num({ default: 3000 }),
@@ -120,7 +118,7 @@ function validateEnvVars(cloud) {
     })
 
     // validating GCP infra vars
-  } else if (cloud == constants.cloud.GCP) {
+  } else if (cloud === constants.cloud.GCP) {
     cleanEnv(process.env, {
       TF_VAR_FW_RULE_SUFFIX:validStr({ default: 'matic' }),
       TF_VAR_BOR_MACHINE_TYPE: validStr({ default: 'n2d-standard-4' }),
@@ -135,47 +133,47 @@ function validateEnvVars(cloud) {
       TF_VAR_GCP_REGION: validStr({
         default: 'europe-west2',
         choices: [
-          "asia-east1",
-          "asia-east2",
-          "asia-northeast1",
-          "asia-northeast2",
-          "asia-northeast3",
-          "asia-south1",
-          "asia-south2",
-          "asia-southeast1",
-          "asia-southeast2",
-          "australia-southeast1",
-          "australia-southeast2",
-          "europe-central2",
-          "europe-north1",
-          "europe-southwest1",
-          "europe-west1",
-          "europe-west2",
-          "europe-west3",
-          "europe-west4",
-          "europe-west6",
-          "europe-west8",
-          "europe-west9",
-          "me-west1",
-          "northamerica-northeast1",
-          "northamerica-northeast2",
-          "southamerica-east1",
-          "southamerica-west1",
-          "us-central1",
-          "us-east1",
-          "us-east4",
-          "us-east5",
-          "us-south1",
-          "us-west1",
-          "us-west2",
-          "us-west3",
-          "us-west4"
+          'asia-east1',
+          'asia-east2',
+          'asia-northeast1',
+          'asia-northeast2',
+          'asia-northeast3',
+          'asia-south1',
+          'asia-south2',
+          'asia-southeast1',
+          'asia-southeast2',
+          'australia-southeast1',
+          'australia-southeast2',
+          'europe-central2',
+          'europe-north1',
+          'europe-southwest1',
+          'europe-west1',
+          'europe-west2',
+          'europe-west3',
+          'europe-west4',
+          'europe-west6',
+          'europe-west8',
+          'europe-west9',
+          'me-west1',
+          'northamerica-northeast1',
+          'northamerica-northeast2',
+          'southamerica-east1',
+          'southamerica-west1',
+          'us-central1',
+          'us-east1',
+          'us-east4',
+          'us-east5',
+          'us-south1',
+          'us-west1',
+          'us-west2',
+          'us-west3',
+          'us-west4'
         ],
         docs:
           'https://cloud.google.com/compute/docs/regions-zones'
       }),
       TF_VAR_ZONE: validZone({ default: 'europe-west2-a' }),
-      TF_VAR_GCE_PUB_KEY_FILE: validStr({ default: '/home/ubuntu/aws-key.pem.pub' }),
+      TF_VAR_GCE_PUB_KEY_FILE: validStr({ default: '/home/ubuntu/aws-key.pem.pub' })
     })
   } else {
     console.log(`❌ Unsupported cloud provider ${cloud}`)

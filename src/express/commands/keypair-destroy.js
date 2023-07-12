@@ -17,7 +17,7 @@ export async function keypairDestroy(keyName) {
 
   const cloud = doc.cloud.toString()
 
-  if (cloud == constants.cloud.AWS) {
+  if (cloud === constants.cloud.AWS) {
     console.log(`📍 Getting pubKey for ${keyName} ...`)
     const output = shell.exec(
       `aws ec2 describe-key-pairs --key-names ${keyName} --include-public-key --output json`
@@ -73,29 +73,28 @@ export async function keypairDestroy(keyName) {
     }
 
     console.log(`📍 Key-pair ${keyName} destroyed successfully!`)
-  } else if (cloud == constants.cloud.GCP) {
-    const user = doc.ethHostUser.toString()
+  } else if (cloud === constants.cloud.GCP) {
     const project = doc.instancesIds[0].split('/')[1].toString()
     const zone = doc.instancesIds[0].split('/')[3].toString()
-    const instances = doc.instancesIds.map(x => x.split('/').at(-1)).toString().replace(/,/g, ' ').split(" ")
+    const instances = doc.instancesIds.map(x => x.split('/').at(-1)).toString().replace(/,/g, ' ').split(' ')
 
     await Promise.all(instances.map(async (instance) => {
       console.log(`📍 Getting pubKey for ${keyName} ...`)
-      const existing_pub_keys = shell.exec(
+      const existingPubKeys = shell.exec(
         `gcloud compute instances describe ${instance} --project=${project} --zone=${zone} --format='value(metadata.ssh-keys)'`
       )
-      const existing_ssh_keys = existing_pub_keys.split("\n");
-      const filtered_ssh_keys = existing_ssh_keys.filter(line => !line.trim().endsWith(keyName));
+      const existingSshKeys = existingPubKeys.split('\n')
+      const filteredSshKeys = existingSshKeys.filter(line => !line.trim().endsWith(keyName))
 
-      if (existing_pub_keys.length == filtered_ssh_keys.length) {
+      if (existingPubKeys.length === filteredSshKeys.length) {
         console.log(`📍 Failed to get pubKey from ${keyName}`)
         process.exit(1)
       }
 
-      const updated_ssh_keys = filtered_ssh_keys.join("\n");
+      const updatedSshKeys = filteredSshKeys.join('\n')
       // This command retrieves the SSH keys from Google Cloud (gcloud). Please note that the output may contain a lot of logs.
       shell.exec(
-        `gcloud compute instances add-metadata ${instance} --metadata ssh-keys="${updated_ssh_keys}" --project=${project} --zone=${zone}`
+        `gcloud compute instances add-metadata ${instance} --metadata ssh-keys='${updatedSshKeys}' --project=${project} --zone=${zone}`
       )
     }
     ))
@@ -110,6 +109,6 @@ export async function keypairDestroy(keyName) {
     console.log(`📍 Key-pair ${keyName} destroyed successfully!`)
   } else {
     console.log(`❌ Unsupported cloud provider ${cloud}`)
-    process.exit(1);
+    process.exit(1)
   }
 }

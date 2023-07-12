@@ -17,7 +17,7 @@ export async function keypairAdd() {
   if (cloud === constants.cloud.AWS) {
     console.log('📍 Generating aws key-pair...')
     shell.exec(
-      `aws ec2 create-key-pair --key-name ${keyName} --key-type rsa --key-format pem --query "KeyMaterial" --output text > ${keyName}.pem`
+      `aws ec2 create-key-pair --key-name ${keyName} --key-type rsa --key-format pem --query 'KeyMaterial' --output text > ${keyName}.pem`
     )
 
     if (shell.error() !== null) {
@@ -74,11 +74,10 @@ export async function keypairAdd() {
     console.log(
       `🚨 Do not forget to destroy the key when no longer needed, using the command "../../bin/express-cli --ssh-key-des ${keyName}"`
     )
-  } else if (cloud == constants.cloud.GCP) {
-    const user = doc.ethHostUser.toString()
+  } else if (cloud === constants.cloud.GCP) {
     const project = doc.instancesIds[0].split('/')[1].toString()
     const zone = doc.instancesIds[0].split('/')[3].toString()
-    const instances = doc.instancesIds.map(x => x.split('/').at(-1)).toString().replace(/,/g, ' ').split(" ")
+    const instances = doc.instancesIds.map(x => x.split('/').at(-1)).toString().replace(/,/g, ' ').split(' ')
     const keyFilePath = `${keyName}.pem.pub`
 
     console.log('📍 Generating gcp key-pair...')
@@ -88,11 +87,11 @@ export async function keypairAdd() {
 
     await Promise.all(instances.map(async (instance) => {
       // This command retrieves the SSH keys from Google Cloud (gcloud). Please note that the output may contain a lot of logs.
-      const existing_keys = shell.exec(
+      const existingKeys = shell.exec(
         `gcloud compute instances describe ${instance} --project=${project} --zone=${zone} --format='value(metadata.ssh-keys)'`
       )
 
-      const new_public_key = await new Promise((resolve, reject) => {
+      const newPublicKey = await new Promise((resolve, reject) => {
         fs.readFile(keyFilePath, 'utf-8', (error, data) => {
           if (error) {
             console.error('Error reading file:', error)
@@ -103,10 +102,10 @@ export async function keypairAdd() {
         })
       })
 
-      const new_keys = new_public_key + existing_keys
+      const newKeys = newPublicKey + existingKeys
 
       shell.exec(
-        `gcloud compute instances add-metadata ${instance} --metadata ssh-keys="${user}:${new_keys}" --project=${project} --zone=${zone}`
+        `gcloud compute instances add-metadata ${instance} --metadata ssh-keys='{user}:${newKeys}' --project=${project} --zone=${zone}`
       )
     }))
 

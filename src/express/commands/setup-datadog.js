@@ -40,7 +40,7 @@ export async function setupDatadog() {
     doc = await loadDevnetConfig('remote')
   }
 
-  if (doc.cloud.toString() === constants.cloud.GCP) { 
+  if (doc.cloud.toString() === constants.cloud.GCP) {
     // not tested datadog setup in GCP
     console.log('📍Datadog setup currently not supported in GCP')
     return
