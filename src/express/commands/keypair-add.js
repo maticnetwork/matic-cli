@@ -105,7 +105,7 @@ export async function keypairAdd() {
       const newKeys = newPublicKey + existingKeys
 
       shell.exec(
-        `gcloud compute instances add-metadata ${instance} --metadata ssh-keys='{user}:${newKeys}' --project=${project} --zone=${zone}`
+        `gcloud compute instances add-metadata ${instance} --metadata ssh-keys='${user}:${newKeys}' --project=${project} --zone=${zone}`
       )
     }))
 
