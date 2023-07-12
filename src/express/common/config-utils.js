@@ -848,7 +848,7 @@ export async function editMaticCliDockerYAMLConfig() {
 
 export async function validateConfigs(cloud) {
   validateEnvVars(cloud)
-  if (cloud === 'aws') {
+  if (cloud === constants.cloud.AWS) {
     validateAwsKeyAndCertificate()
   }
   validateUsersAndHosts()

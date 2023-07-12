@@ -1,5 +1,6 @@
 import { loadDevnetConfig, splitToArray } from '../common/config-utils'
 import { maxRetries, runSshCommand } from '../common/remote-worker'
+import { getGcpInstancesInfo } from '../common/gcp-utils'
 import constants from '../common/constants'
 
 const shell = require('shelljs')
@@ -74,19 +75,12 @@ export async function keypairDestroy(keyName) {
 
     console.log(`📍 Key-pair ${keyName} destroyed successfully!`)
   } else if (cloud === constants.cloud.GCP) {
-    const project = doc.instancesIds[0].split('/')[1].toString()
-    const zone = doc.instancesIds[0].split('/')[3].toString()
-    const instances = doc.instancesIds
-      .map((x) => x.split('/').at(-1))
-      .toString()
-      .replace(/,/g, ' ')
-      .split(' ')
-
+    const instances = getGcpInstancesInfo(doc.instancesIds)
     await Promise.all(
-      instances.map(async (instance) => {
+      instances.names.split(' ').map(async (instance) => {
         console.log(`📍 Getting pubKey for ${keyName} ...`)
         const existingPubKeys = shell.exec(
-          `gcloud compute instances describe ${instance} --project=${project} --zone=${zone} --format='value(metadata.ssh-keys)'`
+          `gcloud compute instances describe ${instance} --project=${instances.project} --zone=${instances.zone} --format='value(metadata.ssh-keys)'`
         )
         const existingSshKeys = existingPubKeys.split('\n')
         const filteredSshKeys = existingSshKeys.filter(
@@ -101,16 +95,19 @@ export async function keypairDestroy(keyName) {
         const updatedSshKeys = filteredSshKeys.join('\n')
         // This command retrieves the SSH keys from Google Cloud (gcloud). Please note that the output may contain a lot of logs.
         shell.exec(
-          `gcloud compute instances add-metadata ${instance} --metadata ssh-keys='${updatedSshKeys}' --project=${project} --zone=${zone}`
+          `gcloud compute instances add-metadata ${instance} --metadata ssh-keys='${updatedSshKeys}' --project=${instances.project} --zone=${instances.zone}`
         )
       })
     )
 
     console.log(`📍 Removing key-pair for ${keyName} locally ...`)
     shell.exec(`rm ./${keyName}.pem`)
-    shell.exec(`rm ./${keyName}.pem.pub`)
     if (shell.error() !== null) {
       console.log(`📍Failed to delete ${keyName}.pem locally`)
+    }
+    shell.exec(`rm ./${keyName}.pem.pub`)
+    if (shell.error() !== null) {
+      console.log(`📍Failed to delete ${keyName}.pem.pub locally`)
     }
 
     console.log(`📍 Key-pair ${keyName} destroyed successfully!`)

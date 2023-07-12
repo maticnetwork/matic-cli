@@ -4,6 +4,7 @@ import { loadDevnetConfig } from '../common/config-utils'
 import { restartAll } from './restart'
 import { maxRetries, runSshCommand } from '../common/remote-worker'
 import { timer } from '../common/time-utils'
+import { getGcpInstancesInfo } from '../common/gcp-utils'
 import constants from '../common/constants'
 
 const shell = require('shelljs')
@@ -30,14 +31,9 @@ export async function startInstances() {
   const cloud = doc.cloud.toString()
 
   if (cloud === constants.cloud.GCP) {
-    const project = doc.instancesIds[0].split('/')[1].toString()
-    const zone = doc.instancesIds[0].split('/')[3].toString()
-    const instances = doc.instancesIds
-      .map((x) => x.split('/').at(-1))
-      .toString()
-      .replace(/,/g, ' ')
+    const instances = getGcpInstancesInfo(doc.instancesIds)
     shell.exec(
-      `gcloud compute instances start ${instances} --zone ${zone} --project ${project}`
+      `gcloud compute instances start ${instances.names} --zone ${instances.zone} --project ${instances.project}`
     )
   } else if (cloud === constants.cloud.AWS) {
     const instances = doc.instancesIds.toString().replace(/,/g, ' ')
