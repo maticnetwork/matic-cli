@@ -26,7 +26,7 @@ To use the `express-cli` you have to execute the following steps.
 - use [nvm](https://github.com/nvm-sh/nvm#installing-and-updating) to switch to the proper `node` version, `v16.17.1`,
   by running `nvm use` from the root folder
 - install `express-cli` and `matic-cli` locally with command `npm i`
-- generate a keypair on AWS EC2 and download its certificate locally (`.pem` file). If you are on GCP, you can use your existing keypair or use `ssh-keygen` to generate. Check the [GCP guide](./docs/gcp_dev_guide.md).
+- generate a keypair on AWS EC2 (in the same region being used, currently `eu-west-1` by default and download its certificate locally (`.pem` file). If you are on GCP, you can use your existing keypair or use `ssh-keygen` to generate. Check the [GCP guide](./docs/gcp_dev_guide.md).
 - copy `secret.tfvars.example` to `secret.tfvar` with command `cp secret.tfvars.example secret.tfvars` and check the commented file for details
 - **If you are a Polygon employee**, connect to the company VPN
 - modify `secret.tfvar` with addresses of the allowed IPs (as specified in `secret.tfvars.example` file)
