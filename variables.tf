@@ -99,7 +99,7 @@ variable "ERIGON_ARCHIVE_INSTANCE_TYPE" {
 }
 
 variable "INSTANCE_AMI" {
-  default = "ami-017fecd1353bcc96e"
+  default = "ami-01dd271720c1ba44f"
 }
 
 variable "PEM_FILE" {
