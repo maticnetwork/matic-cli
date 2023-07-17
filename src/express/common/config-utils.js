@@ -79,7 +79,7 @@ function validateEnvVars(cloud) {
       TF_VAR_BOR_ARCHIVE_VOLUME_TYPE: validStr({ default: 'io1' }),
       TF_VAR_ERIGON_ARCHIVE_VOLUME_TYPE: validStr({ default: 'io1' }),
       TF_VAR_AWS_REGION: validStr({
-        default: 'us-west-1',
+        default: 'eu-west-1',
         choices: [
           'us-east-2',
           'us-east-1',

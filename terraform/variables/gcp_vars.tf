@@ -49,12 +49,12 @@ variable "INSTANCE_IMAGE" {
 
 variable "GCP_REGION" {
   type    = string
-  default = "us-west2"
+  default = "europe-west2"
 }
 
 variable "ZONE" {
   type    = string
-  default = "us-west2-a"
+  default = "europe-west2-a"
 }
 
 variable "GCE_PUB_KEY_FILE" {
