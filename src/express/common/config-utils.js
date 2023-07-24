@@ -177,7 +177,7 @@ function validateEnvVars(cloud) {
         docs: 'https://cloud.google.com/compute/docs/regions-zones'
       }),
       TF_VAR_ZONE: validZone({ default: 'europe-west2-a' }),
-      TF_VAR_GCE_PUB_KEY_FILE: validStr({
+      TF_VAR_GCP_PUB_KEY_FILE: validStr({
         default: '/home/ubuntu/aws-key.pem.pub'
       })
     })

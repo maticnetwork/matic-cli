@@ -72,7 +72,7 @@ resource "google_compute_instance" "bor_node_server" {
   }
 
   metadata = {
-    ssh-keys = "${var.USER}:${file(var.GCE_PUB_KEY_FILE)}"
+    ssh-keys = "${var.USER}:${file(var.GCP_PUB_KEY_FILE)}"
   }
 
   network_interface {
@@ -108,7 +108,7 @@ resource "google_compute_instance" "erigon_node_server" {
   }
 
   metadata = {
-    ssh-keys = "${var.USER}:${file(var.GCE_PUB_KEY_FILE)}"
+    ssh-keys = "${var.USER}:${file(var.GCP_PUB_KEY_FILE)}"
   }
 
   network_interface {
@@ -145,7 +145,7 @@ resource "google_compute_instance" "dockerized_server" {
   }
 
   metadata = {
-    ssh-keys = "${var.USER}:${file(var.GCE_PUB_KEY_FILE)}"
+    ssh-keys = "${var.USER}:${file(var.GCP_PUB_KEY_FILE)}"
   }
 
   network_interface {

@@ -1,6 +1,17 @@
+# Google Cloud SDK (gcloud) Installation
+
+- Visit the Google Cloud SDK installation page: https://cloud.google.com/sdk/docs/install. Follow the installation instructions specific to your operating system. 
+- Run the following command to verify that the SDK installed correctly:
+  `gcloud version`
+- Run the following command to start the initialization process:
+  `gcloud init`
+- Authenticate with Application Default Credentials:
+  `gcloud auth application-default login`
+- After initialization, run: `gcloud config set project YOUR_PROJECT_ID` (Replace YOUR_PROJECT_ID with your actual GCP project ID)
+
 # express-cli on GCP
 
-- Make to you have installed `gcloud` tool for authentication
+- Make sure you have installed `gcloud` tool for authentication
 - You also need `ssh-keygen` tool. It's mostly available in all distributions.
 - You should have a public and private keypair for running ssh commands. You can generate one using following commands
   `sh

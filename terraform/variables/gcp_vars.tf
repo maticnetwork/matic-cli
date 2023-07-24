@@ -57,7 +57,7 @@ variable "ZONE" {
   default = "europe-west2-a"
 }
 
-variable "GCE_PUB_KEY_FILE" {
+variable "GCP_PUB_KEY_FILE" {
   type    = string
 }
 
