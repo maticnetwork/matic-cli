@@ -96,7 +96,7 @@ There are 2 AWS accounts available to you.
 Using the account ID <ACCOUNT_ID>
 The only role available to you is: <AWSRole> (<AWS_ROLE_ID>)
 Using the role name "<AWS_ROLE>"
-CLI default client Region [None]: us-west-1
+CLI default client Region [None]: eu-west-1
 CLI default output format [None]: json
 CLI profile name [<PROFILE_NAME_AND_ID>]: default
 
