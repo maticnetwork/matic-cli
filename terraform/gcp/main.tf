@@ -189,6 +189,18 @@ resource "google_compute_firewall" "allow_internal_access" {
   target_tags = [var.VM_NAME]
 }
 
+resource "google_compute_firewall" "allow_devnet_vm_connection" {
+  name    = format("%s-%s-%s", var.VM_NAME, var.FW_RULE_SUFFIX, "devnet-vm-connection")
+  network = google_compute_network.vpc_network.name
+  direction = "INGRESS"
+  priority  = 1000
+  allow {
+    protocol = "all"
+  }
+  source_ranges = concat(google_compute_address.bor_static_ip.*.address, google_compute_address.erigon_static_ip.*.address, google_compute_address.docker_static_ip.*.address)
+  target_tags = [var.VM_NAME]
+}
+
 # output values
 output "cloud" {
   value = "gcp"  # do not update this, value should match the corresponding value in the constants.js file.
