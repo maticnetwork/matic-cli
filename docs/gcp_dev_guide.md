@@ -1,6 +1,6 @@
 # Google Cloud SDK (gcloud) Installation
 
-- Visit the Google Cloud SDK installation page: https://cloud.google.com/sdk/docs/install. Follow the installation instructions specific to your operating system. 
+- Visit the Google Cloud SDK installation page: https://cloud.google.com/sdk/docs/install. Follow the installation instructions specific to your operating system.
 - Run the following command to verify that the SDK installed correctly:
   `gcloud version`
 - Run the following command to start the initialization process:
