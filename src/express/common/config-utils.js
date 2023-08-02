@@ -3,7 +3,7 @@
 import yaml from 'js-yaml'
 import fs from 'fs'
 import { cleanEnv, num, bool, url, host, makeValidator } from 'envalid'
-
+import constants from './constants'
 const shell = require('shelljs')
 
 const validStr = makeValidator((x) => {
@@ -32,6 +32,23 @@ const validAmiStr = makeValidator((x) => {
   } else throw new Error(x + 'is not valid, please check your configs!')
 })
 
+const validGCPVmImageStr = makeValidator((x) => {
+  if (x !== undefined && x !== null && x !== '' && x.startsWith('ubuntu-')) {
+    return x
+  } else throw new Error(x + 'is not valid, please check your configs!')
+})
+
+const validZone = makeValidator((x) => {
+  if (
+    x !== undefined &&
+    x !== null &&
+    x !== '' &&
+    x.startsWith(process.env.TF_VAR_GCP_REGION + '-')
+  ) {
+    return x
+  } else throw new Error(x + 'is not valid, please check your configs!')
+})
+
 const validCertPathStr = makeValidator((x) => {
   if (
     x !== undefined &&
@@ -40,67 +57,146 @@ const validCertPathStr = makeValidator((x) => {
     !x.startsWith('~') &&
     (x.endsWith('.pem') || x.endsWith('.cer'))
   ) {
+    console.log('Done Checking path..')
     return x
   } else throw new Error(x + 'is not valid, please check your configs!')
 })
 
-function validateEnvVars() {
+function validateEnvVars(cloud) {
+  // validating AWS infra vars
+  if (cloud === constants.cloud.AWS) {
+    cleanEnv(process.env, {
+      TF_VAR_BOR_IOPS: num({ default: 3000 }),
+      TF_VAR_ERIGON_IOPS: num({ default: 3000 }),
+      TF_VAR_BOR_INSTANCE_TYPE: validStr({ default: 't2.xlarge' }),
+      TF_VAR_ERIGON_INSTANCE_TYPE: validStr({ default: 't2.xlarge' }),
+      TF_VAR_BOR_ARCHIVE_INSTANCE_TYPE: validStr({ default: 't2.xlarge' }),
+      TF_VAR_ERIGON_ARCHIVE_INSTANCE_TYPE: validStr({ default: 't2.xlarge' }),
+      TF_VAR_INSTANCE_AMI: validAmiStr({ default: 'ami-01dd271720c1ba44f' }),
+      TF_VAR_PEM_FILE: validStr({ default: 'aws-key' }),
+      TF_VAR_BOR_VOLUME_TYPE: validStr({ default: 'gp3' }),
+      TF_VAR_ERIGON_VOLUME_TYPE: validStr({ default: 'gp3' }),
+      TF_VAR_BOR_ARCHIVE_VOLUME_TYPE: validStr({ default: 'io1' }),
+      TF_VAR_ERIGON_ARCHIVE_VOLUME_TYPE: validStr({ default: 'io1' }),
+      TF_VAR_AWS_REGION: validStr({
+        default: 'eu-west-1',
+        choices: [
+          'us-east-2',
+          'us-east-1',
+          'us-west-1',
+          'us-west-2',
+          'af-south-1',
+          'ap-east-1',
+          'ap-south-2',
+          'ap-southeast-3',
+          'ap-south-1',
+          'ap-northeast-3',
+          'ap-northeast-2',
+          'ap-southeast-1',
+          'ap-southeast-2',
+          'ap-northeast-1',
+          'ca-central-1',
+          'eu-central-1',
+          'eu-west-1',
+          'eu-west-2',
+          'eu-south-1',
+          'eu-west-3',
+          'eu-south-2',
+          'eu-north-1',
+          'eu-central-2',
+          'me-south-1',
+          'me-central-1',
+          'sa-east-1',
+          'us-gov-east-1',
+          'us-gov-west-1'
+        ],
+        docs:
+          'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/' +
+          'Concepts.RegionsAndAvailabilityZones.html'
+      })
+    })
+
+    // validating GCP infra vars
+  } else if (cloud === constants.cloud.GCP) {
+    cleanEnv(process.env, {
+      TF_VAR_FW_RULE_SUFFIX: validStr({ default: 'matic' }),
+      TF_VAR_BOR_MACHINE_TYPE: validStr({ default: 'n2d-standard-4' }),
+      TF_VAR_ERIGON_MACHINE_TYPE: validStr({ default: 'n2d-standard-4' }),
+      TF_VAR_BOR_ARCHIVE_MACHINE_TYPE: validStr({ default: 'n2d-standard-4' }),
+      TF_VAR_ERIGON_ARCHIVE_MACHINE_TYPE: validStr({
+        default: 'n2d-standard-4'
+      }),
+      TF_VAR_INSTANCE_IMAGE: validGCPVmImageStr({
+        default: 'ubuntu-2204-jammy-v20230302'
+      }),
+      TF_VAR_BOR_VOLUME_TYPE_GCP: validStr({ default: 'pd-ssd' }),
+      TF_VAR_ERIGON_VOLUME_TYPE_GCP: validStr({ default: 'pd-ssd' }),
+      TF_VAR_BOR_ARCHIVE_VOLUME_TYPE_GCP: validStr({ default: 'pd-balanced' }),
+      TF_VAR_ERIGON_ARCHIVE_VOLUME_TYPE_GCP: validStr({
+        default: 'pd-balanced'
+      }),
+      TF_VAR_GCP_REGION: validStr({
+        default: 'europe-west2',
+        choices: [
+          'asia-east1',
+          'asia-east2',
+          'asia-northeast1',
+          'asia-northeast2',
+          'asia-northeast3',
+          'asia-south1',
+          'asia-south2',
+          'asia-southeast1',
+          'asia-southeast2',
+          'australia-southeast1',
+          'australia-southeast2',
+          'europe-central2',
+          'europe-north1',
+          'europe-southwest1',
+          'europe-west1',
+          'europe-west2',
+          'europe-west3',
+          'europe-west4',
+          'europe-west6',
+          'europe-west8',
+          'europe-west9',
+          'me-west1',
+          'northamerica-northeast1',
+          'northamerica-northeast2',
+          'southamerica-east1',
+          'southamerica-west1',
+          'us-central1',
+          'us-east1',
+          'us-east4',
+          'us-east5',
+          'us-south1',
+          'us-west1',
+          'us-west2',
+          'us-west3',
+          'us-west4'
+        ],
+        docs: 'https://cloud.google.com/compute/docs/regions-zones'
+      }),
+      TF_VAR_ZONE: validZone({ default: 'europe-west2-a' }),
+      TF_VAR_GCP_PUB_KEY_FILE: validStr({
+        default: '/home/ubuntu/aws-key.pem.pub'
+      })
+    })
+  } else {
+    console.log(`❌ Unsupported cloud provider ${cloud}`)
+    process.exit(1)
+  }
+
   cleanEnv(process.env, {
-    TF_VAR_AWS_PROFILE: validStr({ choices: ['default'] }),
     TF_VAR_VM_NAME: validStr({ default: 'polygon-user' }),
     TF_VAR_DOCKERIZED: validStr({ choices: ['yes', 'no'] }),
     TF_VAR_BOR_DISK_SIZE_GB: num({ default: 20 }),
     TF_VAR_ERIGON_DISK_SIZE_GB: num({ default: 20 }),
-    TF_VAR_BOR_IOPS: num({ default: 3000 }),
-    TF_VAR_ERIGON_IOPS: num({ default: 3000 }),
     TF_VAR_BOR_VALIDATOR_COUNT: num({ default: 2 }),
     TF_VAR_ERIGON_VALIDATOR_COUNT: num({ default: 0 }),
     TF_VAR_BOR_SENTRY_COUNT: num({ default: 1 }),
     TF_VAR_ERIGON_SENTRY_COUNT: num({ default: 0 }),
     TF_VAR_BOR_ARCHIVE_COUNT: num({ default: 0 }),
     TF_VAR_ERIGON_ARCHIVE_COUNT: num({ default: 0 }),
-    TF_VAR_BOR_INSTANCE_TYPE: validStr({ default: 't2.xlarge' }),
-    TF_VAR_ERIGON_INSTANCE_TYPE: validStr({ default: 't2.xlarge' }),
-    TF_VAR_BOR_ARCHIVE_INSTANCE_TYPE: validStr({ default: 't2.xlarge' }),
-    TF_VAR_ERIGON_ARCHIVE_INSTANCE_TYPE: validStr({ default: 't2.xlarge' }),
-    TF_VAR_INSTANCE_AMI: validAmiStr({ default: 'ami-01dd271720c1ba44f' }),
-    TF_VAR_PEM_FILE: validStr({ default: 'aws-key' }),
-    TF_VAR_REGION: validStr({
-      default: 'eu-west-1',
-      choices: [
-        'us-east-2',
-        'us-east-1',
-        'us-west-1',
-        'us-west-2',
-        'af-south-1',
-        'ap-east-1',
-        'ap-south-2',
-        'ap-southeast-3',
-        'ap-south-1',
-        'ap-northeast-3',
-        'ap-northeast-2',
-        'ap-southeast-1',
-        'ap-southeast-2',
-        'ap-northeast-1',
-        'ca-central-1',
-        'eu-central-1',
-        'eu-west-1',
-        'eu-west-2',
-        'eu-south-1',
-        'eu-west-3',
-        'eu-south-2',
-        'eu-north-1',
-        'eu-central-2',
-        'me-south-1',
-        'me-central-1',
-        'sa-east-1',
-        'us-gov-east-1',
-        'us-gov-west-1'
-      ],
-      docs:
-        'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/' +
-        'Concepts.RegionsAndAvailabilityZones.html'
-    }),
     PEM_FILE_PATH: validCertPathStr({ default: '/home/ubuntu/aws-key.pem' }),
     DEFAULT_STAKE: num({ default: 10000 }),
     DEFAULT_FEE: num({ default: 2000 }),
@@ -216,7 +312,6 @@ function validateUsersAndHosts() {
         '❌ DEVNET_BOR_USERS or DEVNET_BOR_HOSTS lengths are not equal to the nodes count ' +
           '(TF_VAR_BOR_VALIDATOR_COUNT+TF_VAR_BOR_SENTRY_COUNT+TF_VAR_BOR_ARCHIVE_COUNT), please check your configs!'
       )
-
       process.exit(1)
     }
 
@@ -232,7 +327,6 @@ function validateUsersAndHosts() {
         '❌ DEVNET_ERIGON_USERS or DEVNET_ERIGON_HOSTS lengths are not equal to the nodes count ' +
           '(TF_VAR_ERIGON_VALIDATOR_COUNT+TF_VAR_ERIGON_SENTRY_COUNT+TF_VAR_ERIGON_ARCHIVE_COUNT), please check your configs!'
       )
-
       process.exit(1)
     }
   }
@@ -649,6 +743,15 @@ export async function editMaticCliRemoteYAMLConfig() {
     setConfigList('devnetHeimdallHosts', heimdallHosts.join(','), doc)
   }
   setConfigValue('devnetType', 'remote', doc)
+  if (process.env.CLOUD === constants.cloud.AWS) {
+    setConfigValue('devnetRegion', process.env.TF_VAR_AWS_REGION, doc)
+  } else if (process.env.CLOUD === constants.cloud.GCP) {
+    setConfigValue('devnetRegion', process.env.TF_VAR_GCP_REGION, doc)
+  } else {
+    console.log(`❌ Unsupported cloud provider ${process.env.CLOUD}`)
+    process.exit(1)
+  }
+  setConfigValue('cloud', process.env.CLOUD, doc)
 
   fs.writeFile(
     `${process.cwd()}/remote-setup-config.yaml`,
@@ -743,9 +846,11 @@ export async function editMaticCliDockerYAMLConfig() {
   )
 }
 
-export async function validateConfigs() {
-  validateEnvVars()
-  validateAwsKeyAndCertificate()
+export async function validateConfigs(cloud) {
+  validateEnvVars(cloud)
+  if (cloud === constants.cloud.AWS) {
+    validateAwsKeyAndCertificate()
+  }
   validateUsersAndHosts()
   validateBlockParams()
   validateGitConfigs()

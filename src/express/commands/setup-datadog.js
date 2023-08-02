@@ -2,6 +2,7 @@
 
 import { loadDevnetConfig, splitToArray } from '../common/config-utils'
 import { timer } from '../common/time-utils'
+import constants from '../common/constants'
 
 const {
   runScpCommand,
@@ -37,6 +38,12 @@ export async function setupDatadog() {
     return
   } else {
     doc = await loadDevnetConfig('remote')
+  }
+
+  if (doc.cloud.toString() === constants.cloud.GCP) {
+    // not tested datadog setup in GCP
+    console.log('📍Datadog setup currently not supported in GCP')
+    return
   }
 
   if (doc.devnetBorHosts.length > 0) {

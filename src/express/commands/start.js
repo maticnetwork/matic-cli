@@ -473,11 +473,14 @@ export async function start() {
   const tfOutput = await terraformOutput()
   let dnsIps = JSON.parse(tfOutput).instance_dns_ips.value.toString()
   const ids = JSON.parse(tfOutput).instance_ids.value.toString()
+  const cloud = JSON.parse(tfOutput).cloud.value.toString()
+  process.env.DEVNET_BOR_HOSTS = dnsIps
 
   dnsIps = setBorAndErigonHosts(dnsIps)
   process.env.INSTANCES_IDS = ids
+  process.env.CLOUD = cloud
 
-  await validateConfigs()
+  await validateConfigs(cloud)
 
   shell.exec(
     `cp ../../configs/devnet/${devnetType}-setup-config.yaml ../../deployments/devnet-${devnetId}`

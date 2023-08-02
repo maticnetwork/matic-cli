@@ -12,7 +12,7 @@ terraform {
 
 # aws provider
 provider "aws" {
-  region     = var.REGION
+  region     = var.AWS_REGION
 }
 
 # ec2 instances
@@ -141,7 +141,7 @@ variable "devnet_public_subnet" {
 resource "aws_subnet" "devnet_public_subnet" {
   vpc_id                  = aws_vpc.devnet_vpc.id
   cidr_block              = var.devnet_public_subnet
-  availability_zone       = "eu-west-1a"
+  availability_zone       = var.AVAILABILITY_ZONE
   map_public_ip_on_launch = true
 
   tags = {
@@ -189,6 +189,10 @@ resource "aws_main_route_table_association" "route_table_association" {
 }
 
 # output variables used by express-cli
+output "cloud" {
+  value = "aws" # do not update this, value should match the corresponding value in the constants.js file.
+}
+
 output "instance_ips" {
   value = aws_eip.eip.*.public_ip
 }
