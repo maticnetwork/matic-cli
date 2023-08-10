@@ -65,15 +65,15 @@ export async function stopServices(doc) {
 
     if (hostToIndexMap.get(ip) < returnTotalBorNodes(doc)) {
       console.log('📍Stopping bor on machine ' + ip + ' ...')
-      command = 'sudo systemctl stop bor.service'
+      command = 'sudo systemctl stop bor.service || echo "bor not running on current machine..."'
       await runSshCommand(ip, command, maxRetries)
     } else {
       console.log('📍Stopping erigon on machine ' + ip + ' ...')
-      command = 'sudo systemctl stop erigon.service'
+      command = 'sudo systemctl stop erigon.service || echo "erigon not running on current machine..."'
       await runSshCommand(ip, command, maxRetries)
     }
     console.log('📍Stopping heimdall on machine ' + ip + '...')
-    command = 'sudo systemctl stop heimdalld.service'
+    command = 'sudo systemctl stop heimdalld.service || echo "heimdall not running on current machine..."'
     await runSshCommand(ip, command, maxRetries)
   })
 
