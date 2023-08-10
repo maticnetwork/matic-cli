@@ -101,7 +101,7 @@ jobs:
       - name: Init devnet
         run: |
           cd matic-cli
-          ./bin/express-cli --init
+          ./bin/express-cli --init aws
 
       - name: Start devnet
         run: |
