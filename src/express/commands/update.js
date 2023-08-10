@@ -47,7 +47,7 @@ export async function pullAndRestartBor(ip, i, isPull) {
   }
 
   console.log('📍Starting bor...')
-  command = 'sudo systemctl start bor.service'
+  command = 'sudo systemctl start bor.service || echo "bor not configured on current machine..."'
   await runSshCommand(ip, command, maxRetries)
 }
 
@@ -94,7 +94,7 @@ export async function pullAndRestartErigon(ip, i, isPull, erigonHostsLength) {
   }
 
   console.log('📍Starting erigon...')
-  command = 'sudo systemctl start erigon.service'
+  command = 'sudo systemctl start erigon.service || echo "erigon not configured on current machine..."'
   await runSshCommand(ip, command, maxRetries)
 }
 
@@ -145,7 +145,7 @@ export async function pullAndRestartHeimdall(doc, ip, i, isPull) {
   }
 
   console.log('📍Starting heimdall...')
-  command = 'sudo systemctl start heimdalld.service'
+  command = 'sudo systemctl start heimdalld.service || echo "heimdall not configured on current machine..."'
   await runSshCommand(ip, command, maxRetries)
 }
 
