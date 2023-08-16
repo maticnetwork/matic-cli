@@ -746,6 +746,17 @@ export class Devnet {
                             'sudo mv ~/bor.service /lib/systemd/system/'
             ], { stdio: getRemoteStdio() })
 
+            if (this.config.network) {
+              const chain = this.config.network
+              await execa('ssh', [
+                '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
+                '-i', '~/cert.pem',
+                      `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                      // eslint-disable-next-line
+                      `sed -i "s|\\/var/lib/heimdall/config/genesis.json|${chain}|g" ~/heimdalld.service`
+              ], { stdio: getRemoteStdio() })
+            }
+
             await execa(
               'ssh',
               [
