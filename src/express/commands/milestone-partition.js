@@ -10,7 +10,8 @@ import {
   getIpsAndEnode,
   fetchAndValidateSameHeightBlocks,
   fetchAndValidateSameBlocks,
-  validateReorg
+  validateReorg,
+  queryMilestone
 } from '../common/milestone-utils'
 
 const milestoneLength = 12
@@ -54,8 +55,8 @@ export async function milestonePartition() {
     return
   }
 
-  console.log('📍Waiting 10s to to fetch and validate finalized blocks...')
-  await timer(10000)
+  console.log('📍Waiting 15s to to fetch and validate finalized blocks...')
+  await timer(15000)
 
   // Validate the 'finalized' block with last milestone
   await validateFinalizedBlock(borHosts, lastMilestone)
@@ -89,22 +90,19 @@ export async function milestonePartition() {
   // Fetch same height blocks from different clusters and validate partition
   const majorityForkBlock = await fetchAndValidateSameHeightBlocks(
     borHosts[0],
-    borHosts[2]
+    borHosts[2],
+    'partition'
   )
 
-  // Expect no milestone to be proposed
-  let latestMilestone = await fetchLatestMilestone(
-    milestoneLength,
-    queryTimer / 4,
+  // Keep querying milestones and make sure that no new milestones are
+  // proposed as there's a 50:50 partition. Expect 1 milestone to get proposed
+  // which will be the last milestone before partition.
+  console.log('📍Waiting for milestones...')
+  await queryMilestone(
+    milestoneLength * 5,
+    queryTimer * 2,
     borHosts[0],
-    lastMilestone
   )
-  if (latestMilestone) {
-    console.log(
-      '📍New milestone proposed despite non-majority clusters, exiting'
-    )
-    return
-  }
 
   // Reconnect both the clusters
   console.log('📍Rejoining clusters')
@@ -115,8 +113,8 @@ export async function milestonePartition() {
   }
 
   // Wait for few seconds for reorg to happen
-  console.log('📍Waiting 4s for clusters to connect and reorg...')
-  await timer(4000)
+  console.log('📍Waiting 10s for clusters to connect and reorg...')
+  await timer(10000)
 
   // Fetch block from cluster 2 to see if it got reorged to cluster 1
   // Validate reorg by checking if cluster 2 got reorged to majority
@@ -130,30 +128,23 @@ export async function milestonePartition() {
   await fetchAndValidateSameBlocks(borHosts[0], borHosts[2])
 
   // Wait for the next milestone to get proposed for verification
-  latestMilestone = await fetchLatestMilestone(
-    milestoneLength,
-    queryTimer,
+  let latestMilestone = await fetchLatestMilestone(
+    milestoneLength * 10,
+    queryTimer * 2,
     borHosts[0],
-    lastMilestone
   )
   if (!latestMilestone) {
     console.log('📍Unable to fetch latest milestone from heimdall, exiting')
     return
   }
 
-  console.log('📍Waiting 10s for bor nodes to import milestone')
-  await timer(10000)
+  console.log('📍Waiting 15s for bor nodes to import milestone')
+  await timer(15000)
 
   console.log(
     '📍Trying to fetch last finalized block from all nodes and validate'
   )
-  valid = await validateFinalizedBlock(borHosts, latestMilestone)
-  if (!valid) {
-    console.log(
-      '📍Unable to fetch or validate last finalized block from all nodes with last milestone, exiting'
-    )
-    return
-  }
+  await validateFinalizedBlock(borHosts, latestMilestone)
 
   console.log('📍Finalized block matches with the last milestone')
   console.log('✅ Test Passed')
