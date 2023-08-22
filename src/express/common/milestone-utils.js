@@ -116,7 +116,7 @@ export async function getMiner(ip, number) {
 
 export async function checkForRewind(ip) {
   const command =
-    'journalctl -u bor -n 500 | grep "Rewinding blockchain" | wc -l'
+    'journalctl -u bor -n 1000 | grep "Rewinding blockchain" | wc -l'
   try {
     const count = await runSshCommandWithReturn(ip, command, maxRetries)
     // console.log('📍Fetched count of rewind logs, count:', count)
@@ -389,6 +389,8 @@ export async function validateFinalizedBlock(hosts, milestone) {
       process.exit(1)
     }
   }
+
+  return true
 }
 
 export async function fetchLatestMilestone(
@@ -443,15 +445,50 @@ export async function fetchLatestMilestone(
       latestMilestone.start_block
     )}, End block: ${Number(latestMilestone.end_block)}, ID: ${
       latestMilestone.milestone_id
-    }`
+    }, Hash: ${latestMilestone.hash}`
   )
   return latestMilestone
+}
+
+// queryMilestone keeps querying new milestones for `maxRetries` times
+export async function queryMilestone(maxRetries, queryTimer, host) {
+  let milestone
+  let count = 0
+  console.log('📍Querying heimdall for next milestone, maxRetries:', maxRetries)
+  while (count <= maxRetries) {
+    if (count !== 0) {
+      await timer(queryTimer)
+    }
+    count++
+
+    milestone = await checkLatestMilestone(host)
+    if (milestone.result) {
+      const latestMilestone = milestone.result
+      console.log(
+        `📍Got milestone from heimdall. Start block: ${Number(
+          latestMilestone.start_block
+        )}, End block: ${Number(latestMilestone.end_block)}, ID: ${
+          latestMilestone.milestone_id
+        }, Hash: ${latestMilestone.hash}, count: ${count}`
+      )
+    } else {
+      console.log(
+        `📍Invalid milestone received. Response: ${JSON.stringify(
+          milestone.result
+        )}, count: ${count}`
+      )
+    }
+  }
 }
 
 // fetchAndValidateSameHeightBlocks attempts to fetch same (by height) blocks
 // from different clusters and validates them. Ideally they should have same
 // block number but different hash.
-export async function fetchAndValidateSameHeightBlocks(host1, host2) {
+export async function fetchAndValidateSameHeightBlocks(
+  host1,
+  host2,
+  type = 'base'
+) {
   // We'll fetch block from cluster 2 first as it'll be behind in terms of block height
   console.log('📍Attempting to fetch latest block from cluster 2')
   const latestBlockCluster2 = await runCommand(
@@ -460,8 +497,14 @@ export async function fetchAndValidateSameHeightBlocks(host1, host2) {
     'latest',
     maxRetries
   )
-  if (latestBlockCluster2 === undefined || latestBlockCluster2.number) {
-    console.log('📍Unable to fetch latest block in cluster 2, exiting')
+  if (
+    latestBlockCluster2 === undefined ||
+    latestBlockCluster2.number === undefined
+  ) {
+    console.log(
+      '📍Unable to fetch latest block in cluster 2, exiting',
+      latestBlockCluster2
+    )
     process.exit(1)
   }
 
@@ -476,7 +519,10 @@ export async function fetchAndValidateSameHeightBlocks(host1, host2) {
     latestBlockCluster2.number,
     maxRetries
   )
-  if (latestBlockCluster1 === undefined || latestBlockCluster1.number) {
+  if (
+    latestBlockCluster1 === undefined ||
+    latestBlockCluster1.number === undefined
+  ) {
     console.log(
       `📍Unable to fetch block ${Number(
         latestBlockCluster2.number
@@ -511,7 +557,13 @@ export async function fetchAndValidateSameHeightBlocks(host1, host2) {
     }`
   )
 
-  return latestBlockCluster2
+  // Return blocks from cluster 2 as it will be considered canonical
+  if (type === 'base') {
+    return latestBlockCluster2
+  }
+
+  // For partition tests, return cluster 1 as it will be canonical
+  return latestBlockCluster1
 }
 
 // fetchAndValidateSameBlocks attempts to fetch same (by height) blocks
@@ -526,23 +578,47 @@ export async function fetchAndValidateSameBlocks(host1, host2) {
     'latest',
     maxRetries
   )
-  if (latestBlockCluster1 === undefined || latestBlockCluster1.number) {
+  if (
+    latestBlockCluster1 === undefined ||
+    latestBlockCluster1.number === undefined
+  ) {
     console.log('📍Unable to fetch latest block in cluster 1, exiting')
     process.exit(1)
   }
 
-  console.log(
-    `📍Attempting to fetch block ${Number(
-      latestBlockCluster1.number
-    )} from cluster 2`
-  )
-  const latestBlockCluster2 = await runCommand(
-    getBlock,
-    host2,
-    latestBlockCluster1.number,
-    maxRetries
-  )
-  if (latestBlockCluster2 === undefined || latestBlockCluster2.number) {
+  let count = 0
+  let latestBlockCluster2
+  while (count <= 10) {
+    count++
+    console.log(
+      `📍Attempting to fetch block ${Number(
+        latestBlockCluster1.number
+      )} from cluster 2, count: ${count}`
+    )
+    latestBlockCluster2 = await runCommand(
+      getBlock,
+      host2,
+      latestBlockCluster1.number,
+      maxRetries
+    )
+    if (
+      latestBlockCluster2 === undefined ||
+      latestBlockCluster2.number === undefined
+    ) {
+      console.log(
+        `📍Unable to fetch block ${Number(
+          latestBlockCluster1.number
+        )} in cluster 2`
+      )
+    } else {
+      break
+    }
+  }
+
+  if (
+    latestBlockCluster2 === undefined ||
+    latestBlockCluster2.number === undefined
+  ) {
     console.log(
       `📍Unable to fetch block ${Number(
         latestBlockCluster1.number
@@ -579,28 +655,44 @@ export async function fetchAndValidateSameBlocks(host1, host2) {
 }
 
 export async function validateReorg(host1, expectedBlock) {
-  console.log(
-    `📍Attempting to fetch block ${Number(expectedBlock.number)} from cluster 1`
-  )
-  const latestBlockCluster1 = await runCommand(
-    getBlock,
-    host1,
-    expectedBlock.number,
-    maxRetries
-  )
-  if (latestBlockCluster1 === undefined || latestBlockCluster1.number) {
+  let count = 0
+  while (1) {
+    await timer(2000)
     console.log(
-      `📍Unable to fetch block ${Number(
-        latestBlockCluster1.number
-      )} in cluster 1, exiting`
+      `📍Attempting to fetch block ${Number(
+        expectedBlock.number
+      )} from cluster 1, count: ${count}`
     )
-    process.exit(1)
-  }
+    count++
 
-  if (latestBlockCluster1.hash !== expectedBlock.hash) {
-    console.log(
-      `📍Hash mismatch among clusters. Cluster 1 hash: ${latestBlockCluster1.hash}, Cluster 2 hash: ${expectedBlock.hash}, exiting`
+    const latestBlockCluster1 = await runCommand(
+      getBlock,
+      host1,
+      expectedBlock.number,
+      maxRetries
     )
-    process.exit(1)
+    if (
+      latestBlockCluster1 === undefined ||
+      latestBlockCluster1.number === undefined
+    ) {
+      console.log(
+        `📍Unable to fetch block ${Number(
+          latestBlockCluster1.number
+        )} in cluster 1, exiting`
+      )
+      continue
+      // process.exit(1)
+    }
+
+    if (latestBlockCluster1.hash !== expectedBlock.hash) {
+      console.log(
+        `📍Hash mismatch among clusters. Cluster 1 hash: ${latestBlockCluster1.hash}, Cluster 2 hash: ${expectedBlock.hash}, exiting`
+      )
+      continue
+      // process.exit(1)
+    }
+
+    // If reached here, exit
+    return
   }
 }

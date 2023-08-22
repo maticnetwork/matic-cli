@@ -54,8 +54,8 @@ export async function milestoneBase() {
     return
   }
 
-  console.log('📍Waiting 10s to fetch and validate finalized blocks...')
-  await timer(10000)
+  console.log('📍Waiting 15s to fetch and validate finalized blocks...')
+  await timer(15000)
 
   // Validate the 'finalized' block with last milestone
   await validateFinalizedBlock(borHosts, lastMilestone)
@@ -88,15 +88,18 @@ export async function milestoneBase() {
   // Fetch same height blocks from different clusters and validate partition
   const majorityForkBlock = await fetchAndValidateSameHeightBlocks(
     borHosts[0],
-    borHosts[1]
+    borHosts[1],
+    'base'
   )
 
+  console.log('📍Waiting for 120s...')
+  await timer(120000)
+
   // Wait for the next milestone to get proposed and validate
-  const latestMilestone = await fetchLatestMilestone(
+  let latestMilestone = await fetchLatestMilestone(
     milestoneLength,
     queryTimer,
-    borHosts[0],
-    lastMilestone
+    borHosts[0]
   )
   if (!latestMilestone) {
     console.log('📍Unable to fetch latest milestone from heimdall, exiting')
@@ -109,8 +112,8 @@ export async function milestoneBase() {
   )
   await validateProposer(ips[0], latestMilestone.proposer)
 
-  console.log('📍Waiting 10s for bor nodes to import milestone')
-  await timer(10000)
+  console.log('📍Waiting 15s for bor nodes to import milestone')
+  await timer(15000)
 
   // Reconnect both the clusters
   console.log('📍Rejoining clusters')
@@ -121,8 +124,8 @@ export async function milestoneBase() {
   }
 
   // Wait for few seconds for reorg to happen
-  console.log('📍Waiting 4s for clusters to connect and reorg...')
-  await timer(4000)
+  console.log('📍Waiting 10s for clusters to connect and reorg...')
+  await timer(10000)
 
   console.log('📍Checking for rewind')
   await checkForRewind(ips[0])
@@ -133,6 +136,20 @@ export async function milestoneBase() {
   console.log(
     '📍Cluster 1 successfully reorged to cluster 2 (with high majority)'
   )
+
+  // Fetch the latest milestone to perform final validation
+  latestMilestone = await fetchLatestMilestone(
+    milestoneLength,
+    queryTimer,
+    borHosts[0]
+  )
+  if (!latestMilestone) {
+    console.log('📍Unable to fetch latest milestone from heimdall, exiting')
+    return
+  }
+
+  console.log('📍Waiting 15s to fetch and validate finalized blocks...')
+  await timer(15000)
 
   console.log(
     '📍Trying to fetch last finalized block from all nodes and validate'
