@@ -558,7 +558,7 @@ export async function fetchAndValidateSameHeightBlocks(
   )
 
   // Return blocks from cluster 2 as it will be considered canonical
-  if (type == 'base') {
+  if (type === 'base') {
     return latestBlockCluster2
   }
 
