@@ -99,7 +99,7 @@ export async function milestoneBase() {
   let latestMilestone = await fetchLatestMilestone(
     milestoneLength,
     queryTimer,
-    borHosts[0],
+    borHosts[0]
   )
   if (!latestMilestone) {
     console.log('📍Unable to fetch latest milestone from heimdall, exiting')

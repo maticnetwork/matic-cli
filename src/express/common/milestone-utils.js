@@ -484,7 +484,11 @@ export async function queryMilestone(maxRetries, queryTimer, host) {
 // fetchAndValidateSameHeightBlocks attempts to fetch same (by height) blocks
 // from different clusters and validates them. Ideally they should have same
 // block number but different hash.
-export async function fetchAndValidateSameHeightBlocks(host1, host2, type = 'base') {
+export async function fetchAndValidateSameHeightBlocks(
+  host1,
+  host2,
+  type = 'base'
+) {
   // We'll fetch block from cluster 2 first as it'll be behind in terms of block height
   console.log('📍Attempting to fetch latest block from cluster 2')
   const latestBlockCluster2 = await runCommand(

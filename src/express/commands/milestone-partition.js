@@ -98,11 +98,7 @@ export async function milestonePartition() {
   // proposed as there's a 50:50 partition. Expect 1 milestone to get proposed
   // which will be the last milestone before partition.
   console.log('📍Waiting for milestones...')
-  await queryMilestone(
-    milestoneLength * 5,
-    queryTimer * 2,
-    borHosts[0],
-  )
+  await queryMilestone(milestoneLength * 5, queryTimer * 2, borHosts[0])
 
   // Reconnect both the clusters
   console.log('📍Rejoining clusters')
@@ -128,10 +124,10 @@ export async function milestonePartition() {
   await fetchAndValidateSameBlocks(borHosts[0], borHosts[2])
 
   // Wait for the next milestone to get proposed for verification
-  let latestMilestone = await fetchLatestMilestone(
+  const latestMilestone = await fetchLatestMilestone(
     milestoneLength * 10,
     queryTimer * 2,
-    borHosts[0],
+    borHosts[0]
   )
   if (!latestMilestone) {
     console.log('📍Unable to fetch latest milestone from heimdall, exiting')
