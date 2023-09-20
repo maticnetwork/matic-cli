@@ -1,7 +1,7 @@
 node_modules
 test
 .DS_Store
-devnet
+/devnet
 .env
 *.tfvars
 .terraform*

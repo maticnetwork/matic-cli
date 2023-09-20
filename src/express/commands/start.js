@@ -489,6 +489,9 @@ export async function start() {
     `cp ../../configs/devnet/openmetrics-conf.yaml ../../deployments/devnet-${devnetId}`
   )
   shell.exec(
+    `cp ../../configs/devnet/install-otelcol-contrib.sh ../../deployments/devnet-${devnetId}`
+  )
+  shell.exec(
     `cp ../../configs/devnet/otel-config-dd.yaml ../../deployments/devnet-${devnetId}`
   )
 

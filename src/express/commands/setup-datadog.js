@@ -71,45 +71,67 @@ export async function setupDatadog() {
       envName = `devnet-${x}`
     }
 
+    // Setup datadog-agent
     console.log('📍Setting up datadog for', envName)
     let command = `DD_API_KEY=${apiKey} DD_SITE="datadoghq.com" DD_HOST_TAGS="env:${envName}" bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"`
     await runSshCommand(`${user}@${host}`, command, maxRetries)
     console.log(`📍Datadog installed on ${host}`)
 
-    await installDocker(`${user}@${host}`, user)
-    console.log('📍Docker installed')
-
-    const datadogConfig = await yaml.load(
-      fs.readFileSync('./otel-config-dd.yaml', 'utf8'),
-      undefined
-    )
-    await setDatadogAPIKey(apiKey, datadogConfig)
-
-    let src = './otel-config-dd.yaml'
-    let dest = `${user}@${host}:~/otel-config-dd.yaml`
-    await runScpCommand(src, dest, maxRetries)
-
-    src = './openmetrics-conf.yaml'
-    dest = `${user}@${host}:~/conf.yaml`
+    // Copy the DD config
+    console.log('📍Copying the datadog config')
+    let src = './openmetrics-conf.yaml'
+    let dest = `${user}@${host}:~/conf.yaml`
     await runScpCommand(src, dest, maxRetries)
 
     command =
       'sudo mv ~/conf.yaml /etc/datadog-agent/conf.d/openmetrics.d/conf.yaml'
     await runSshCommand(`${user}@${host}`, command, maxRetries)
 
-    command =
-      'sudo docker run -d --net=host -v ~/otel-config-dd.yaml:/otel-local-config.yaml otel/opentelemetry-collector-contrib --config otel-local-config.yaml'
-    await runSshCommand(`${user}@${host}`, command, maxRetries)
-    console.log(`📍OpenCollector started on ${host}`)
-
+    // Restart the datadog-agent
+    console.log('📍Restarting the datadog agent')
     command = 'sudo service datadog-agent restart'
+    await runSshCommand(`${user}@${host}`, command, maxRetries)
+
+    // Setup otel collector service
+    console.log('📍Setting up otel collector for', envName)
+    src = './install-otelcol-contrib.sh'
+    dest = `${user}@${host}:~/install-otelcol-contrib.sh`
+    await runScpCommand(src, dest, maxRetries)
+
+    // Install otel collector using the script
+    command = "sudo bash ~/install-otelcol-contrib.sh"
+    await runSshCommand(`${user}@${host}`, command, maxRetries)
+
+    // Set the datadog api key in the otel config
+    console.log('📍Setting up datadog api key in otel config and copying the config')
+    const otelConfig = await yaml.load(
+      fs.readFileSync('./otel-config-dd.yaml', 'utf8'),
+      undefined
+    )
+    await setDatadogAPIKey(apiKey, otelConfig)
+
+    // Copy the otel config
+    src = './otel-config-dd.yaml'
+    dest = `${user}@${host}:~/otel-config-dd.yaml`
+    await runScpCommand(src, dest, maxRetries)
+
+    command = "sudo mv ~/otel-config-dd.yaml /etc/otelcol-contrib/config.yaml"
+    await runSshCommand(`${user}@${host}`, command, maxRetries)
+    
+    // Restart the otel service
+    console.log('📍Restarting the otel service')
+    command = "sudo systemctl daemon-reload && sudo service otelcol-contrib restart"
+    await runSshCommand(`${user}@${host}`, command, maxRetries)
+
+    // Remove the installation script
+    command = "rm ~/install-otelcol-contrib.sh"
     await runSshCommand(`${user}@${host}`, command, maxRetries)
 
     // revert dd api key
     // eslint-disable-next-line no-undef, no-template-curly-in-string
-    await setDatadogAPIKey('${DD_API_KEY}', datadogConfig)
+    await setDatadogAPIKey('${DD_API_KEY}', otelConfig)
   }
 
-  console.log('📍Datadog devnet env : ', envName)
-  console.log('📍Datadog setup complete')
+  console.log('📍Datadog devnet env:', envName)
+  console.log('📍Datadog and otel collector setup complete')
 }
