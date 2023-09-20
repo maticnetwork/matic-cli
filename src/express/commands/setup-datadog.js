@@ -9,7 +9,6 @@ const {
   runSshCommand,
   maxRetries
 } = require('../common/remote-worker')
-const { installDocker } = require('./start.js')
 
 const yaml = require('js-yaml')
 const fs = require('fs')
