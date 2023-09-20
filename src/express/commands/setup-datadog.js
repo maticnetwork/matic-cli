@@ -99,11 +99,13 @@ export async function setupDatadog() {
     await runScpCommand(src, dest, maxRetries)
 
     // Install otel collector using the script
-    command = "sudo bash ~/install-otelcol-contrib.sh"
+    command = 'sudo bash ~/install-otelcol-contrib.sh'
     await runSshCommand(`${user}@${host}`, command, maxRetries)
 
     // Set the datadog api key in the otel config
-    console.log('📍Setting up datadog api key in otel config and copying the config')
+    console.log(
+      '📍Setting up datadog api key in otel config and copying the config'
+    )
     const otelConfig = await yaml.load(
       fs.readFileSync('./otel-config-dd.yaml', 'utf8'),
       undefined
@@ -115,16 +117,17 @@ export async function setupDatadog() {
     dest = `${user}@${host}:~/otel-config-dd.yaml`
     await runScpCommand(src, dest, maxRetries)
 
-    command = "sudo mv ~/otel-config-dd.yaml /etc/otelcol-contrib/config.yaml"
+    command = 'sudo mv ~/otel-config-dd.yaml /etc/otelcol-contrib/config.yaml'
     await runSshCommand(`${user}@${host}`, command, maxRetries)
-    
+
     // Restart the otel service
     console.log('📍Restarting the otel service')
-    command = "sudo systemctl daemon-reload && sudo service otelcol-contrib restart"
+    command =
+      'sudo systemctl daemon-reload && sudo service otelcol-contrib restart'
     await runSshCommand(`${user}@${host}`, command, maxRetries)
 
     // Remove the installation script
-    command = "rm ~/install-otelcol-contrib.sh"
+    command = 'rm ~/install-otelcol-contrib.sh'
     await runSshCommand(`${user}@${host}`, command, maxRetries)
 
     // revert dd api key
