@@ -84,7 +84,7 @@ async function installRequiredSoftwareOnRemoteMachines(
 
   const requirementTasks = nodeIps.map(async (ip) => {
     user = splitAndGetHostIp(ip)
-    // FIXME re-enable when fixed
+    // FIXME re-enable when fixed (check comments within the method)
     // await keepSshConfigAlive(ip)
     await configureCertAndPermissions(user, ip)
     await installCommonPackages(ip)
