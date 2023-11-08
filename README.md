@@ -328,7 +328,6 @@ Please, make sure to install the following software/packages on the VMs.
 
   ```bash
   wget https://raw.githubusercontent.com/maticnetwork/node-ansible/master/go-install.sh \
-    && chmod +x go-install.sh \
     && bash go-install.sh --remove \
     && bash go-install.sh
   ```
