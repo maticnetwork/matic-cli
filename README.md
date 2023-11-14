@@ -378,8 +378,6 @@ cd \
   && npm install
 ```
 
-Set up this handy alias: `alias matic-cli="$(pwd)/bin/matic-cli"`.
-
 #### Local dockerized network
 
 Adjust the [docker configs](configs/devnet/docker-setup-config.yaml) and run
@@ -387,12 +385,18 @@ Adjust the [docker configs](configs/devnet/docker-setup-config.yaml) and run
 ```bash
 mkdir devnet \
   && cd devnet \
-  && matic-cli setup devnet --config ../configs/devnet/docker-setup-config.yaml | tee setup.log
+  && ../bin/matic-cli setup devnet --config ../configs/devnet/docker-setup-config.yaml | tee setup.log
 ...
 DONE Devnet is ready
 ```
 
 Once the setup is done, follow these steps for local docker deployment
+
+- Move to devnet folder
+
+  ```bash
+  cd matic-cli/devnet
+  ```
 
 - Start ganache
 
@@ -438,13 +442,13 @@ Note: in case of docker setup, we have provided [some additional scripts](src/se
 Adjust the [remote configs](configs/devnet/remote-setup-config.yaml) and run
 
 ```bash
-matic-cli setup devnet --config ../configs/devnet/remote-setup-config.yaml
+../bin/matic-cli setup devnet --config ../configs/devnet/remote-setup-config.yaml
 ```
 
 Alternatively, this step can be executed interactively with
 
 ```bash
-matic-cli setup devnet --interactive
+../bin/matic-cli setup devnet --interactive
 ```
 
 Once the setup is done, follow these steps for remote deployment
