@@ -392,12 +392,6 @@ DONE Devnet is ready
 
 Once the setup is done, follow these steps for local docker deployment
 
-- Move to devnet folder
-
-  ```bash
-  cd matic-cli/devnet
-  ```
-
 - Start ganache
 
   ```bash
