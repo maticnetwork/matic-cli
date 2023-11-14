@@ -346,7 +346,9 @@ Please, make sure to install the following software/packages on the VMs.
 - Node v16.17.1 (only _host_)
 
   ```bash
-  curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash && nvm install 16.17.1
+  curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash \
+    && source /home/ubuntu/.bashrc \
+    && nvm install 16.17.1
   ```
 
 - Npm (only _host_)
@@ -361,10 +363,16 @@ Please, make sure to install the following software/packages on the VMs.
   sudo apt install python2 --yes && alias python="/usr/bin/python2"
   ```
 
-- Solc (solidity compiler) and Ganache CLI (only _host_)
+- Solc v0.5.16 (only _host_)
 
   ```bash
-  npm install --global solc ganache
+  sudo snap install solc
+  ```
+
+- Ganache CLI (only _host_)
+
+  ```bash
+  npm install --global ganache
   ```
 
 ### Usage
