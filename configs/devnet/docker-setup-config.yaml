@@ -1,15 +1,31 @@
-defaultStake: 10000
-defaultFee: 2000
-borChainId: 15005
-heimdallChainId: heimdall-4052
+# Repositories
 borRepo: https://github.com/maticnetwork/bor.git
 borBranch: develop
+
 heimdallRepo: https://github.com/maticnetwork/heimdall.git
 heimdallBranch: develop
+
 contractsRepo: https://github.com/maticnetwork/contracts.git
 contractsBranch: mardizzone/node-16
+
 genesisContractsRepo: https://github.com/maticnetwork/genesis-contracts.git
 genesisContractsBranch: master
+
+# Defaults
+devnetType: docker
+defaultStake: 10000
+defaultFee: 2000
+
+# L1
+ethURL: http://ganache:9545
+ethHostUser: ubuntu
+
+# Heimdall
+heimdallChainId: heimdall-4052
+heimdallDockerBuildContext: https://github.com/maticnetwork/heimdall.git#develop
+
+# Bor
+borChainId: 15005
 sprintSize: 64
 sprintSizeBlockNumber: 0
 blockNumber: '0'
@@ -17,11 +33,11 @@ blockTime: '2'
 numOfBorValidators: 1
 numOfBorSentries: 1
 numOfBorArchiveNodes: 0
-ethURL: http://ganache:9545
-ethHostUser: ubuntu
-devnetType: docker
 borDockerBuildContext: https://github.com/maticnetwork/bor.git#develop
-heimdallDockerBuildContext: https://github.com/maticnetwork/heimdall.git#develop
 devnetBorUsers: ubuntu,ubuntu
-devnetBorHosts:
-  - ec2-xx-xxx-xx-xxx.eu-west-1.compute.amazonaws.com # use localhost for local deployments
+devnetBorHosts: ["ec2-xx-xxx-xx-xxx.eu-west-1.compute.amazonaws.com"] # use localhost for local deployments
+
+# Erigon
+numOfErigonValidators: 0
+numOfErigonSentries: 0
+numOfErigonArchiveNodes: 0

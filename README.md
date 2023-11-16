@@ -7,13 +7,18 @@ test and monitor any devnet on AWS stacks from any local system.
 
 It currently supports **only** devnets running `v0.3.x` stacks.
 
-The `express-cli` interacts with `terraform` to create a fully working setup on AWS.  
+The `express-cli` interacts with `terraform` to create a fully working setup on AWS.
 This setup is composed by a set of `EC2 VM` instances running a specific `ubuntu 22.04 ami`, mounted with `gp3 disks` ,
-and a `public-subnet` with its `VPC`.  
+and a `public-subnet` with its `VPC`.
 In case the infrastructure already exists, `matic-cli` can be used as a standalone tool to deploy Polygon stacks on
 pre-configured VMs.
 
 Please, refer to the section of this file you are more interested in (`express-cli` or `matic-cli`)
+
+## Table of contents
+
+- [`express-cli`](#express-cli)
+- [`matic-cli`](#matic-cli)
 
 ## `express-cli`
 
@@ -45,7 +50,7 @@ In case you plan to utilize express-cli for Google Cloud, you will need to make 
 
 ### Auth Configuration
 
-As a prerequisite, you need to configure authentication on `aws`  
+As a prerequisite, you need to configure authentication on `aws`
 This will create the folder `~/.aws` in your system
 To do so, please run
 
@@ -144,8 +149,8 @@ First off, you need to `--init` terraform on your local machine, by executing th
 
   - Creates the desired remote setup, based on the preferences defined in the `.env.devnet<id>` file
   - `--start` command can be used also to target an existing AWS setup. If changes to `.env.devnet<id>` file are detected, the
-    previous devnet will be destroyed and a new one created, reusing the same AWS VMs  
-     To destroy the remote devnet, you can execute the `--destroy` command.
+    previous devnet will be destroyed and a new one created, reusing the same AWS VMs
+    To destroy the remote devnet, you can execute the `--destroy` command.
 
 - `../../bin/express-cli --destroy`
 
@@ -225,7 +230,7 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 - ` ../../bin/express-cli --monitor [exit]`
 
   - Monitors the reception of state-syncs and checkpoints to make sure the whole network is in a healthy state.
-    If `--send-state-sync` hasn't been used before, only checkpoints will be detected. Monitor the setup.  
+    If `--send-state-sync` hasn't been used before, only checkpoints will be detected. Monitor the setup.
     If `exit` string is passed the process terminates when at least one `stateSync` and one `checkpoint` are detected.
 
 - ` ../../bin/express-cli --instances-stop`
@@ -316,22 +321,21 @@ Please, make sure to install the following software/packages on the VMs.
 - Build Essentials (_host_ and _remotes_)
 
   ```bash
-  sudo apt update
-  sudo apt install build-essential
+  sudo apt update --yes && sudo apt install --yes build-essential
   ```
 
 - Go 1.18+ (_host_ and _remotes_)
 
   ```bash
-  wget https://raw.githubusercontent.com/maticnetwork/node-ansible/master/go-install.sh
-  bash go-install.sh --remove
-  bash go-install.sh
+  wget https://raw.githubusercontent.com/maticnetwork/node-ansible/master/go-install.sh \
+    && bash go-install.sh --remove \
+    && bash go-install.sh
   ```
 
 - Rabbitmq (_host_ and _remotes_)
 
   ```bash
-  sudo apt install rabbitmq-server
+  sudo apt install --yes rabbitmq-server
   ```
 
 - Docker (_host_ and _remotes_, only needed in case of a docker setup)
@@ -342,21 +346,21 @@ Please, make sure to install the following software/packages on the VMs.
 - Node v16.17.1 (only _host_)
 
   ```bash
-  curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
-  nvm install 16.17.1
+  curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash \
+    && source /home/ubuntu/.bashrc \
+    && nvm install 16.17.1
   ```
 
 - Npm (only _host_)
 
   ```bash
-  sudo apt update
-  sudo apt install nodejs npm
+  sudo apt update --yes && sudo apt install --yes npm
   ```
 
 - Python 2 (only _host_)
 
   ```bash
-  sudo apt install python2 && alias python="/usr/bin/python2
+  sudo apt install python2 --yes && alias python="/usr/bin/python2"
   ```
 
 - Solc v0.5.16 (only _host_)
@@ -366,8 +370,9 @@ Please, make sure to install the following software/packages on the VMs.
   ```
 
 - Ganache CLI (only _host_)
+
   ```bash
-  sudo npm install -g ganache
+  npm install --global ganache
   ```
 
 ### Usage
@@ -375,12 +380,10 @@ Please, make sure to install the following software/packages on the VMs.
 On the _host_ machine, please run
 
 ```bash
-cd ~
-git clone https://github.com/maticnetwork/matic-cli.git
-cd matic-cli
-npm i
-mkdir devnet
-cd devnet
+cd \
+  && git clone https://github.com/maticnetwork/matic-cli.git \
+  && cd matic-cli \
+  && npm install
 ```
 
 #### Local dockerized network
@@ -388,15 +391,15 @@ cd devnet
 Adjust the [docker configs](configs/devnet/docker-setup-config.yaml) and run
 
 ```bash
-../bin/matic-cli setup devnet -c ../configs/devnet/docker-setup-config.yaml
+mkdir devnet \
+  && cd devnet \
+  && ../bin/matic-cli setup devnet --config ../configs/devnet/docker-setup-config.yaml | tee setup.log
+...
+DONE Devnet is ready
 ```
 
 Once the setup is done, follow these steps for local docker deployment
 
-- Move to devnet folder
-  ```bash
-  cd matic-cli/devnet
-  ```
 - Start ganache
 
   ```bash
@@ -441,16 +444,16 @@ Note: in case of docker setup, we have provided [some additional scripts](src/se
 Adjust the [remote configs](configs/devnet/remote-setup-config.yaml) and run
 
 ```bash
-../bin/matic-cli setup devnet -c ../configs/devnet/remote-setup-config.yaml
+../bin/matic-cli setup devnet --config ../configs/devnet/remote-setup-config.yaml
 ```
 
 Alternatively, this step can be executed interactively with
 
 ```bash
-../bin/matic-cli setup devnet -i
+../bin/matic-cli setup devnet --interactive
 ```
 
-Once the setup is done, follow these steps for remote deployment  
+Once the setup is done, follow these steps for remote deployment
 In this case, the stack is already running, you would just need to deploy/sync some contracts, as follows:
 
 - Move to devnet folder
@@ -481,7 +484,7 @@ Stop al services, remove the `matic-cli/devnet` folder, and you can start the pr
    eval "$(ssh-agent -s)"
    ssh-add `<.pem file>`
    ```
-3. We have provided the default config values [here](configs/devnet) to ensure smooth functioning of the process  
+3. We have provided the default config values [here](configs/devnet) to ensure smooth functioning of the process
    Please check the relative [README](configs/README.md) for more accurate description of such configs
    These files are used as templates and dynamically modified by `express-cli`, hence they should not be deleted nor any modification remotely pushed
    Therefore, they are under `.gitignore`, and in case you do not want those changes to be reflected in your local `git`,
