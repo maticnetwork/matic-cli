@@ -179,7 +179,7 @@ export async function validateProposer(ip, proposer) {
 export async function removePeers(ip, peers) {
   const tasks = []
   for (let i = 0; i < peers.length; i++) {
-    const command = `~/go/bin/bor attach ~/.bor/data/bor.ipc --exec "admin.removePeer('${peers[i]}')"`
+    const command = `~/go/bin/bor attach /var/lib/bor/data/bor.ipc --exec "admin.removePeer('${peers[i]}')"`
     tasks.push(runSshCommand(ip, command, maxRetries))
   }
 
@@ -198,7 +198,7 @@ export async function removePeers(ip, peers) {
 export async function addPeers(ip, peers) {
   const tasks = []
   for (let i = 0; i < peers.length; i++) {
-    const command = `~/go/bin/bor attach ~/.bor/data/bor.ipc --exec "admin.addPeer('${peers[i]}')"`
+    const command = `~/go/bin/bor attach /var/lib/bor/data/bor.ipc --exec "admin.addPeer('${peers[i]}')"`
     tasks.push(runSshCommand(ip, command, maxRetries))
   }
 
@@ -216,7 +216,7 @@ export async function addPeers(ip, peers) {
 
 export async function getPeerLength(ip) {
   const command =
-    '/home/ubuntu/go/bin/bor attach ~/.bor/data/bor.ipc --exec "admin.peers.length"'
+    '/home/ubuntu/go/bin/bor attach /var/lib/bor/data/bor.ipc --exec "admin.peers.length"'
   try {
     const length = await runSshCommandWithReturn(ip, command, maxRetries)
     return parseInt(length)
@@ -335,7 +335,7 @@ export async function validateClusters(ips, expectedPeers) {
 export async function getEnode(user, host) {
   const ip = `${user}@${host}`
   const command =
-    '~/go/bin/bor attach ~/.bor/data/bor.ipc --exec admin.nodeInfo.enode'
+    '~/go/bin/bor attach /var/lib/bor/data/bor.ipc --exec admin.nodeInfo.enode'
   try {
     const fullEnode = await runSshCommandWithReturn(ip, command, maxRetries)
     let enode = String(fullEnode).split('@')[0].slice(1) // remove the local ip from the enode

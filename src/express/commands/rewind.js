@@ -35,7 +35,7 @@ export async function rewind(num) {
   const ip = `${borUsers[0]}@${borHosts[0]}`
 
   const getBlockNumberCommand =
-    '~/go/bin/bor attach ~/.bor/data/bor.ipc --exec "eth.blockNumber"'
+    '~/go/bin/bor attach /var/lib/bor/data/bor.ipc --exec "eth.blockNumber"'
 
   const intitalBlockNumber = await runSshCommandWithReturn(
     ip,
@@ -46,7 +46,7 @@ export async function rewind(num) {
     `📍 Rewinding chain by ${num} blocks, \n📍 current block number: ${intitalBlockNumber}`
   )
 
-  const rewindCommand = `~/go/bin/bor attach ~/.bor/data/bor.ipc --exec "debug.setHead(web3.toHex(${intitalBlockNumber} - ${num}))"`
+  const rewindCommand = `~/go/bin/bor attach /var/lib/bor/data/bor.ipc --exec "debug.setHead(web3.toHex(${intitalBlockNumber} - ${num}))"`
   await runSshCommand(ip, rewindCommand, maxRetries)
 
   const restartCommand = 'sudo service bor restart'
