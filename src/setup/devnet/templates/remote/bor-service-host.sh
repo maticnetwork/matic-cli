@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 NODE_DIR=$HOME/node
-BOR_HOME=$HOME/.bor
+BOR_HOME=/var/lib/bor
 BIN_DIR=$(go env GOPATH)/bin
 USER=$(whoami)
 source $HOME/.nvm/nvm.sh

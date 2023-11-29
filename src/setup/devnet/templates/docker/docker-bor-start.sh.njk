@@ -2,8 +2,8 @@
 
 set -x
 
-NODE_DIR=/root/.bor
-DATA_DIR=/root/.bor/data
+NODE_DIR=/var/lib/bor
+DATA_DIR=/var/lib/bor/data
 
 ADDRESSES=({% for s in obj.signerDumpData %}
   "{{ s.address }}"{% endfor %}
@@ -12,8 +12,8 @@ ADDRESSES=({% for s in obj.signerDumpData %}
 INDEX=$1;
 ADDRESS=${ADDRESSES[$INDEX]};
 
-NODE_DIR=/root/.bor
-DATA_DIR=/root/.bor/data
+NODE_DIR=/var/lib/bor
+DATA_DIR=/var/lib/bor/data
 
 docker compose run --service-ports -d --name bor$INDEX --entrypoint bash bor$INDEX -c "
 touch /root/logs/bor.log
