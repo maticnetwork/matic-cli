@@ -7,9 +7,9 @@ do
   NODE_DIR=$HOME/node
   DATA_DIR=/var/lib/bor/data
   docker compose run --rm --entrypoint bash bor$i -c "
-mkdir -p $DATA_DIR/bor;
-cp $NODE_DIR/bor/nodekey $DATA_DIR/bor/;
-cp $NODE_DIR/bor/static-nodes.json $DATA_DIR/bor/;
+sudo mkdir -p $DATA_DIR/bor;
+sudo cp $NODE_DIR/bor/nodekey $DATA_DIR/bor/;
+sudo cp $NODE_DIR/bor/static-nodes.json $DATA_DIR/bor/;
 "
 done
 
