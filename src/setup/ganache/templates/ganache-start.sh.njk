@@ -8,9 +8,9 @@ ganache \
   --chain.hardfork istanbul \
   --miner.blockTime 1 \
   --database.dbPath $DATA_DIR \
-  {% for acc in obj.config.accounts %}--wallet.accounts {{ acc.privateKey }},1000000000000000000000 {% endfor %}\
+  {% for acc in obj.config.accounts %}--wallet.accounts {{ acc.privateKey }},1000000000000000000000 {% endfor %} \
   --miner.blockGasLimit 8000000 \
   --miner.defaultGasPrice 0 \
-  --chain.allowUnlimitedContractSize=true \
+  --chain.allowUnlimitedContractSize \
   --server.port 9545 \
   --server.host 0.0.0.0

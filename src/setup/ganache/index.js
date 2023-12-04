@@ -92,7 +92,7 @@ export class Ganache {
                 blockGasLimit: '0xfffffffff'
               },
               chain: {
-                allowUnlimitedContractSize: 'true'
+                allowUnlimitedContractSize: true
               },
               database: {
                 dbPath: this.dbDir
