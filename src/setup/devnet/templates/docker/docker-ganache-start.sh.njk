@@ -11,6 +11,6 @@ docker compose run -d --service-ports --name ganache ganache \
   {% for acc in obj.config.accounts %}--wallet.accounts {{ acc.privateKey }},1000000000000000000000 {% endfor %} \
   --miner.blockGasLimit 0xfffffffff \
   --miner.defaultGasPrice 0x1 \
-  --chain.allowUnlimitedContractSize \
+  --chain.allowUnlimitedContractSize true \
   --server.port 9545 \
   --server.host 0.0.0.0
