@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+
+set -x
+
+ADDRESSES=({% for s in obj.signerDumpData %}
+  "{{ s.address }}"{% endfor %}
+)
+
+INDEX=$1;
+ADDRESS=${ADDRESSES[$INDEX]};
+
+docker compose run --service-ports -d --name bor$INDEX --entrypoint bash bor$INDEX -c "
+touch /root/logs/bor.log
+bor server \
+  --config /var/lib/bor/config.toml \
+  --bor.heimdall http://heimdall$INDEX:1317 \
+  --unlock $ADDRESS \
+  --miner.etherbase $ADDRESS > /root/logs/bor.log 2>&1 &
+tail -f /root/logs/bor.log
+"

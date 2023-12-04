@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+
+# create heimdall file
+mkdir -p /var/lib/bor
+
+# get address
+ADDRESS="`cat /var/lib/bor/address.txt`"
+
+# start bor
+bor server \
+  --config /var/lib/bor/config.toml \
+  --unlock $ADDRESS \
+  --miner.etherbase $ADDRESS \
