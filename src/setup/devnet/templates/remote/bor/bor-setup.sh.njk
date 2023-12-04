@@ -5,7 +5,7 @@ BOR_HOME=/var/lib/bor
 LOG_HOME=$HOME/logs
 
 # create heimdall file
-mkdir -p $BOR_HOME $LOG_HOME
+sudo mkdir -p $BOR_HOME $LOG_HOME
 
 # copy node directories to home directories
 cp -rf $NODE_DIR/bor/* $BOR_HOME/
@@ -15,6 +15,6 @@ BOR_DATA_DIR=$BOR_HOME/data
 
 # copy bor files
 mkdir -p $BOR_DATA_DIR/bor;
-cp $BOR_HOME/nodekey $BOR_DATA_DIR/bor/
-cp $BOR_HOME/static-nodes.json $BOR_DATA_DIR/
-cp $BOR_HOME/static-nodes.json $BOR_DATA_DIR/bor/
+cp $NODE_DIR/bor/nodekey $BOR_DATA_DIR/bor/
+cp $NODE_DIR/bor/static-nodes.json $BOR_DATA_DIR/
+cp $NODE_DIR/bor/static-nodes.json $BOR_DATA_DIR/bor/

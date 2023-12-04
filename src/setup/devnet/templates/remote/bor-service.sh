@@ -9,7 +9,7 @@ NODE=$(nvm which node)
 GO=$(go env GOROOT)/bin
 PATH=$NODE:$BIN_DIR:$GO:$PATH
 
-VALIDATOR_ADDRESS="`cat $BOR_HOME/address.txt`"
+VALIDATOR_ADDRESS="`cat $NODE_DIR/bor/address.txt`"
 
 # PSP - add this
 FLAG=config

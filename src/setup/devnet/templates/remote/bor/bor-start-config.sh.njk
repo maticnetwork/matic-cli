@@ -1,10 +1,12 @@
 #!/usr/bin/env sh
 
+NODE_DIR=$HOME/node
+
 # create heimdall file
-mkdir -p /var/lib/bor
+sudo mkdir -p /var/lib/bor
 
 # get address
-ADDRESS="`cat /var/lib/bor/address.txt`"
+ADDRESS="`cat $NODE_DIR/bor/address.txt`"
 
 # start bor
 bor server \
