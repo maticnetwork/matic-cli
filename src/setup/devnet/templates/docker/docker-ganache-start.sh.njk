@@ -4,10 +4,13 @@ set -x
 
 DATA_DIR={{ ganache.dbName }}
 
-docker compose run -d --service-ports --name ganache ganache --chain.hardfork istanbul \
+docker compose run -d --service-ports --name ganache ganache \
+  --chain.hardfork istanbul \
   --miner.blockTime 1 \
   --database.dbPath /root/data/$DATA_DIR \
   {% for acc in obj.config.accounts %}--wallet.accounts {{ acc.privateKey }},1000000000000000000000 {% endfor %}\
   --miner.blockGasLimit 0xfffffffff \
   --miner.defaultGasPrice 0x1 \
-  --server.port 9545 --server.host 0.0.0.0
+  --chain.allowUnlimitedContractSize=true \
+  --server.port 9545 \
+  --server.host 0.0.0.0

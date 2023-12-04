@@ -91,6 +91,9 @@ export class Ganache {
                 defaultGasPrice: '0x1',
                 blockGasLimit: '0xfffffffff'
               },
+              chain: {
+                allowUnlimitedContractSize: 'true'
+              },
               database: {
                 dbPath: this.dbDir
               },
