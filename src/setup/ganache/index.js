@@ -168,19 +168,19 @@ export class Ganache {
 }
 
 async function setupGanache(config) {
-  const ganache = new Ganache(config, {
+  const ganacheObj = new Ganache(config, {
     contractsBranch: config.contractsBranch
   })
 
   // get ganache tasks
-  const tasks = await ganache.getTasks()
+  const tasks = await ganacheObj.getTasks()
 
   await tasks.run()
   console.log('%s Ganache snapshot is ready', chalk.green.bold('DONE'))
 
   // print details
   await config.print()
-  await ganache.print()
+  await ganacheObj.print()
 }
 
 export default async function (command) {
