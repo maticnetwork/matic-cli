@@ -5,13 +5,14 @@ import chalk from 'chalk'
 import path from 'path'
 import execa from 'execa'
 import fs from 'fs-extra'
-import ganache from 'ganache'
 
 import { loadConfig } from '../config'
 import { processTemplateFiles } from '../../lib/utils'
 import { getDefaultBranch } from '../helper'
 import { Contracts } from '../contracts'
 import { getRemoteStdio } from '../../express/common/remote-worker'
+
+const ganache = require('ganache')
 
 export class Ganache {
   constructor(config, options = {}) {
