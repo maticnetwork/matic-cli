@@ -8,13 +8,13 @@ LOG_HOME=$HOME/logs
 sudo mkdir -p $BOR_HOME $LOG_HOME
 
 # copy node directories to home directories
-cp -rf $NODE_DIR/bor/* $BOR_HOME/
+sudo cp -rf $NODE_DIR/bor/* $BOR_HOME/
 
 # setup bor
 BOR_DATA_DIR=$BOR_HOME/data
 
 # copy bor files
-mkdir -p $BOR_DATA_DIR/bor;
-cp $NODE_DIR/bor/nodekey $BOR_DATA_DIR/bor/
-cp $NODE_DIR/bor/static-nodes.json $BOR_DATA_DIR/
-cp $NODE_DIR/bor/static-nodes.json $BOR_DATA_DIR/bor/
+sudo mkdir -p $BOR_DATA_DIR/bor;
+sudo cp $NODE_DIR/bor/nodekey $BOR_DATA_DIR/bor/
+sudo cp $NODE_DIR/bor/static-nodes.json $BOR_DATA_DIR/
+sudo cp $NODE_DIR/bor/static-nodes.json $BOR_DATA_DIR/bor/
