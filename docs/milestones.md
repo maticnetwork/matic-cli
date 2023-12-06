@@ -35,11 +35,11 @@ The `ADDRESS` here refers to the validator address obtained in step 1.
 
 ### Tests and commands
 
-- `../../bin/express-cli --milestone-base`
+- `../../bin/express-cli.js --milestone-base`
 
   - This command runs the base milestone tests. The base tests creates 2 clusters where one of them has lower difficulty but high majority to propose milestones and another one has high difficulty to dominate the traditional fork choice rule but lower voting power to propose a milestone. Ideally, with the milestone feature, the fork which has the milestone (here the lower difficulty one) should be considered canonical and 'finalized'.
 
-- `../../bin/express-cli --milestone-partition`
+- `../../bin/express-cli.js --milestone-partition`
 
   - This command runs the 50:50 partition based milestone tests. The base tests creates 2 clusters where none of them has majority to propose new milestones. The network should behave ideally in such cases and when those clusters connect, expected behaviour should be observed and new milestones should start getting proposed.
 

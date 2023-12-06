@@ -136,7 +136,7 @@ Instructions to run `express-cli`.
 For the list of commands, please run `express-cli --help`
 First off, you need to `--init` terraform on your local machine, by executing the following command.
 
-- `./bin/express-cli --init <aws|gcp>`
+- `./bin/express-cli.js --init <aws|gcp>`
 
   - Initializes a new devnet folder with terraform and creates some git-ignored files locally. This step is mandatory
     before running any other command. The new devnet folder created will be `devnet-<id>` where `id` is a monotonically
@@ -145,150 +145,150 @@ First off, you need to `--init` terraform on your local machine, by executing th
     Then, a remote devnet can be created with the `--start` command, as follows.
   - You should specify the cloud provider. Currently the supported values are `aws` and `gcp`.
 
-- `../../bin/express-cli --start`
+- `../../bin/express-cli.js --start`
 
   - Creates the desired remote setup, based on the preferences defined in the `.env.devnet<id>` file
   - `--start` command can be used also to target an existing AWS setup. If changes to `.env.devnet<id>` file are detected, the
     previous devnet will be destroyed and a new one created, reusing the same AWS VMs
     To destroy the remote devnet, you can execute the `--destroy` command.
 
-- `../../bin/express-cli --destroy`
+- `../../bin/express-cli.js --destroy`
 
   - Destroys the remote setup and delete the dedicated VMs
 
 The `express-cli` also comes with additional utility commands, listed below. Some of them are only available for non-dockerized devnets.
 
-- `../../bin/express-cli --update-all [index]`
+- `../../bin/express-cli.js --update-all [index]`
 
   - Fetches `heimdall`,`bor` and `erigon` branches defined as `HEIMDALL_BRANCH`, `BOR_BRANCH` and `ERIGON_BRANCH` in `.env. devnet<id>` file, pulls relative changes and restarts those services on the remote machines. If an integer `index` is used, the job will be performed only on the VM corresponding to that index. For example if the devnet consists of 2 bor and erigon nodes, then the indices for bor machines would be 0 and 1 and for erigon it'll be 2 and 3.
 
-- `../../bin/express-cli --update-bor [index]`
+- `../../bin/express-cli.js --update-bor [index]`
 
   - Fetches `bor` branch defined as `BOR_BRANCH` in `.env.devnet<id>` file, pulls relative changes and restarts it on
     the remote machines. If an integer `index` is used, the job will be performed only on the VM corresponding to that index.
 
-- `../../bin/express-cli --update-erigon [index]`
+- `../../bin/express-cli.js --update-erigon [index]`
 
   - Fetches `erigon` branch defined as `ERIGON_BRANCH` in `.env.devnet<id>` file, pulls relative changes and restarts it on
     the remote machines. If an integer `index` is used, the job will be performed only on the VM corresponding to that index. For example if the devnet consists of 2 bor and erigon nodes and you wanted to target the first erigon node, `index` will be 2.
 
-- `../../bin/express-cli --update-heimdall [index]`
+- `../../bin/express-cli.js --update-heimdall [index]`
 
   - Fetches `heimdall` branch defined as `HEIMDALL_BRANCH` in `.env.devnet<id>` file, pulls relative changes and restarts it on
     the remote machines. If an integer `index` is used, the job will be performed only on the VM corresponding to that
     index. For example if the devnet consists of 2 bor and erigon nodes, then the indices for bor machines would be 0 and 1 and for erigon it'll be 2 and 3.
 
-- `../../bin/express-cli --restart-all [index]`
+- `../../bin/express-cli.js --restart-all [index]`
 
   - Restarts `bor`, `erigon` and `heimdall` on all the remote machines. If an integer `index` is used, the job will be performed
     only on the VM corresponding to that index. For example if the devnet consists of 2 bor and erigon nodes, then the indices for bor machines would be 0 and 1 and for erigon it'll be 2 and 3.
 
-- `../../bin/express-cli --restart-bor [index]`
+- `../../bin/express-cli.js --restart-bor [index]`
 
   - Restarts `bor` on all the remote machines. If an integer `index` is used, the job will be performed only on the VM
     corresponding to that index.
 
-- `../../bin/express-cli --restart-erigon [index]`
+- `../../bin/express-cli.js --restart-erigon [index]`
 
   - Restarts `erigon` on all the remote machines. If an integer `index` is used, the job will be performed only on the VM
     corresponding to that index. For example if the devnet consists of 2 bor and erigon nodes and you wanted to target the first erigon node, `index` will be 2.
 
-- `../../bin/express-cli --restart-heimdall [index]`
+- `../../bin/express-cli.js --restart-heimdall [index]`
 
   - Restarts `heimdall` on all the remote machines. If an integer `index` is used, the job will be performed only on
     the VM corresponding to that index. For example if the devnet consists of 2 bor and erigon nodes, then the indices for bor machines would be 0 and 1 and for erigon it'll be 2 and 3.
 
-- `../../bin/express-cli --cleanup`
+- `../../bin/express-cli.js --cleanup`
 
   - Cleans up `ganache`, `bor`, `heimdall` and `bridge`, redeploys all the contracts and restarts all the services
     The `express-cli` also provides additional testing commands, listed here.
 
-- `../../bin/express-cli --send-state-sync`
+- `../../bin/express-cli.js --send-state-sync`
 
   - Create a `state-sync` transaction on the remote network
 
-- `../../bin/express-cli --send-staked-event [validatorID]`
+- `../../bin/express-cli.js --send-staked-event [validatorID]`
 
   - Create a `Staked` transaction on the remote network and adds a new validator.
 
-- `../../bin/express-cli --send-stakeupdate-event [validatorID]`
+- `../../bin/express-cli.js --send-stakeupdate-event [validatorID]`
 
   - Create a `StakeUpdate` transaction on the remote network and increase stake of 1st validator by 100 MATIC.
 
-- `../../bin/express-cli --send-signerchange-event [validatorID]`
+- `../../bin/express-cli.js --send-signerchange-event [validatorID]`
 
   - Create a `SignerChange` transaction on the remote network and changes the signer of the 1st validator.
 
-- `../../bin/express-cli --send-topupfee-event [validatorID]`
+- `../../bin/express-cli.js --send-topupfee-event [validatorID]`
 
   - Create a `TopUpFee` transaction on the remote network and adds balance/heimdallFee for the first validator on Heimdall.
 
-- `../../bin/express-cli --send-unstakeinit-event [validatorID]`
+- `../../bin/express-cli.js --send-unstakeinit-event [validatorID]`
 
   - Create a `UnstakeInit` transaction on the remote network and removes the validator from validator-set. `validatorID` can be used to specify the validator to be removed. If not specified, the first validator will be removed.
 
-- ` ../../bin/express-cli --monitor [exit]`
+- ` ../../bin/express-cli.js --monitor [exit]`
 
   - Monitors the reception of state-syncs and checkpoints to make sure the whole network is in a healthy state.
     If `--send-state-sync` hasn't been used before, only checkpoints will be detected. Monitor the setup.
     If `exit` string is passed the process terminates when at least one `stateSync` and one `checkpoint` are detected.
 
-- ` ../../bin/express-cli --instances-stop`
+- ` ../../bin/express-cli.js --instances-stop`
 
   - Stop the cloud VM instances associated with the deployed devnet.
 
-- ` ../../bin/express-cli --instances-start`
+- ` ../../bin/express-cli.js --instances-start`
 
   - Start the (previously stopped) VM instances associated with the deployed devnet. Also, it starts all services, such as ganache, heimdall, and bor
 
-- `../../bin/express-cli --stress [fund]`
+- `../../bin/express-cli.js --stress [fund]`
 
   - Runs the stress tests on remote nodes. The string `fund` is needed when stress tests are ran for the first time,
     to fund the accounts
 
-- `../../bin/express-cli --setup-datadog`
+- `../../bin/express-cli.js --setup-datadog`
 
   - Sets up datadog on the nodes and gets them ready to send metrics to Datadog Dashboard. `DD_API_KEY` env var is required for this.
 
-- `../../bin/express-cli --setup-ethstats`
+- `../../bin/express-cli.js --setup-ethstats`
 
   - Sets up ethstats on the nodes and gets them ready to send metrics to Ethstats Backend which can be queried from Hasura Console and displayed on Reorgs Frontend.
 
-- `../../bin/express-cli --chaos [intensity]`
+- `../../bin/express-cli.js --chaos [intensity]`
 
   - Adds dedicated chaos(de-peering) to the network. The `intensity` parameter is optional and can be set from `1` to `10`. If not set, `5` is used.
 
-- `../../bin/express-cli --rewind [numberOfBlocks]`
+- `../../bin/express-cli.js --rewind [numberOfBlocks]`
 
   - Rewinds the chain by a defined number of blocks (not greater than `128`). Default `numberOfBlocks` value is `100`.
 
-- `../../bin/express-cli --eip-1559-test [index]`
+- `../../bin/express-cli.js --eip-1559-test [index]`
 
   - Executes a test to send EIP 1559 tx. In case of a non-dockerized devnet, if an integer [index] is specified, it will use
     that VM to send the tx. Otherwise, it will target the first VM.
 
-- `../../bin/express-cli --ssh-key-add`
+- `../../bin/express-cli.js --ssh-key-add`
 
   - Generates an additional ssh key-pair remotely and stores it locally in the devnet folder. The public key is added to the ssh authorized keys of the devnet's machines. The key can be shared - on a secure channel! - with other devs to grant them access to the remote devnet.
 
-- `../../bin/express-cli --ssh-key-des [keyName]`
+- `../../bin/express-cli.js --ssh-key-des [keyName]`
 
   - Destroys an ssh key-pair given its `keyName`. The key gets deleted remotely from `aws` or `gcp`, cancelled from the authorized ssh keys of the devnet's machines and removed from local devnet folder.
 
-- `../../bin/express-cli --reorg-start [split]`
+- `../../bin/express-cli.js --reorg-start [split]`
 
   - Reorg the chain by creating two clusters in the network, where [split] param represents the number of nodes that one of the clusters will have (with other being [total number of nodes - split])
 
-- `../../bin/express-cli --reorg-stop`
+- `../../bin/express-cli.js --reorg-stop`
 
   - Stops the reorg previously created by reconnecting all the nodes
 
-- `../../bin/express-cli --shadow-fork [blockNumber]`
+- `../../bin/express-cli.js --shadow-fork [blockNumber]`
 
   - Run (mumbai/mainnet) nodes in shadow mode. Please note that there might be an offset of ~3-4 blocks from [block] number
     specified when restarting the (shadow) node. Currently only works with remote setup (no docker support).
 
-- `../../bin/express-cli --rpc-test`
+- `../../bin/express-cli.js --rpc-test`
 
   - Executes RPC methods against the provided test data and verifies the response data's compatibility and correctness.
     Since the `tests/rpc-tests/RPC-testdata` is a [submodule](https://github.com/maticnetwork/RPC-testdata) , do the following
@@ -299,7 +299,7 @@ The `express-cli` also comes with additional utility commands, listed below. Som
     git submodule update
     ```
 
-- `../../bin/express-cli --relay`
+- `../../bin/express-cli.js --relay`
   - Relay transactions from testnet or mainnet to shadow node running in the devnet.
 
 ## `Milestone tests`
@@ -394,7 +394,7 @@ Adjust the [docker configs](configs/devnet/docker-setup-config.yaml) and run
 ```bash
 mkdir devnet \
   && cd devnet \
-  && ../bin/matic-cli setup devnet --config ../configs/devnet/docker-setup-config.yaml | tee setup.log
+  && ../bin/matic-cli.js setup devnet --config ../configs/devnet/docker-setup-config.yaml | tee setup.log
 ...
 DONE Devnet is ready
 ```
@@ -445,13 +445,13 @@ Note: in case of docker setup, we have provided [some additional scripts](src/se
 Adjust the [remote configs](configs/devnet/remote-setup-config.yaml) and run
 
 ```bash
-../bin/matic-cli setup devnet --config ../configs/devnet/remote-setup-config.yaml
+../bin/matic-cli.js setup devnet --config ../configs/devnet/remote-setup-config.yaml
 ```
 
 Alternatively, this step can be executed interactively with
 
 ```bash
-../bin/matic-cli setup devnet --interactive
+../bin/matic-cli.js setup devnet --interactive
 ```
 
 Once the setup is done, follow these steps for remote deployment

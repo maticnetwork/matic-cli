@@ -44,6 +44,6 @@ export async function sendStateSyncTx() {
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
 
   console.log(
-    '📍StateSync Tx Sent, check with "../../bin/express-cli --monitor"'
+    '📍StateSync Tx Sent, check with "../../bin/express-cli.js --monitor"'
   )
 }
