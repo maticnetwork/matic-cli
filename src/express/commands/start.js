@@ -14,6 +14,7 @@ import {
   runScpCommand,
   runSshCommand
 } from '../common/remote-worker.js'
+import { fundGanacheAccounts } from '../common/ganache-utils.js'
 import { timer } from '../common/time-utils.js'
 import yaml from 'js-yaml'
 import fs from 'fs'
@@ -481,6 +482,13 @@ export async function start() {
   process.env.INSTANCES_IDS = ids
   process.env.CLOUD = cloud
 
+  const doc = await yaml.load(
+    fs.readFileSync(
+      `../../deployments/devnet-${devnetId}/${devnetType}-setup-config.yaml`,
+      'utf8'
+    )
+  )
+
   await validateConfigs(cloud)
 
   shell.exec(
@@ -513,4 +521,6 @@ export async function start() {
   } else {
     await runRemoteSetupWithMaticCLI(dnsIps, devnetId)
   }
+
+  await fundGanacheAccounts(doc)
 }
