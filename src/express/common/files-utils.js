@@ -1,7 +1,7 @@
 import fs from 'fs'
 
 export function findMaxDevnetId() {
-  const deployments = './deployments'
+  const deployments = './deployments.js'
   let max = 0
 
   fs.readdirSync(deployments).forEach((file) => {

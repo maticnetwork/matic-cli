@@ -1,10 +1,11 @@
 import Web3 from 'web3'
-import { loadDevnetConfig, splitToArray } from '../common/config-utils'
-import { maxRetries, runSshCommand } from '../common/remote-worker'
-import { stopServices } from './cleanup'
-import { isValidPositiveNum } from '../common/num-utils'
-const fs = require('fs')
+import { loadDevnetConfig, splitToArray } from '../common/config-utils.js'
+import { maxRetries, runSshCommand } from '../common/remote-worker.js'
+import { stopServices } from './cleanup.js'
+import { isValidPositiveNum } from '../common/num-utils.js'
 
+import fs from 'fs'
+import dotenv from 'dotenv'
 async function initWeb3(provider) {
   return new Web3(provider)
 }
@@ -21,7 +22,7 @@ export async function shadow(targetBlock) {
     console.log('❌ Invalid [blockNumber] parameter! Exiting ...')
     process.exit(1)
   }
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
   const borUsers = splitToArray(doc.devnetBorUsers.toString())
   const providerToNodeIp = new Map()
   let ip

@@ -1,11 +1,14 @@
 // noinspection JSCheckFunctionSignatures,JSUnresolvedFunction,JSUnresolvedVariable
 
-import { loadDevnetConfig } from '../common/config-utils'
-import { timer } from '../common/time-utils'
+import { loadDevnetConfig } from '../common/config-utils.js'
+import { timer } from '../common/time-utils.js'
 
-const fetch = require('node-fetch')
-const Web3 = require('web3')
-const { runScpCommand, maxRetries } = require('../common/remote-worker')
+import fetch from 'node-fetch'
+import Web3 from 'web3'
+import dotenv from 'dotenv'
+import fs from 'fs-extra'
+
+import { runScpCommand, maxRetries } from '../common/remote-worker.js'
 
 const lastStateIdABI = [
   {
@@ -118,7 +121,7 @@ async function getLatestCheckpointFromRootChain(ip, rootChainProxyAddress) {
 }
 
 export async function monitor(exitWhenDone) {
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
   const devnetType =
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
 
@@ -141,7 +144,9 @@ export async function monitor(exitWhenDone) {
   const dest = './contractAddresses.json'
   await runScpCommand(src, dest, maxRetries)
 
-  const contractAddresses = require(`${process.cwd()}/contractAddresses.json`)
+  const contractAddresses = JSON.parse(
+    fs.readFileSync(`${process.cwd()}/contractAddresses.json`, 'utf8')
+  )
 
   const rootChainProxyAddress = contractAddresses.root.RootChainProxy
 

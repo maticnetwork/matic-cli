@@ -4,8 +4,8 @@ import path from 'path'
 import execa from 'execa'
 import fs from 'fs-extra'
 
-import { cloneRepository } from '../../lib/utils'
-import { getRemoteStdio } from '../../express/common/remote-worker'
+import { cloneRepository } from '../../lib/utils.js'
+import { getRemoteStdio } from '../../express/common/remote-worker.js'
 
 export class Contracts {
   constructor(config, options = {}) {
@@ -34,7 +34,8 @@ export class Contracts {
   }
 
   get contractAddresses() {
-    return require(this.contractAddressesPath)
+    const data = fs.readFileSync(this.contractAddressesPath, 'utf8')
+    return JSON.parse(data)
   }
 
   print() {}

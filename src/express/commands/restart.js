@@ -2,17 +2,18 @@ import {
   pullAndRestartBor,
   pullAndRestartErigon,
   pullAndRestartHeimdall
-} from './update'
+} from './update.js'
 import {
   checkAndReturnVMIndex,
   loadDevnetConfig,
-  returnTotalBorNodes
-} from '../common/config-utils'
+  returnTotalBorNodes,
+  splitToArray
+} from '../common/config-utils.js'
 
-const { splitToArray } = require('../common/config-utils')
+import dotenv from 'dotenv'
 
 export async function restartAll(n) {
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
   const doc = await loadDevnetConfig('remote')
   const vmIndex = await checkAndReturnVMIndex(n, doc)
   const totalHosts = []
@@ -74,7 +75,7 @@ export async function restartAll(n) {
 }
 
 export async function restartBor(n) {
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
   const doc = await loadDevnetConfig('remote')
   const vmIndex = await checkAndReturnVMIndex(n, doc)
   const borUsers = splitToArray(doc.devnetBorUsers.toString())
@@ -105,7 +106,7 @@ export async function restartBor(n) {
 }
 
 export async function restartErigon(n) {
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
   const doc = await loadDevnetConfig('remote')
   const vmIndex = await checkAndReturnVMIndex(n, doc)
   const erigonUsers = splitToArray(doc.devnetErigonUsers.toString())
@@ -143,7 +144,7 @@ export async function restartErigon(n) {
 }
 
 export async function restartHeimdall(n) {
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
   const doc = await loadDevnetConfig('remote')
   const vmIndex = await checkAndReturnVMIndex(n, doc)
   const totalHosts = []

@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - 'master'
+      - 'fix/deploy-stake-manager-testable'
   pull_request:
     branches:
       - '**'
@@ -25,7 +26,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: '16.20.2'
+          node-version: '18.12.0'
 
       - name: Install npm dependencies
         working-directory: matic-cli
@@ -98,34 +99,34 @@ jobs:
 
       - name: Init devnet
         working-directory: matic-cli
-        run: ./bin/express-cli --init aws
+        run: ./bin/express-cli.js --init aws
 
       - name: Start devnet
         working-directory: matic-cli/deployments/devnet-1
         run: |
           ls -la
-          ../../bin/express-cli --start
+          ../../bin/express-cli.js --start
 
       - name: Run stateSynced and checkpoint tests
         working-directory: matic-cli/deployments/devnet-1
         run: |
-          ../../bin/express-cli --send-state-sync
-          timeout 20m ../../bin/express-cli --monitor exit
+          ../../bin/express-cli.js --send-state-sync
+          timeout 20m ../../bin/express-cli.js --monitor exit
 
       - name: Run smart contracts events tests
         working-directory: matic-cli/deployments/devnet-1
         run: |
-          timeout 5m ../../bin/express-cli --send-staked-event 1
-          timeout 5m ../../bin/express-cli --send-stakeupdate-event 1
-          timeout 5m ../../bin/express-cli --send-topupfee-event 1
-          timeout 10m ../../bin/express-cli --send-unstakeinit-event 1
+          timeout 5m ../../bin/express-cli.js --send-staked-event 1
+          timeout 5m ../../bin/express-cli.js --send-stakeupdate-event 1
+          timeout 5m ../../bin/express-cli.js --send-topupfee-event 1
+          timeout 10m ../../bin/express-cli.js --send-unstakeinit-event 1
 
       - name: Destroy devnet
         if: always()
         working-directory: matic-cli/deployments/devnet-1
         run: |
           echo "Running --destroy"
-          ../../bin/express-cli --destroy
+          ../../bin/express-cli.js --destroy
 
       - name: Delete aws key pair
         if: always()

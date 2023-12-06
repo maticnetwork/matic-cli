@@ -1,15 +1,18 @@
 // noinspection JSUnresolvedVariable
 
-import { loadDevnetConfig } from '../common/config-utils'
+import { loadDevnetConfig } from '../common/config-utils.js'
 
-const {
+import {
   runScpCommand,
   runSshCommand,
   maxRetries
-} = require('../common/remote-worker')
+} from '../common/remote-worker.js'
+
+import dotenv from 'dotenv'
+import fs from 'fs-extra'
 
 export async function sendStateSyncTx() {
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
   const devnetType =
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
 
@@ -30,7 +33,9 @@ export async function sendStateSyncTx() {
   const dest = './contractAddresses.json'
   await runScpCommand(src, dest, maxRetries)
 
-  const contractAddresses = require(`${process.cwd()}/contractAddresses.json`)
+  const contractAddresses = JSON.parse(
+    fs.readFileSync(`${process.cwd()}/contractAddresses.json`, 'utf8')
+  )
 
   const MaticToken = contractAddresses.root.tokens.MaticToken
 

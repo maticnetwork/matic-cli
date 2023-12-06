@@ -2,7 +2,7 @@ import {
   getIpsAndEnode,
   getUsersAndHosts,
   joinAllPeers
-} from '../common/milestone-utils'
+} from '../common/milestone-utils.js'
 
 export async function stopReorg() {
   // Get users and hosts

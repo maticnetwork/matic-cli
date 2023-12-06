@@ -8,9 +8,9 @@ import path from 'path'
 import fs from 'fs'
 import { isValidAddress } from 'ethereumjs-util'
 
-import { loadConfig } from '../config'
-import { cloneRepository, errorMissingConfigs } from '../../lib/utils'
-import { getRemoteStdio } from '../../express/common/remote-worker'
+import { loadConfig } from '../config.js'
+import { cloneRepository, errorMissingConfigs } from '../../lib/utils.js'
+import { getRemoteStdio } from '../../express/common/remote-worker.js'
 
 // balance
 const DEFAULT_BALANCE = 1000000000 // 1 Billion - Without 10^18

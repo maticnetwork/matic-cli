@@ -8,17 +8,18 @@ import {
   splitAndGetHostIp,
   splitToArray,
   setBorAndErigonHosts
-} from '../common/config-utils'
+} from '../common/config-utils.js'
 import {
   maxRetries,
   runScpCommand,
   runSshCommand
-} from '../common/remote-worker'
-import { timer } from '../common/time-utils'
+} from '../common/remote-worker.js'
+import { timer } from '../common/time-utils.js'
 import yaml from 'js-yaml'
 import fs from 'fs'
 
-const shell = require('shelljs')
+import shell from 'shelljs'
+import dotenv from 'dotenv'
 
 async function terraformApply(devnetId) {
   console.log('📍Executing terraform apply...')
@@ -378,7 +379,7 @@ async function runDockerSetupWithMaticCLI(ips, devnetId) {
 
   console.log('📍Executing docker setup with matic-cli...')
   command =
-    'cd ~/matic-cli/devnet && ../bin/matic-cli setup devnet -c ../configs/devnet/docker-setup-config.yaml'
+    'cd ~/matic-cli/devnet && ../bin/matic-cli.js setup devnet -c ../configs/devnet/docker-setup-config.yaml'
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Starting ganache...')
@@ -444,7 +445,7 @@ async function runRemoteSetupWithMaticCLI(ips, devnetId) {
 
   console.log('📍Executing remote setup with matic-cli...')
   command =
-    'cd ~/matic-cli/devnet && ../bin/matic-cli setup devnet -c ../configs/devnet/remote-setup-config.yaml'
+    'cd ~/matic-cli/devnet && ../bin/matic-cli.js setup devnet -c ../configs/devnet/remote-setup-config.yaml'
   await runSshCommand(ip, command, maxRetries)
 
   if (!process.env.NETWORK) {
@@ -462,7 +463,7 @@ async function runRemoteSetupWithMaticCLI(ips, devnetId) {
 
 export async function start() {
   const devnetId = getDevnetId()
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
 
   shell.exec(`terraform workspace select devnet-${devnetId}`)
 

@@ -1,48 +1,49 @@
-import { start } from './express/commands/start'
+import { start } from './express/commands/start.js'
 import {
   updateAll,
   updateBor,
   updateErigon,
   updateHeimdall
-} from './express/commands/update'
-import { terraformInit } from './express/commands/init'
-import { terraformDestroy } from './express/commands/destroy'
-import { startStressTest } from './express/commands/stress'
-import { sendStateSyncTx } from './express/commands/send-state-sync'
-import { sendStakedEvent } from './express/commands/send-staked-event'
-import { sendStakeUpdateEvent } from './express/commands/send-stake-update'
-import { sendSignerChangeEvent } from './express/commands/send-signer-change'
-import { sendUnstakeInitEvent } from './express/commands/send-unstake-init'
-import { sendTopUpFeeEvent } from './express/commands/send-topupfee'
-import { monitor } from './express/commands/monitor'
+} from './express/commands/update.js'
+import { terraformInit } from './express/commands/init.js'
+import { terraformDestroy } from './express/commands/destroy.js'
+import { startStressTest } from './express/commands/stress.js'
+import { sendStateSyncTx } from './express/commands/send-state-sync.js'
+import { sendStakedEvent } from './express/commands/send-staked-event.js'
+import { sendStakeUpdateEvent } from './express/commands/send-stake-update.js'
+import { sendSignerChangeEvent } from './express/commands/send-signer-change.js'
+import { sendUnstakeInitEvent } from './express/commands/send-unstake-init.js'
+import { sendTopUpFeeEvent } from './express/commands/send-topupfee.js'
+import { monitor } from './express/commands/monitor.js'
 import {
   restartAll,
   restartBor,
   restartErigon,
   restartHeimdall
-} from './express/commands/restart'
-import { cleanup } from './express/commands/cleanup'
-import { setupDatadog } from './express/commands/setup-datadog'
-import { setupEthstats } from './express/commands/setup-ethstats-backend'
-import { chaos } from './express/commands/chaos'
-import { checkDir } from './express/common/files-utils'
-import { timer } from './express/common/time-utils'
+} from './express/commands/restart.js'
+import { cleanup } from './express/commands/cleanup.js'
+import { setupDatadog } from './express/commands/setup-datadog.js'
+import { setupEthstats } from './express/commands/setup-ethstats-backend.js'
+import { chaos } from './express/commands/chaos.js'
+import { checkDir } from './express/common/files-utils.js'
+import { timer } from './express/common/time-utils.js'
 import { program } from 'commander'
-import pkg from '../package.json'
-import { testEip1559 } from '../tests/test-eip-1559'
-import { stopInstances } from './express/commands/cloud-instances-stop'
-import { startInstances } from './express/commands/cloud-instances-start'
-import { rewind } from './express/commands/rewind'
-import { startReorg } from './express/commands/reorg-start'
-import { stopReorg } from './express/commands/reorg-stop'
-import { milestoneBase } from './express/commands/milestone-base'
-import { milestonePartition } from './express/commands/milestone-partition'
-import { shadow } from './express/commands/shadow'
-import { relay } from './express/commands/relay'
-import { keypairAdd } from './express/commands/keypair-add'
-import { keypairDestroy } from './express/commands/keypair-destroy'
-import { rpcTest } from '../tests/rpc-tests/rpc-test'
-import constants from './express/common/constants'
+// eslint-disable-next-line
+import pkg from '../package.json' assert { type: 'json' }
+import { testEip1559 } from '../tests/test-eip-1559.js'
+import { stopInstances } from './express/commands/cloud-instances-stop.js'
+import { startInstances } from './express/commands/cloud-instances-start.js'
+import { rewind } from './express/commands/rewind.js'
+import { startReorg } from './express/commands/reorg-start.js'
+import { stopReorg } from './express/commands/reorg-stop.js'
+import { milestoneBase } from './express/commands/milestone-base.js'
+import { milestonePartition } from './express/commands/milestone-partition.js'
+import { shadow } from './express/commands/shadow.js'
+import { relay } from './express/commands/relay.js'
+import { keypairAdd } from './express/commands/keypair-add.js'
+import { keypairDestroy } from './express/commands/keypair-destroy.js'
+import { rpcTest } from '../tests/rpc-tests/rpc-test.js'
+import { constants } from './express/common/constants.js'
 
 function checkCloudProvider(provider, _) {
   const supportedClouds = [constants.cloud.AWS, constants.cloud.GCP]

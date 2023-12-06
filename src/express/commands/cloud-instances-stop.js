@@ -1,16 +1,17 @@
 // noinspection JSUnresolvedFunction
 
-import { loadDevnetConfig } from '../common/config-utils'
-import { timer } from '../common/time-utils'
-import { stopServices } from './cleanup'
-import { getGcpInstancesInfo } from '../common/gcp-utils'
-import constants from '../common/constants'
+import { loadDevnetConfig } from '../common/config-utils.js'
+import { timer } from '../common/time-utils.js'
+import { stopServices } from './cleanup.js'
+import { getGcpInstancesInfo } from '../common/gcp-utils.js'
+import { constants } from '../common/constants.js'
+import dotenv from 'dotenv'
 
-const shell = require('shelljs')
+import shell from 'shelljs'
 
 export async function stopInstances() {
   console.log('📍Stopping instances...')
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
   const devnetType =
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
 

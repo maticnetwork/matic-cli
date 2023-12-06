@@ -1,11 +1,12 @@
 import {
   checkAndReturnVMIndex,
   loadDevnetConfig,
-  returnTotalBorNodes
-} from '../common/config-utils'
+  returnTotalBorNodes,
+  splitToArray
+} from '../common/config-utils.js'
 
-const { splitToArray } = require('../common/config-utils')
-const { runSshCommand, maxRetries } = require('../common/remote-worker')
+import { runSshCommand, maxRetries } from '../common/remote-worker.js'
+import dotenv from 'dotenv'
 
 export async function pullAndRestartBor(ip, i, isPull) {
   console.log('📍Working on bor for machine ' + ip + '...')
@@ -153,7 +154,7 @@ export async function pullAndRestartHeimdall(doc, ip, i, isPull) {
 }
 
 export async function updateAll(n) {
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
   const doc = await loadDevnetConfig('remote')
   const vmIndex = await checkAndReturnVMIndex(n, doc)
   const totalHosts = []
@@ -216,7 +217,7 @@ export async function updateAll(n) {
 }
 
 export async function updateBor(n) {
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
   const doc = await loadDevnetConfig('remote')
   const vmIndex = await checkAndReturnVMIndex(n, doc)
   const borUsers = splitToArray(doc.devnetBorUsers.toString())
@@ -247,7 +248,7 @@ export async function updateBor(n) {
 }
 
 export async function updateErigon(n) {
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
   const doc = await loadDevnetConfig('remote')
   const vmIndex = await checkAndReturnVMIndex(n, doc)
   const erigonUsers = splitToArray(doc.devnetErigonUsers.toString())
@@ -285,7 +286,7 @@ export async function updateErigon(n) {
 }
 
 export async function updateHeimdall(n) {
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
   const doc = await loadDevnetConfig('remote')
   const vmIndex = await checkAndReturnVMIndex(n, doc)
   const totalHosts = []

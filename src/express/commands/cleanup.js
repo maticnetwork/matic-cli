@@ -2,12 +2,13 @@ import {
   loadDevnetConfig,
   returnTotalBorNodes,
   splitToArray
-} from '../common/config-utils'
-import { maxRetries, runSshCommand } from '../common/remote-worker'
-import { timer } from '../common/time-utils'
+} from '../common/config-utils.js'
+import { maxRetries, runSshCommand } from '../common/remote-worker.js'
+import { timer } from '../common/time-utils.js'
+import dotenv from 'dotenv'
 
 export async function cleanup() {
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
   const doc = await loadDevnetConfig('remote')
   await stopServices(doc)
   await cleanupServices(doc)

@@ -1,9 +1,10 @@
 // noinspection JSUnresolvedFunction
 
-import { findMaxDevnetId } from '../common/files-utils'
+import { findMaxDevnetId } from '../common/files-utils.js'
 import fs from 'fs'
 
-const shell = require('shelljs')
+import shell from 'shelljs'
+import dotenv from 'dotenv'
 
 export async function terraformInit(cloud) {
   const nextDevnetId = !fs.existsSync('./deployments')
@@ -25,7 +26,7 @@ export async function terraformInit(cloud) {
     `cp ./terraform/variables/${cloud}_vars.tf ./deployments/devnet-${nextDevnetId}/${cloud}_vars.tf`
   )
 
-  require('dotenv').config({
+  dotenv.config({
     path: `./deployments/devnet-${nextDevnetId}/.env`
   })
 

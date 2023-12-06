@@ -5,19 +5,21 @@ import {
   runScpCommand,
   runSshCommand,
   runSshCommandWithReturn
-} from '../../src/express/common/remote-worker'
+} from '../../src/express/common/remote-worker.js'
 import assert from 'assert'
-import { loadDevnetConfig } from '../../src/express/common/config-utils'
+import { loadDevnetConfig } from '../../src/express/common/config-utils.js'
 import HDWalletProvider from '@truffle/hdwallet-provider'
-import { timer } from '../../src/express/common/time-utils'
-import { fundAccount, sanitizeIterations } from '../test-utils'
-const axios = require('axios/dist/node/axios.cjs')
-const Web3 = require('web3')
-const ethUtil = require('ethereumjs-util')
-const Transaction = require('ethereumjs-tx')
-const _ = require('lodash')
+import { timer } from '../../src/express/common/time-utils.js'
+import { fundAccount, sanitizeIterations } from '../test-utils.js'
+import axios from 'axios'
+import Web3 from 'web3'
+import ethUtil from 'ethereumjs-util'
+import Transaction from 'ethereumjs-tx'
+import _ from 'lodash'
 
-require('dotenv').config({ path: `${process.cwd()}/.env` })
+import dotenv from 'dotenv'
+
+dotenv.config({ path: `${process.cwd()}/.env` })
 
 const txHashRegex = /^0x[0-9a-f]{64}$/
 const signedTxRegex = /^0x[0-9a-f]*$/

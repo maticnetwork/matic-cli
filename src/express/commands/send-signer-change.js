@@ -1,19 +1,24 @@
-import { loadDevnetConfig } from '../common/config-utils'
-import stakeManagerABI from '../../abi/StakeManagerABI.json'
+import { loadDevnetConfig } from '../common/config-utils.js'
+// eslint-disable-next-line
+import stakeManagerABI from '../../abi/StakeManagerABI.json' assert { type: 'json' }
 import Web3 from 'web3'
-import { getSignedTx } from '../common/tx-utils'
-import { timer } from '../common/time-utils'
-import Wallet, { hdkey } from 'ethereumjs-wallet'
-import { isValidatorIdCorrect } from '../common/validators-utils'
+import { getSignedTx } from '../common/tx-utils.js'
+import { timer } from '../common/time-utils.js'
+import Wallet from 'ethereumjs-wallet'
+const { hdkey } = Wallet
+import { isValidatorIdCorrect } from '../common/validators-utils.js'
 
-const {
+import {
   runScpCommand,
   runSshCommandWithReturn,
   maxRetries
-} = require('../common/remote-worker')
+} from '../common/remote-worker.js'
+
+import dotenv from 'dotenv'
+import fs from 'fs-extra'
 
 export async function sendSignerChangeEvent(validatorID) {
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
   const devnetType =
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
 
@@ -53,11 +58,15 @@ export async function sendSignerChangeEvent(validatorID) {
   dest = './contractAddresses.json'
   await runScpCommand(src, dest, maxRetries)
 
-  const contractAddresses = require(`${process.cwd()}/contractAddresses.json`)
+  const contractAddresses = JSON.parse(
+    fs.readFileSync(`${process.cwd()}/contractAddresses.json`, 'utf8')
+  )
 
   const StakeManagerProxyAddress = contractAddresses.root.StakeManagerProxy
 
-  const signerDump = require(`${process.cwd()}/signer-dump.json`)
+  const signerDump = JSON.parse(
+    fs.readFileSync(`${process.cwd()}/signer-dump.json`, 'utf8')
+  )
   const pkey = signerDump[validatorID - 1].priv_key
   const validatorAccount = signerDump[validatorID - 1].address
 
