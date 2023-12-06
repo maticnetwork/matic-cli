@@ -4,10 +4,10 @@ import Web3 from 'web3'
 
 const EthAmount = '10'
 
-// Since we might reset and restart ganache multiple times during the life
-// of a devnet, and  considered that ganache is no longer maintained, plus
+// Since we might reset and restart ganache multiple times during the setup,
+// and  considered that ganache is no longer maintained, plus
 // it is affected by this issue https://github.com/trufflesuite/ganache/issues/4404
-// we implemented this workaround waiting for a migration to other tools
+// we implemented this workaround waiting for a migration to hardhat
 // (see internal issue https://polygon.atlassian.net/browse/POS-1869)
 export async function fundGanacheAccounts(doc) {
   const machine0 = doc.devnetBorHosts[0]
