@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: '18.19.0'
+  NODE_VERSION: '16.20.2'
 
 jobs:
   lint:
