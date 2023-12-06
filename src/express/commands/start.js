@@ -193,7 +193,7 @@ async function installHostSpecificPackages(ip) {
                         export NVM_DIR="$HOME/.nvm"
                         [ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
                         [ -s "$NVM_DIR/bash_completion" ] && \\. "$NVM_DIR/bash_completion" &&
-                        nvm install 16.20.2`
+                        nvm install 18.19.0`
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Installing solc...')
@@ -209,9 +209,9 @@ async function installHostSpecificPackages(ip) {
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Creating symlink for npm and node...')
-  command = `sudo ln -sf ~/.nvm/versions/node/v16.20.2/bin/npm /usr/bin/npm &&
-                    sudo ln -sf ~/.nvm/versions/node/v16.20.2/bin/node /usr/bin/node &&
-                    sudo ln -sf ~/.nvm/versions/node/v16.20.2/bin/npx /usr/bin/npx`
+  command = `sudo ln -sf ~/.nvm/versions/node/v18.19.0/bin/npm /usr/bin/npm &&
+                    sudo ln -sf ~/.nvm/versions/node/v18.19.0/bin/node /usr/bin/node &&
+                    sudo ln -sf ~/.nvm/versions/node/v18.19.0/bin/npx /usr/bin/npx`
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Installing ganache...')
