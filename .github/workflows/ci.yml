@@ -14,18 +14,21 @@ concurrency:
   group: build-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  NODE_VERSION: '18.19.0'
+
 jobs:
   lint:
     name: Prettier and Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           path: matic-cli
       - name: Setup node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18.19.0'
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Install npm dependencies
         working-directory: matic-cli
@@ -49,7 +52,7 @@ jobs:
         os: [ubuntu-20.04] # list of os: https://github.com/actions/virtual-environments
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           path: matic-cli
 
@@ -88,9 +91,9 @@ jobs:
           chmod 700 matic-cli-ci-key.pem
 
       - name: Setup node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18.19.0'
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Install npm dependencies
         working-directory: matic-cli
