@@ -8,7 +8,7 @@ docker compose run -d --service-ports --name ganache ganache \
   --chain.hardfork istanbul \
   --miner.blockTime 1 \
   --database.dbPath /root/data/$DATA_DIR \
-  {% for acc in obj.config.accounts %}--wallet.accounts {{ acc.privateKey }},1000000000000000000000 {% endfor %} \
+  --wallet.accounts {% for acc in obj.config.accounts %} "{{ acc.privateKey }}, 1000000000000000000000" {% endfor %} \
   --miner.blockGasLimit 0xfffffffff \
   --miner.defaultGasPrice 0x1 \
   --chain.allowUnlimitedContractSize true \
