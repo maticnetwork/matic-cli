@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - 'master'
-      - 'fix/deploy-stake-manager-testable'
   pull_request:
     branches:
       - '**'

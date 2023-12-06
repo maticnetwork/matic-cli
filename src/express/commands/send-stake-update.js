@@ -1,8 +1,4 @@
 import { loadDevnetConfig } from '../common/config-utils.js'
-// eslint-disable-next-line
-import stakeManagerABI from '../../abi/StakeManagerABI.json' assert { type: 'json' }
-// eslint-disable-next-line
-import ERC20ABI from '../../abi/ERC20ABI.json' assert { type: 'json' }
 import Web3 from 'web3'
 import { timer } from '../common/time-utils.js'
 import { getSignedTx } from '../common/tx-utils.js'
@@ -16,6 +12,9 @@ import {
 
 import dotenv from 'dotenv'
 import fs from 'fs-extra'
+
+import stakeManagerABI from '../../abi/StakeManagerABI.json' assert { type: 'json' }
+import ERC20ABI from '../../abi/ERC20ABI.json' assert { type: 'json' }
 
 export async function sendStakeUpdateEvent(validatorID) {
   dotenv.config({ path: `${process.cwd()}/.env` })

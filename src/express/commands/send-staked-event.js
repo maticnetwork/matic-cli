@@ -1,11 +1,6 @@
 import { loadDevnetConfig } from '../common/config-utils.js'
-// eslint-disable-next-line
-import stakeManagerABI from '../../abi/StakeManagerABI.json' assert { type: 'json' }
-// eslint-disable-next-line
-import ERC20ABI from '../../abi/ERC20ABI.json' assert { type: 'json' }
 import Web3 from 'web3'
 import Wallet from 'ethereumjs-wallet'
-const { hdkey } = Wallet
 import { timer } from '../common/time-utils.js'
 import { getSignedTx } from '../common/tx-utils.js'
 import { isValidatorIdCorrect } from '../common/validators-utils.js'
@@ -18,6 +13,10 @@ import {
 
 import dotenv from 'dotenv'
 import fs from 'fs-extra'
+
+import stakeManagerABI from '../../abi/StakeManagerABI.json' assert { type: 'json' }
+import ERC20ABI from '../../abi/ERC20ABI.json' assert { type: 'json' }
+const { hdkey } = Wallet
 
 export async function sendStakedEvent(validatorID) {
   dotenv.config({ path: `${process.cwd()}/.env` })
@@ -104,7 +103,7 @@ export async function sendStakedEvent(validatorID) {
 
   const RandomSeed = 'random' + Math.random()
   const newAccPrivKey = hdkey.fromMasterSeed(RandomSeed)._hdkey._privateKey
-  const wallet = Wallet.fromPrivateKey(newAccPrivKey)
+  const wallet = Wallet.default.fromPrivateKey(newAccPrivKey)
   const newAccAddr = wallet.getAddressString()
   const newAccPubKey = wallet.getPublicKeyString()
 

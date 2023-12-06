@@ -1,6 +1,4 @@
 import { loadDevnetConfig } from '../common/config-utils.js'
-// eslint-disable-next-line
-import stakeManagerABI from '../../abi/StakeManagerABI.json' assert { type: 'json' }
 import Web3 from 'web3'
 import { getSignedTx } from '../common/tx-utils.js'
 import { timer } from '../common/time-utils.js'
@@ -10,6 +8,10 @@ import { isValidatorIdCorrect } from '../common/validators-utils.js'
 import { runScpCommand, maxRetries } from '../common/remote-worker.js'
 
 import dotenv from 'dotenv'
+import fs from 'fs-extra'
+
+import stakeManagerABI from '../../abi/StakeManagerABI.json' assert { type: 'json' }
+
 export async function sendUnstakeInitEvent(validatorID) {
   dotenv.config({ path: `${process.cwd()}/.env` })
   const devnetType =

@@ -28,8 +28,6 @@ import { chaos } from './express/commands/chaos.js'
 import { checkDir } from './express/common/files-utils.js'
 import { timer } from './express/common/time-utils.js'
 import { program } from 'commander'
-// eslint-disable-next-line
-import pkg from '../package.json' assert { type: 'json' }
 import { testEip1559 } from '../tests/test-eip-1559.js'
 import { stopInstances } from './express/commands/cloud-instances-stop.js'
 import { startInstances } from './express/commands/cloud-instances-start.js'
@@ -44,6 +42,8 @@ import { keypairAdd } from './express/commands/keypair-add.js'
 import { keypairDestroy } from './express/commands/keypair-destroy.js'
 import { rpcTest } from '../tests/rpc-tests/rpc-test.js'
 import { constants } from './express/common/constants.js'
+
+import pkg from '../package.json' assert { type: 'json' }
 
 function checkCloudProvider(provider, _) {
   const supportedClouds = [constants.cloud.AWS, constants.cloud.GCP]

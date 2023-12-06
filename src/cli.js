@@ -1,9 +1,7 @@
 import { program } from 'commander'
-
-// eslint-disable-next-line
-import pkg from '../package.json' assert { type: 'json' }
-
 import setupPrograms from './setup/index.js'
+
+import pkg from '../package.json' assert { type: 'json' }
 
 const setupCmd = program
   .version(pkg.version)
