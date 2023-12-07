@@ -1,13 +1,15 @@
 /* eslint-disable dot-notation */
-import { loadDevnetConfig, splitToArray } from '../common/config-utils'
-import { timer } from '../common/time-utils'
+import { loadDevnetConfig, splitToArray } from '../common/config-utils.js'
+import { timer } from '../common/time-utils.js'
+import dotenv from 'dotenv'
+import fs from 'fs-extra'
 
-const {
+import {
   runScpCommand,
   runSshCommand,
   maxRetries,
   runSshCommandWithoutExit
-} = require('../common/remote-worker')
+} from '../common/remote-worker.js'
 
 async function removeAllPeers(ip, staticNodes) {
   let command = 'mv ~/.bor/static-nodes.json ~/.bor/static-nodes.json_bkp'
@@ -48,7 +50,7 @@ export async function chaos(intensity) {
   }
   console.log('📍Command --chaos [intensity]', intensity)
 
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
   const devnetType =
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
 
@@ -67,14 +69,16 @@ export async function chaos(intensity) {
   }
 
   try {
-    require(`${process.cwd()}/static-nodes.json`)
+    JSON.parse(fs.readFileSync(`${process.cwd()}/static-nodes.json`, 'utf8'))
   } catch (error) {
     const src = `${borUsers[0]}@${borHosts[0]}:~/node/bor/static-nodes.json`
     const dest = './static-nodes.json'
     await runScpCommand(src, dest, maxRetries)
   }
 
-  const staticNodes = require(`${process.cwd()}/static-nodes.json`)
+  const staticNodes = JSON.parse(
+    fs.readFileSync(`${process.cwd()}/static-nodes.json`, 'utf8')
+  )
   console.log('📍Static nodes', staticNodes)
 
   let N = parseInt((doc['devnetBorHosts'].length * intensity) / 15)

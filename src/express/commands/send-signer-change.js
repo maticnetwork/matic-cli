@@ -1,19 +1,24 @@
-import { loadDevnetConfig } from '../common/config-utils'
-import stakeManagerABI from '../../abi/StakeManagerABI.json'
+import { loadDevnetConfig } from '../common/config-utils.js'
 import Web3 from 'web3'
-import { getSignedTx } from '../common/tx-utils'
-import { timer } from '../common/time-utils'
-import Wallet, { hdkey } from 'ethereumjs-wallet'
-import { isValidatorIdCorrect } from '../common/validators-utils'
+import { getSignedTx } from '../common/tx-utils.js'
+import { timer } from '../common/time-utils.js'
+import Wallet from 'ethereumjs-wallet'
+import stakeManagerABI from '../../abi/StakeManagerABI.json' assert { type: 'json' }
 
-const {
+import { isValidatorIdCorrect } from '../common/validators-utils.js'
+
+import {
   runScpCommand,
   runSshCommandWithReturn,
   maxRetries
-} = require('../common/remote-worker')
+} from '../common/remote-worker.js'
+
+import dotenv from 'dotenv'
+import fs from 'fs-extra'
+const { hdkey } = Wallet
 
 export async function sendSignerChangeEvent(validatorID) {
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
   const devnetType =
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
 
@@ -53,11 +58,15 @@ export async function sendSignerChangeEvent(validatorID) {
   dest = './contractAddresses.json'
   await runScpCommand(src, dest, maxRetries)
 
-  const contractAddresses = require(`${process.cwd()}/contractAddresses.json`)
+  const contractAddresses = JSON.parse(
+    fs.readFileSync(`${process.cwd()}/contractAddresses.json`, 'utf8')
+  )
 
   const StakeManagerProxyAddress = contractAddresses.root.StakeManagerProxy
 
-  const signerDump = require(`${process.cwd()}/signer-dump.json`)
+  const signerDump = JSON.parse(
+    fs.readFileSync(`${process.cwd()}/signer-dump.json`, 'utf8')
+  )
   const pkey = signerDump[validatorID - 1].priv_key
   const validatorAccount = signerDump[validatorID - 1].address
 
@@ -71,7 +80,7 @@ export async function sendSignerChangeEvent(validatorID) {
 
   const RandomSeed = 'random' + Math.random()
   const newAccPrivKey = hdkey.fromMasterSeed(RandomSeed)._hdkey._privateKey
-  const wallet = Wallet.fromPrivateKey(newAccPrivKey)
+  const wallet = Wallet.default.fromPrivateKey(newAccPrivKey)
   const newAccAddr = wallet.getAddressString()
   const newAccPubKey = wallet.getPublicKeyString()
 

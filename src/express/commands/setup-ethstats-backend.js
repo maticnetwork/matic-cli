@@ -1,19 +1,20 @@
-import { loadDevnetConfig, splitToArray } from '../common/config-utils'
+import { loadDevnetConfig, splitToArray } from '../common/config-utils.js'
 
-const {
+import {
   runSshCommand,
   maxRetries,
   runSshCommandWithReturnWithoutExit
-} = require('../common/remote-worker')
-const { installDocker } = require('./start.js')
+} from '../common/remote-worker.js'
+import { installDocker } from './start.js'
 
+import dotenv from 'dotenv'
 const startFileLocation = '~/node/bor-start.sh'
 let addEthstatsFlagCommand = ''
 
 export async function setupEthstats() {
   console.log('📍Setting up Ethstats backend...')
   let doc
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
 
   if (process.env.TF_VAR_DOCKERIZED === 'yes') {
     console.log('📍Not supported for Ethstats at the moment')

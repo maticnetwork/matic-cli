@@ -4,10 +4,13 @@ set -x
 
 DATA_DIR={{ obj.dbDir }}
 
-ganache --chain.hardfork istanbul \
+ganache \
+  --chain.hardfork istanbul \
   --miner.blockTime 1 \
   --database.dbPath $DATA_DIR \
-  {% for acc in obj.config.accounts %}--wallet.accounts {{ acc.privateKey }},1000000000000000000000 {% endfor %}\
+  --wallet.accounts {% for acc in obj.config.accounts %}"{{ acc.privateKey }}, 1000000000000000000000" {% endfor %} \
   --miner.blockGasLimit 8000000 \
-  --miner.defaultGasPrice 0 \
-  --server.port 9545 --server.host 0.0.0.0
+  --miner.defaultGasPrice 0x1 \
+  --chain.allowUnlimitedContractSize true \
+  --server.port 9545 \
+  --server.host 0.0.0.0

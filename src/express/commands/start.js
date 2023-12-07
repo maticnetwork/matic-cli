@@ -8,17 +8,19 @@ import {
   splitAndGetHostIp,
   splitToArray,
   setBorAndErigonHosts
-} from '../common/config-utils'
+} from '../common/config-utils.js'
 import {
   maxRetries,
   runScpCommand,
   runSshCommand
-} from '../common/remote-worker'
-import { timer } from '../common/time-utils'
+} from '../common/remote-worker.js'
+import { fundGanacheAccounts } from '../common/ganache-utils.js'
+import { timer } from '../common/time-utils.js'
 import yaml from 'js-yaml'
 import fs from 'fs'
 
-const shell = require('shelljs')
+import shell from 'shelljs'
+import dotenv from 'dotenv'
 
 async function terraformApply(devnetId) {
   console.log('📍Executing terraform apply...')
@@ -191,8 +193,8 @@ async function installHostSpecificPackages(ip) {
   let command = `curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash &&
                         export NVM_DIR="$HOME/.nvm"
                         [ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
-                        [ -s "$NVM_DIR/bash_completion" ] && \\. "$NVM_DIR/bash_completion" && 
-                        nvm install 16.20.2`
+                        [ -s "$NVM_DIR/bash_completion" ] && \\. "$NVM_DIR/bash_completion" &&
+                        nvm install 18.19.0`
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Installing solc...')
@@ -208,9 +210,9 @@ async function installHostSpecificPackages(ip) {
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Creating symlink for npm and node...')
-  command = `sudo ln -sf ~/.nvm/versions/node/v16.20.2/bin/npm /usr/bin/npm &&
-                    sudo ln -sf ~/.nvm/versions/node/v16.20.2/bin/node /usr/bin/node &&
-                    sudo ln -sf ~/.nvm/versions/node/v16.20.2/bin/npx /usr/bin/npx`
+  command = `sudo ln -sf ~/.nvm/versions/node/v18.19.0/bin/npm /usr/bin/npm &&
+                    sudo ln -sf ~/.nvm/versions/node/v18.19.0/bin/node /usr/bin/node &&
+                    sudo ln -sf ~/.nvm/versions/node/v18.19.0/bin/npx /usr/bin/npx`
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Installing ganache...')
@@ -378,7 +380,7 @@ async function runDockerSetupWithMaticCLI(ips, devnetId) {
 
   console.log('📍Executing docker setup with matic-cli...')
   command =
-    'cd ~/matic-cli/devnet && ../bin/matic-cli setup devnet -c ../configs/devnet/docker-setup-config.yaml'
+    'cd ~/matic-cli/devnet && ../bin/matic-cli.js setup devnet -c ../configs/devnet/docker-setup-config.yaml'
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Starting ganache...')
@@ -444,7 +446,7 @@ async function runRemoteSetupWithMaticCLI(ips, devnetId) {
 
   console.log('📍Executing remote setup with matic-cli...')
   command =
-    'cd ~/matic-cli/devnet && ../bin/matic-cli setup devnet -c ../configs/devnet/remote-setup-config.yaml'
+    'cd ~/matic-cli/devnet && ../bin/matic-cli.js setup devnet -c ../configs/devnet/remote-setup-config.yaml'
   await runSshCommand(ip, command, maxRetries)
 
   if (!process.env.NETWORK) {
@@ -462,7 +464,7 @@ async function runRemoteSetupWithMaticCLI(ips, devnetId) {
 
 export async function start() {
   const devnetId = getDevnetId()
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
 
   shell.exec(`terraform workspace select devnet-${devnetId}`)
 
@@ -512,4 +514,13 @@ export async function start() {
   } else {
     await runRemoteSetupWithMaticCLI(dnsIps, devnetId)
   }
+
+  const doc = await yaml.load(
+    fs.readFileSync(
+      `../../deployments/devnet-${devnetId}/${devnetType}-setup-config.yaml`,
+      'utf8'
+    )
+  )
+
+  await fundGanacheAccounts(doc)
 }

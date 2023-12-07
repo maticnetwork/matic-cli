@@ -6,11 +6,11 @@ import chalk from 'chalk'
 import path from 'path'
 import fs from 'fs-extra'
 
-import { loadConfig } from '../config'
-import { cloneRepository, getKeystoreFile } from '../../lib/utils'
-import { getDefaultBranch } from '../helper'
-import { Genesis } from '../genesis'
-import { getRemoteStdio } from '../../express/common/remote-worker'
+import { loadConfig } from '../config.js'
+import { cloneRepository, getKeystoreFile } from '../../lib/utils.js'
+import { getDefaultBranch } from '../helper.js'
+import { Genesis } from '../genesis/index.js'
+import { getRemoteStdio } from '../../express/common/remote-worker.js'
 
 // default password
 export const KEYSTORE_PASSWORD = 'hello'

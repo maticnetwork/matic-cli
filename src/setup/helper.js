@@ -2,7 +2,7 @@
 
 import inquirer from 'inquirer'
 
-import { errorMissingConfigs, getNewPrivateKey } from '../lib/utils'
+import { errorMissingConfigs, getNewPrivateKey } from '../lib/utils.js'
 
 export async function getChainIds(options = {}) {
   const questions = []

@@ -6,17 +6,17 @@ import chalk from 'chalk'
 import path from 'path'
 import fs from 'fs-extra'
 
-import fileReplacer from '../../lib/file-replacer'
-import { loadConfig } from '../config'
+import fileReplacer from '../../lib/file-replacer.js'
+import { loadConfig } from '../config.js'
 import {
   cloneRepository,
   compressedPublicKey,
   privateKeyToPublicKey,
   processTemplateFiles
-} from '../../lib/utils'
-import { getDefaultBranch } from '../helper'
-import { Ganache } from '../ganache'
-import { getRemoteStdio } from '../../express/common/remote-worker'
+} from '../../lib/utils.js'
+import { getDefaultBranch } from '../helper.js'
+import { Ganache } from '../ganache/index.js'
+import { getRemoteStdio } from '../../express/common/remote-worker.js'
 
 export class Heimdall {
   constructor(config, options = {}) {
@@ -45,6 +45,11 @@ export class Heimdall {
 
   get configValidatorKeyFilePath() {
     return path.join(this.config.configDir, this.validatorKeyFile)
+  }
+
+  get configValidatorKeyFile() {
+    const data = fs.readFileSync(this.configValidatorKeyFilePath, 'utf8')
+    return JSON.parse(data)
   }
 
   get repositoryDir() {
@@ -133,7 +138,7 @@ export class Heimdall {
         stdio: getRemoteStdio()
       }
     ).then(() => {
-      return require(this.configValidatorKeyFilePath)
+      return this.configValidatorKeyFile
     })
   }
 

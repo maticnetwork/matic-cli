@@ -1,20 +1,25 @@
-import { loadDevnetConfig } from '../common/config-utils'
-import stakeManagerABI from '../../abi/StakeManagerABI.json'
-import ERC20ABI from '../../abi/ERC20ABI.json'
+import { loadDevnetConfig } from '../common/config-utils.js'
 import Web3 from 'web3'
-import Wallet, { hdkey } from 'ethereumjs-wallet'
-import { timer } from '../common/time-utils'
-import { getSignedTx } from '../common/tx-utils'
-import { isValidatorIdCorrect } from '../common/validators-utils'
+import Wallet from 'ethereumjs-wallet'
+import { timer } from '../common/time-utils.js'
+import { getSignedTx } from '../common/tx-utils.js'
+import { isValidatorIdCorrect } from '../common/validators-utils.js'
 
-const {
+import {
   runScpCommand,
   runSshCommandWithReturn,
   maxRetries
-} = require('../common/remote-worker')
+} from '../common/remote-worker.js'
+
+import dotenv from 'dotenv'
+import fs from 'fs-extra'
+
+import stakeManagerABI from '../../abi/StakeManagerABI.json' assert { type: 'json' }
+import ERC20ABI from '../../abi/ERC20ABI.json' assert { type: 'json' }
+const { hdkey } = Wallet
 
 export async function sendStakedEvent(validatorID) {
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
   const devnetType =
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
 
@@ -54,7 +59,9 @@ export async function sendStakedEvent(validatorID) {
   dest = './contractAddresses.json'
   await runScpCommand(src, dest, maxRetries)
 
-  const contractAddresses = require(`${process.cwd()}/contractAddresses.json`)
+  const contractAddresses = JSON.parse(
+    fs.readFileSync(`${process.cwd()}/contractAddresses.json`, 'utf8')
+  )
 
   const StakeManagerProxyAddress = contractAddresses.root.StakeManagerProxy
 
@@ -64,7 +71,9 @@ export async function sendStakedEvent(validatorID) {
     MaticTokenAddr
   )
 
-  const signerDump = require(`${process.cwd()}/signer-dump.json`)
+  const signerDump = JSON.parse(
+    fs.readFileSync(`${process.cwd()}/signer-dump.json`, 'utf8')
+  )
   const pkey = signerDump[validatorID - 1].priv_key
   const validatorAccount = signerDump[validatorID - 1].address
   const stakeAmount = rootChainWeb3.utils.toWei('12')
@@ -94,7 +103,7 @@ export async function sendStakedEvent(validatorID) {
 
   const RandomSeed = 'random' + Math.random()
   const newAccPrivKey = hdkey.fromMasterSeed(RandomSeed)._hdkey._privateKey
-  const wallet = Wallet.fromPrivateKey(newAccPrivKey)
+  const wallet = Wallet.default.fromPrivateKey(newAccPrivKey)
   const newAccAddr = wallet.getAddressString()
   const newAccPubKey = wallet.getPublicKeyString()
 

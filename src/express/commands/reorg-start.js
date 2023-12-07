@@ -2,8 +2,8 @@ import {
   createClusters,
   getIpsAndEnode,
   getUsersAndHosts
-} from '../common/milestone-utils'
-import { isValidPositiveNum } from '../common/num-utils'
+} from '../common/milestone-utils.js'
+import { isValidPositiveNum } from '../common/num-utils.js'
 
 export async function startReorg(split) {
   // Get users and hosts
