@@ -4,6 +4,8 @@ NODE_DIR=$HOME/node
 BOR_HOME=/var/lib/bor
 LOG_HOME=$HOME/logs
 
+USER=$(whoami)
+
 # create heimdall file
 sudo mkdir -p $BOR_HOME $LOG_HOME
 
@@ -19,3 +21,5 @@ sudo cp $NODE_DIR/bor-config.toml $BOR_HOME/config.toml
 sudo cp $NODE_DIR/bor/nodekey $BOR_DATA_DIR/bor/
 sudo cp $NODE_DIR/bor/static-nodes.json $BOR_DATA_DIR/
 sudo cp $NODE_DIR/bor/static-nodes.json $BOR_DATA_DIR/bor/
+
+sudo chown -R $USER $BOR_HOME
