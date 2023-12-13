@@ -332,7 +332,9 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType, devnetId) {
       "sudo systemctl stop erigon.service || echo 'erigon not running on current machine...'"
     await runSshCommand(ip, command, maxRetries)
 
-    console.log('📍Removing /var/lib/bor folder (if present) on machine ' + ip + ' ...')
+    console.log(
+      '📍Removing /var/lib/bor folder (if present) on machine ' + ip + ' ...'
+    )
     command = 'sudo rm -rf /var/lib/bor'
     await runSshCommand(ip, command, maxRetries)
 

@@ -294,14 +294,15 @@ function validateUsersAndHosts() {
   const erigonSenCount = Number(process.env.TF_VAR_ERIGON_SENTRY_COUNT)
   const erigonArchiveCount = Number(process.env.TF_VAR_ERIGON_ARCHIVE_COUNT)
 
-  if (process.env.DEVNET_BOR_USERS &&
+  if (
+    process.env.DEVNET_BOR_USERS &&
     process.env.DEVNET_BOR_FLAGS &&
     borFlags.length !== borUsers.length
-    ) {
-      console.log(
-        '❌ DEVNET_BOR_USERS lengths and DEVNET_BOR_FLAGS length are not equal, please check your configs!'
-      )
-      process.exit(1)
+  ) {
+    console.log(
+      '❌ DEVNET_BOR_USERS lengths and DEVNET_BOR_FLAGS length are not equal, please check your configs!'
+    )
+    process.exit(1)
   }
 
   if (

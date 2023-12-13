@@ -10,7 +10,8 @@ const {
 } = require('../common/remote-worker')
 
 async function removeAllPeers(ip, staticNodes) {
-  let command = 'sudo mv /var/lib/bor/static-nodes.json /var/lib/bor/static-nodes.json_bkp'
+  let command =
+    'sudo mv /var/lib/bor/static-nodes.json /var/lib/bor/static-nodes.json_bkp'
   try {
     await runSshCommandWithoutExit(ip, command, 1)
   } catch (error) {
