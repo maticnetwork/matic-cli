@@ -11,8 +11,7 @@ PATH=$NODE:$BIN_DIR:$GO:$PATH
 
 VALIDATOR_ADDRESS="`cat $NODE_DIR/bor/address.txt`"
 
-# PSP - add this
-FLAG=config
+FLAG=$1
 
 cat > metadata <<EOF
 VALIDATOR_ADDRESS=
