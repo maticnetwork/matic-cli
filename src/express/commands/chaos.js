@@ -19,10 +19,10 @@ async function removeAllPeers(ip, staticNodes) {
 
   const tasks = []
   for (let i = 0; i < staticNodes.length; i++) {
-    command = `/home/ubuntu/go/bin/bor attach /var/lib/bor/data/bor.ipc --exec "admin.removeTrustedPeer('${staticNodes[i]}')"`
+    command = `~/go/bin/bor attach /var/lib/bor/data/bor.ipc --exec "admin.removeTrustedPeer('${staticNodes[i]}')"`
     tasks.push(runSshCommand(ip, command, maxRetries))
 
-    command = `/home/ubuntu/go/bin/bor attach /var/lib/bor/data/bor.ipc --exec "admin.removePeer('${staticNodes[i]}')"`
+    command = `~/go/bin/bor attach /var/lib/bor/data/bor.ipc --exec "admin.removePeer('${staticNodes[i]}')"`
     tasks.push(runSshCommand(ip, command, maxRetries))
   }
   console.log('📍Removing all peers')
@@ -33,7 +33,7 @@ async function removeAllPeers(ip, staticNodes) {
 async function addAllPeers(ip, staticNodes) {
   const tasks = []
   for (let i = 0; i < staticNodes.length; i++) {
-    const command = `/home/ubuntu/go/bin/bor attach /var/lib/bor/data/bor.ipc --exec "admin.addPeer('${staticNodes[i]}')"`
+    const command = `~/go/bin/bor attach /var/lib/bor/data/bor.ipc --exec "admin.addPeer('${staticNodes[i]}')"`
     tasks.push(runSshCommand(ip, command, maxRetries))
   }
   console.log('📍Adding all peers')

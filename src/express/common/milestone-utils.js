@@ -216,7 +216,7 @@ export async function addPeers(ip, peers) {
 
 export async function getPeerLength(ip) {
   const command =
-    '/home/ubuntu/go/bin/bor attach /var/lib/bor/data/bor.ipc --exec "admin.peers.length"'
+    '~/go/bin/bor attach /var/lib/bor/data/bor.ipc --exec "admin.peers.length"'
   try {
     const length = await runSshCommandWithReturn(ip, command, maxRetries)
     return parseInt(length)

@@ -75,7 +75,7 @@ services:
     environment:
       - HEIMDALL_URL=http://heimdall{{ node }}:1317
     volumes:
-      - ./devnet/node{{ node }}/bor:/var/lib/bor
+      - ./devnet/node{{ node }}/bor:/root/var/lib/bor
       - ./logs/node{{ node }}/bor:/root/logs
     {% if node == 0 %}
     ports:

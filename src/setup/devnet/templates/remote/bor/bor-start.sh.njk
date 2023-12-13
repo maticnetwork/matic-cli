@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
+BOR_DIR=/var/lib/bor
+BOR_DATA_DIR=/var/lib/bor/data
 NODE_DIR=$HOME/node
 
 # create heimdall file
@@ -10,8 +12,8 @@ ADDRESS="`cat $NODE_DIR/bor/address.txt`"
 
 # start bor
 bor server \
-  --chain=/var/lib/bor/genesis.json \
-  --datadir /var/lib/bor/data \
+  --chain=$BOR_DIR/genesis.json \
+  --datadir $BOR_DATA_DIR \
   --port 30303 \
   --bor.heimdall "http://localhost:1317" \
   --http --http.addr '0.0.0.0' \
@@ -19,7 +21,7 @@ bor server \
   --http.vhosts '*' \
   --http.corsdomain '*' \
   --http.port 8545 \
-  --ipcpath /var/lib/bor/data/bor.ipc \
+  --ipcpath $BOR_DATA_DIR/bor.ipc \
   --http.api 'eth,net,web3,txpool,bor,debug' \
   --bor.logs=true \
   --syncmode 'full' \
@@ -33,7 +35,7 @@ bor server \
   --metrics.opencollector-endpoint="127.0.0.1:4317" \
   --unlock $ADDRESS \
   --miner.etherbase $ADDRESS \
-  --keystore /var/lib/bor/keystore \
-  --password /var/lib/bor/password.txt \
+  --keystore $BOR_DIR/keystore \
+  --password $BOR_DIR/password.txt \
   --allow-insecure-unlock \
   --mine
