@@ -1783,7 +1783,7 @@ export default async function (command) {
   const totalBorNodes = config.numOfBorValidators + config.numOfBorSentries + config.numOfBorArchiveNodes
 
   // set devnet bor flags
-  let devnetBorFlags = config.devnetBorFlags || []
+  const devnetBorFlags = config.devnetBorFlags || []
 
   // For docker, the devnetBorHosts conform to the subnet 172.20.1.0/24
   if (config.devnetType === 'docker') {
