@@ -1,11 +1,11 @@
 import { Command } from 'commander'
 
-import heimdall from './heimdall'
-import genesis from './genesis'
-import bor from './bor'
-import localnet from './localnet'
-import ganache from './ganache'
-import devnet from './devnet'
+import heimdall from './heimdall/index.js'
+import genesis from './genesis/index.js'
+import bor from './bor/index.js'
+import localnet from './localnet/index.js'
+import ganache from './ganache/index.js'
+import devnet from './devnet/index.js'
 
 //
 // Add sub commands

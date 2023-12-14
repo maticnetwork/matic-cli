@@ -1,9 +1,12 @@
-import { loadDevnetConfig, splitToArray } from '../common/config-utils'
-const {
+import { loadDevnetConfig, splitToArray } from '../common/config-utils.js'
+
+import {
   runSshCommand,
   runSshCommandWithReturn,
   maxRetries
-} = require('../common/remote-worker')
+} from '../common/remote-worker.js'
+
+import dotenv from 'dotenv'
 
 export async function rewind(num) {
   // num = number of blocks to rewind
@@ -14,7 +17,7 @@ export async function rewind(num) {
     num = 128
   }
 
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
   const devnetType =
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
 

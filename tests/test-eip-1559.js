@@ -4,16 +4,20 @@ import {
   checkAndReturnVMIndex,
   loadDevnetConfig,
   splitToArray
-} from '../src/express/common/config-utils'
+} from '../src/express/common/config-utils.js'
 import fs from 'fs'
-import { maxRetries, runScpCommand } from '../src/express/common/remote-worker'
-import { fundAccount, sanitizeIterations } from './test-utils'
-const Web3 = require('web3')
-const bigInt = require('big-integer')
-const HDWalletProvider = require('@truffle/hdwallet-provider')
-const assert = require('assert')
+import {
+  maxRetries,
+  runScpCommand
+} from '../src/express/common/remote-worker.js'
+import { fundAccount, sanitizeIterations } from './test-utils.js'
+import Web3 from 'web3'
+import bigInt from 'big-integer'
+import HDWalletProvider from '@truffle/hdwallet-provider'
+import assert from 'assert'
+import dotenv from 'dotenv'
 
-require('dotenv').config({ path: `${process.cwd()}/.env` })
+dotenv.config({ path: `${process.cwd()}/.env` })
 
 async function runTest(web3, accounts, sender) {
   try {

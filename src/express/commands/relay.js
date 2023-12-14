@@ -1,8 +1,9 @@
-import { loadDevnetConfig, splitToArray } from '../common/config-utils'
+import { loadDevnetConfig, splitToArray } from '../common/config-utils.js'
 import Web3 from 'web3'
 
-const fs = require('fs')
-require('dotenv').config()
+import fs from 'fs'
+import dotenv from 'dotenv'
+dotenv.config()
 
 // print function, so that only 0th index node prints the logs
 function print(text, index) {
@@ -68,7 +69,7 @@ function fetchTxData(ip) {
 
 // function to start relayTxn() on all nodes
 export async function relay() {
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
   const doc = await loadDevnetConfig('remote')
   if (!doc.devnetBorHosts) {
     console.log(

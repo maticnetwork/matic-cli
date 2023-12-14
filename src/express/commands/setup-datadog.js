@@ -1,19 +1,21 @@
 // noinspection JSCheckFunctionSignatures,JSUnresolvedVariable
 
-import { loadDevnetConfig, splitToArray } from '../common/config-utils'
-import { timer } from '../common/time-utils'
-import constants from '../common/constants'
+import { loadDevnetConfig, splitToArray } from '../common/config-utils.js'
+import { timer } from '../common/time-utils.js'
+import { constants } from '../common/constants.js'
 
-const {
+import {
   runScpCommand,
   runSshCommand,
   maxRetries
-} = require('../common/remote-worker')
-const { installDocker } = require('./start.js')
+} from '../common/remote-worker.js'
 
-const yaml = require('js-yaml')
-const fs = require('fs')
+import { installDocker } from './start.js'
 
+import yaml from 'js-yaml'
+import fs from 'fs'
+
+import dotenv from 'dotenv'
 export async function setDatadogAPIKey(value, doc) {
   if (value !== undefined) {
     doc.exporters.datadog.api.key = value
@@ -31,7 +33,7 @@ export async function setDatadogAPIKey(value, doc) {
 
 export async function setupDatadog() {
   let doc
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
 
   if (process.env.TF_VAR_DOCKERIZED === 'yes') {
     console.log('📍Not supported for datadog at the moment')

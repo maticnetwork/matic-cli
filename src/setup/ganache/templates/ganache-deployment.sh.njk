@@ -13,4 +13,4 @@ export HEIMDALL_ID={{ obj.config.heimdallChainId }}
 cd {{ obj.contracts.repositoryDir }}
 
 # root contracts are deployed on base chain
-npm run truffle:migrate:dev -- --reset --to 4
+npm run truffle:migrate:dev -- --reset --to 4 --compile-none

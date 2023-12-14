@@ -1,12 +1,13 @@
 // noinspection JSUnresolvedFunction
 
-import { getDevnetId } from '../common/config-utils'
+import { getDevnetId } from '../common/config-utils.js'
 
-const shell = require('shelljs')
+import shell from 'shelljs'
+import dotenv from 'dotenv'
 
 export async function terraformDestroy() {
   console.log('📍Executing terraform destroy...')
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
   shell.exec('terraform destroy -auto-approve -var-file=./secret.tfvars', {
     env: {
       ...process.env

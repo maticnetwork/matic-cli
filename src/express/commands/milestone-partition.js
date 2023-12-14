@@ -1,5 +1,5 @@
 /* eslint-disable dot-notation */
-import { timer } from '../common/time-utils'
+import { timer } from '../common/time-utils.js'
 
 import {
   createClusters,
@@ -12,7 +12,7 @@ import {
   fetchAndValidateSameBlocks,
   validateReorg,
   queryMilestone
-} from '../common/milestone-utils'
+} from '../common/milestone-utils.js'
 
 const milestoneLength = 12
 const queryTimer = (milestoneLength / 8) * 1000

@@ -7,11 +7,11 @@ import execa from 'execa'
 import fs from 'fs-extra'
 import ganache from 'ganache'
 
-import { loadConfig } from '../config'
-import { processTemplateFiles } from '../../lib/utils'
-import { getDefaultBranch } from '../helper'
-import { Contracts } from '../contracts'
-import { getRemoteStdio } from '../../express/common/remote-worker'
+import { loadConfig } from '../config.js'
+import { processTemplateFiles } from '../../lib/utils.js'
+import { getDefaultBranch } from '../helper.js'
+import { Contracts } from '../contracts/index.js'
+import { getRemoteStdio } from '../../express/common/remote-worker.js'
 
 export class Ganache {
   constructor(config, options = {}) {
@@ -90,6 +90,9 @@ export class Ganache {
               miner: {
                 defaultGasPrice: '0x1',
                 blockGasLimit: '0xfffffffff'
+              },
+              chain: {
+                allowUnlimitedContractSize: true
               },
               database: {
                 dbPath: this.dbDir

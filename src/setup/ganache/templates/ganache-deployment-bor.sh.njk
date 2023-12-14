@@ -13,4 +13,4 @@ export HEIMDALL_ID={{ obj.config.heimdallChainId }}
 cd {{ obj.contracts.repositoryDir }}
 
 # bor contracts are deployed on child chain
-npm run truffle:migrate:dev:bor -- --reset -f 5 --to 5
+npm run truffle:migrate:dev:bor -- --reset -f 5 --to 5 --compile-none

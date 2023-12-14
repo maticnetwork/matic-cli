@@ -5,14 +5,14 @@ import chalk from 'chalk'
 import path from 'path'
 import fs from 'fs-extra'
 
-import { getDefaultBranch } from '../helper'
-import { loadConfig } from '../config'
+import { getDefaultBranch } from '../helper.js'
+import { loadConfig } from '../config.js'
 
-import { Genesis } from '../genesis'
-import { Heimdall } from '../heimdall'
-import { Ganache } from '../ganache'
-import { Bor } from '../bor'
-import { processTemplateFiles } from '../../lib/utils'
+import { Genesis } from '../genesis/index.js'
+import { Heimdall } from '../heimdall/index.js'
+import { Ganache } from '../ganache/index.js'
+import { Bor } from '../bor/index.js'
+import { processTemplateFiles } from '../../lib/utils.js'
 
 async function setupLocalnet(config) {
   const ganache = new Ganache(config, {

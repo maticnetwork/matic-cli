@@ -1,9 +1,10 @@
-import { loadDevnetConfig, splitToArray } from '../common/config-utils'
-import { maxRetries, runSshCommand } from '../common/remote-worker'
-import { getGcpInstancesInfo } from '../common/gcp-utils'
-import constants from '../common/constants'
+import { loadDevnetConfig, splitToArray } from '../common/config-utils.js'
+import { maxRetries, runSshCommand } from '../common/remote-worker.js'
+import { getGcpInstancesInfo } from '../common/gcp-utils.js'
+import { constants } from '../common/constants.js'
+import shell from 'shelljs'
+import dotenv from 'dotenv'
 
-const shell = require('shelljs')
 export async function keypairDestroy(keyName) {
   if (keyName === true || keyName === null || keyName === undefined) {
     console.log(
@@ -11,7 +12,7 @@ export async function keypairDestroy(keyName) {
     )
     process.exit(1)
   }
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
   const devnetType =
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
   const doc = await loadDevnetConfig(devnetType)

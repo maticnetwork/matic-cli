@@ -3,8 +3,8 @@
 import yaml from 'js-yaml'
 import fs from 'fs'
 import { cleanEnv, num, bool, url, host, makeValidator } from 'envalid'
-import constants from './constants'
-const shell = require('shelljs')
+import { constants } from './constants.js'
+import shell from 'shelljs'
 
 const validStr = makeValidator((x) => {
   if (x !== undefined && x !== null && x !== '') return x

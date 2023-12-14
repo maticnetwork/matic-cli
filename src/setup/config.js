@@ -6,9 +6,9 @@ import execa from 'execa'
 import chalk from 'chalk'
 import YAML from 'yaml'
 
-import { getChainIds, getKeystoreDetails } from './helper'
-import { getAccountFromPrivateKey } from '../lib/utils'
-import { getRemoteStdio } from '../express/common/remote-worker'
+import { getChainIds, getKeystoreDetails } from './helper.js'
+import { getAccountFromPrivateKey } from '../lib/utils.js'
+import { getRemoteStdio } from '../express/common/remote-worker.js'
 
 const defaultConfigFileName = 'config.json'
 
@@ -119,7 +119,8 @@ export async function loadConfig(options = {}) {
   let _options = {}
   if (hasConfigFile) {
     if (configFile.endsWith('.json')) {
-      _options = require(configFile) // get options from config
+      const file = fs.readFileSync(configFile, 'utf8')
+      _options = JSON.parse(file) // get options from config
     } else if (configFile.endsWith('.yaml') || configFile.endsWith('.yml')) {
       const file = fs.readFileSync(configFile, 'utf8')
       _options = YAML.parse(file)

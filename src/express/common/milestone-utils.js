@@ -1,17 +1,18 @@
 /* eslint-disable dot-notation */
-import { loadDevnetConfig, splitToArray } from '../common/config-utils'
-import { checkLatestMilestone } from '../commands/monitor'
-import { timer } from './time-utils'
+import { loadDevnetConfig, splitToArray } from '../common/config-utils.js'
+import { checkLatestMilestone } from '../commands/monitor.js'
+import { timer } from './time-utils.js'
 
-const {
+import {
   runSshCommand,
   maxRetries,
   runSshCommandWithReturn,
   runCommand
-} = require('../common/remote-worker')
+} from '../common/remote-worker.js'
+import dotenv from 'dotenv'
 
 export async function getUsersAndHosts() {
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
   const devnetType =
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
 

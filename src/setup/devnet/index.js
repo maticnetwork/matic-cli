@@ -9,22 +9,22 @@ import fs from 'fs-extra'
 import nunjucks from 'nunjucks'
 import { bufferToHex, privateToPublic, toBuffer } from 'ethereumjs-util'
 
-import { Heimdall } from '../heimdall'
-import { Bor } from '../bor'
-import { Ganache } from '../ganache'
-import { Genesis } from '../genesis'
-import { getDefaultBranch } from '../helper'
+import { Heimdall } from '../heimdall/index.js'
+import { Bor } from '../bor/index.js'
+import { Ganache } from '../ganache/index.js'
+import { Genesis } from '../genesis/index.js'
+import { getDefaultBranch } from '../helper.js'
 import {
   errorMissingConfigs,
   getAccountFromPrivateKey,
   getKeystoreFile,
   getNewPrivateKey,
   processTemplateFiles
-} from '../../lib/utils'
-import { loadConfig } from '../config'
-import fileReplacer from '../../lib/file-replacer'
-import { getRemoteStdio } from '../../express/common/remote-worker'
-import { Erigon } from '../erigon'
+} from '../../lib/utils.js'
+import { loadConfig } from '../config.js'
+import fileReplacer from '../../lib/file-replacer.js'
+import { getRemoteStdio } from '../../express/common/remote-worker.js'
+import { Erigon } from '../erigon/index.js'
 
 const timer = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -60,7 +60,8 @@ export class Devnet {
   }
 
   get signerDumpData() {
-    return require(this.signerDumpPath)
+    const data = fs.readFileSync(this.signerDumpPath, 'utf8')
+    return JSON.parse(data)
   }
 
   get totalBorNodes() {

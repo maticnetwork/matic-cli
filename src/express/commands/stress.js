@@ -1,14 +1,15 @@
 // noinspection JSUnresolvedFunction
 
-import { getDevnetId, loadDevnetConfig } from '../common/config-utils'
+import { getDevnetId, loadDevnetConfig } from '../common/config-utils.js'
 
-const { runScpCommand, maxRetries } = require('../common/remote-worker')
-const shell = require('shelljs')
+import { runScpCommand, maxRetries } from '../common/remote-worker.js'
+import shell from 'shelljs'
+import dotenv from 'dotenv'
 
 export async function startStressTest(fund) {
   const doc = await loadDevnetConfig('remote')
   const devnetId = getDevnetId()
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
   let machine0
   if (
     doc.devnetBorHosts.length > 0 &&

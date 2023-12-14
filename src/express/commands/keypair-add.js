@@ -1,12 +1,13 @@
-import { loadDevnetConfig, splitToArray } from '../common/config-utils'
-import { maxRetries, runSshCommand } from '../common/remote-worker'
-import { getGcpInstancesInfo } from '../common/gcp-utils'
-import constants from '../common/constants'
+import { loadDevnetConfig, splitToArray } from '../common/config-utils.js'
+import { maxRetries, runSshCommand } from '../common/remote-worker.js'
+import { getGcpInstancesInfo } from '../common/gcp-utils.js'
+import { constants } from '../common/constants.js'
 
-const shell = require('shelljs')
-const fs = require('fs')
+import shell from 'shelljs'
+import dotenv from 'dotenv'
+import fs from 'fs'
 export async function keypairAdd() {
-  require('dotenv').config({ path: `${process.cwd()}/.env` })
+  dotenv.config({ path: `${process.cwd()}/.env` })
   const devnetType =
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
   const doc = await loadDevnetConfig(devnetType)
@@ -111,6 +112,6 @@ export async function keypairAdd() {
     `🔑 You can now share ${keyName}.pem with other devs - on a secure channel - to let them access the devnet`
   )
   console.log(
-    `🚨 Do not forget to destroy the key when no longer needed, using the command "../../bin/express-cli --ssh-key-des ${keyName}"`
+    `🚨 Do not forget to destroy the key when no longer needed, using the command "../../bin/express-cli.js --ssh-key-des ${keyName}"`
   )
 }
