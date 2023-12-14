@@ -1,5 +1,5 @@
 chain = "/var/lib/bor/genesis.json"
-identity = "MyIdentity"
+identity = "matic-cli"
 verbosity = 3
 log-level = ""
 vmdebug = false
@@ -87,7 +87,7 @@ devfakeauthor = false
     port = 8545
     prefix = ""
     host = "0.0.0.0"
-    api = ["eth", "net", "web3", "txpool", "bor"]
+    api = ["eth", "net", "web3", "txpool", "bor", "personal", "admin", "debug", "miner"]
     vhosts = ["localhost"]
     corsdomain = ["localhost"]
     ep-size = 40
@@ -171,7 +171,7 @@ devfakeauthor = false
   password = "/var/lib/bor/password.txt"
   allow-insecure-unlock = true
   lightkdf = false
-  disable-bor-wallet = true
+  disable-bor-wallet = false
 
 [grpc]
   addr = ":3131"
