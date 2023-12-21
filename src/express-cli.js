@@ -656,9 +656,6 @@ export async function cli() {
       )
       process.exit(1)
     }
-    console.log(
-      '⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...'
-    )
     await fundGanacheAccounts()
   }
 }
