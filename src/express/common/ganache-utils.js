@@ -12,17 +12,17 @@ const EthAmount = '10'
 // we implemented this workaround waiting for a migration to hardhat
 // (see internal issue https://polygon.atlassian.net/browse/POS-1869)
 export async function fundGanacheAccounts() {
-  let doc
+  let machine0
   dotenv.config({ path: `${process.cwd()}/.env` })
 
-  if (process.env.TF_VAR_DOCKERIZED === 'yes') {
-    console.log('📍Not supported for dockerized environments at the moment')
-    return
-  } else {
-    doc = await loadDevnetConfig('remote')
-  }
+  const devnetType =
+    process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
 
-  const machine0 = doc.devnetBorHosts[0]
+  const doc = await loadDevnetConfig(devnetType)
+
+  doc.devnetBorHosts.length > 0
+    ? (machine0 = doc.devnetBorHosts[0])
+    : (machine0 = doc.devnetErigonHosts[0])
 
   console.log('📍Transferring funds from ganache account[0] to others...')
   const src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/devnet/signer-dump.json`

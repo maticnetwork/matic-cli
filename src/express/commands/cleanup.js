@@ -12,7 +12,6 @@ import { fundGanacheAccounts } from '../common/ganache-utils.js'
 export async function cleanup() {
   dotenv.config({ path: `${process.cwd()}/.env` })
   const doc = await loadDevnetConfig('remote')
-  const devnetId = getDevnetId()
 
   await stopServices(doc)
   await cleanupServices(doc)
