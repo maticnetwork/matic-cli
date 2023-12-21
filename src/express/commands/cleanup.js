@@ -18,7 +18,7 @@ export async function cleanup() {
   await cleanupServices(doc)
   await startServices(doc)
   await deployBorContractsAndStateSync(doc)
-  await fundGanacheAccounts(doc, devnetId, 'remote')
+  await fundGanacheAccounts()
 }
 
 export async function stopServices(doc) {

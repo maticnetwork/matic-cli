@@ -515,12 +515,5 @@ export async function start() {
     await runRemoteSetupWithMaticCLI(dnsIps, devnetId)
   }
 
-  const doc = await yaml.load(
-    fs.readFileSync(
-      `../../deployments/devnet-${devnetId}/${devnetType}-setup-config.yaml`,
-      'utf8'
-    )
-  )
-
-  await fundGanacheAccounts(doc)
+  await fundGanacheAccounts()
 }

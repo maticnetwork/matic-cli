@@ -1,6 +1,8 @@
 import fs from 'fs'
 import { maxRetries, runScpCommand } from './remote-worker.js'
+import { loadDevnetConfig } from '../common/config-utils.js'
 import Web3 from 'web3'
+import dotenv from 'dotenv'
 
 const EthAmount = '10'
 
@@ -9,7 +11,17 @@ const EthAmount = '10'
 // it is affected by this issue https://github.com/trufflesuite/ganache/issues/4404
 // we implemented this workaround waiting for a migration to hardhat
 // (see internal issue https://polygon.atlassian.net/browse/POS-1869)
-export async function fundGanacheAccounts(doc) {
+export async function fundGanacheAccounts() {
+  let doc
+  dotenv.config({ path: `${process.cwd()}/.env` })
+
+  if (process.env.TF_VAR_DOCKERIZED === 'yes') {
+    console.log('📍Not supported for dockerized environments at the moment')
+    return
+  } else {
+    doc = await loadDevnetConfig('remote')
+  }
+
   const machine0 = doc.devnetBorHosts[0]
 
   console.log('📍Transferring funds from ganache account[0] to others...')

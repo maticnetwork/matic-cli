@@ -302,6 +302,9 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 - `../../bin/express-cli.js --relay`
   - Relay transactions from testnet or mainnet to shadow node running in the devnet.
 
+- `../../bin/express-cli.js --fund-ganache-accounts`
+  - Transfer 10 eth to all the ganache accounts.
+
 ## `Milestone tests`
 
 The `express-cli` can also be used to perform few simulation based tests for the upcoming milestone feature. Please refer to the steps and requirements mentioned over [here](./docs/milestones.md) for running the tests.
