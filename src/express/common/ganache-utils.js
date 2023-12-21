@@ -20,6 +20,16 @@ export async function fundGanacheAccounts() {
 
   const doc = await loadDevnetConfig(devnetType)
 
+  if (
+    doc.borChainId !== 137 && // mainnet
+    doc.borChainId !== 8001 && // mumbai
+    doc.borChainId !== 8002 // amoy
+  ) {
+    console.log('📍Fund ganache accounts only works for devnet')
+    console.log('📍Skipping in case of mainnet, mumbai or amoy')
+    return
+  }
+
   doc.devnetBorHosts.length > 0
     ? (machine0 = doc.devnetBorHosts[0])
     : (machine0 = doc.devnetErigonHosts[0])
