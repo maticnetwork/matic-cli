@@ -1505,7 +1505,7 @@ export class Devnet {
                 ),
                 execa(
                   'jq',
-                  ['\'.config.consensus = "bor" | .config.eip1559FeeCollectorTransition = .config.londonBlock | .config.eip1559FeeCollector = .config.bor.burntContract."0"\'', `${this.erigonGenesisFilePath(i)} > ~/tmp.json && mv ~/tmp.json ${this.erigonGenesisFilePath(i)}`],
+                  ['\'.config.consensus = "bor" | .config.bor.agraBlock = .config.shanghaiBlock | del(.config.shanghaiBlock)\'', `${this.erigonGenesisFilePath(i)} > ~/tmp.json && mv ~/tmp.json ${this.erigonGenesisFilePath(i)}`],
                   { shell: true }
                 )
                 )
