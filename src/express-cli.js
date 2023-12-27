@@ -455,9 +455,6 @@ export async function cli() {
       )
       process.exit(1)
     }
-    console.log(
-      '⛔ This command currently cannot be executed against an erigon node'
-    )
     await timer(3000)
     await setupDatadog()
   } else if (options.setupEthstats) {
