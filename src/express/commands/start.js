@@ -417,11 +417,11 @@ async function runDockerSetupWithMaticCLI(ips, devnetId) {
   console.log('📍Executing bor ipc tests...')
   console.log('📍1. Fetching admin.peers...')
   command =
-    'cd ~/matic-cli/devnet && docker exec bor0 bash -c "bor attach /var/lib/bor/data/bor.ipc -exec \'admin.peers\'"'
+    'cd ~/matic-cli/devnet && docker exec bor0 bash -c "bor attach /root/var/lib/bor/data/bor.ipc -exec \'admin.peers\'"'
   await runSshCommand(ip, command, maxRetries)
   console.log('📍2. Fetching eth.blockNumber...')
   command =
-    'cd ~/matic-cli/devnet && docker exec bor0 bash -c "bor attach /var/lib/bor/data/bor.ipc -exec \'eth.blockNumber\'"'
+    'cd ~/matic-cli/devnet && docker exec bor0 bash -c "bor attach /root/var/lib/bor/data/bor.ipc -exec \'eth.blockNumber\'"'
   await runSshCommand(ip, command, maxRetries)
   console.log('📍bor ipc tests executed...')
 }

@@ -9,8 +9,8 @@ ADDRESSES=({% for s in obj.signerDumpData %}
 INDEX=$1;
 ADDRESS=${ADDRESSES[$INDEX]};
 
-BOR_DIR=/var/lib/bor
-BOR_DATA_DIR=/var/lib/bor/data
+BOR_DIR=/root/var/lib/bor
+BOR_DATA_DIR=/root/var/lib/bor/data
 
 docker compose run --service-ports -d --name bor$INDEX --entrypoint bash bor$INDEX -c "
 touch /root/logs/bor.log
