@@ -11,14 +11,17 @@ const EthAmount = '10'
 // it is affected by this issue https://github.com/trufflesuite/ganache/issues/4404
 // we implemented this workaround waiting for a migration to hardhat
 // (see internal issue https://polygon.atlassian.net/browse/POS-1869)
-export async function fundGanacheAccounts() {
-  let machine0
-  dotenv.config({ path: `${process.cwd()}/.env` })
+export async function fundGanacheAccounts(doc) {
+  let machine0 = doc.devnetBorHosts[0]
 
-  const devnetType =
-    process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
+  if (doc == nil) {
+    dotenv.config({ path: `${process.cwd()}/.env` })
 
-  const doc = await loadDevnetConfig(devnetType)
+    const devnetType =
+      process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
+
+    doc = await loadDevnetConfig(devnetType)
+  }
 
   if (
     doc.borChainId !== 137 && // mainnet

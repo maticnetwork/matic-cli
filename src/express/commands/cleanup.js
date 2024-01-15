@@ -16,7 +16,7 @@ export async function cleanup() {
   await cleanupServices(doc)
   await startServices(doc)
   await deployBorContractsAndStateSync(doc)
-  await fundGanacheAccounts()
+  await fundGanacheAccounts(doc)
 }
 
 export async function stopServices(doc) {
