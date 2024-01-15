@@ -939,6 +939,22 @@ export class Devnet {
                     // eslint-disable-next-line
                     `printf %s "  --gcmode 'archive'" >> ~/node/bor-start.sh `
               ], { stdio: getRemoteStdio() })
+
+              await execa('ssh', [
+                '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
+                '-i', '~/cert.pem',
+                    `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                    // eslint-disable-next-line
+                    `sed -i '$s,$, \\\\,' ~/node/bor-start-config.sh`
+              ], { stdio: getRemoteStdio() })
+
+              await execa('ssh', [
+                '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
+                '-i', '~/cert.pem',
+                    `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                    // eslint-disable-next-line
+                    `printf %s "  --gcmode 'archive'" >> ~/node/bor-start-config.sh `
+              ], { stdio: getRemoteStdio() })
             }
 
             if (this.config.network) {
@@ -949,6 +965,14 @@ export class Devnet {
                       `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                       // eslint-disable-next-line
                       `sed -i "s|\\$BOR_HOME/genesis.json|${chain}|g" ~/node/bor-start.sh`
+              ], { stdio: getRemoteStdio() })
+
+              await execa('ssh', [
+                '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
+                '-i', '~/cert.pem',
+                      `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                      // eslint-disable-next-line
+                      `sed -i "s|\\$BOR_HOME/genesis.json|${chain}|g" ~/node/bor-start-config.sh`
               ], { stdio: getRemoteStdio() })
             }
 
