@@ -12,6 +12,7 @@ const EthAmount = '10'
 // we implemented this workaround waiting for a migration to hardhat
 // (see internal issue https://polygon.atlassian.net/browse/POS-1869)
 export async function fundGanacheAccounts(doc) {
+  let machine0
   if (doc === undefined || doc == null) {
     dotenv.config({ path: `${process.cwd()}/.env` })
 
