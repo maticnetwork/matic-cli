@@ -514,5 +514,4 @@ export async function start() {
   } else {
     await runRemoteSetupWithMaticCLI(dnsIps, devnetId)
   }
-
 }
