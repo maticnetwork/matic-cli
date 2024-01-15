@@ -515,5 +515,4 @@ export async function start() {
     await runRemoteSetupWithMaticCLI(dnsIps, devnetId)
   }
 
-  await fundGanacheAccounts()
 }
