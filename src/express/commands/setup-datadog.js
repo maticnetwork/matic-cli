@@ -2,7 +2,6 @@
 
 import { loadDevnetConfig, splitToArray } from '../common/config-utils.js'
 import { timer } from '../common/time-utils.js'
-import { constants } from '../common/constants.js'
 
 import {
   runScpCommand,
