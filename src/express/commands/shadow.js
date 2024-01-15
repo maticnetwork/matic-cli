@@ -49,7 +49,7 @@ export async function shadow(targetBlock) {
     console.log('❌ All the machines are past the target block! Exiting ...')
     process.exit(1)
   }
-  const shadowGenesisLocation = '~/.bor/shadow-genesis.json'
+  const shadowGenesisLocation = '/var/lib/bor/shadow-genesis.json'
   const startScriptLocation = '~/node/bor-start.sh'
   const launchFolder =
     process.env.NETWORK === 'mainnet' ? 'mainnet-v1' : 'testnet-v4'

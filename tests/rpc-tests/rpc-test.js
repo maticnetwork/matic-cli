@@ -77,7 +77,7 @@ async function init() {
       const addFlagsCmd = `sed -i 's/--allow-insecure-unlock \\\\/&\\n  --disable-bor-wallet=false \\\\/' ${borStartScriptLocation}`
       const restartBorCmd = 'sudo service bor restart'
       const isSyncingCmd =
-        '~/go/bin/bor attach ~/.bor/data/bor.ipc --exec "eth.syncing"'
+        '~/go/bin/bor attach /var/lib/bor/data/bor.ipc --exec "eth.syncing"'
 
       console.log(
         '📍Updating start script on machine to unlock node account ... '
@@ -104,7 +104,7 @@ async function init() {
   }
   const web3 = await initWeb3(machine)
 
-  const src = `${ip}:~/.bor/address.txt`
+  const src = `${ip}:/var/lib/bor/address.txt`
   const dest = './address.txt'
   await runScpCommand(src, dest, maxRetries)
 

@@ -722,7 +722,7 @@ export class Devnet {
                 '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
                 '-i', '~/cert.pem',
                                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                                `bash ${this.config.targetDirectory}/bor-service-host.sh`
+                                `bash ${this.config.targetDirectory}/bor-service-host.sh ${this.config.devnetBorFlags[i]}`
               ], { stdio: getRemoteStdio() })
 
               // NOTE: Target location would vary depending on bor/heimdall version. Currently the setup works with bor and heimdall v0.3.x
@@ -737,7 +737,7 @@ export class Devnet {
               '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
               '-i', '~/cert.pem',
                             `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                            'bash ~/bor-service.sh'
+                            `bash ~/bor-service.sh ${this.config.devnetBorFlags[i]}`
             ], { stdio: getRemoteStdio() })
 
             await execa('ssh', [
@@ -939,6 +939,22 @@ export class Devnet {
                     // eslint-disable-next-line
                     `printf %s "  --gcmode 'archive'" >> ~/node/bor-start.sh `
               ], { stdio: getRemoteStdio() })
+
+              await execa('ssh', [
+                '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
+                '-i', '~/cert.pem',
+                    `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                    // eslint-disable-next-line
+                    `sed -i '$s,$, \\\\,' ~/node/bor-start-config.sh`
+              ], { stdio: getRemoteStdio() })
+
+              await execa('ssh', [
+                '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
+                '-i', '~/cert.pem',
+                    `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                    // eslint-disable-next-line
+                    `printf %s "  --gcmode 'archive'" >> ~/node/bor-start-config.sh `
+              ], { stdio: getRemoteStdio() })
             }
 
             if (this.config.network) {
@@ -949,6 +965,14 @@ export class Devnet {
                       `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                       // eslint-disable-next-line
                       `sed -i "s|\\$BOR_HOME/genesis.json|${chain}|g" ~/node/bor-start.sh`
+              ], { stdio: getRemoteStdio() })
+
+              await execa('ssh', [
+                '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
+                '-i', '~/cert.pem',
+                      `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                      // eslint-disable-next-line
+                      `sed -i "s|\\$BOR_HOME/genesis.json|${chain}|g" ~/node/bor-start-config.sh`
               ], { stdio: getRemoteStdio() })
             }
 
@@ -1783,6 +1807,9 @@ export default async function (command) {
   const devnetErigonUsers = config.devnetErigonUsers || []
   const totalBorNodes = config.numOfBorValidators + config.numOfBorSentries + config.numOfBorArchiveNodes
 
+  // set devnet bor flags
+  const devnetBorFlags = config.devnetBorFlags || []
+
   // For docker, the devnetBorHosts conform to the subnet 172.20.1.0/24
   if (config.devnetType === 'docker') {
     devnetBorHosts = []
@@ -1798,7 +1825,8 @@ export default async function (command) {
     devnetHeimdallHosts,
     devnetHeimdallUsers,
     devnetErigonHosts,
-    devnetErigonUsers
+    devnetErigonUsers,
+    devnetBorFlags
   })
 
   // start setup
