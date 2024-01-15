@@ -12,15 +12,15 @@ const EthAmount = '10'
 // we implemented this workaround waiting for a migration to hardhat
 // (see internal issue https://polygon.atlassian.net/browse/POS-1869)
 export async function fundGanacheAccounts(doc) {
-  let machine0 = doc.devnetBorHosts[0]
-
-  if (doc == nil) {
+  if (doc === undefined || doc == null) {
     dotenv.config({ path: `${process.cwd()}/.env` })
 
     const devnetType =
       process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
 
     doc = await loadDevnetConfig(devnetType)
+  } else {
+    machine0 = doc.devnetBorHosts[0]
   }
 
   if (
