@@ -3,8 +3,11 @@ import { maxRetries, runScpCommand } from './remote-worker.js'
 import { loadDevnetConfig } from '../common/config-utils.js'
 import Web3 from 'web3'
 import dotenv from 'dotenv'
+import bor from '../../setup/bor/index.js'
 
 const EthAmount = '10'
+
+const borProdChainIds = [137, 8001, 8002] //mainnet, mumbai, amoy
 
 // Since we might reset and restart ganache multiple times during the setup,
 // and  considered that ganache is no longer maintained, plus
@@ -21,14 +24,10 @@ export async function fundGanacheAccounts(doc) {
 
     doc = await loadDevnetConfig(devnetType)
   } else {
-    machine0 = doc.devnetBorHosts[0]
+    machine0 = doc.devnetHeimdallHosts[0]
   }
 
-  if (
-    doc.borChainId !== 137 && // mainnet
-    doc.borChainId !== 8001 && // mumbai
-    doc.borChainId !== 8002 // amoy
-  ) {
+  if (!borProdChainIds.includes(doc.borChainId)) {
     console.log('📍Fund ganache accounts only works for devnet')
     console.log('📍Skipping in case of mainnet, mumbai or amoy')
     return
