@@ -10,7 +10,12 @@ const EthAmount = '10'
 // we implemented this workaround waiting for a migration to hardhat
 // (see internal issue https://polygon.atlassian.net/browse/POS-1869)
 export async function fundGanacheAccounts(doc) {
-  const machine0 = doc.devnetBorHosts[0]
+  let machine0
+  if (doc.devnetBorHosts) {
+    machine0 = doc.devnetBorHosts[0]
+  } else {
+    machine0 = doc.devnetErigonHosts[0]
+  }
 
   console.log('📍Transferring funds from ganache account[0] to others...')
   const src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/devnet/signer-dump.json`
