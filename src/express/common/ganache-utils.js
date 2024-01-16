@@ -3,11 +3,10 @@ import { maxRetries, runScpCommand } from './remote-worker.js'
 import { loadDevnetConfig } from '../common/config-utils.js'
 import Web3 from 'web3'
 import dotenv from 'dotenv'
-import bor from '../../setup/bor/index.js'
 
 const EthAmount = '10'
 
-const borProdChainIds = [137, 8001, 8002] //mainnet, mumbai, amoy
+const borProdChainIds = [137, 8001, 8002] // mainnet, mumbai, amoy
 
 // Since we might reset and restart ganache multiple times during the setup,
 // and  considered that ganache is no longer maintained, plus
