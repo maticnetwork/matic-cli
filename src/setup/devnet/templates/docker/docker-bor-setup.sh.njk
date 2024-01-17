@@ -4,14 +4,12 @@ set -x
 
 for i in {0..{{ obj.totalNodes - 1 }}}
 do
-  NODE_DIR=$HOME/node
-  DATA_DIR=/root/var/lib/bor/data
-  BOR_DIR=/root/var/lib/bor
+  NODE_DIR=/root/var/lib/bor
+  DATA_DIR=/root/.bor/data
   docker compose run --rm --entrypoint bash bor$i -c "
-sudo mkdir -p $DATA_DIR/bor;
-sudo cp $NODE_DIR/bor-config.toml $BOR_DIR/config.toml
-sudo cp $NODE_DIR/bor/nodekey $DATA_DIR/bor/;
-sudo cp $NODE_DIR/bor/static-nodes.json $DATA_DIR/bor/;
+mkdir -p $DATA_DIR/bor;
+cp $NODE_DIR/nodekey $DATA_DIR/bor/;
+cp $NODE_DIR/static-nodes.json $DATA_DIR/bor/;
 "
 done
 
