@@ -184,7 +184,7 @@ jobs:
           bash docker-bor-setup.sh
           bash docker-bor-start-all.sh
           cd -
-          timeout 2m bash bor/integration-tests/bor_health.sh
+          timeout 2m bash matic-cli/.github/integration-tests/bor_health.sh
           cd -
           bash ganache-deployment-bor.sh
           bash ganache-deployment-sync.sh
@@ -195,7 +195,7 @@ jobs:
           cd matic-cli/devnet/code/contracts
           npm run truffle exec scripts/deposit.js -- --network development $(jq -r .root.tokens.MaticToken contractAddresses.json) 100000000000000000000
           cd -
-          timeout 60m bash matic-cli/.github/smoke_test.sh
+          timeout 60m bash matic-cli/.github/integration-tests/smoke_test.sh
 
       - name: Upload logs
         if: always()
