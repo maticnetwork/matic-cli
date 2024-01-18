@@ -1,4 +1,4 @@
-name: CI-e2e-remote
+name: CI
 on:
   push:
     branches:
@@ -12,12 +12,36 @@ on:
 
 concurrency:
   group: build-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 env:
   NODE_VERSION: '18.19.0'
 
 jobs:
+  lint:
+    name: Prettier and Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: matic-cli
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install npm dependencies
+        working-directory: matic-cli
+        run: npm install --prefer-offline --no-audit --progress=false
+
+      - name: Run prettier
+        working-directory: matic-cli
+        run: npm run prettier:check
+
+      - name: Run lint
+        working-directory: matic-cli
+        run: npm run lint:check
+
   e2e-remote:
     permissions:
       id-token: write
@@ -110,3 +134,91 @@ jobs:
         if: always()
         working-directory: matic-cli/aws
         run: aws ec2 delete-key-pair --key-name matic-cli-ci-key
+
+  e2e-docker:
+    permissions:
+      id-token: write
+      contents: write
+    if: (github.event.action != 'closed' || github.event.pull_request.merged == true)
+    strategy:
+      matrix:
+        os: [ubuntu-20.04] # list of os: https://github.com/actions/virtual-environments
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: matic-cli
+
+      - name: Install dependencies on Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt update
+          sudo apt install build-essential
+          curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+          sudo snap install solc
+          sudo apt install python2 jq curl
+          sudo ln -sf /usr/bin/python2 /usr/bin/python
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install npm dependencies
+        working-directory: matic-cli
+        run: npm install --prefer-offline --no-audit --progress=false
+
+      - name: Bootstrap devnet
+        run: |
+          cd matic-cli
+          npm install --prefer-offline --no-audit --progress=false
+          mkdir devnet
+          cd devnet
+          ../bin/matic-cli.js setup devnet -c ../../matic-cli/.github/e2e-docker-config.yml
+
+      - name: Launch devnet
+        run: |
+          cd matic-cli/devnet
+          bash docker-ganache-start.sh
+          bash docker-heimdall-start-all.sh
+          bash docker-bor-setup.sh
+          bash docker-bor-start-all.sh
+          cd -
+          timeout 2m bash bor/integration-tests/bor_health.sh
+          cd -
+          bash ganache-deployment-bor.sh
+          bash ganache-deployment-sync.sh
+
+      - name: Run smoke tests
+        run: |
+          echo "Deposit 100 matic for each account to bor network"
+          cd matic-cli/devnet/code/contracts
+          npm run truffle exec scripts/deposit.js -- --network development $(jq -r .root.tokens.MaticToken contractAddresses.json) 100000000000000000000
+          cd -
+          timeout 60m bash matic-cli/.github/smoke_test.sh
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: logs_${{ github.run_id }}
+          path: |
+            matic-cli/devnet/logs
+
+      - name: Package code and chain data
+        if: always()
+        run: |
+          cd matic-cli/devnet
+          docker compose down --remove-orphans
+          cd -
+          mkdir -p ${{ github.run_id }}/matic-cli
+          sudo mv bor ${{ github.run_id }}
+          sudo mv matic-cli/devnet ${{ github.run_id }}/matic-cli
+          sudo tar czf code.tar.gz ${{ github.run_id }}
+
+      - name: Upload code and chain data
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: code_${{ github.run_id }}
+          path: code.tar.gz
