@@ -2,9 +2,12 @@
 
 set -x
 
-# copy static nodes from json to toml
-STATICNODES=$(cat node/bor/static-nodes.json)
-sed -i "s%.*static-nodes =.*%static-nodes = $(echo $STATICNODES)%g" $NODE_DIR/docker-bor-config.toml
+NODE_DIR=/root/var/lib/bor
+DATA_DIR=/root/var/lib/bor/data
+
+# # copy static nodes from json to toml
+# STATICNODES=$(cat $NODE_DIR/static-nodes.json)
+# sed -i "s%.*static-nodes =.*%static-nodes = $(echo $STATICNODES)%g" $NODE_DIR/config.toml
 
 for i in {0..{{ obj.totalNodes - 1 }}}
 do
@@ -14,7 +17,6 @@ do
 mkdir -p $DATA_DIR/bor;
 cp $NODE_DIR/nodekey $DATA_DIR/bor/;
 cp $NODE_DIR/static-nodes.json $DATA_DIR/bor/;
-cp $NODE_DIR/docker-bor-config.toml $NODE_DIR/config.toml;
 "
 done
 
