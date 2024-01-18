@@ -18,7 +18,7 @@ env:
   NODE_VERSION: '18.19.0'
 
 jobs:
-  e2e-remote:
+  e2e-docker:
     permissions:
       id-token: write
       contents: write
