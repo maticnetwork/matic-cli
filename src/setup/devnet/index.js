@@ -343,6 +343,13 @@ export class Devnet {
             obj: this,
             ganache: this.ganache
           })
+
+          for (let i = 0; i < this.totalBorNodes; i++) {
+            await fs.copyFile(
+              path.join(this.config.targetDirectory, 'docker-bor-config.toml'),
+              path.join(this.borDir(i), 'config.toml')
+            )
+          }
         }
       }
     ]

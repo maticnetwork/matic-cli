@@ -9,15 +9,16 @@ ADDRESSES=({% for s in obj.signerDumpData %}
 INDEX=$1;
 ADDRESS=${ADDRESSES[$INDEX]};
 
-BOR_DIR=/root/var/lib/bor
-BOR_DATA_DIR=/root/var/lib/bor/data
+NODE_DIR=/root/var/lib/bor
+DATA_DIR=/root/var/lib/bor/data
 
 docker compose run --service-ports -d --name bor$INDEX --entrypoint bash bor$INDEX -c "
 touch /root/logs/bor.log
 bor server \
-  --chain=$BOR_DIR/genesis.json \
+  --config $NODE_DIR/config.toml \
+  --chain=$NODE_DIR/genesis.json \
   --identity matic-cli \
-  --datadir $BOR_DATA_DIR \
+  --datadir $DATA_DIR \
   --port 30303 \
   --bor.heimdall http://heimdall$INDEX:1317 \
   --http --http.addr '0.0.0.0' \
@@ -26,7 +27,7 @@ bor server \
   --http.corsdomain '*' \
   --ws.origins '*' \
   --http.port 8545 \
-  --ipcpath $BOR_DATA_DIR/bor.ipc \
+  --ipcpath $DATA_DIR/bor.ipc \
   --http.api 'personal,eth,net,web3,txpool,miner,admin,bor,debug' \
   --bor.logs=true \
   --syncmode 'full' \
@@ -38,8 +39,8 @@ bor server \
   --unlock $ADDRESS \
   --miner.etherbase $ADDRESS \
   --disable-bor-wallet=false \
-  --keystore $BOR_DIR/keystore \
-  --password $BOR_DIR/password.txt \
+  --keystore $NODE_DIR/keystore \
+  --password $NODE_DIR/password.txt \
   --allow-insecure-unlock \
   --mine > /root/logs/bor.log 2>&1 &
 tail -f /root/logs/bor.log
