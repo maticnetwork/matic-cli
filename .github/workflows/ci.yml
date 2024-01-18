@@ -164,10 +164,6 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install npm dependencies
-        working-directory: matic-cli
-        run: npm install --prefer-offline --no-audit --progress=false
-
       - name: Bootstrap devnet
         run: |
           cd matic-cli
