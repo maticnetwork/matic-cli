@@ -1,4 +1,4 @@
-name: CI-LINT
+name: lint
 on:
   push:
     branches:
