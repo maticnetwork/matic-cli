@@ -15,6 +15,7 @@ DATA_DIR=/root/var/lib/bor/data
 docker compose run --service-ports -d --name bor$INDEX --entrypoint bash bor$INDEX -c "
 touch /root/logs/bor.log
 bor server \
+  --config $NODE_DIR/config.toml \
   --chain=$NODE_DIR/genesis.json \
   --identity matic-cli \
   --datadir $DATA_DIR \
