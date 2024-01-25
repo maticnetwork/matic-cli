@@ -36,6 +36,7 @@ numOfBorArchiveNodes: 0
 borDockerBuildContext: https://github.com/maticnetwork/bor.git#develop
 devnetBorUsers: ubuntu,ubuntu
 devnetBorHosts: ["ec2-xx-xxx-xx-xxx.eu-west-1.compute.amazonaws.com"] # use localhost for local deployments
+devnetBorFlags: config,config
 
 # Erigon
 numOfErigonValidators: 0

@@ -152,7 +152,7 @@ async function cleanupServices(doc) {
 
     if (hostToIndexMap.get(ip) < returnTotalBorNodes(doc)) {
       console.log('📍Cleaning up bor on machine ' + ip + ' ...')
-      command = 'rm -rf ~/.bor/data'
+      command = 'rm -rf /var/lib/bor/data'
       await runSshCommand(ip, command, maxRetries)
     } else {
       console.log('📍Cleaning up erigon on machine ' + ip + ' ...')

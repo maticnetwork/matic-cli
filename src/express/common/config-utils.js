@@ -275,7 +275,7 @@ function validateUsersAndHosts() {
   console.log(
     '📍Validating DEVNET_BOR_USERS, DEVNET_BOR_HOSTS, DEVNET_ERIGON_USERS and DEVNET_ERIGON_HOSTS...'
   )
-  let borUsers, borHosts, erigonUsers, erigonHosts
+  let borUsers, borHosts, erigonUsers, erigonHosts, borFlags
   if (process.env.DEVNET_BOR_USERS && process.env.DEVNET_BOR_HOSTS) {
     borUsers = process.env.DEVNET_BOR_USERS.split(',')
     borHosts = process.env.DEVNET_BOR_HOSTS.split(',')
@@ -284,12 +284,26 @@ function validateUsersAndHosts() {
     erigonUsers = process.env.DEVNET_ERIGON_USERS.split(',')
     erigonHosts = process.env.DEVNET_ERIGON_HOSTS.split(',')
   }
+  if (process.env.DEVNET_BOR_FLAGS) {
+    borFlags = process.env.DEVNET_BOR_FLAGS.split(',')
+  }
   const borValCount = Number(process.env.TF_VAR_BOR_VALIDATOR_COUNT)
   const borSenCount = Number(process.env.TF_VAR_BOR_SENTRY_COUNT)
   const borArchiveCount = Number(process.env.TF_VAR_BOR_ARCHIVE_COUNT)
   const erigonValCount = Number(process.env.TF_VAR_ERIGON_VALIDATOR_COUNT)
   const erigonSenCount = Number(process.env.TF_VAR_ERIGON_SENTRY_COUNT)
   const erigonArchiveCount = Number(process.env.TF_VAR_ERIGON_ARCHIVE_COUNT)
+
+  if (
+    process.env.DEVNET_BOR_USERS &&
+    process.env.DEVNET_BOR_FLAGS &&
+    borFlags.length !== borUsers.length
+  ) {
+    console.log(
+      '❌ DEVNET_BOR_USERS lengths and DEVNET_BOR_FLAGS length are not equal, please check your configs!'
+    )
+    process.exit(1)
+  }
 
   if (
     process.env.TF_VAR_DOCKERIZED === 'yes' &&
@@ -700,9 +714,11 @@ export async function editMaticCliRemoteYAMLConfig() {
     setConfigList('devnetHeimdallHosts', process.env.DEVNET_ERIGON_HOSTS, doc)
     deleteConfig('devnetBorUsers', doc)
     deleteConfig('devnetBorHosts', doc)
+    deleteConfig('devnetBorFlags', doc)
   } else if (!process.env.DEVNET_ERIGON_USERS) {
     setConfigList('devnetBorHosts', process.env.DEVNET_BOR_HOSTS, doc)
     setConfigList('devnetBorUsers', process.env.DEVNET_BOR_USERS, doc)
+    setConfigList('devnetBorFlags', process.env.DEVNET_BOR_FLAGS, doc)
     setConfigList('devnetHeimdallUsers', process.env.DEVNET_BOR_USERS, doc)
     setConfigList('devnetHeimdallHosts', process.env.DEVNET_BOR_HOSTS, doc)
     deleteConfig('devnetErigonUsers', doc)
@@ -710,6 +726,7 @@ export async function editMaticCliRemoteYAMLConfig() {
   } else {
     setConfigList('devnetBorHosts', process.env.DEVNET_BOR_HOSTS, doc)
     setConfigList('devnetBorUsers', process.env.DEVNET_BOR_USERS, doc)
+    setConfigList('devnetBorFlags', process.env.DEVNET_BOR_FLAGS, doc)
     setConfigList('devnetErigonHosts', process.env.DEVNET_ERIGON_HOSTS, doc)
     setConfigList('devnetErigonUsers', process.env.DEVNET_ERIGON_USERS, doc)
     setConfigList(

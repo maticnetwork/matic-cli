@@ -35,5 +35,8 @@ devnetBorUsers:
 devnetHeimdallUsers:
   - ubuntu
   - ubuntu
+devnetBorFlags:
+  - config
+  - config
 borDockerBuildContext: https://github.com/maticnetwork/bor.git#develop
 heimdallDockerBuildContext: https://github.com/maticnetwork/heimdall.git#develop
