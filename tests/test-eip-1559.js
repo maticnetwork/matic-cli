@@ -201,7 +201,7 @@ export async function testEip1559(n) {
     for (let i = 0; i < count; i++) {
       await runTest(web3, accounts, sender)
     }
-    console.log('All tests successfuly executed!')
+    console.log('All tests successfully executed!')
     process.exit(0)
   } catch (error) {
     console.log('❌ Error occurred while running eip-1559 tests: ', error)
