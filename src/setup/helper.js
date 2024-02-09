@@ -56,7 +56,7 @@ export async function getNetworkParams(options = {}) {
       type: 'input',
       name: 'sprintSizeBlockNumber',
       message:
-        'Please enter the corresponding block numbers(s) seperated by commas',
+        'Please enter the corresponding block numbers(s) separated by commas',
       default: '0'
     })
   }
@@ -65,7 +65,7 @@ export async function getNetworkParams(options = {}) {
     questions.push({
       type: 'input',
       name: 'blockTime',
-      message: 'Please enter the block times(s) seperated by commas',
+      message: 'Please enter the block times(s) separated by commas',
       default: '2'
     })
 
@@ -73,7 +73,7 @@ export async function getNetworkParams(options = {}) {
       type: 'input',
       name: 'blockNumber',
       message:
-        'Please enter the corresponding block numbers(s) seperated by commas',
+        'Please enter the corresponding block numbers(s) separated by commas',
       default: '0'
     })
   }

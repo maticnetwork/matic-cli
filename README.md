@@ -35,7 +35,7 @@ To use the `express-cli` you have to execute the following steps.
 - copy `secret.tfvars.example` to `secret.tfvar` with command `cp secret.tfvars.example secret.tfvars` and check the commented file for details
 - **If you are a Polygon employee**, connect to the company VPN
 - modify `secret.tfvar` with addresses of the allowed IPs (as specified in `secret.tfvars.example` file)
-- copy `.env.example` to `.env` with command `cp .env.example .env` and check the heavily commented file for details. If you're using GCP, you can ignore AWS specific terraform varibales and vice versa.
+- copy `.env.example` to `.env` with command `cp .env.example .env` and check the heavily commented file for details. If you're using GCP, you can ignore AWS specific terraform variables and vice versa.
 - make sure `PEM_FILE_PATH` points to a correct AWS key certificate, the one you downloaded in the previous steps
 - define the number of nodes (`TF_VAR_VALIDATOR_COUNT` and `TF_VAR_SENTRY_COUNT`) and adjust the `DEVNET_BOR_USERS`
   accordingly
@@ -120,7 +120,7 @@ Congrats! You're all set to use `express-cli` commands.
 
 If you are using Google cloud platform, you need to configure authentication on `gcloud`.
 
-If you have downloaded the service account credentials, you can use the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to provide the location of thst credential JSON file.
+If you have downloaded the service account credentials, you can use the `GOOGLE_APPLICATION_CREDENTIALS` environment variable to provide the location of that credential JSON file.
 
 ```bash
 gcloud auth application-default login

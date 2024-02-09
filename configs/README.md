@@ -78,10 +78,10 @@ borBranch: c5569e4da9ebe0ce4e63aec571966c71234f7cfc # todo change to develop onc
 # Branch of Heimdall to use. Repository: https://github.com/maticnetwork/heimdall
 heimdallBranch: develop
 
-# Branch of contract to use. Repostiory: https://github.com/maticnetwork/contracts
+# Branch of contract to use. Repository: https://github.com/maticnetwork/contracts
 contractsBranch: mardizzone/node-upgrade # todo change to master once contracts team merges the PR
 
-# Branch of contract to use. Repostiory: https://github.com/maticnetwork/genesis-contracts
+# Branch of contract to use. Repository: https://github.com/maticnetwork/genesis-contracts
 genesisContractsBranch: mardizzone/node-upgrade # todo change to master once contracts team merges the PR
 
 # Docker build context for bor. Used in docker setup. When specified, borBranch will be ignored.

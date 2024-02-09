@@ -489,7 +489,7 @@ function setCommonConfigs(doc) {
       }
     } catch (error) {
       console.log(
-        '❌ Error occured while processing heimdall chain id (Heimdall chain id should be like: heimdall-4052)!'
+        '❌ Error occurred while processing heimdall chain id (Heimdall chain id should be like: heimdall-4052)!'
       )
       process.exit(1)
     }
