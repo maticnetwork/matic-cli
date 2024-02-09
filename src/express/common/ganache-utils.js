@@ -1,5 +1,3 @@
-import fs from 'fs'
-import { maxRetries, runScpCommand } from './remote-worker.js'
 import { loadDevnetConfig } from '../common/config-utils.js'
 import Web3 from 'web3'
 import dotenv from 'dotenv'
