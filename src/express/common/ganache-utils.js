@@ -13,7 +13,7 @@ const borProdChainIds = [137, 8001, 8002] // mainnet, mumbai, amoy
 // it is affected by this issue https://github.com/trufflesuite/ganache/issues/4404
 // we implemented this workaround waiting for a migration to hardhat
 // (see internal issue https://polygon.atlassian.net/browse/POS-1869)
-export async function fundGanacheAccounts(doc) {
+export async function fundGanacheAccounts(doc, signerDump) {
   let machine0
   if (doc === undefined || doc == null) {
     dotenv.config({ path: `${process.cwd()}/.env` })
@@ -37,13 +37,6 @@ export async function fundGanacheAccounts(doc) {
     : (machine0 = doc.devnetErigonHosts[0])
 
   console.log('📍Transferring funds from ganache account[0] to others...')
-  const src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/devnet/signer-dump.json`
-  const dest = './signer-dump.json'
-  await runScpCommand(src, dest, maxRetries)
-
-  const signerDump = JSON.parse(
-    fs.readFileSync(`${process.cwd()}/signer-dump.json`, 'utf8')
-  )
 
   const rootChainWeb3 = new Web3(`http://${machine0}:9545`)
 
