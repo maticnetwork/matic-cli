@@ -26,7 +26,7 @@ export async function fundGanacheAccounts(doc) {
     machine0 = doc.devnetHeimdallHosts[0]
   }
 
-  if (!borProdChainIds.includes(doc.borChainId)) {
+  if (borProdChainIds.includes(doc.borChainId)) {
     console.log('📍Fund ganache accounts only works for devnet')
     console.log('📍Skipping in case of mainnet, mumbai or amoy')
     return
