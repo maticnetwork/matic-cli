@@ -1,3 +1,5 @@
+import fs from 'fs'
+import { maxRetries, runScpCommand } from './remote-worker.js'
 import { loadDevnetConfig } from '../common/config-utils.js'
 import Web3 from 'web3'
 import dotenv from 'dotenv'
@@ -11,7 +13,7 @@ const borProdChainIds = [137, 8001, 8002] // mainnet, mumbai, amoy
 // it is affected by this issue https://github.com/trufflesuite/ganache/issues/4404
 // we implemented this workaround waiting for a migration to hardhat
 // (see internal issue https://polygon.atlassian.net/browse/POS-1869)
-export async function fundGanacheAccounts(doc, signerDump) {
+export async function fundGanacheAccounts(doc) {
   let machine0
   if (doc === undefined || doc == null) {
     dotenv.config({ path: `${process.cwd()}/.env` })
@@ -35,6 +37,10 @@ export async function fundGanacheAccounts(doc, signerDump) {
     : (machine0 = doc.devnetErigonHosts[0])
 
   console.log('📍Transferring funds from ganache account[0] to others...')
+
+  const signerDump = JSON.parse(
+    fs.readFileSync(`${process.cwd()}/signer-dump.json`, 'utf8')
+  )
 
   const rootChainWeb3 = new Web3(`http://${machine0}:9545`)
 

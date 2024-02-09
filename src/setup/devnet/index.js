@@ -1647,8 +1647,6 @@ async function setupDevnet(config) {
     await snapshotTasks.run()
   }
 
-  await fundGanacheAccounts(config, devnet.signerDumpData)
-
   console.log('%s Devnet is ready', chalk.green.bold('DONE'))
 }
 
