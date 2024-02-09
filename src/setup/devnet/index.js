@@ -25,7 +25,6 @@ import { loadConfig } from '../config.js'
 import fileReplacer from '../../lib/file-replacer.js'
 import { getRemoteStdio } from '../../express/common/remote-worker.js'
 import { Erigon } from '../erigon/index.js'
-import { fundGanacheAccounts } from '../../express/common/ganache-utils.js'
 
 const timer = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 

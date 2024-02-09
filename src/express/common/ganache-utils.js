@@ -1,6 +1,6 @@
 import fs from 'fs'
-import { maxRetries, runScpCommand } from './remote-worker.js'
 import { loadDevnetConfig } from '../common/config-utils.js'
+import { maxRetries, runScpCommand } from './remote-worker.js'
 import Web3 from 'web3'
 import dotenv from 'dotenv'
 
@@ -15,11 +15,10 @@ const borProdChainIds = [137, 8001, 8002] // mainnet, mumbai, amoy
 // (see internal issue https://polygon.atlassian.net/browse/POS-1869)
 export async function fundGanacheAccounts(doc) {
   let machine0
+  const devnetType =
+    process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
   if (doc === undefined || doc == null) {
     dotenv.config({ path: `${process.cwd()}/.env` })
-
-    const devnetType =
-      process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
 
     doc = await loadDevnetConfig(devnetType)
   } else {
@@ -37,6 +36,11 @@ export async function fundGanacheAccounts(doc) {
     : (machine0 = doc.devnetErigonHosts[0])
 
   console.log('📍Transferring funds from ganache account[0] to others...')
+  if (devnetType === 'remote') {
+    const src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/devnet/signer-dump.json`
+    const dest = './signer-dump.json'
+    await runScpCommand(src, dest, maxRetries)
+  }
 
   const signerDump = JSON.parse(
     fs.readFileSync(`${process.cwd()}/signer-dump.json`, 'utf8')
