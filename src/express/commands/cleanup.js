@@ -1,5 +1,4 @@
 import {
-  getDevnetId,
   loadDevnetConfig,
   returnTotalBorNodes,
   splitToArray
@@ -12,13 +11,12 @@ import { fundGanacheAccounts } from '../common/ganache-utils.js'
 export async function cleanup() {
   dotenv.config({ path: `${process.cwd()}/.env` })
   const doc = await loadDevnetConfig('remote')
-  const devnetId = getDevnetId()
 
   await stopServices(doc)
   await cleanupServices(doc)
   await startServices(doc)
   await deployBorContractsAndStateSync(doc)
-  await fundGanacheAccounts(doc, devnetId, 'remote')
+  await fundGanacheAccounts(doc)
 }
 
 export async function stopServices(doc) {

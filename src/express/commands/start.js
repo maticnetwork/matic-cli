@@ -14,13 +14,13 @@ import {
   runScpCommand,
   runSshCommand
 } from '../common/remote-worker.js'
-import { fundGanacheAccounts } from '../common/ganache-utils.js'
 import { timer } from '../common/time-utils.js'
 import yaml from 'js-yaml'
 import fs from 'fs'
 
 import shell from 'shelljs'
 import dotenv from 'dotenv'
+import { fundGanacheAccounts } from '../common/ganache-utils.js'
 
 async function terraformApply(devnetId) {
   console.log('📍Executing terraform apply...')

@@ -2,7 +2,6 @@
 
 import { loadDevnetConfig, splitToArray } from '../common/config-utils.js'
 import { timer } from '../common/time-utils.js'
-import { constants } from '../common/constants.js'
 
 import {
   runScpCommand,
@@ -42,27 +41,17 @@ export async function setupDatadog() {
     doc = await loadDevnetConfig('remote')
   }
 
-  if (doc.cloud.toString() === constants.cloud.GCP) {
-    // not tested datadog setup in GCP
-    console.log('📍Datadog setup currently not supported in GCP')
-    return
+  // Using heimdall hosts here so it handles both bor and erigon
+  if (doc.devnetHeimdallHosts.length > 0) {
+    console.log('📍Monitoring the nodes', doc.devnetHeimdallHosts[0])
   }
 
-  if (doc.devnetBorHosts.length > 0) {
-    console.log('📍Monitoring the nodes', doc.devnetBorHosts[0])
-  } else {
-    console.log(
-      '📍No nodes to monitor since this command is not yet supported on Erigon devnets, please check your configs! Exiting...'
-    )
-    process.exit(1)
-  }
-
-  const borUsers = splitToArray(doc.devnetBorUsers.toString())
+  const heimdallUsers = splitToArray(doc.devnetHeimdallUsers.toString())
   let envName
 
-  for (let i = 0; i < doc.devnetBorHosts.length; i++) {
-    const host = doc.devnetBorHosts[i]
-    const user = borUsers[i]
+  for (let i = 0; i < doc.devnetHeimdallHosts.length; i++) {
+    const host = doc.devnetHeimdallHosts[i]
+    const user = heimdallUsers[i]
 
     console.log('📍Monitoring the node', host)
 

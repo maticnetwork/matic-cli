@@ -44,6 +44,7 @@ import { rpcTest } from '../tests/rpc-tests/rpc-test.js'
 import { constants } from './express/common/constants.js'
 
 import pkg from '../package.json' assert { type: 'json' }
+import { fundGanacheAccounts } from './express/common/ganache-utils.js'
 
 function checkCloudProvider(provider, _) {
   const supportedClouds = [constants.cloud.AWS, constants.cloud.GCP]
@@ -162,6 +163,7 @@ program
   )
   .option('-relay, --relay', 'Relay transaction to shadow node')
   .option('-rpc, --rpc-test', 'Run the rpc test command')
+  .option('-fga, --fund-ganache-accounts', 'Add funds to ganache accounts')
   .version(pkg.version)
 
 export async function cli() {
@@ -453,9 +455,6 @@ export async function cli() {
       )
       process.exit(1)
     }
-    console.log(
-      '⛔ This command currently cannot be executed against an erigon node'
-    )
     await timer(3000)
     await setupDatadog()
   } else if (options.setupEthstats) {
@@ -646,5 +645,14 @@ export async function cli() {
       '⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...'
     )
     await rpcTest()
+  } else if (options.fundGanacheAccounts) {
+    console.log('📍Command --fund-ganache-accounts')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    await fundGanacheAccounts()
   }
 }
