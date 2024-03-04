@@ -205,7 +205,7 @@ function validateEnvVars(cloud) {
     SPRINT_SIZE: num({ default: 64 }),
     BLOCK_NUMBER: validStr({ default: '0,64' }),
     BLOCK_TIME: validStr({ default: '3,2' }),
-    DEVNET_BOR_FLAGS: validStr({ default: 'config,config' }),
+    DEVNET_BOR_FLAGS: validStr({ default: 'config,cli' }),
     BOR_REPO: url({
       default: 'https://github.com/maticnetwork/bor.git'
     }),
