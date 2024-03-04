@@ -36,11 +36,9 @@ export async function fundGanacheAccounts(doc) {
     : (machine0 = doc.devnetErigonHosts[0])
 
   console.log('📍Transferring funds from ganache account[0] to others...')
-  if (devnetType === 'remote') {
-    const src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/devnet/signer-dump.json`
-    const dest = './signer-dump.json'
-    await runScpCommand(src, dest, maxRetries)
-  }
+  const src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/devnet/signer-dump.json`
+  const dest = './signer-dump.json'
+  await runScpCommand(src, dest, maxRetries)
 
   const signerDump = JSON.parse(
     fs.readFileSync(`${process.cwd()}/signer-dump.json`, 'utf8')

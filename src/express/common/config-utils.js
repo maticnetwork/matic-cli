@@ -205,6 +205,7 @@ function validateEnvVars(cloud) {
     SPRINT_SIZE: num({ default: 64 }),
     BLOCK_NUMBER: validStr({ default: '0,64' }),
     BLOCK_TIME: validStr({ default: '3,2' }),
+    DEVNET_BOR_FLAGS: validStr({ default: 'config,cli' }),
     BOR_REPO: url({
       default: 'https://github.com/maticnetwork/bor.git'
     }),
@@ -356,6 +357,16 @@ function validateUsersAndHosts() {
     })
     borHosts.forEach((borHost) => {
       host(borHost)
+    })
+  }
+  if (borFlags) {
+    borFlags.forEach((flag) => {
+      if (flag !== 'config' && flag !== 'cli') {
+        console.log(
+          "❌ DEVNET_BOR_FLAGS must all be 'config' or 'cli', please check your configs!"
+        )
+        process.exit(1)
+      }
     })
   }
   if (erigonUsers) {
@@ -581,6 +592,59 @@ function setCommonConfigs(doc) {
   )
   setConfigList('instancesIds', process.env.INSTANCES_IDS, doc)
   setConfigValue('snapshot', process.env.SNAPSHOT, doc)
+
+  if (!process.env.DEVNET_BOR_USERS) {
+    setConfigList('devnetErigonHosts', process.env.DEVNET_ERIGON_HOSTS, doc)
+    setConfigList('devnetErigonUsers', process.env.DEVNET_ERIGON_USERS, doc)
+    setConfigList('devnetHeimdallUsers', process.env.DEVNET_ERIGON_USERS, doc)
+    setConfigList('devnetHeimdallHosts', process.env.DEVNET_ERIGON_HOSTS, doc)
+    deleteConfig('devnetBorUsers', doc)
+    deleteConfig('devnetBorHosts', doc)
+    deleteConfig('devnetBorFlags', doc)
+  } else if (!process.env.DEVNET_ERIGON_USERS) {
+    setConfigList('devnetBorHosts', process.env.DEVNET_BOR_HOSTS, doc)
+    setConfigList('devnetBorUsers', process.env.DEVNET_BOR_USERS, doc)
+    setConfigList('devnetBorFlags', process.env.DEVNET_BOR_FLAGS, doc)
+    setConfigList('devnetHeimdallUsers', process.env.DEVNET_BOR_USERS, doc)
+    setConfigList('devnetHeimdallHosts', process.env.DEVNET_BOR_HOSTS, doc)
+    deleteConfig('devnetErigonUsers', doc)
+    deleteConfig('devnetErigonHosts', doc)
+  } else {
+    setConfigList('devnetBorHosts', process.env.DEVNET_BOR_HOSTS, doc)
+    setConfigList('devnetBorUsers', process.env.DEVNET_BOR_USERS, doc)
+    setConfigList('devnetBorFlags', process.env.DEVNET_BOR_FLAGS, doc)
+    setConfigList('devnetErigonHosts', process.env.DEVNET_ERIGON_HOSTS, doc)
+    setConfigList('devnetErigonUsers', process.env.DEVNET_ERIGON_USERS, doc)
+    setConfigList(
+      'devnetHeimdallUsers',
+      process.env.DEVNET_BOR_USERS.concat(',', process.env.DEVNET_ERIGON_USERS),
+      doc
+    )
+
+    const heimdallHosts = []
+    heimdallHosts.push(
+      ...doc.devnetBorHosts.slice(0, process.env.TF_VAR_BOR_VALIDATOR_COUNT)
+    )
+    heimdallHosts.push(
+      ...doc.devnetErigonHosts.slice(
+        0,
+        process.env.TF_VAR_ERIGON_VALIDATOR_COUNT
+      )
+    )
+    heimdallHosts.push(
+      ...doc.devnetBorHosts.slice(
+        process.env.TF_VAR_BOR_VALIDATOR_COUNT,
+        doc.devnetBorHosts.length
+      )
+    )
+    heimdallHosts.push(
+      ...doc.devnetErigonHosts.slice(
+        process.env.TF_VAR_ERIGON_VALIDATOR_COUNT,
+        doc.devnetErigonHosts.length
+      )
+    )
+    setConfigList('devnetHeimdallHosts', heimdallHosts.join(','), doc)
+  }
 }
 
 function setConfigValue(key, value, doc) {
@@ -707,58 +771,6 @@ export async function editMaticCliRemoteYAMLConfig() {
   )
 
   setCommonConfigs(doc)
-  if (!process.env.DEVNET_BOR_USERS) {
-    setConfigList('devnetErigonHosts', process.env.DEVNET_ERIGON_HOSTS, doc)
-    setConfigList('devnetErigonUsers', process.env.DEVNET_ERIGON_USERS, doc)
-    setConfigList('devnetHeimdallUsers', process.env.DEVNET_ERIGON_USERS, doc)
-    setConfigList('devnetHeimdallHosts', process.env.DEVNET_ERIGON_HOSTS, doc)
-    deleteConfig('devnetBorUsers', doc)
-    deleteConfig('devnetBorHosts', doc)
-    deleteConfig('devnetBorFlags', doc)
-  } else if (!process.env.DEVNET_ERIGON_USERS) {
-    setConfigList('devnetBorHosts', process.env.DEVNET_BOR_HOSTS, doc)
-    setConfigList('devnetBorUsers', process.env.DEVNET_BOR_USERS, doc)
-    setConfigList('devnetBorFlags', process.env.DEVNET_BOR_FLAGS, doc)
-    setConfigList('devnetHeimdallUsers', process.env.DEVNET_BOR_USERS, doc)
-    setConfigList('devnetHeimdallHosts', process.env.DEVNET_BOR_HOSTS, doc)
-    deleteConfig('devnetErigonUsers', doc)
-    deleteConfig('devnetErigonHosts', doc)
-  } else {
-    setConfigList('devnetBorHosts', process.env.DEVNET_BOR_HOSTS, doc)
-    setConfigList('devnetBorUsers', process.env.DEVNET_BOR_USERS, doc)
-    setConfigList('devnetBorFlags', process.env.DEVNET_BOR_FLAGS, doc)
-    setConfigList('devnetErigonHosts', process.env.DEVNET_ERIGON_HOSTS, doc)
-    setConfigList('devnetErigonUsers', process.env.DEVNET_ERIGON_USERS, doc)
-    setConfigList(
-      'devnetHeimdallUsers',
-      process.env.DEVNET_BOR_USERS.concat(',', process.env.DEVNET_ERIGON_USERS),
-      doc
-    )
-
-    const heimdallHosts = []
-    heimdallHosts.push(
-      ...doc.devnetBorHosts.slice(0, process.env.TF_VAR_BOR_VALIDATOR_COUNT)
-    )
-    heimdallHosts.push(
-      ...doc.devnetErigonHosts.slice(
-        0,
-        process.env.TF_VAR_ERIGON_VALIDATOR_COUNT
-      )
-    )
-    heimdallHosts.push(
-      ...doc.devnetBorHosts.slice(
-        process.env.TF_VAR_BOR_VALIDATOR_COUNT,
-        doc.devnetBorHosts.length
-      )
-    )
-    heimdallHosts.push(
-      ...doc.devnetErigonHosts.slice(
-        process.env.TF_VAR_ERIGON_VALIDATOR_COUNT,
-        doc.devnetErigonHosts.length
-      )
-    )
-    setConfigList('devnetHeimdallHosts', heimdallHosts.join(','), doc)
-  }
   setConfigValue('devnetType', 'remote', doc)
   if (process.env.CLOUD === constants.cloud.AWS) {
     setConfigValue('devnetRegion', process.env.TF_VAR_AWS_REGION, doc)
@@ -846,8 +858,6 @@ export async function editMaticCliDockerYAMLConfig() {
 
   setCommonConfigs(doc)
   setEthHostUser('ubuntu', doc)
-  setConfigList('devnetBorHosts', process.env.DEVNET_BOR_HOSTS, doc)
-  setConfigValue('devnetBorUsers', process.env.DEVNET_BOR_USERS, doc)
   setConfigValue('devnetType', 'docker', doc)
   setEthURL('ganache', doc)
 

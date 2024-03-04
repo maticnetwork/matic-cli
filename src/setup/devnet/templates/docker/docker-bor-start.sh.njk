@@ -9,11 +9,11 @@ ADDRESSES=({% for s in obj.signerDumpData %}
 INDEX=$1;
 ADDRESS=${ADDRESSES[$INDEX]};
 
-NODE_DIR=/root/var/lib/bor
-DATA_DIR=/root/var/lib/bor/data
+NODE_DIR=/var/lib/bor
+DATA_DIR=/var/lib/bor/data
 
 docker compose run --service-ports -d --name bor$INDEX --entrypoint bash bor$INDEX -c "
-touch /root/logs/bor.log
+touch /logs/bor.log
 bor server \
   --config $NODE_DIR/config.toml \
   --chain=$NODE_DIR/genesis.json \
@@ -42,6 +42,6 @@ bor server \
   --keystore $NODE_DIR/keystore \
   --password $NODE_DIR/password.txt \
   --allow-insecure-unlock \
-  --mine > /root/logs/bor.log 2>&1 &
-tail -f /root/logs/bor.log
+  --mine > /logs/bor.log 2>&1 &
+tail -f /logs/bor.log
 "

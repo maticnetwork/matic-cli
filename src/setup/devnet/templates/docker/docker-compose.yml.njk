@@ -14,7 +14,7 @@ services:
     networks:
       - devnet-network
     volumes:
-      - ./data:/root/data
+      - ./data:/data
     ports:
       - "9545:9545"
 
@@ -44,8 +44,8 @@ services:
     networks:
       - devnet-network
     volumes:
-      - ./devnet/node{{ node }}/heimdalld:/root/var/lib/heimdall
-      - ./logs/node{{ node }}/heimdall:/root/heimdall/logs
+      - ./devnet/node{{ node }}/heimdalld:/var/lib/heimdall
+      - ./logs/node{{ node }}/heimdall:/heimdall/logs
     {% if node == 0 %}
     ports:
       - "1317:1317"
@@ -75,8 +75,8 @@ services:
     environment:
       - HEIMDALL_URL=http://heimdall{{ node }}:1317
     volumes:
-      - ./devnet/node{{ node }}/bor:/root/var/lib/bor
-      - ./logs/node{{ node }}/bor:/root/logs
+      - ./devnet/node{{ node }}/bor:/var/lib/bor
+      - ./logs/node{{ node }}/bor:/logs
     {% if node == 0 %}
     ports:
       - "8545:8545"

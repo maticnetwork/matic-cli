@@ -22,7 +22,7 @@ $ bash tmux-docker.sh
 On docker container's shell:
 
 ```bash
-$ tail -f /root/heimdall/logs/heimdalld.log
+$ tail -f /heimdall/logs/heimdalld.log
 ```
 
 **To retrieve nodes and contracts addresses**
