@@ -213,7 +213,7 @@ function validateEnvVars(cloud) {
     ERIGON_REPO: url({
       default: 'https://github.com/ledgerwatch/erigon.git'
     }),
-    ERIGON_BRANCH: validStr({ default: 'devel' }),
+    ERIGON_BRANCH: validStr({ default: 'main' }),
     HEIMDALL_REPO: url({
       default: 'https://github.com/maticnetwork/heimdall.git'
     }),
