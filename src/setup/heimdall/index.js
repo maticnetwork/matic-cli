@@ -270,7 +270,7 @@ export class Heimdall {
                 'init',
                 '--home',
                 this.heimdallDataDir,
-                '--chain-id',
+                '--chain',
                 this.heimdallChainId,
                 'heimdall-test'
               ],

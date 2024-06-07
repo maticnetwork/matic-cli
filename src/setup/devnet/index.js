@@ -1252,7 +1252,7 @@ export class Devnet {
             this.config.numOfBorValidators + this.config.numOfErigonValidators,
             '--n',
             this.config.numOfBorSentries + this.config.numOfBorArchiveNodes + this.config.numOfErigonSentries + this.config.numOfErigonArchiveNodes,
-            '--chain-id',
+            '--chain',
             this.config.heimdallChainId,
             '--node-host-prefix',
             'heimdall',
