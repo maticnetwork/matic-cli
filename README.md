@@ -62,8 +62,8 @@ This command will interactively ask for some configs
 **If you are a Polygon employee**, please use the following
 
 - SSO session name: leave empty
-- SSO start URL: https://polygon-technology.awsapps.com/start#/
-- SSO region: us-east-1
+- SSO start URL: https://0xpolygon.awsapps.com/start/#/
+- SSO region: eu-west-1
 
 The browser will open and authorize your request. Please allow it.
 
@@ -85,12 +85,12 @@ Here an output example
 SSO session name (Recommended):
 WARNING: Configuring using legacy format (e.g. without an SSO session).
 Consider re-running "configure sso" command and providing a session name.
-SSO start URL [None]: https://polygon-technology.awsapps.com/start#/
-SSO region [None]: us-east-1
+SSO start URL [None]: https://0xpolygon.awsapps.com/start/#/
+SSO region [None]: eu-west-1
 Attempting to automatically open the SSO authorization page in your default browser.
 If the browser does not open or you wish to use a different device to authorize this request, open the following URL:
 
-https://device.sso.us-east-1.amazonaws.com/
+https://device.sso.eu-west-1.amazonaws.com/
 
 Then enter the code:
 
