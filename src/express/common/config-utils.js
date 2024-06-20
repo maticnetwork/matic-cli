@@ -206,27 +206,27 @@ function validateEnvVars(cloud) {
     BLOCK_NUMBER: validStr({ default: '0,64' }),
     BLOCK_TIME: validStr({ default: '3,2' }),
     DEVNET_BOR_FLAGS: validStr({ default: 'config,cli' }),
-    BOR_REPO: url({
+    BOR_REPO: validStr({
       default: 'https://github.com/maticnetwork/bor.git'
     }),
     BOR_BRANCH: validStr({ default: 'develop' }),
-    ERIGON_REPO: url({
+    ERIGON_REPO: validStr({
       default: 'https://github.com/ledgerwatch/erigon.git'
     }),
     ERIGON_BRANCH: validStr({ default: 'main' }),
-    HEIMDALL_REPO: url({
+    HEIMDALL_REPO: validStr({
       default: 'https://github.com/maticnetwork/heimdall.git'
     }),
     HEIMDALL_BRANCH: validStr({ default: 'develop' }),
-    CONTRACTS_REPO: url({
+    CONTRACTS_REPO: validStr({
       default: 'https://github.com/maticnetwork/contracts.git'
     }),
     CONTRACTS_BRANCH: validStr({ default: 'master' }),
-    GENESIS_CONTRACTS_REPO: url({
+    GENESIS_CONTRACTS_REPO: validStr({
       default: 'https://github.com/maticnetwork/genesis-contracts.git'
     }),
     GENESIS_CONTRACTS_BRANCH: validStr({ default: 'master' }),
-    MATIC_CLI_REPO: url({
+    MATIC_CLI_REPO: validStr({
       default: 'https://github.com/maticnetwork/matic-cli.git'
     }),
     MATIC_CLI_BRANCH: validStr({ default: 'master' }),
