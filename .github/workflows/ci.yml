@@ -58,12 +58,14 @@ jobs:
 
       - name: Create .env file
         working-directory: matic-cli
+        env:
+          GITHUB_HEAD_REF: ${{ github.head_ref || github.ref_name }}
         run: |
           cp .env.example .env
           sed -i 's,YOUR_IDENTIFIER,matic-cli-ci,' .env
           sed -i 's,aws-key,matic-cli-ci-key,' .env
           sed -i 's,/absolute/path/to/your/,/home/runner/work/matic-cli/matic-cli/matic-cli/aws/,' .env
-          sed -i 's,MATIC_CLI_BRANCH=master,MATIC_CLI_BRANCH=${{ github.head_ref || github.ref_name }},' .env
+          sed -i 's,MATIC_CLI_BRANCH=master,MATIC_CLI_BRANCH=$GITHUB_HEAD_REF,' .env
 
       - name: Get GitHub action runner IP
         id: ip
