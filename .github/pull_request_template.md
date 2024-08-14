@@ -32,7 +32,7 @@ Please complete this section if any breaking changes have been made, otherwise d
 
 - [ ] I have tested this code manually on local environment
 - [ ] I have tested this code manually on remote devnet using express-cli
-- [ ] I have tested this code manually on mumbai
+- [ ] I have tested this code manually on mumbai or amoy
 
 ### Manual tests
 
