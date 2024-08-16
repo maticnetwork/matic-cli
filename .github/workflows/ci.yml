@@ -181,6 +181,7 @@ jobs:
       - name: Launch devnet
         run: |
           cd matic-cli/devnet
+          docker login
           bash docker-ganache-start.sh
           bash docker-heimdall-start-all.sh
           bash docker-bor-setup.sh
