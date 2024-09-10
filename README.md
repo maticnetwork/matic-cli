@@ -390,63 +390,62 @@ Please, make sure to install the following software/packages on the VMs.
 
 #### **MacOS**
 
-  - Build Essentials (_host_ and _remotes_)
+- Build Essentials (_host_ and _remotes_)
 
-    ```zsh
-    xcode-select --install
-    ```
+  ```zsh
+  xcode-select --install
+  ```
 
-  - Go 1.18+ (_host_ and _remotes_)
+- Go 1.18+ (_host_ and _remotes_)
 
-    ```zsh
-    curl -O https://raw.githubusercontent.com/maticnetwork/node-ansible/master/go-install.sh
-    bash go-install.sh --remove
-    bash go-install.sh
-    ```
+  ```zsh
+  curl -O https://raw.githubusercontent.com/maticnetwork/node-ansible/master/go-install.sh
+  bash go-install.sh --remove
+  bash go-install.sh
+  ```
 
-  - Rabbitmq (_host_ and _remotes_)
+- Rabbitmq (_host_ and _remotes_)
 
-    ```zsh
-    brew install rabbitmq
-    ```
+  ```zsh
+  brew install rabbitmq
+  ```
 
-  - Docker (_host_ and _remotes_, only needed in case of a docker setup)
+- Docker (_host_ and _remotes_, only needed in case of a docker setup)
 
-    https://docs.docker.com/desktop/install/mac-install/
+  https://docs.docker.com/desktop/install/mac-install/
 
-  - Node v18.19.0 (only _host_)
+- Node v18.19.0 (only _host_)
 
-    ```zsh
-    curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash \
-      && source /home/ubuntu/.bashrc \
-      && nvm install 18.19.0 \
-      && node --version
-    ```
+  ```zsh
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash \
+  && nvm install 18.19.0 \
+  && node --version
+  ```
 
-  - Python 2 (only _host_)
+- Python 2 (only _host_)
 
-    ```zsh
-    brew install pyenv
-    pyenv install 2.7.18
-    pyenv global 2.7.18
-    python --version
-    ```
+  ```zsh
+  brew install pyenv
+  pyenv install 2.7.18
+  pyenv global 2.7.18
+  python --version
+  ```
 
-  - Solc v0.5.16 (only _host_)
+- Solc v0.5.16 (only _host_)
 
-    ```zsh
-    brew tap ethereum/ethereum
-    brew install solc-select
-    solc-select install 0.5.17
-    solc-select use 0.5.17
-    solc --version
-    ```
+  ```zsh
+  brew tap ethereum/ethereum
+  brew install solc-select
+  solc-select install 0.5.17
+  solc-select use 0.5.17
+  solc --version
+  ```
 
-  - Ganache CLI (only _host_)
+- Ganache CLI (only _host_)
 
-    ```zsh
-    npm install --global ganache
-    ```
+  ```zsh
+  npm install --global ganache
+  ```
 
 ### Usage
 
