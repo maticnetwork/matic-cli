@@ -3,13 +3,11 @@
 🏗 A set of CLIs, tools and tests to set up, manage and operate Polygon devnets.
 
 The **Testing Toolkit** is built on top of `express-cli`, an extension of `matic-cli` which uses `terraform` to deploy,
-test and monitor any devnet on AWS stacks from any local system.
+test and monitor any devnet on AWS/GCP stacks from any local system.
 
 It currently supports **only** devnets running `v0.3.x` stacks.
 
-The `express-cli` interacts with `terraform` to create a fully working setup on AWS.
-This setup is composed by a set of `EC2 VM` instances running a specific `ubuntu 22.04 ami`, mounted with `gp3 disks` ,
-and a `public-subnet` with its `VPC`.
+The `express-cli` interacts with `terraform` to create a fully working setup on AWS/GCP.
 In case the infrastructure already exists, `matic-cli` can be used as a standalone tool to deploy Polygon stacks on
 pre-configured VMs.
 
@@ -44,7 +42,6 @@ To use the `express-cli` you have to execute the following steps.
 - (optional) replace `TF_VAR_DISK_SIZE_GB` with your preferred disk size in GB (default is 100 GB)
 - `VERBOSE=true` prints logs from the remote machines. If set to `false`, only `express-cli` and `matic-cli` logs will
   be shown
-- **If you are a Polygon employee**, please refer to [this page](https://www.notion.so/polygontechnology/Testing-Toolkit-d47e098641d14c80b2e9a90b3b1b88d9) for more info
 
 In case you plan to utilize express-cli for Google Cloud, you will need to make few modifications like SSH keys. It's important to note that express-cli is not fully tested yet on GCP, and not all features are accessible. Check the [GCP dev guide](./docs/gcp_dev_guide.md).
 
@@ -328,6 +325,8 @@ other VMs' IPs (_remotes_).
 
 Please, make sure to install the following software/packages on the VMs.
 
+#### **Ubuntu**
+
 - Build Essentials (_host_ and _remotes_)
 
   ```bash
@@ -386,6 +385,65 @@ Please, make sure to install the following software/packages on the VMs.
   npm install --global ganache
   ```
 
+#### **MacOS**
+
+- Build Essentials (_host_ and _remotes_)
+
+  ```zsh
+  xcode-select --install
+  ```
+
+- Go 1.18+ (_host_ and _remotes_)
+
+  ```zsh
+  curl -O https://raw.githubusercontent.com/maticnetwork/node-ansible/master/go-install.sh
+  bash go-install.sh --remove
+  bash go-install.sh
+  ```
+
+- Rabbitmq (_host_ and _remotes_)
+
+  ```zsh
+  brew install rabbitmq
+  ```
+
+- Docker (_host_ and _remotes_, only needed in case of a docker setup)
+
+  https://docs.docker.com/desktop/install/mac-install/
+
+- Node v18.19.0 (only _host_)
+
+  ```zsh
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash \
+  && nvm install 18.19.0 \
+  && node --version
+  ```
+
+- Python 2 (only _host_)
+
+  ```zsh
+  brew install pyenv
+  pyenv install 2.7.18
+  pyenv global 2.7.18
+  python --version
+  ```
+
+- Solc v0.5.16 (only _host_)
+
+  ```zsh
+  brew tap ethereum/ethereum
+  brew install solc-select
+  solc-select install 0.5.17
+  solc-select use 0.5.17
+  solc --version
+  ```
+
+- Ganache CLI (only _host_)
+
+  ```zsh
+  npm install --global ganache
+  ```
+
 ### Usage
 
 On the _host_ machine, please run
@@ -399,13 +457,18 @@ cd \
 
 #### Local dockerized network
 
-Adjust the [docker configs](configs/devnet/docker-setup-config.yaml) and run
+Adjust the [docker configs](configs/devnet/docker-setup-config.yaml) based on your setup, and run
 
 ```bash
 mkdir devnet \
   && cd devnet \
   && ../bin/matic-cli.js setup devnet --config ../configs/devnet/docker-setup-config.yaml | tee setup.log
-...
+```
+
+This will create and spin up the devnet.
+The process will take some time, until this log shows up
+
+```
 DONE Devnet is ready
 ```
 
@@ -484,7 +547,7 @@ In this case, the stack is already running, you would just need to deploy/sync s
 
 #### Clean setup
 
-Stop al services, remove the `matic-cli/devnet` folder, and you can start the process once again
+Stop all services, remove the `matic-cli/devnet` folder, and you can start the process once again
 
 #### Notes
 
