@@ -464,8 +464,10 @@ mkdir devnet \
   && cd devnet \
   && ../bin/matic-cli.js setup devnet --config ../configs/devnet/docker-setup-config.yaml | tee setup.log
 ```
+
 This will create and spin up the devnet.
 The process will take some time, until this log shows up
+
 ```
 DONE Devnet is ready
 ```
