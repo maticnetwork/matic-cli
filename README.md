@@ -328,6 +328,8 @@ other VMs' IPs (_remotes_).
 
 Please, make sure to install the following software/packages on the VMs.
 
+#### **Ubuntu**
+
 - Build Essentials (_host_ and _remotes_)
 
   ```bash
@@ -383,6 +385,65 @@ Please, make sure to install the following software/packages on the VMs.
 - Ganache CLI (only _host_)
 
   ```bash
+  npm install --global ganache
+  ```
+
+#### **MacOS**
+
+- Build Essentials (_host_ and _remotes_)
+
+  ```zsh
+  xcode-select --install
+  ```
+
+- Go 1.18+ (_host_ and _remotes_)
+
+  ```zsh
+  curl -O https://raw.githubusercontent.com/maticnetwork/node-ansible/master/go-install.sh
+  bash go-install.sh --remove
+  bash go-install.sh
+  ```
+
+- Rabbitmq (_host_ and _remotes_)
+
+  ```zsh
+  brew install rabbitmq
+  ```
+
+- Docker (_host_ and _remotes_, only needed in case of a docker setup)
+
+  https://docs.docker.com/desktop/install/mac-install/
+
+- Node v18.19.0 (only _host_)
+
+  ```zsh
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash \
+  && nvm install 18.19.0 \
+  && node --version
+  ```
+
+- Python 2 (only _host_)
+
+  ```zsh
+  brew install pyenv
+  pyenv install 2.7.18
+  pyenv global 2.7.18
+  python --version
+  ```
+
+- Solc v0.5.16 (only _host_)
+
+  ```zsh
+  brew tap ethereum/ethereum
+  brew install solc-select
+  solc-select install 0.5.17
+  solc-select use 0.5.17
+  solc --version
+  ```
+
+- Ganache CLI (only _host_)
+
+  ```zsh
   npm install --global ganache
   ```
 
@@ -484,7 +545,7 @@ In this case, the stack is already running, you would just need to deploy/sync s
 
 #### Clean setup
 
-Stop al services, remove the `matic-cli/devnet` folder, and you can start the process once again
+Stop all services, remove the `matic-cli/devnet` folder, and you can start the process once again
 
 #### Notes
 
