@@ -472,42 +472,12 @@ The process will take some time, until this log shows up
 DONE Devnet is ready
 ```
 
-Once the setup is done, follow these steps for local docker deployment
+Once the setup is done, use the aggregated script for local docker deployment
 
-- Start ganache
-
-  ```bash
-  bash docker-ganache-start.sh
-  ```
-
-- Start `heimdall` instances (it will run all services - rabbitmq, heimdall, bridge, server)
-
-  ```bash
-  bash docker-heimdall-start-all.sh
-  ```
-
-- Setup `bor`
-
-  ```bash
-  bash docker-bor-setup.sh
-  ```
-
-- Start bor
-
-  ```bash
-  bash docker-bor-start-all.sh
-  ```
-
-- Deploy contracts on Child chain
-
-  ```bash
-  bash ganache-deployment-bor.sh
-  ```
-
-- Sync contract addresses to Main chain
-  ```bash
-  bash ganache-deployment-sync.sh
-  ```
+```bash
+chmod +x ../docker_devnet.sh
+../docker_devnet.sh
+```
 
 Logs will be stored under `logs/` folder
 
