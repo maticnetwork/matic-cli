@@ -17,8 +17,8 @@ By automating these tasks, the script significantly reduces manual overhead, ena
 - [Prerequisites](#prerequisites)
 - [Configuration](#configuration)
 - [Usage](#usage)
-    - [Running the Script](#running-the-script)
-    - [Platform Options](#platform-options)
+  - [Running the Script](#running-the-script)
+  - [Platform Options](#platform-options)
 - [Script Workflow](#script-workflow)
 - [Logging](#logging)
 - [Permissions](#permissions)
@@ -62,8 +62,8 @@ matic_cli_directory="/Path/to/matic-cli"     # Absolute path to your local Matic
 - **`cosmos_commits`**: List the specific commit hashes from the Cosmos SDK repository you wish to test.
 - **Directories**: Ensure all paths are absolute and correctly point to your local repositories.
 - **Branches**:
-    - `cosmos_branch`: The branch in the Cosmos SDK repository where the specified commits reside.
-    - `heimdall_branch`: The branch in the Heimdall repository where dependencies will be updated. Ensure your docker `configs/devnet/docker-setup-config.yaml`(for local docker deployments) or your `.env`(for cloud based deployments) build using the same heimdall branch and you have the necessary permissions to push changes to this branch.
+  - `cosmos_branch`: The branch in the Cosmos SDK repository where the specified commits reside.
+  - `heimdall_branch`: The branch in the Heimdall repository where dependencies will be updated. Ensure your docker `configs/devnet/docker-setup-config.yaml`(for local docker deployments) or your `.env`(for cloud based deployments) build using the same heimdall branch and you have the necessary permissions to push changes to this branch.
 
 ## Usage
 
@@ -106,44 +106,51 @@ matic_cli_directory="/Path/to/matic-cli"     # Absolute path to your local Matic
 The script performs the following steps for each specified Cosmos SDK commit:
 
 1. **Setup**:
-    - Determines the script's directory.
-    - Sources the `config.env` file for configuration variables.
-    - Validates the provided deployment platform (`aws`, `gcp`, or `docker`).
+
+   - Determines the script's directory.
+   - Sources the `config.env` file for configuration variables.
+   - Validates the provided deployment platform (`aws`, `gcp`, or `docker`).
 
 2. **Processing Each Commit**:
 
    For each commit hash in `cosmos_commits`:
 
    a. **Checkout Cosmos SDK Commit**:
-    - Navigates to the Cosmos SDK directory.
-    - Fetches the latest changes.
-    - Checks out the specified branch and pulls the latest commits.
-    - Switches to the target commit.
+
+   - Navigates to the Cosmos SDK directory.
+   - Fetches the latest changes.
+   - Checks out the specified branch and pulls the latest commits.
+   - Switches to the target commit.
 
    b. **Retrieve Version Information**:
-    - Determines the module version corresponding to the commit.
+
+   - Determines the module version corresponding to the commit.
 
    c. **Update Heimdall Dependencies**:
-    - Navigates to the Heimdall directory.
-    - Checks out or creates the specified Heimdall branch.
-    - Updates `go.mod` to replace the Cosmos SDK dependency with the target version.
-    - Runs `go mod tidy` and builds the project using `make build`.
+
+   - Navigates to the Heimdall directory.
+   - Checks out or creates the specified Heimdall branch.
+   - Updates `go.mod` to replace the Cosmos SDK dependency with the target version.
+   - Runs `go mod tidy` and builds the project using `make build`.
 
    d. **Commit and Push Changes**:
-    - Commits the updated `go.mod` and `go.sum`.
-    - Pushes the changes to the Heimdall repository.
+
+   - Commits the updated `go.mod` and `go.sum`.
+   - Pushes the changes to the Heimdall repository.
 
    e. **Deploy Devnet**:
-    - Navigates to the Matic CLI directory.
-    - Depending on the chosen platform (`aws`, `gcp`, or `docker`), initializes and starts the devnet.
-    - Captures logs during initialization and deployment.
-    - For Docker deployments, handles container cleanup and log collection.
+
+   - Navigates to the Matic CLI directory.
+   - Depending on the chosen platform (`aws`, `gcp`, or `docker`), initializes and starts the devnet.
+   - Captures logs during initialization and deployment.
+   - For Docker deployments, handles container cleanup and log collection.
 
    f. **Logging**:
-    - Stores all logs in a structured directory for each commit and platform.
+
+   - Stores all logs in a structured directory for each commit and platform.
 
 3. **Completion**:
-    - After processing all commits, the script notifies that all tasks are completed.
+   - After processing all commits, the script notifies that all tasks are completed.
 
 ## Logging
 
@@ -178,6 +185,7 @@ These logs facilitate troubleshooting and analysis of each deployment.
 - **Heimdall Branch**: Ensure you have push rights to the specified Heimdall branch (`heimdall_branch`) in your `config.env`. The script will attempt to commit and push changes to this branch.
 - **Repository Access**: Ensure your local repositories (`cosmos_directory`, `heimdall_directory`, `matic_cli_directory`) are correctly set up with the necessary access rights.
 - **Access and Setup**: Make sure you have AWS CLI or GCP CLI set up with the necessary permissions for cloud deployments.
+
 ---
 
-*Happy Testing!*
+_Happy Testing!_
