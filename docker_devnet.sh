@@ -21,5 +21,3 @@ bash ganache-deployment-bor.sh || { echo "Failed to deploy Bor to Ganache"; exit
 bash ganache-deployment-sync.sh || { echo "Failed to sync Ganache deployment"; exit 1; }
 
 echo "Devnet setup complete."
-
-cd ..

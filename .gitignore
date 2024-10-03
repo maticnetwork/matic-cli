@@ -3,12 +3,14 @@ test
 .DS_Store
 devnet
 .env
+util-scripts/heimdall/config.env
 *.tfvars
 .terraform*
 terraform.tfstate
 terraform.tfstate.backup
 terraform.tfstate.*
 deployments/
+util-scripts/heimdall/logs
 .idea
 contractAddresses.json
 signer-dump.json
