@@ -2,7 +2,7 @@
 
 ## Overview
 
-This script automates the testing of specific commits from the [Cosmos SDK](https://github.com/cosmos/cosmos-sdk) within [Heimdall](https://github.com/maticnetwork/heimdall) using [Matic CLI](https://github.com/maticnetwork/matic-cli). It streamlines the process of:
+This script automates the testing of specific commits from the [Cosmos SDK](https://github.com/maticnetwork/cosmos-sdk) within [Heimdall](https://github.com/maticnetwork/heimdall) using [Matic CLI](https://github.com/maticnetwork/matic-cli). It streamlines the process of:
 
 - Checking out specific Cosmos SDK commits.
 - Updating Heimdall's dependencies to these commits.
