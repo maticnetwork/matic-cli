@@ -43,8 +43,6 @@ To use the `express-cli` you have to execute the following steps.
 - `VERBOSE=true` prints logs from the remote machines. If set to `false`, only `express-cli` and `matic-cli` logs will
   be shown
 
-In case you plan to utilize express-cli for Google Cloud, you will need to make few modifications like SSH keys. It's important to note that express-cli is not fully tested yet on GCP, and not all features are accessible. Check the [GCP dev guide](./docs/gcp_dev_guide.md).
-
 ### Auth Configuration
 
 As a prerequisite, you need to configure authentication on `aws`
