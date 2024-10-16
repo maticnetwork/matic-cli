@@ -25,7 +25,7 @@ ssh-keygen -f ~/ubuntu.pem -N ""
 - If you don't have a keypair, run the following command to generate an SSH key pair: `ssh-keygen -f ubuntu.pem -N ""`
 - The above command generates two files. _ubuntu.pem_ (private keyfile) and _ubuntu.pem.pub_ (public key)
 - These two files have to be updated in _.env_ file.
-- Locate the `TF_VAR_GCE_PUB_KEY_FILE` variable in .env file and set its value to the absolute path pointing to the public key file you generated.
+- Locate the `TF_VAR_GCP_PUB_KEY_FILE` variable in .env file and set its value to the absolute path pointing to the public key file you generated.
 - Locate the `PEM_FILE_PATH` variable in .env file and set its value to the absolute path pointing to the private key file you generated.
 
 ## Resource Naming Convention
