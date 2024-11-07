@@ -93,7 +93,7 @@ export class Devnet {
     return path.join(this.heimdallDir(index), 'config', 'genesis.json')
   }
 
-  heimdallHeimdallConfigFilePath(index) {
+  heimdallAppConfigFilePath(index) {
     return path.join(this.heimdallDir(index), 'config', 'heimdall-config.toml')
   }
 
@@ -251,7 +251,7 @@ export class Devnet {
         task: async () => {
           // set heimdall
           for (let i = 0; i < this.totalBorNodes; i++) {
-            fileReplacer(this.heimdallHeimdallConfigFilePath(i))
+            fileReplacer(this.heimdallAppConfigFilePath(i))
               .replace(
                 /eth_rpc_url[ ]*=[ ]*".*"/gi,
                 `eth_rpc_url = "${this.config.ethURL}"`
@@ -363,7 +363,7 @@ export class Devnet {
         task: async () => {
           // set heimdall
           for (let i = 0; i < this.totalNodes; i++) {
-            fileReplacer(this.heimdallHeimdallConfigFilePath(i))
+            fileReplacer(this.heimdallAppConfigFilePath(i))
               .replace(
                 /eth_rpc_url[ ]*=[ ]*".*"/gi,
                 `eth_rpc_url = "${this.config.ethURL}"`
