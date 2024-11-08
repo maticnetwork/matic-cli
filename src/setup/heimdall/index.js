@@ -319,7 +319,7 @@ export class Heimdall {
               )
               .replace(
                 /bor_grpc_url[ ]*=[ ]*".*"/gi,
-                'bor_grpc_url = "http://localhost:3131"'
+                'bor_grpc_url = "localhost:3131"'
               )
               .save()
           }
