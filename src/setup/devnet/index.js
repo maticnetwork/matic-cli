@@ -261,6 +261,14 @@ export class Devnet {
                 `bor_rpc_url = "http://bor${i}:8545"`
               )
               .replace(
+                /bor_grpc_flag[ ]*=[ ]*".*"/gi,
+                'bor_grpc_flag = "true"'
+              )
+              .replace(
+                /bor_grpc_url[ ]*=[ ]*".*"/gi,
+                'bor_grpc_url = "http://localhost:3131"'
+              )
+              .replace(
                 /amqp_url[ ]*=[ ]*".*"/gi,
                 `amqp_url = "amqp://guest:guest@rabbit${i}:5672/"`
               )
@@ -371,6 +379,14 @@ export class Devnet {
               .replace(
                 /bor_rpc_url[ ]*=[ ]*".*"/gi,
                 'bor_rpc_url = "http://localhost:8545"'
+              )
+              .replace(
+                /bor_grpc_flag[ ]*=[ ]*".*"/gi,
+                'bor_grpc_flag = "true"'
+              )
+              .replace(
+                /bor_grpc_url[ ]*=[ ]*".*"/gi,
+                'bor_grpc_url = "http://localhost:3131"'
               )
               .replace(
                 /amqp_url[ ]*=[ ]*".*"/gi,

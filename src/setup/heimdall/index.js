@@ -304,7 +304,6 @@ export class Heimdall {
         {
           title: 'Process heimdall config file',
           task: () => {
-            console.log('>>>>> ', this.heimdallAppConfigFilePath)
             fileReplacer(this.heimdallAppConfigFilePath)
               .replace(
                 /eth_rpc_url[ ]*=[ ]*".*"/gi,
