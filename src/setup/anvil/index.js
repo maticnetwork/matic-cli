@@ -28,7 +28,7 @@ export class Anvil{
   }
 
   get taskTitle() {
-    return 'Setup contracts on Anvil,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,[test]';
+    return 'Setup contracts on Anvil';
   }
 
   get dbDir() {
@@ -69,7 +69,7 @@ export class Anvil{
         {
           title: 'Start Anvil',
           task: () => {
-            server = execa(`anvil --port 9545 --balance 10000000000 --gas-limit 1000000 --gas-price 1 --accounts 3 --code-size-limit 10000 --verbose --fork-url https://mainnet.infura.io/v3/00ef543e2349479293b611bfa6d24b3d --chain-id 11155111`, {
+            server = execa(`anvil --port 9545 --balance 10000000000 --gas-limit 1000000 --gas-price 1 --accounts 3 --code-size-limit 10000 --verbose --fork-url https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY} --chain-id 11155111`, {
               stdio: 'inherit',
             });
             return server;

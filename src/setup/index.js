@@ -5,6 +5,7 @@ import genesis from './genesis/index.js'
 import bor from './bor/index.js'
 import localnet from './localnet/index.js'
 import ganache from './ganache/index.js'
+import anvil from './anvil/index.js'
 import devnet from './devnet/index.js'
 
 //
