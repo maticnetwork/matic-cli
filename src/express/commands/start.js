@@ -183,6 +183,11 @@ async function installHostSpecificPackages(ip) {
   console.log('📍Installing ganache...')
   command = 'sudo npm install -g ganache -y'
   await runSshCommand(ip, command, maxRetries)
+
+
+  console.log('📍Installing anvil...')
+  command ='curl -L https://foundry.paradigm.xyz | bash && export PATH="$HOME/.foundry/bin:$PATH" && source ~/.bashrc && foundryup'
+  await runSshCommand(ip, command, maxRetries)
 }
 
 export async function installDocker(ip, user) {
@@ -417,6 +422,7 @@ async function runRemoteSetupWithMaticCLI(ips, devnetId) {
   await runSshCommand(ip, command, maxRetries)
 
   if (!process.env.NETWORK) {
+    // write an anvil script ; 
     console.log('📍Deploying contracts for bor on machine ' + ip + ' ...')
     await timer(60000)
     command = 'cd ~/matic-cli/devnet && bash ganache-deployment-bor.sh'
@@ -482,12 +488,4 @@ export async function start() {
     await runRemoteSetupWithMaticCLI(dnsIps, devnetId)
   }
 
-  const doc = await yaml.load(
-    fs.readFileSync(
-      `../../deployments/devnet-${devnetId}/${devnetType}-setup-config.yaml`,
-      'utf8'
-    )
-  )
-
-  await fundGanacheAccounts(doc)
 }

@@ -12,6 +12,7 @@ import { bufferToHex, privateToPublic, toBuffer } from 'ethereumjs-util'
 import { Heimdall } from '../heimdall/index.js'
 import { Bor } from '../bor/index.js'
 import { Ganache } from '../ganache/index.js'
+import { Anvil } from '../anvil/index.js'
 import { Genesis } from '../genesis/index.js'
 import { getDefaultBranch } from '../helper.js'
 import {
@@ -1419,6 +1420,7 @@ export class Devnet {
 
   async getTasks() {
     const ganache = this.ganache
+    const anvil = this.anvil
     const heimdall = this.heimdall
     const bor = this.bor
     const genesis = this.genesis
@@ -1615,6 +1617,9 @@ async function setupDevnet(config) {
   const devnet = new Devnet(config)
   devnet.ganache = new Ganache(config, {
     contractsBranch: config.contractsBranch
+  })
+  devnet.anvil = new Anvil(config, {
+    contractsBranch : config.contractsBranch
   })
   devnet.bor = new Bor(config, {
     repositoryUrl: config.borRepo,
