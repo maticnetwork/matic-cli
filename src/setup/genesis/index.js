@@ -126,7 +126,7 @@ export class Genesis {
         {
           title: 'Compile matic-contracts',
           task: () =>
-            execa('npm', ['run', 'build'], {
+            execa('npm', ['run', 'truffle:compile'], {
               cwd: this.maticContractDir,
               stdio: getRemoteStdio()
             })

@@ -86,7 +86,7 @@ export class Contracts {
       {
         title: 'Compile matic contracts',
         task: () =>
-          execa('npm', ['run', 'truffle:compile'], {
+          execa('npm', ['run', 'build'], {
             cwd: this.repositoryDir,
             stdio: getRemoteStdio()
           })
