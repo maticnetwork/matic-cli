@@ -10,7 +10,7 @@ import { getDefaultBranch } from '../helper.js';
 import { Contracts } from '../contracts/index.js';
 import { getRemoteStdio } from '../../express/common/remote-worker.js';
 
-export class AnvilSetup {
+export class Anvil{
   constructor(config, options = {}) {
     this.config = config;
 

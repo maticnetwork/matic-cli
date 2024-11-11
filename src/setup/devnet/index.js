@@ -1568,6 +1568,15 @@ export class Devnet {
         }
       },
       {
+        title: anvil.taskTitle,
+        task: () => {
+          return anvil.getTasks()
+        },
+        enabled: () => {
+          return (this.config.devnetType === 'docker' || 'remote') && !this.config.network
+        }
+      },
+      {
         title: 'Remove multiple keystore files',
         task: async () => {
           let erigonValCount = this.config.numOfErigonValidators
