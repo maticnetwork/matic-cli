@@ -262,7 +262,7 @@ export class Devnet {
               )
               .replace(
                 /bor_grpc_flag[ ]*=[ ]*".*"/gi,
-                'bor_grpc_flag = "true"'
+                'bor_grpc_flag = "false"'
               )
               .replace(
                 /bor_grpc_url[ ]*=[ ]*".*"/gi,
@@ -382,7 +382,7 @@ export class Devnet {
               )
               .replace(
                 /bor_grpc_flag[ ]*=[ ]*".*"/gi,
-                'bor_grpc_flag = "true"'
+                'bor_grpc_flag = "false"'
               )
               .replace(
                 /bor_grpc_url[ ]*=[ ]*".*"/gi,
