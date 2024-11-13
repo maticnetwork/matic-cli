@@ -266,7 +266,7 @@ export class Devnet {
               )
               .replace(
                 /bor_grpc_url[ ]*=[ ]*".*"/gi,
-                'bor_grpc_url = "localhost:3131"'
+                `bor_grpc_url = "bor${i}:3131"`
               )
               .replace(
                 /amqp_url[ ]*=[ ]*".*"/gi,

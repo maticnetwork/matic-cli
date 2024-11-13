@@ -313,7 +313,8 @@ export class Heimdall {
                 /bor_rpc_url[ ]*=[ ]*".*"/gi,
                 'bor_rpc_url = "http://localhost:8545"'
               )
-              .replace(/bor_grpc_flag[ ]*=[ ]*".*"/gi, 'bor_grpc_flag = "false"')
+              .replace(/bor_grpc_flag[ ]*=[ ]*".*"/gi,
+                'bor_grpc_flag = "false"')
               .replace(
                 /bor_grpc_url[ ]*=[ ]*".*"/gi,
                 'bor_grpc_url = "localhost:3131"'
