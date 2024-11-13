@@ -18,7 +18,7 @@ do
         exit 1
     fi
 
-    if (( $balance > $balanceInit )); then
+    if (( balance > balanceInit )); then
         if [ $stateSyncFound != "true" ]; then
             stateSyncTime=$(( SECONDS - start_time ))
             stateSyncFound="true"
@@ -27,7 +27,7 @@ do
 
     checkpointID=$(curl -sL http://localhost:1317/checkpoints/latest | jq .result.id)
 
-    if [ $checkpointID != "null" ]; then
+    if [ "$checkpointID" != "null" ]; then
         if [ $checkpointFound != "true" ]; then
             checkpointTime=$(( SECONDS - start_time ))
             checkpointFound="true"
@@ -40,5 +40,5 @@ do
 
 done
 echo "Both state sync and checkpoint went through. All tests have passed!"
-echo "Time taken for state sync: $(printf '%02dm:%02ds\n'  $(($stateSyncTime%3600/60)) $(($stateSyncTime%60)))"
-echo "Time taken for checkpoint: $(printf '%02dm:%02ds\n'  $(($checkpointTime%3600/60)) $(($checkpointTime%60)))"
+echo "Time taken for state sync: $(printf '%02dm:%02ds\n' $((stateSyncTime%3600/60)) $((stateSyncTime%60)))"
+echo "Time taken for checkpoint: $(printf '%02dm:%02ds\n' $((checkpointTime%3600/60)) $((checkpointTime%60)))"
