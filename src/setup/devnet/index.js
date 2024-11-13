@@ -93,7 +93,7 @@ export class Devnet {
     return path.join(this.heimdallDir(index), 'config', 'genesis.json')
   }
 
-  heimdallHeimdallConfigFilePath(index) {
+  heimdallAppConfigFilePath(index) {
     return path.join(this.heimdallDir(index), 'config', 'heimdall-config.toml')
   }
 
@@ -251,7 +251,7 @@ export class Devnet {
         task: async () => {
           // set heimdall
           for (let i = 0; i < this.totalBorNodes; i++) {
-            fileReplacer(this.heimdallHeimdallConfigFilePath(i))
+            fileReplacer(this.heimdallAppConfigFilePath(i))
               .replace(
                 /eth_rpc_url[ ]*=[ ]*".*"/gi,
                 `eth_rpc_url = "${this.config.ethURL}"`
@@ -259,6 +259,14 @@ export class Devnet {
               .replace(
                 /bor_rpc_url[ ]*=[ ]*".*"/gi,
                 `bor_rpc_url = "http://bor${i}:8545"`
+              )
+              .replace(
+                /bor_grpc_flag[ ]*=[ ]*".*"/gi,
+                'bor_grpc_flag = "true"'
+              )
+              .replace(
+                /bor_grpc_url[ ]*=[ ]*".*"/gi,
+                'bor_grpc_url = "localhost:3131"'
               )
               .replace(
                 /amqp_url[ ]*=[ ]*".*"/gi,
@@ -363,7 +371,7 @@ export class Devnet {
         task: async () => {
           // set heimdall
           for (let i = 0; i < this.totalNodes; i++) {
-            fileReplacer(this.heimdallHeimdallConfigFilePath(i))
+            fileReplacer(this.heimdallAppConfigFilePath(i))
               .replace(
                 /eth_rpc_url[ ]*=[ ]*".*"/gi,
                 `eth_rpc_url = "${this.config.ethURL}"`
@@ -371,6 +379,14 @@ export class Devnet {
               .replace(
                 /bor_rpc_url[ ]*=[ ]*".*"/gi,
                 'bor_rpc_url = "http://localhost:8545"'
+              )
+              .replace(
+                /bor_grpc_flag[ ]*=[ ]*".*"/gi,
+                'bor_grpc_flag = "true"'
+              )
+              .replace(
+                /bor_grpc_url[ ]*=[ ]*".*"/gi,
+                'bor_grpc_url = "localhost:3131"'
               )
               .replace(
                 /amqp_url[ ]*=[ ]*".*"/gi,
