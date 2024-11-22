@@ -893,20 +893,6 @@ export class Devnet {
               { stdio: getRemoteStdio() }
             )
 
-            await execa(
-              'scp',
-              [
-                '-o',
-                'StrictHostKeyChecking=no',
-                '-o',
-                'UserKnownHostsFile=/dev/null',
-                '-i',
-                '~/cert.pem',
-                `${this.config.targetDirectory}/code/heimdall/build/heimdallcli`,
-                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:~/go/bin/heimdallcli`
-              ],
-              { stdio: getRemoteStdio() }
-            )
 
             let nodeDir = `${this.testnetDir}/node${i}/`
             if (i >= this.config.numOfBorValidators) {
@@ -1097,21 +1083,6 @@ export class Devnet {
                 '~/cert.pem',
                 `${this.config.targetDirectory}/code/heimdall/build/heimdalld`,
                 `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}:~/go/bin/heimdalld`
-              ],
-              { stdio: getRemoteStdio() }
-            )
-
-            await execa(
-              'scp',
-              [
-                '-o',
-                'StrictHostKeyChecking=no',
-                '-o',
-                'UserKnownHostsFile=/dev/null',
-                '-i',
-                '~/cert.pem',
-                `${this.config.targetDirectory}/code/heimdall/build/heimdallcli`,
-                `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}:~/go/bin/heimdallcli`
               ],
               { stdio: getRemoteStdio() }
             )
