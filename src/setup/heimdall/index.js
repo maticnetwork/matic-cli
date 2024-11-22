@@ -84,7 +84,7 @@ export class Heimdall {
   }
 
   get heimdallAppConfigFilePath() {
-    return path.join(this.heimdallConfigDir, 'heimdall-config.toml')
+    return path.join(this.heimdallConfigDir, 'app.toml')
   }
 
   get heimdallValidatorKeyFilePath() {

@@ -94,7 +94,7 @@ export class Devnet {
   }
 
   heimdallAppConfigFilePath(index) {
-    return path.join(this.heimdallDir(index), 'config', 'heimdall-config.toml')
+    return path.join(this.heimdallDir(index), 'config', 'app.toml')
   }
 
   borDir(index) {
