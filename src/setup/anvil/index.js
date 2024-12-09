@@ -13,6 +13,7 @@ import { getRemoteStdio } from '../../express/common/remote-worker.js';
 export class Anvil{
   constructor(config, options = {}) {
     this.config = config;
+    console.log("anvil integration started !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
 
     this.dbName = options.dbName || 'anvil-db';
     this.serverPort = options.serverPort || 9545;
