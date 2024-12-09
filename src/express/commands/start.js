@@ -151,6 +151,11 @@ async function installCommonPackages(ip) {
   console.log('📍Installing rabbitmq...')
   command = 'sudo apt install rabbitmq-server -y'
   await runSshCommand(ip, command, maxRetries)
+
+  console.log('📍Installing grpcurl...')
+  command =
+    'curl -sSL "https://github.com/fullstorydev/grpcurl/releases/download/v1.8.7/grpcurl_1.8.7_linux_x86_64.tar.gz" | sudo tar -xz -C /usr/local/bin'
+  await runSshCommand(ip, command, maxRetries)
 }
 
 async function installHostSpecificPackages(ip) {

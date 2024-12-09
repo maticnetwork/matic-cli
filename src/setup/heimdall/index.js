@@ -83,7 +83,7 @@ export class Heimdall {
     return path.join(this.heimdallConfigDir, 'genesis.json')
   }
 
-  get heimdallHeimdallConfigFilePath() {
+  get heimdallAppConfigFilePath() {
     return path.join(this.heimdallConfigDir, 'heimdall-config.toml')
   }
 
@@ -304,7 +304,7 @@ export class Heimdall {
         {
           title: 'Process heimdall config file',
           task: () => {
-            fileReplacer(this.heimdallHeimdallConfigFilePath)
+            fileReplacer(this.heimdallAppConfigFilePath)
               .replace(
                 /eth_rpc_url[ ]*=[ ]*".*"/gi,
                 'eth_rpc_url = "http://localhost:9545"'
@@ -312,6 +312,11 @@ export class Heimdall {
               .replace(
                 /bor_rpc_url[ ]*=[ ]*".*"/gi,
                 'bor_rpc_url = "http://localhost:8545"'
+              )
+              .replace(/bor_grpc_flag[ ]*=[ ]*".*"/gi, 'bor_grpc_flag = "true"')
+              .replace(
+                /bor_grpc_url[ ]*=[ ]*".*"/gi,
+                'bor_grpc_url = "localhost:3131"'
               )
               .save()
           }
