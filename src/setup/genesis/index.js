@@ -21,11 +21,11 @@ export class Genesis {
 
     this.repositoryName = this.name
     this.repositoryBranch =
-      options.repositoryBranch || 'mardizzone/node-upgrade'
+      options.repositoryBranch || 'master'
     this.repositoryUrl =
       options.repositoryUrl ||
-      'https://github.com/maticnetwork/genesis-contracts'
-    this.maticContractsRepository = 'matic-contracts'
+      'https://github.com/AryaLanejwar3005/genesis-contracts'
+    this.maticContractsRepository = 'pos-contracts'
   }
 
   get name() {
@@ -126,7 +126,7 @@ export class Genesis {
         {
           title: 'Compile matic-contracts',
           task: () =>
-            execa('npm', ['run', 'truffle:compile'], {
+            execa('forge', ['build'], {
               cwd: this.maticContractDir,
               stdio: getRemoteStdio()
             })
