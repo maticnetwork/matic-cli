@@ -99,10 +99,12 @@ export class Genesis {
             })
         },
         {
-          title: 'Install dependencies for matic-contracts',
+          title: `Install dependencies for matic-contracts ${this.maticContractDir}`,
           task: () =>
             execa('npm', ['install', '--omit=dev'], {
-              cwd: this.maticContractDir
+              cwd: this.maticContractDir, 
+              stdio: getRemoteStdio(),
+              
             })
         },
         {
