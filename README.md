@@ -165,7 +165,7 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 - `../../bin/express-cli.js --update-erigon [index]`
 
   - Fetches `erigon` branch defined as `ERIGON_BRANCH` in `.env.devnet<id>` file, pulls relative changes and restarts it on
-    the remote machines. If an integer `index` is used, the job will be performed only on the VM corresponding to that index. For example if the devnet consists of 2 bor and erigon nodes and you wanted to target the first erigon node, `index` will be 2.
+    the remote machines. If an integer `index` is used, the job will be performed only on the VM corresponding to that index. For example, if the devnet consists of 2 bor and erigon nodes and you want to target the first erigon node, `index` will be 2.
 
 - `../../bin/express-cli.js --update-heimdall [index]`
 

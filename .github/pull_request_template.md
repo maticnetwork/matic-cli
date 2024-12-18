@@ -15,8 +15,8 @@ Please complete this section if any breaking changes have been made, otherwise d
 
 # Checklist
 
-- [ ] I have added at least 2 reviewer or the whole pos-v1 team
-- [ ] I have added sufficient documentation in code
+- [ ] I have added at least 2 reviewers or the whole pos-v1 team
+- [ ] I have added sufficient documentation in the code
 - [ ] I will be resolving comments - if any - by pushing each fix in a separate commit and linking the commit hash in the comment reply
 
 # Cross repository changes
