@@ -108,6 +108,15 @@ export class Genesis {
             })
         },
         {
+          title: `Installing Forge  ${this.maticContractDir}`,
+          task: () =>
+            execa('npm', ['install', 'forge'], {
+              cwd: this.maticContractDir, 
+              stdio: getRemoteStdio(),
+              
+            })
+        },
+        {
           title: 'Process templates',
           task: () =>
             execa(
