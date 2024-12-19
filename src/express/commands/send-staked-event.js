@@ -156,5 +156,5 @@ export async function checkValidatorsLength(doc, machine0) {
     maxRetries
   )
   const outObj = JSON.parse(out)
-  return outObj.result.validators.length
+  return outObj.validator_set.validators.length
 }

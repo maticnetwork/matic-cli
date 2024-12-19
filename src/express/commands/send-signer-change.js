@@ -126,5 +126,5 @@ async function getValidatorSigner(doc, machine0, validatorID) {
     maxRetries
   )
   const outObj = JSON.parse(out)
-  return outObj.result.signer
+  return outObj.validator.signer
 }

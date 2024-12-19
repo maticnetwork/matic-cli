@@ -893,7 +893,6 @@ export class Devnet {
               { stdio: getRemoteStdio() }
             )
 
-
             let nodeDir = `${this.testnetDir}/node${i}/`
             if (i >= this.config.numOfBorValidators) {
               nodeDir = `${this.testnetDir}/node${i + this.config.numOfErigonValidators}/`

@@ -52,10 +52,8 @@ async function checkCheckpoint(ip) {
   const url = `http://${ip}:1317/checkpoints/count`
   const response = await fetch(url)
   const responseJson = await response.json()
-  if (responseJson.result) {
-    if (responseJson.result.result) {
-      return responseJson.result.result
-    }
+  if (responseJson.ack_count) {
+    return responseJson.ack_count
   }
 
   return 0
@@ -74,8 +72,8 @@ async function checkStateSyncTx(ip, id) {
   if (responseJson.error) {
     return undefined
   } else {
-    if (responseJson.result) {
-      return responseJson.result
+    if (responseJson.record) {
+      return responseJson.record
     }
   }
 
@@ -89,8 +87,8 @@ async function getStateSyncTxList(ip, startTime, endTime) {
   if (responseJson.error) {
     return undefined
   } else {
-    if (responseJson.result) {
-      return responseJson.result
+    if (responseJson.record) {
+      return responseJson.record
     }
   }
 
