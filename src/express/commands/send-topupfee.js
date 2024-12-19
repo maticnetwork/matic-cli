@@ -147,12 +147,12 @@ export async function sendTopUpFeeEvent(validatorID) {
 }
 
 async function getValidatorBalance(doc, machine0, valAddr) {
-  const command = `curl http://localhost:1317/bank/balances/${valAddr}`
+  const command = `curl http://localhost:1317/cosmos/bank/v1beta1/balances/${valAddr}`
   const out = await runSshCommandWithReturn(
     `${doc.ethHostUser}@${machine0}`,
     command,
     maxRetries
   )
   const outObj = JSON.parse(out)
-  return outObj.result[0].amount
+  return outObj.balances[0].amount
 }

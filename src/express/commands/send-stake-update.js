@@ -142,5 +142,5 @@ async function getValidatorPower(doc, machine0, validatorID) {
     maxRetries
   )
   const outObj = JSON.parse(out)
-  return outObj.result.power
+  return outObj.validator.voting_power
 }

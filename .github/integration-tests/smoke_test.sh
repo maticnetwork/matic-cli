@@ -25,7 +25,7 @@ do
         fi
     fi
 
-    checkpointID=$(curl -sL http://localhost:1317/checkpoints/latest | jq .result.id)
+    checkpointID=$(curl -sL http://localhost:1317/checkpoints/latest | jq .checkpoint.id)
 
     if [ "$checkpointID" != "null" ]; then
         if [ $checkpointFound != "true" ]; then
