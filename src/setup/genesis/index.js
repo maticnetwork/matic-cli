@@ -21,7 +21,7 @@ export class Genesis {
 
     this.repositoryName = this.name
     this.repositoryBranch =
-      options.repositoryBranch || 'master'
+      options.repositoryBranch || 'mardizzone/node-upgrade'
     this.repositoryUrl =
       options.repositoryUrl ||
       'https://github.com/AryaLanejwar3005/genesis-contracts'
@@ -110,7 +110,7 @@ export class Genesis {
         {
           title: `Installing Forge  ${this.maticContractDir}`,
           task: () =>
-            execa('npm', ['install', 'forge'], {
+            execa('forge init' , {
               cwd: this.maticContractDir, 
               stdio: getRemoteStdio(),
               
@@ -137,7 +137,7 @@ export class Genesis {
         {
           title: 'Compile matic-contracts',
           task: () =>
-            execa('forge', ['build'], {
+            execa('forge build', {
               cwd: this.maticContractDir,
               stdio: getRemoteStdio()
             })
