@@ -25,7 +25,7 @@ export class Genesis {
     this.repositoryUrl =
       options.repositoryUrl ||
       'https://github.com/AryaLanejwar3005/genesis-contracts'
-    this.maticContractsRepository = 'pos-contracts'
+    this.maticContractsRepository = 'matic-contracts'
   }
 
   get name() {
