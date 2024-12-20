@@ -1574,15 +1574,15 @@ export class Devnet {
           }
         }
       },
-      {
-        title: ganache.taskTitle,
-        task: () => {
-          return ganache.getTasks()
-        },
-        enabled: () => {
-          return (this.config.devnetType === 'docker' || 'remote') && !this.config.network
-        }
-      },
+      //{
+      //  title: ganache.taskTitle,
+      //  task: () => {
+      //    return ganache.getTasks()
+      //  },
+      //  enabled: () => {
+      //    return (this.config.devnetType === 'docker' || 'remote') && !this.config.network
+      //  }
+      //},
       {
         title: anvil.taskTitle,
         task: () => {
