@@ -8,7 +8,7 @@ heimdallRepo: https://github.com/maticnetwork/heimdall.git
 heimdallBranch: develop
 contractsRepo: https://github.com/AryaLanjewar3005/pos-contracts.git 
 contractsBranch: anvil-integration-0.0
-genesisContractsRepo: https://github.com/AryaLanjewar3005/genesis-contracts.git
+genesisContractsRepo: https://github.com/maticnetwork/genesis-contracts.git
 genesisContractsBranch: master
 sprintSize: 64
 sprintSizeBlockNumber: 0
