@@ -24,7 +24,7 @@ export class Genesis {
       options.repositoryBranch || 'mardizzone/node-upgrade'
     this.repositoryUrl =
       options.repositoryUrl ||
-      'https://github.com/AryaLanejwar3005/genesis-contracts'
+      'https://github.com/maticnetwork/genesis-contracts'
     this.maticContractsRepository = 'matic-contracts'
   }
 
@@ -99,21 +99,10 @@ export class Genesis {
             })
         },
         {
-          title: `Install dependencies for matic-contracts ${this.maticContractDir}`,
+          title: 'Install dependencies for matic-contracts',
           task: () =>
             execa('npm', ['install', '--omit=dev'], {
-              cwd: this.maticContractDir, 
-              stdio: getRemoteStdio(),
-              
-            })
-        },
-        {
-          title: `Installing Forge  ${this.maticContractDir}`,
-          task: () =>
-            execa('forge init' , {
-              cwd: this.maticContractDir, 
-              stdio: getRemoteStdio(),
-              
+              cwd: this.maticContractDir
             })
         },
         {
@@ -137,7 +126,7 @@ export class Genesis {
         {
           title: 'Compile matic-contracts',
           task: () =>
-            execa('forge build', {
+            execa('npm', ['run', 'truffle:compile'], {
               cwd: this.maticContractDir,
               stdio: getRemoteStdio()
             })
