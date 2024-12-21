@@ -193,6 +193,10 @@ async function installHostSpecificPackages(ip) {
   console.log('📍Installing anvil...')
   command ='curl -L https://foundry.paradigm.xyz | bash && export PATH="$HOME/.foundry/bin:$PATH" && source ~/.bashrc && foundryup'
   await runSshCommand(ip, command, maxRetries)
+
+  console.log('📍Testing if forge is installed!')
+  command = 'forge --version'
+  await runSshCommand(ip, command, maxRetries)
 }
 
 export async function installDocker(ip, user) {
