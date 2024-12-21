@@ -86,7 +86,7 @@ export class Contracts {
       {
         title: 'Compile matic contracts',
         task: () =>
-          execa('npm', ['run', 'build'], {
+          execa('forge', ['build'], {
             cwd: this.repositoryDir,
             stdio: getRemoteStdio()
           })
