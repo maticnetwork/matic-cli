@@ -256,11 +256,28 @@ export class Heimdall {
     }
   }
 
+  goPrivateTask() {
+    return {
+      title: 'Setup GOPRIVATE',
+      task: () => {
+        return execa(
+          'go',
+          ['env', '-w', `GOPRIVATE=${this.repositoryUrl}`],
+          {
+            cwd: this.repositoryDir,
+            stdio: getRemoteStdio()
+          }
+        )
+      }
+    }
+  }
+
   async getTasks() {
     return new Listr(
       [
         this.cloneRepositoryTask(),
         this.buildTask(),
+        this.goPrivateTask(),
         {
           title: 'Init Heimdall',
           task: () => {
