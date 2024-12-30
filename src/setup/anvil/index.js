@@ -70,20 +70,41 @@ export class Anvil{
         {
           title: 'Start Anvil',
           task: () => {
-            server = execa(`anvil --port 9545 --balance 10000000000 --gas-limit 1000000 --gas-price 1 --accounts 3 --code-size-limit 10000 --verbose --fork-url https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY} --chain-id 11155111`, {
+            server = execa('anvil', [
+            '--port', '9545',
+            '--balance', '1000000000000000',
+            '--gas-limit', '1000000000000',
+            '--gas-price', '1',
+            '--accounts', '3',
+            '--code-size-limit', '10000000000',
+            '--verbose'
+        ], {
+            stdio: 'inherit',
+          env: {
+          ...process.env,
+          PATH: `${process.env.HOME}/.foundry/bin:${process.env.PATH}`
+          }
+        })
+  },
+}, 
+
+        {
+          title: 'Start Anvil',
+          task: () => {
+            server = execa(`anvil --port 9545 --balance 1000000000000000 --gas-limit 1000000000000 --gas-price 1 --accounts 3 --code-size-limit 10000000000 --verbose`, {
               stdio: 'inherit',
             });
             return server;
           },
         },
-        //{
-        //  title: 'Deploy contracts on Main chain',
-        //  task: () =>
-        //    execa('bash', ['anvil-deployment.sh'], {
-        //      cwd: this.config.targetDirectory,
-        //      stdio: getRemoteStdio(),
-        //    }),
-        //},
+        {
+          title: 'Deploy contracts on Main chain',
+          task: () =>
+            execa('bash', ['anvil-deployment.sh'], {
+              cwd: this.config.targetDirectory,
+              stdio: getRemoteStdio(),
+            }),
+        },
         {
           title: 'Setup validators',
           task: () => this.getStakeTasks(),
