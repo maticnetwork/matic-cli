@@ -123,10 +123,16 @@ export class Genesis {
               }
             )
         },
+
+        {
+          title: 'Adding forge to path',
+          task: () =>
+            execa('export PATH="$HOME/.foundry/bin:$PATH')
+        },
         {
           title: 'Compile matic-contracts',
           task: () =>
-            execa('npm', ['run', 'truffle:compile'], {
+            execa('forge', ['build'], {
               cwd: this.maticContractDir,
               stdio: getRemoteStdio()
             })
