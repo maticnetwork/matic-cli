@@ -88,15 +88,15 @@ export class Anvil{
   },
 }, 
 
-        {
-          title: 'Start Anvil',
-          task: () => {
-            server = execa(`anvil --port 9545 --balance 1000000000000000 --gas-limit 1000000000000 --gas-price 1 --accounts 3 --code-size-limit 10000000000 --verbose`, {
-              stdio: 'inherit',
-            });
-            return server;
-          },
-        },
+        //{
+        //  title: 'Start Anvil',
+        //  task: () => {
+        //    server = execa(`anvil --port 9545 --balance 1000000000000000 --gas-limit 1000000000000 --gas-price 1 --accounts 3 --code-size-limit 10000000000 --verbose`, {
+        //      stdio: 'inherit',
+        //    });
+        //    return server;
+        //  },
+        //},
         {
           title: 'Deploy contracts on Main chain',
           task: () =>
