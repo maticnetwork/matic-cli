@@ -127,7 +127,9 @@ export class Genesis {
         {
           title: 'Adding forge to path',
           task: () =>
-            execa('export PATH="$HOME/.foundry/bin:$PATH')
+            execa('bash', ['-c', 'export PATH="$HOME/.foundry/bin:$PATH"'], {
+              stdio: getRemoteStdio()
+            })
         },
         {
           title: 'Compile matic-contracts',
