@@ -134,10 +134,16 @@ export class Genesis {
         {
           title: 'Compile matic-contracts',
           task: () =>
+            //execa('forge', ['build'], {
+            //  cwd: this.maticContractDir,
+            //  stdio: getRemoteStdio()
+            //})
             execa('forge', ['build'], {
-              cwd: this.maticContractDir,
-              stdio: getRemoteStdio()
-            })
+    env: {
+    ...process.env,
+    PATH: `${process.env.HOME}/.foundry/bin:${process.env.PATH}`
+  }
+})
         },
         {
           title: 'Prepare validators for genesis file',
