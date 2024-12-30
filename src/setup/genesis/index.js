@@ -142,7 +142,8 @@ export class Genesis {
     env: {
     ...process.env,
     PATH: `${process.env.HOME}/.foundry/bin:${process.env.PATH}`
-  }
+  },
+              stdio: getRemoteStdio()
 })
         },
         {

@@ -86,8 +86,15 @@ export class Contracts {
       {
         title: 'Compile matic contracts',
         task: () =>
+          //execa('forge', ['build'], {
+          //  cwd: this.repositoryDir,
+          //  stdio: getRemoteStdio()
+          //})
           execa('forge', ['build'], {
-            cwd: this.repositoryDir,
+            env: {
+              ...process.env,
+              PATH: `${process.env.HOME}/.foundry/bin:${process.env.PATH}`
+            },
             stdio: getRemoteStdio()
           })
       }
