@@ -77,7 +77,7 @@ export class Anvil{
             '--gas-price', '1',
             '--accounts', '3',
             '--code-size-limit', '10000000000',
-            '--verbose'
+            '--verbosity'
         ], {
             stdio: 'inherit',
           env: {
