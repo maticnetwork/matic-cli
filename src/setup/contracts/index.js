@@ -6,8 +6,6 @@ import fs from 'fs-extra'
 
 import { cloneRepository } from '../../lib/utils.js'
 import { getRemoteStdio } from '../../express/common/remote-worker.js'
-import { title } from 'process'
-import { get } from 'lodash'
 
 export class Contracts {
   constructor(config, options = {}) {
