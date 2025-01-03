@@ -86,7 +86,7 @@ export class Contracts {
       {
         title: 'Generate interfaces',
         task: ()=> 
-          execa('npm' ['run', 'generate:interfaces'], {
+          execa('npm', ['run', 'generate:interfaces'], {
             cwd: this.repositoryDir,
             stdio: getRemoteStdio()
           })
