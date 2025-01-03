@@ -15,6 +15,9 @@ echo "$DIR"
 # cd matic contracts repo
 cd {{ obj.contracts.repositoryDir }}
 
+export ETHERSCANAPIKEY= {{ obj.etherscanAPIKey }}
+echo "$ETHERSCANAPIKEY" >> .env 
+
 export PATH="$HOME/.foundry/bin:$PATH"
 
 # bor contracts are deployed on child chain
