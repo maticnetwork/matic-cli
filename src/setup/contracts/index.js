@@ -6,6 +6,8 @@ import fs from 'fs-extra'
 
 import { cloneRepository } from '../../lib/utils.js'
 import { getRemoteStdio } from '../../express/common/remote-worker.js'
+import { title } from 'process'
+import { get } from 'lodash'
 
 export class Contracts {
   constructor(config, options = {}) {
@@ -82,6 +84,14 @@ export class Contracts {
               stdio: getRemoteStdio()
             }
           )
+      },
+      {
+        title: 'Generate interfaces',
+        task: ()=> 
+          execa('npm' ['run', 'generate:interfaces'], {
+            cwd: this.repositoryDir,
+            stdio: getRemoteStdio()
+          })
       },
       {
         title: 'Compile matic contracts',
