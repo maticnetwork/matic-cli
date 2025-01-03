@@ -87,6 +87,10 @@ export class Contracts {
         title: 'Generate interfaces',
         task: ()=> 
           execa('npm', ['run', 'generate:interfaces'], {
+            env : {
+              ...process.env,
+              PATH: `${process.env.HOME}/.foundry/bin:${process.env.PATH}`
+            },
             cwd: this.repositoryDir,
             stdio: getRemoteStdio()
           })
