@@ -15,7 +15,7 @@ echo "$DIR"
 # cd matic contracts repo
 cd {{ obj.contracts.repositoryDir }}
 
-export ETHERSCANAPIKEY= {{ obj.etherscanAPIKey }}
+export ETHERSCANAPIKEY= {{ obj.config.etherscanAPIKey }}
 echo "ETHERSCAN_API_KEY= $ETHERSCANAPIKEY" >> .env 
 
 export PATH="$HOME/.foundry/bin:$PATH"
