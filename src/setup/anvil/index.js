@@ -13,8 +13,9 @@ import { getRemoteStdio } from '../../express/common/remote-worker.js';
 export class Anvil{
   constructor(config, options = {}) {
     this.config = config;
-    this.etherscanAPIKey = process.env.ETHERSCAN_API_KEY;
     console.log("anvil integration started !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
+
+    this.etherscanAPIKey = process.env.ETHERSCAN_API_KEY;
 
     this.dbName = options.dbName || 'anvil-db';
     this.serverPort = options.serverPort || 9545;
