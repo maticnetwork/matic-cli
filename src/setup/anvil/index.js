@@ -15,7 +15,8 @@ export class Anvil{
     this.config = config;
     console.log("anvil integration started !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
 
-    this.etherscanAPIKey = process.env.ETHERSCAN_API_KEY;
+    this.etherscanAPIKey = config.etherscanAPIKey;
+    console.log(`anvil etherscan API key check : ${this.etherscanAPIKey} !!!!!!!!!`)
 
     this.dbName = options.dbName || 'anvil-db';
     this.serverPort = options.serverPort || 9545;
