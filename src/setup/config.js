@@ -72,6 +72,7 @@ export default class Config {
     if (!this.privateKey || !this.keystorePassword) {
       const keystoreDetails = await getKeystoreDetails(this)
       this.accounts =  createAccountsFromMnemonics(process.env.MNEMONICS, 5)
+      console.log("Changes !!!!!!!!!!!!!!!!!!!!!!!!!")
       console.log(this.accounts)
       //this.accounts.push(getAccountFromPrivateKey(keystoreDetails.privateKey))
       this.set({ keystorePassword: keystoreDetails.keystorePassword })
