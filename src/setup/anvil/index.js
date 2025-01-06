@@ -14,11 +14,7 @@ export class Anvil{
   constructor(config, options = {}) {
     this.config = config;
     console.log("anvil integration started !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
-    console.log(this.config.accounts)
     console.log(this.config)
-
-    this.etherscanAPIKey = config.etherscanAPIKey;
-    console.log(`anvil etherscan API key check : ${this.etherscanAPIKey} !!!!!!!!!`)
 
     this.dbName = options.dbName || 'anvil-db';
     this.serverPort = options.serverPort || 9545;
@@ -76,7 +72,7 @@ export class Anvil{
           title: 'Start Anvil',
           task: () => {
             server = execa('anvil', [
-            '--port', '9545',
+            '--port', `${this.serverPort}`,
             '--balance', '1000000000000000',
             '--gas-limit', '1000000000000',
             '--gas-price', '1',
