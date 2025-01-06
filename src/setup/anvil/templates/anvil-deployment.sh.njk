@@ -18,6 +18,7 @@ cd {{ obj.contracts.repositoryDir }}
 export ETHERSCANAPIKEY={{ obj.config.etherscanAPIKey }}
 echo "$ETHERSCANAPIKEY"
 echo "ETHERSCAN_API_KEY=$ETHERSCANAPIKEY" >> .env 
+echo "HEIMDALL_ID='$HEIMDALL_ID'" >> .env
 
 export PATH="$HOME/.foundry/bin:$PATH"
 
