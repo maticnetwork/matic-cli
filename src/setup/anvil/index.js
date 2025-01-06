@@ -14,6 +14,7 @@ export class Anvil{
   constructor(config, options = {}) {
     this.config = config;
     console.log("anvil integration started !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
+    console.log(this.config.accounts)
 
     this.etherscanAPIKey = config.etherscanAPIKey;
     console.log(`anvil etherscan API key check : ${this.etherscanAPIKey} !!!!!!!!!`)
