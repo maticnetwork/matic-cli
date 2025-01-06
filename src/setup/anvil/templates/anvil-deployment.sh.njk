@@ -22,4 +22,10 @@ echo "ETHERSCAN_API_KEY=$ETHERSCANAPIKEY" >> .env
 export PATH="$HOME/.foundry/bin:$PATH"
 
 # bor contracts are deployed on child chain
-forge script scripts/deployment-scripts/deployContracts.s.sol:DeploymentScript --rpc-url http://localhost:9545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --broadcast
+# forge script scripts/deployment-scripts/deployContracts.s.sol:DeploymentScript --rpc-url http://localhost:9545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --broadcast
+#
+
+FORGE_COMMAND="forge script scripts/deployment-scripts/deployContracts.s.sol:DeploymentScript --rpc-url http://localhost:9545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --broadcast"
+
+# Automatically answer "yes" to any prompts from the Forge command
+yes "yes" | $FORGE_COMMAND
