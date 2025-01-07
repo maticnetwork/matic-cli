@@ -28,9 +28,6 @@ export PATH="$HOME/.foundry/bin:$PATH"
 # forge script scripts/deployment-scripts/deployContracts.s.sol:DeploymentScript --rpc-url http://localhost:9545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --broadcast
 #
 
-FORGE_COMMAND_01="forge script scripts/deployment-scripts/deployContracts.s.sol:DeploymentScript --rpc-url http://localhost:9545 --private-key $PRIVATE_KEY --broadcast"
-
-# Automatically answer "yes" to any prompts from the Forge command
-yes "yes" | $FORGE_COMMAND
+forge script scripts/deployment-scripts/deployContracts.s.sol:DeploymentScript --rpc-url http://localhost:9545 --private-key $PRIVATE_KEY --broadcast
 
 forge script scripts/deployment-scripts/drainStakeManager.s.sol:DrainStakeManagerDeployment --rpc-url http://localhost:9545 --private-key $PRIVATE_KEY --broadcast

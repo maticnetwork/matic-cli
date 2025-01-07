@@ -15,6 +15,7 @@ export class Anvil{
     this.config = config;
     console.log("anvil integration started !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
     console.log(this.config)
+    this.mnemonic = config.mnemonic
 
     this.dbName = options.dbName || 'anvil-db';
     this.serverPort = options.serverPort || 9545;
@@ -77,6 +78,7 @@ export class Anvil{
             '--gas-limit', '1000000000000',
             '--gas-price', '1',
             '--accounts', '3',
+            '--mnemonic', `${this.mnemonic}`
             '--code-size-limit', '10000000000',
             '--verbosity'
         ], {
