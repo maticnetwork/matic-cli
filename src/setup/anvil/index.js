@@ -78,7 +78,7 @@ export class Anvil{
             '--gas-limit', '1000000000000',
             '--gas-price', '1',
             '--accounts', '3',
-            '--mnemonic', `${this.mnemonic}`
+            '--mnemonic', `${this.mnemonic}`,
             '--code-size-limit', '10000000000',
             '--verbosity'
         ], {

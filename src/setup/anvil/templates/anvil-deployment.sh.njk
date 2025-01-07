@@ -31,3 +31,9 @@ export PATH="$HOME/.foundry/bin:$PATH"
 forge script scripts/deployment-scripts/deployContracts.s.sol:DeploymentScript --rpc-url http://localhost:9545 --private-key $PRIVATE_KEY --broadcast
 
 forge script scripts/deployment-scripts/drainStakeManager.s.sol:DrainStakeManagerDeployment --rpc-url http://localhost:9545 --private-key $PRIVATE_KEY --broadcast
+
+forge script scripts/deployment-scripts/initializeState.s.sol:InitializeStateScript --rpc-url http://localhost:9545 --private-key $PRIVATE_KEY --broadcast
+
+forge script scripts/deployment-scripts/childContractDeployment.s.sol:ChildContractDeploymentScript --rpc-url http://localhost:9545 --private-key $PRIVATE_KEY --broadcast
+
+forge script scripts/deployment-scripts/syncChildStateToRoot.s.sol:SyncChildStateToRootScript --rpc-url http://localhost:9545 --private-key $PRIVATE_KEY --broadcast
