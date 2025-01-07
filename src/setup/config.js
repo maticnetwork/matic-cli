@@ -71,6 +71,8 @@ export default class Config {
   async loadAccounts() {
     if (!this.privateKey || !this.keystorePassword) {
       const keystoreDetails = await getKeystoreDetails(this)
+      console.log("Configs in loadAccounts function : ")
+      console.log(this.print())
       this.accounts =  createAccountsFromMnemonics("test test test test test test test test test test test junk", 5)
       console.log("Changes !!!!!!!!!!!!!!!!!!!!!!!!!")
       console.log(this.accounts)
