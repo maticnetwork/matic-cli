@@ -120,7 +120,7 @@ resource "aws_security_group" "internet_facing_load_balancer_sg" {
       description = "web traffic to internet"
       from_port   = egress.value
       to_port     = egress.value
-      protocol    = "-1"
+      protocol    = "tcp"
       cidr_blocks = var.SG_CIDR_BLOCKS_OUT
       self = true
     }

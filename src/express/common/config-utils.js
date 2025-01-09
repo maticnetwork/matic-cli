@@ -54,8 +54,7 @@ const validCertPathStr = makeValidator((x) => {
     x !== undefined &&
     x !== null &&
     x !== '' &&
-    !x.startsWith('~') &&
-    (x.endsWith('.pem') || x.endsWith('.cer'))
+    !x.startsWith('~')
   ) {
     console.log('Done Checking path..')
     return x
