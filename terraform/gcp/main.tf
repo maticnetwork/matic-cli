@@ -1,4 +1,4 @@
-# Provider and Terraform Configuration 
+# Provider and Terraform Configuration
 
 terraform {
   required_providers {
@@ -183,7 +183,8 @@ resource "google_compute_firewall" "allow_internal_access" {
   direction = "INGRESS"
   priority  = 1000
   allow {
-    protocol = "all"
+    protocol = "tcp"
+    ports    = var.PORTS_IN
   }
   source_tags = [var.VM_NAME]
   target_tags = [var.VM_NAME]
@@ -195,7 +196,8 @@ resource "google_compute_firewall" "allow_devnet_vm_connection" {
   direction = "INGRESS"
   priority  = 1000
   allow {
-    protocol = "all"
+    protocol = "tcp"
+    ports    = var.PORTS_IN
   }
   source_ranges = concat(google_compute_address.bor_static_ip.*.address, google_compute_address.erigon_static_ip.*.address, google_compute_address.docker_static_ip.*.address)
   target_tags = [var.VM_NAME]
