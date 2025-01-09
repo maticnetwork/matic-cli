@@ -50,12 +50,7 @@ const validZone = makeValidator((x) => {
 })
 
 const validCertPathStr = makeValidator((x) => {
-  if (
-    x !== undefined &&
-    x !== null &&
-    x !== '' &&
-    !x.startsWith('~')
-  ) {
+  if (x !== undefined && x !== null && x !== '' && !x.startsWith('~')) {
     console.log('Done Checking path..')
     return x
   } else throw new Error(x + 'is not valid, please check your configs!')
