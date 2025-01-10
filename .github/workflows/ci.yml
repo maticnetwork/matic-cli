@@ -17,6 +17,7 @@ concurrency:
 env:
   NODE_VERSION: '18.19.0'
   OIDC_PROVIDER: 'projects/198945073119/locations/global/workloadIdentityPools/github/providers/matic-cli'
+  OIDC_SERVICE_ACCOUNT: 'matic-cli-service-account@prj-polygonlabs-pos-v1-dev.iam.gserviceaccount.com'
 
 jobs:
   lint:
@@ -83,6 +84,7 @@ jobs:
         with:
           token_format: access_token
           workload_identity_provider: ${{ env.OIDC_PROVIDER }}
+          service_account: ${{ env.OIDC_SERVICE_ACCOUNT }}
 
       - name: Create gcp key pair
         working-directory: matic-cli
