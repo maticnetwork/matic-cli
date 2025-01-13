@@ -93,7 +93,7 @@ export class Devnet {
     return path.join(this.heimdallDir(index), 'config', 'genesis.json')
   }
 
-  heimdallAppConfigFilePath(index) {
+  heimdallHeimdallConfigFilePath(index) {
     return path.join(this.heimdallDir(index), 'config', 'heimdall-config.toml')
   }
 
@@ -251,7 +251,7 @@ export class Devnet {
         task: async () => {
           // set heimdall
           for (let i = 0; i < this.totalBorNodes; i++) {
-            fileReplacer(this.heimdallAppConfigFilePath(i))
+            fileReplacer(this.heimdallHeimdallConfigFilePath(i))
               .replace(
                 /eth_rpc_url[ ]*=[ ]*".*"/gi,
                 `eth_rpc_url = "${this.config.ethURL}"`
@@ -259,14 +259,6 @@ export class Devnet {
               .replace(
                 /bor_rpc_url[ ]*=[ ]*".*"/gi,
                 `bor_rpc_url = "http://bor${i}:8545"`
-              )
-              .replace(
-                /bor_grpc_flag[ ]*=[ ]*".*"/gi,
-                'bor_grpc_flag = "true"'
-              )
-              .replace(
-                /bor_grpc_url[ ]*=[ ]*".*"/gi,
-                `bor_grpc_url = "bor${i}:3131"`
               )
               .replace(
                 /amqp_url[ ]*=[ ]*".*"/gi,
@@ -334,7 +326,7 @@ export class Devnet {
             this.config.targetDirectory
           )
 
-          // TODO: Uncomment when finalized for docker setup
+          // TODO: Uncomment when finalised for docker setup
           // if (this.config.network) {
           //   const chain = this.config.network
           //   for (let i = 0; i < this.totalBorNodes; i++) {
@@ -371,7 +363,7 @@ export class Devnet {
         task: async () => {
           // set heimdall
           for (let i = 0; i < this.totalNodes; i++) {
-            fileReplacer(this.heimdallAppConfigFilePath(i))
+            fileReplacer(this.heimdallHeimdallConfigFilePath(i))
               .replace(
                 /eth_rpc_url[ ]*=[ ]*".*"/gi,
                 `eth_rpc_url = "${this.config.ethURL}"`
@@ -379,14 +371,6 @@ export class Devnet {
               .replace(
                 /bor_rpc_url[ ]*=[ ]*".*"/gi,
                 'bor_rpc_url = "http://localhost:8545"'
-              )
-              .replace(
-                /bor_grpc_flag[ ]*=[ ]*".*"/gi,
-                'bor_grpc_flag = "true"'
-              )
-              .replace(
-                /bor_grpc_url[ ]*=[ ]*".*"/gi,
-                'bor_grpc_url = "localhost:3131"'
               )
               .replace(
                 /amqp_url[ ]*=[ ]*".*"/gi,
@@ -1268,7 +1252,7 @@ export class Devnet {
             this.config.numOfBorValidators + this.config.numOfErigonValidators,
             '--n',
             this.config.numOfBorSentries + this.config.numOfBorArchiveNodes + this.config.numOfErigonSentries + this.config.numOfErigonArchiveNodes,
-            '--chain-id',
+            '--chain',
             this.config.heimdallChainId,
             '--node-host-prefix',
             'heimdall',
