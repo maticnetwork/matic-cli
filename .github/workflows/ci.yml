@@ -16,8 +16,8 @@ concurrency:
 
 env:
   NODE_VERSION: '18.19.0'
-  OIDC_PROVIDER: 'projects/198945073119/locations/global/workloadIdentityPools/github/providers/matic-cli'
-  OIDC_SERVICE_ACCOUNT: 'matic-cli-service-account@prj-polygonlabs-pos-v1-dev.iam.gserviceaccount.com'
+  OIDC_PROVIDER: projects/23849419004/locations/global/workloadIdentityPools/polygonlabs-shared-prod/providers/oidc-shared-prod
+  OIDC_SERVICE_ACCOUNT: shared-prod-oidc-sa-ar@prj-polygonlabs-shared-prod.iam.gserviceaccount.com
 
 jobs:
   lint:
