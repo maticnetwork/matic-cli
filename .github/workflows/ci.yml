@@ -105,7 +105,7 @@ jobs:
 
       - name: Init devnet
         working-directory: matic-cli
-        run: ./bin/express-cli.js --init aws
+        run: ./bin/express-cli.js --init gcp
 
       - name: Start devnet
         working-directory: matic-cli/deployments/devnet-1
