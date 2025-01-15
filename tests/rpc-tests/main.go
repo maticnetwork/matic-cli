@@ -8,6 +8,9 @@ import (
 	"math/big"
 	"math/rand"
 	"net/http"
+	"time"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
 // Request represents the JSON-RPC request payload.
@@ -32,7 +35,11 @@ type RPCError struct {
 	Message string `json:"message"`
 }
 
-type ResponseMap map[string]interface{}
+type ResponseMap struct {
+	chainId                *big.Int
+	mostRecentBlock        *big.Int
+	currentProposerAddress common.Address
+}
 
 type TestCase struct {
 	Key            string
@@ -50,14 +57,30 @@ func main() {
 	// Ethereum node RPC endpoint
 	rpcURL := "https://rpc-amoy.polygon.technology"
 	mapTestCases := testCasesToMap(testCases)
-	responseMap := make(ResponseMap)
+	responseMap := ResponseMap{}
 	mapRequestIdToKey := make(map[int]string)
 	failedTestCases := []FailedTestCase{}
 
 	testCaseBatches := []BatchTestCase{
-		[]TestCase{mapTestCases["eth_chainId"]},
+		[]TestCase{
+			mapTestCases["eth_chainId"],
+			mapTestCases["eth_blockNumber"],
+			mapTestCases["bor_getCurrentProposer"],
+			mapTestCases["bor_getCurrentValidators"],
+		},
+		[]TestCase{
+			mapTestCases["eth_getBlockByNumber"],
+			// mapTestCases["eth_getHeaderByNumber"],
+			// mapTestCases["eth_getUncleCountByBlockNumber"],
+			// mapTestCases["eth_getBlockTransactionCountByNumber"],
+			// mapTestCases["bor_getAuthor"],
+			// mapTestCases["bor_getSnapshotProposer"],
+			// mapTestCases["bor_getSnapshotProposerSequence"],
+		},
 	}
 
+	timeStart := time.Now()
+	countTestCases := 0
 	for _, testCaseBatch := range testCaseBatches {
 		// Preparing Request
 		requests := make([]Request, 0)
@@ -66,6 +89,7 @@ func main() {
 			mapRequestIdToKey[req.ID] = testCase.Key
 
 			requests = append(requests, req)
+			countTestCases++
 		}
 
 		responses, err := CallEthereumRPC(requests, rpcURL)
@@ -87,6 +111,8 @@ func main() {
 	for _, failedTestCase := range failedTestCases {
 		fmt.Printf("failed test case: %s | err:%s", failedTestCase.Key, failedTestCase.Err)
 	}
+
+	fmt.Printf("All Tests Executed | Success: (%d/%d) | Duration: %s\n", countTestCases-len(failedTestCases), countTestCases, time.Since(timeStart))
 }
 
 func testCasesToMap(testCases []TestCase) map[string]TestCase {
@@ -139,26 +165,20 @@ func NewRequest(method string, params interface{}) Request {
 	}
 }
 
-// ConvertHexToInt converts a json.RawMessage containing a hex string to a *big.Int.
-func convertHexToInt(raw json.RawMessage) (*big.Int, error) {
-	// Decode the JSON to extract the hex string
-	var hexString string
-	if err := json.Unmarshal(raw, &hexString); err != nil {
+type Validator struct {
+	ID               uint64         `json:"ID"`
+	Address          common.Address `json:"signer"`
+	VotingPower      int64          `json:"power"`
+	ProposerPriority int64          `json:"accum"`
+}
+
+func parseResponse[T any](raw json.RawMessage) (*T, error) {
+	var response T
+	if err := json.Unmarshal(raw, &response); err != nil {
 		return nil, fmt.Errorf("error unmarshalling JSON: %w", err)
 	}
 
-	// Remove the "0x" prefix if present
-	if len(hexString) >= 2 && hexString[:2] == "0x" {
-		hexString = hexString[2:]
-	}
-
-	// Convert the hex string to an integer using big.Int
-	intValue, success := new(big.Int).SetString(hexString, 16)
-	if !success {
-		return nil, fmt.Errorf("error converting hex string to integer")
-	}
-
-	return intValue, nil
+	return &response, nil
 }
 
 var testCases = []TestCase{
@@ -168,11 +188,99 @@ var testCases = []TestCase{
 			return NewRequest("eth_chainId", []interface{}{})
 		},
 		HandleResponse: func(rm *ResponseMap, resp Response) error {
-			intValue, err := convertHexToInt(resp.Result)
+			parsed, err := parseResponse[string](resp.Result)
 			if err != nil {
 				return err
 			}
-			(*rm)["chainId"] = intValue
+			hexString := *parsed
+
+			// Remove the "0x" prefix if present
+			if len(hexString) >= 2 && hexString[:2] == "0x" {
+				hexString = hexString[2:]
+			}
+
+			// Convert the hex string to an integer using big.Int
+			intValue, success := new(big.Int).SetString(hexString, 16)
+			if !success {
+				return fmt.Errorf("error converting hex string to integer")
+			}
+			(*rm).chainId = intValue
+			return nil
+		},
+	},
+	{
+		Key: "eth_blockNumber",
+		PrepareRequest: func(rm *ResponseMap) Request {
+			return NewRequest("eth_blockNumber", []interface{}{})
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			parsed, err := parseResponse[string](resp.Result)
+			if err != nil {
+				return err
+			}
+			hexString := *parsed
+
+			// Remove the "0x" prefix if present
+			if len(hexString) >= 2 && hexString[:2] == "0x" {
+				hexString = hexString[2:]
+			}
+
+			// Convert the hex string to an integer using big.Int
+			intValue, success := new(big.Int).SetString(hexString, 16)
+			if !success {
+				return fmt.Errorf("error converting hex string to integer")
+			}
+			(*rm).mostRecentBlock = intValue
+			return nil
+		},
+	},
+	{
+		Key: "bor_getCurrentProposer",
+		PrepareRequest: func(rm *ResponseMap) Request {
+			return NewRequest("bor_getCurrentProposer", []interface{}{})
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			currentProposerAddress, err := parseResponse[common.Address](resp.Result)
+			if err != nil {
+				return err
+			}
+			if (*currentProposerAddress == common.Address{}) {
+				return fmt.Errorf("invalid proposer address: %s", currentProposerAddress)
+			}
+			(*rm).currentProposerAddress = *currentProposerAddress
+			return nil
+		},
+	},
+	{
+		Key: "bor_getCurrentValidators",
+		PrepareRequest: func(rm *ResponseMap) Request {
+			return NewRequest("bor_getCurrentValidators", []interface{}{})
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			validators, err := parseResponse[[]Validator](resp.Result)
+			if err != nil {
+				return err
+			}
+			if len(*validators) == 0 {
+				return fmt.Errorf("must be at least one validator")
+			}
+			// todo: more validators verification
+			return nil
+		},
+	},
+	{
+		Key: "eth_getBlockByNumber",
+		PrepareRequest: func(rm *ResponseMap) Request {
+			return NewRequest("eth_getBlockByNumber", []interface{}{fmt.Sprintf("0x%x", (*rm).mostRecentBlock), true})
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			block, err := parseResponse[map[string]interface{}](resp.Result)
+			if err != nil {
+				return err
+			}
+			if block == nil {
+				return fmt.Errorf("block not found")
+			}
 			return nil
 		},
 	},
