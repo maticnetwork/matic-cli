@@ -149,6 +149,8 @@ export class Genesis {
         {
           title: 'Prepare validators for genesis file',
           task: () => {
+            console.log(`Helooooooooooooooooooooooo ${this.config.genesisAddresses}`)
+            console.log(this.config.genesisAddresses)
             const validators = this.config.genesisAddresses.map((a) => {
               return {
                 address: a,
