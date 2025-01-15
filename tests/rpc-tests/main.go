@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/ecdsa"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -12,6 +13,7 @@ import (
 	"math/rand"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -44,7 +46,8 @@ type RPCError struct {
 
 type ResponseMap struct {
 	chainId                *big.Int
-	mostRecentBlock        *big.Int
+	mostRecentBlockNumber  *big.Int
+	mostRecentBlockHash    common.Hash
 	currentProposerAddress common.Address
 	accounts               Accounts
 	gasPrice               *big.Int
@@ -94,15 +97,21 @@ func main() {
 			mapTestCases["eth_feeHistory"],
 			mapTestCases["bor_getCurrentProposer"],
 			mapTestCases["bor_getCurrentValidators"],
+			mapTestCases["eth_maxPriorityFeePerGas"],
+			mapTestCases["eth_syncing"],
 		},
 		[]TestCase{
 			mapTestCases["eth_getBlockByNumber"],
+			mapTestCases["bor_getAuthor (by number)"],
+			mapTestCases["bor_getAuthor (no params)"],
 			// mapTestCases["eth_getHeaderByNumber"],
 			// mapTestCases["eth_getUncleCountByBlockNumber"],
 			// mapTestCases["eth_getBlockTransactionCountByNumber"],
-			// mapTestCases["bor_getAuthor"],
 			// mapTestCases["bor_getSnapshotProposer"],
 			// mapTestCases["bor_getSnapshotProposerSequence"],
+		},
+		[]TestCase{
+			mapTestCases["bor_getAuthor (by hash)"],
 		},
 	}
 
@@ -264,6 +273,100 @@ func hexStringToBigInt(hexString string) (*big.Int, error) {
 	return intValue, nil
 }
 
+func validateBlock(block map[string]interface{}) error {
+	// Check if the block is nil
+	if block == nil {
+		return fmt.Errorf("block not found")
+	}
+
+	// Validate specific required fields
+	requiredFields := []string{
+		"baseFeePerGas", "difficulty", "gasLimit", "gasUsed",
+		"hash", "number", "timestamp", "parentHash", "totalDifficulty", "miner",
+	}
+
+	for _, field := range requiredFields {
+		if _, ok := block[field]; !ok {
+			return fmt.Errorf("missing required field: %s", field)
+		}
+	}
+
+	// Validate "gasLimit" (cannot be zero)
+	if err := validateHexBigInt(block["gasLimit"], "gasLimit", func(value *big.Int) error {
+		if value.Cmp(big.NewInt(0)) == 0 {
+			return errors.New("gasLimit cannot be zero")
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	// Validate "timestamp" (should be within 1 hour of the current time)
+	if err := validateHexBigInt(block["timestamp"], "timestamp", func(value *big.Int) error {
+		currentTime := time.Now().Unix()
+		blockTime := value.Int64()
+		if blockTime < currentTime-3600 || blockTime > currentTime+3600 {
+			return fmt.Errorf("timestamp is too far from current time: %d", blockTime)
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	// Validate "totalDifficulty" (must be greater than zero)
+	if err := validateHexBigInt(block["totalDifficulty"], "totalDifficulty", func(value *big.Int) error {
+		if value.Cmp(big.NewInt(0)) <= 0 {
+			return errors.New("totalDifficulty must be greater than zero")
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	// Validate "miner" address length (must be 42 characters for Ethereum addresses)
+	if miner, ok := block["miner"].(string); !ok || len(miner) != 42 {
+		return fmt.Errorf("invalid miner address length: %s", miner)
+	}
+
+	// Validate "hash" (must be 66 characters and not start with '0x0')
+	if hash, ok := block["hash"].(string); !ok || len(hash) != 66 || strings.HasPrefix(hash, "0x0") {
+		return fmt.Errorf("invalid hash: %s", hash)
+	}
+
+	// Additional checks for "parentHash" length
+	if parentHash, ok := block["parentHash"].(string); !ok || len(parentHash) != 66 {
+		return fmt.Errorf("invalid parentHash length: %s", parentHash)
+	}
+
+	// If all validations pass, return nil
+	return nil
+}
+
+func validateHexBigInt(value interface{}, fieldName string, customValidation func(*big.Int) error) error {
+	strValue, ok := value.(string)
+	if !ok {
+		return fmt.Errorf("invalid type for %s, expected string", fieldName)
+	}
+
+	// Ensure it starts with "0x"
+	if len(strValue) < 3 || strValue[:2] != "0x" {
+		return fmt.Errorf("%s must be a hex string prefixed with 0x", fieldName)
+	}
+
+	// Convert to big.Int
+	bigValue, success := new(big.Int).SetString(strValue[2:], 16)
+	if !success {
+		return fmt.Errorf("invalid hex string for %s: %s", fieldName, strValue)
+	}
+
+	// Apply custom validation if provided
+	if customValidation != nil {
+		return customValidation(bigValue)
+	}
+
+	return nil
+}
+
 var testCases = []TestCase{
 	{
 		Key: "eth_chainId",
@@ -298,7 +401,7 @@ var testCases = []TestCase{
 			if err != nil {
 				return err
 			}
-			(*rm).mostRecentBlock = intValue
+			(*rm).mostRecentBlockNumber = intValue
 			return nil
 		},
 	},
@@ -359,16 +462,19 @@ var testCases = []TestCase{
 	{
 		Key: "eth_getBlockByNumber",
 		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
-			return NewRequest("eth_getBlockByNumber", []interface{}{fmt.Sprintf("0x%x", (*rm).mostRecentBlock), true}), nil
+			return NewRequest("eth_getBlockByNumber", []interface{}{fmt.Sprintf("0x%x", (*rm).mostRecentBlockNumber), true}), nil
 		},
 		HandleResponse: func(rm *ResponseMap, resp Response) error {
 			block, err := parseResponse[map[string]interface{}](resp.Result)
 			if err != nil {
 				return err
 			}
-			if block == nil {
-				return fmt.Errorf("block not found")
+			err = validateBlock(*block)
+			if err != nil {
+				return err
 			}
+			blockHash, _ := (*block)["hash"].(string)
+			(*rm).mostRecentBlockHash = common.HexToHash(blockHash)
 			return nil
 		},
 	},
@@ -412,6 +518,27 @@ var testCases = []TestCase{
 				return fmt.Errorf("gas price must be greater than 0")
 			}
 			(*rm).gasPrice = gasPrice
+			return nil
+		},
+	},
+	{
+		Key: "eth_maxPriorityFeePerGas",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("eth_maxPriorityFeePerGas", []interface{}{}), nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			parsed, err := parseResponse[string](resp.Result)
+			if err != nil {
+				return err
+			}
+			priorityFeePerGas, err := hexStringToBigInt(*parsed)
+			if err != nil {
+				return err
+			}
+
+			if (*priorityFeePerGas).Cmp(big.NewInt(0)) < 0 {
+				return fmt.Errorf("gas price must be equal or greater than 0")
+			}
 			return nil
 		},
 	},
@@ -462,6 +589,70 @@ var testCases = []TestCase{
 						return fmt.Errorf("negative Reward value at Reward[%d][%d]: %s", i, j, (*big.Int)(reward).String())
 					}
 				}
+			}
+			return nil
+		},
+	},
+	{
+		Key: "eth_syncing",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("eth_syncing", []interface{}{}), nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			isSyncing, err := parseResponse[bool](resp.Result)
+			if err != nil {
+				return err
+			}
+			if *isSyncing {
+				return fmt.Errorf("should not be syncing")
+			}
+			return nil
+		},
+	},
+	{
+		Key: "bor_getAuthor (by number)",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("bor_getAuthor", []interface{}{(*rm).mostRecentBlockNumber}), nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			address, err := parseResponse[common.Address](resp.Result)
+			if err != nil {
+				return err
+			}
+			if (*address == common.Address{}) {
+				return fmt.Errorf("invalid author address")
+			}
+			return nil
+		},
+	},
+	{
+		Key: "bor_getAuthor (no params)",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("bor_getAuthor", []interface{}{}), nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			address, err := parseResponse[common.Address](resp.Result)
+			if err != nil {
+				return err
+			}
+			if (*address == common.Address{}) {
+				return fmt.Errorf("invalid author address")
+			}
+			return nil
+		},
+	},
+	{
+		Key: "bor_getAuthor (by hash)",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("bor_getAuthor", []interface{}{(*rm).mostRecentBlockHash}), nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			address, err := parseResponse[common.Address](resp.Result)
+			if err != nil {
+				return err
+			}
+			if (*address == common.Address{}) {
+				return fmt.Errorf("invalid author address")
 			}
 			return nil
 		},
