@@ -107,6 +107,7 @@ export function createAccountsFromMnemonics(mnemonics, totalAccounts) {
 }
 // return new generated private key
 export function getNewPrivateKey() {
+  console.log("Check !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
   return web3.eth.accounts.create()
 }
 
