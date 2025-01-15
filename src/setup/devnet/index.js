@@ -335,7 +335,7 @@ export class Devnet {
             this.config.targetDirectory
           )
 
-          // TODO: Uncomment when finalised for docker setup
+          // TODO: Uncomment when finalized for docker setup
           // if (this.config.network) {
           //   const chain = this.config.network
           //   for (let i = 0; i < this.totalBorNodes; i++) {
