@@ -94,7 +94,7 @@ jobs:
         #test
       - name: Login to GCP
         run: |
-          gcloud auth application-default login --no-launch-browser --cred-file=${{ env.CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE }}
+          gcloud auth application-default login --cred-file=${{ env.CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE }} --no-launch-browser
 
       - name: Create gcp key pair
         working-directory: matic-cli
