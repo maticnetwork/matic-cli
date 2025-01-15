@@ -94,7 +94,7 @@ jobs:
 
       - name: Login to GCP
         run: |
-          gcloud auth application-default login -quiet
+          gcloud auth application-default login --quiet
 
       - name: Create gcp key pair
         working-directory: matic-cli
