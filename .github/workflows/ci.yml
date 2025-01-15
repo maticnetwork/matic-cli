@@ -90,12 +90,11 @@ jobs:
           project_id: ${{ env.OIDC_PROJECT_ID }}
 
       - name: Set up GCP SDK
-        uses: 'google-github-actions/setup-gcloud@v1'
-        with:
-          version: '476.0.0'
+        uses: 'google-github-actions/setup-gcloud@v2'
+
       - name: Login to GCP
         run: |
-          gcloud auth application-default login --cred-file=${{ env.CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE }} --no-launch-browser
+          gcloud auth application-default login --client-id-file=${{ env.CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE }} --no-launch-browser
 
       - name: Create gcp key pair
         working-directory: matic-cli
