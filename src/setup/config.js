@@ -73,7 +73,7 @@ export default class Config {
       const keystoreDetails = await getKeystoreDetails(this)
       console.log("Configs in loadAccounts function : ")
       console.log(this.print())
-      this.accounts =  createAccountsFromMnemonics("clock radar mass judge dismiss just intact mind resemble fringe diary casino", 5)
+      //this.accounts =  createAccountsFromMnemonics("clock radar mass judge dismiss just intact mind resemble fringe diary casino", 5)
       console.log("Changes !!!!!!!!!!!!!!!!!!!!!!!!!")
       console.log(this.accounts)
       //this.accounts.push(getAccountFromPrivateKey(keystoreDetails.privateKey))
@@ -81,6 +81,7 @@ export default class Config {
       this.set({ keystorePassword: keystoreDetails.keystorePassword })
     }
 
+    this.primaryAccount = this.primaryAccount()
     // set genesis address
     this.genesisAddresses = [this.primaryAccount.address]
   }
