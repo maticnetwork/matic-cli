@@ -92,10 +92,6 @@ jobs:
       - name: Set up GCP SDK
         uses: 'google-github-actions/setup-gcloud@v2'
 
-      - name: Login to GCP
-        run: |
-          gcloud auth application-default login --client-id-file=${{ env.CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE }} --no-launch-browser
-
       - name: Create gcp key pair
         working-directory: matic-cli
         run: |
