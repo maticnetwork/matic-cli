@@ -62,6 +62,7 @@ export class Anvil{
 
   async getContractDeploymentTasks() {
     let server = null;
+    console.log(`Accounts : ${this.config}`)
 
     return new Listr(
       [
