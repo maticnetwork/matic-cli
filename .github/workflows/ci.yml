@@ -91,7 +91,8 @@ jobs:
 
       - name: Set up GCP SDK
         uses: 'google-github-actions/setup-gcloud@v2'
-        #test
+        with:
+          version: '476.0.0'
       - name: Login to GCP
         run: |
           gcloud auth application-default login --cred-file=${{ env.CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE }} --no-launch-browser
