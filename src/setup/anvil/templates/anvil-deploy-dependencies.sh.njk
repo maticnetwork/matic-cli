@@ -19,6 +19,6 @@ cd {{ obj.contracts.repositoryDir }}
 
 export PATH="$HOME/.foundry/bin:$PATH"
 
- forge create --rpc-url http://localhost:9545 --private-key $PRIVATE_KEY contracts/common/lib/Common.sol:Common --broadcast 
+ forge create --rpc-url http://localhost:9545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 contracts/common/lib/Common.sol:Common --broadcast 
 
-forge create --rpc-url http://localhost:9545 --private-key $PRIVATE_KEY contracts/root/predicates/TransferWithSigUtils.sol:TransferWithSigUtils --broadcast
+forge create --rpc-url http://localhost:9545 --private-key  0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 contracts/root/predicates/TransferWithSigUtils.sol:TransferWithSigUtils --broadcast
