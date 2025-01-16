@@ -71,17 +71,12 @@ export default class Config {
   async loadAccounts() {
     if (!this.privateKey || !this.keystorePassword) {
       const keystoreDetails = await getKeystoreDetails(this)
-      console.log("Configs in loadAccounts function : ")
-      console.log(this.print())
-      //this.accounts =  createAccountsFromMnemonics("clock radar mass judge dismiss just intact mind resemble fringe diary casino", 5)
-      console.log("Changes !!!!!!!!!!!!!!!!!!!!!!!!!")
-      console.log(this.accounts)
+      this.accounts =  createAccountsFromMnemonics("clock radar mass judge dismiss just intact mind resemble fringe diary casino", 5)
       //this.accounts.push(getAccountFromPrivateKey(keystoreDetails.privateKey))
       this.set({ keystorePassword: keystoreDetails.keystorePassword })
       this.set({ keystorePassword: keystoreDetails.keystorePassword })
     }
 
-    this.primaryAccount = this.primaryAccount()
     // set genesis address
     this.genesisAddresses = [this.primaryAccount.address]
   }

@@ -13,8 +13,6 @@ import { getRemoteStdio } from '../../express/common/remote-worker.js';
 export class Anvil{
   constructor(config, options = {}) {
     this.config = config;
-    console.log("anvil integration started !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
-    console.log(this.config)
     this.mnemonic = config.mnemonic
 
     this.dbName = options.dbName || 'anvil-db';
@@ -101,6 +99,15 @@ export class Anvil{
         //    return server;
         //  },
         //},
+        {
+          title : 'Deploy dependencies',
+          task: () => 
+            execa('bash', ['anvil-deploy-dependencies.sh'], {
+              cwd: this.config.targetDirectory,
+              stdio: getRemoteStdio(),
+              timeout: 6000
+            })
+        }
         {
           title: 'Deploy contracts on Main chain',
           task: () =>
