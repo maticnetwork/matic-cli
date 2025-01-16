@@ -90,6 +90,10 @@ jobs:
           service_account: ${{ env.OIDC_SERVICE_ACCOUNT }}
           project_id: ${{ env.OIDC_PROJECT_ID }}
 
+      - name: GCP login
+        run: |
+          gcloud auth login --brief --cred-file="${{ steps.auth.outputs.credentials_file_path }}"
+
       - name: Set up GCP SDK
         uses: 'google-github-actions/setup-gcloud@v2'
 
@@ -100,7 +104,6 @@ jobs:
           cd gcp
           ssh-keygen -t ed25519 -f ./matic-cli-ci-key
           chmod 700 matic-cli-ci-key
-          cat ${{ steps.auth.outputs.credentials_file_path }}
 
       - name: Setup node
         uses: actions/setup-node@v4
