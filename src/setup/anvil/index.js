@@ -75,8 +75,8 @@ export class Anvil{
             '--balance', '1000000000000000',
             '--gas-limit', '1000000000000',
             '--gas-price', '1',
-            '--accounts', '3',
-            '--mnemonic', `${this.mnemonic}`,
+            '--accounts', '10',
+            //'--mnemonic', `${this.mnemonic}`,
             '--code-size-limit', '10000000000',
             '--verbosity'
         ], {
@@ -107,7 +107,7 @@ export class Anvil{
               stdio: getRemoteStdio(),
               timeout: 6000
             })
-        }
+        },
         {
           title: 'Deploy contracts on Main chain',
           task: () =>
