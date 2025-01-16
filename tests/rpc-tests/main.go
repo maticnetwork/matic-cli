@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"crypto/ecdsa"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -18,7 +19,9 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/consensus/bor"
 	"github.com/ethereum/go-ethereum/consensus/bor/valset"
+	"github.com/ethereum/go-ethereum/core/types"
 	hdwallet "github.com/miguelmota/go-ethereum-hdwallet"
 )
 
@@ -45,14 +48,29 @@ type RPCError struct {
 }
 
 type ResponseMap struct {
-	chainId                *big.Int
-	mostRecentBlockNumber  *big.Int
-	mostRecentBlockHash    common.Hash
-	currentProposerAddress common.Address
-	accounts               Accounts
-	gasPrice               *big.Int
+	chainId                        *big.Int
+	mostRecentBlockNumber          *big.Int
+	mostRecentBlockHash            common.Hash
+	mostRecentBlockTotalDifficulty *big.Int
+	mostRecentBlockParentHash      common.Hash
+	currentProposerAddress         common.Address
+	accounts                       Accounts
+	gasPrice                       *big.Int
 }
-
+type Account struct {
+	key   *ecdsa.PrivateKey
+	addr  common.Address
+	nonce *big.Int
+}
+type Accounts []Account
+type feeHistoryResult struct {
+	OldestBlock      *hexutil.Big     `json:"oldestBlock"`
+	Reward           [][]*hexutil.Big `json:"reward,omitempty"`
+	BaseFee          []*hexutil.Big   `json:"baseFeePerGas,omitempty"`
+	GasUsedRatio     []float64        `json:"gasUsedRatio"`
+	BlobBaseFee      []*hexutil.Big   `json:"baseFeePerBlobGas,omitempty"`
+	BlobGasUsedRatio []float64        `json:"blobGasUsedRatio,omitempty"`
+}
 type TestCase struct {
 	Key            string
 	PrepareRequest func(*ResponseMap) (*Request, error)
@@ -63,6 +81,10 @@ type BatchTestCase []TestCase
 type FailedTestCase struct {
 	Err error
 	Key string
+}
+type SignTransactionResult struct {
+	Raw hexutil.Bytes      `json:"raw"`
+	Tx  *types.Transaction `json:"tx"`
 }
 
 var (
@@ -95,23 +117,30 @@ func main() {
 			mapTestCases["eth_getBalance"],
 			mapTestCases["eth_gasPrice"],
 			mapTestCases["eth_feeHistory"],
-			mapTestCases["bor_getCurrentProposer"],
-			mapTestCases["bor_getCurrentValidators"],
 			mapTestCases["eth_maxPriorityFeePerGas"],
 			mapTestCases["eth_syncing"],
+			mapTestCases["bor_getCurrentProposer"],
+			mapTestCases["bor_getCurrentValidators"],
+			mapTestCases["bor_getAuthor (no params)"],
+			mapTestCases["bor_getSnapshotProposer"],
+			mapTestCases["bor_getSnapshotProposerSequence"],
 		},
 		[]TestCase{
 			mapTestCases["eth_getBlockByNumber"],
+			mapTestCases["eth_getHeaderByNumber"],
+			mapTestCases["eth_estimateGas (simple transfer)"],
 			mapTestCases["bor_getAuthor (by number)"],
-			mapTestCases["bor_getAuthor (no params)"],
-			// mapTestCases["eth_getHeaderByNumber"],
-			// mapTestCases["eth_getUncleCountByBlockNumber"],
-			// mapTestCases["eth_getBlockTransactionCountByNumber"],
-			// mapTestCases["bor_getSnapshotProposer"],
-			// mapTestCases["bor_getSnapshotProposerSequence"],
+			mapTestCases["bor_getRootHash"],
+			mapTestCases["bor_getSigners"],
+			mapTestCases["bor_getSnapshot"],
+			mapTestCases["eth_fillTransaction"],
 		},
 		[]TestCase{
 			mapTestCases["bor_getAuthor (by hash)"],
+			mapTestCases["eth_getBlockByHash"],
+			mapTestCases["eth_getHeaderByHash"],
+			mapTestCases["bor_getSignersAtHash"],
+			mapTestCases["bor_getSnapshotAtHash"],
 		},
 	}
 
@@ -144,6 +173,10 @@ func main() {
 		// Handling Response
 		for _, response := range responses {
 			key := mapRequestIdToKey[response.ID]
+			if response.Error != nil {
+				failedTestCases = append(failedTestCases, FailedTestCase{Key: key, Err: fmt.Errorf("request error; message: %s | code: %d", response.Error.Message, response.Error.Code)})
+				continue
+			}
 			err := mapTestCases[key].HandleResponse(&responseMap, response)
 			if err != nil {
 				failedTestCases = append(failedTestCases, FailedTestCase{Key: key, Err: err})
@@ -219,21 +252,6 @@ func parseResponse[T any](raw json.RawMessage) (*T, error) {
 	}
 
 	return &response, nil
-}
-
-type Account struct {
-	key   *ecdsa.PrivateKey
-	addr  common.Address
-	nonce *big.Int
-}
-type Accounts []Account
-type feeHistoryResult struct {
-	OldestBlock      *hexutil.Big     `json:"oldestBlock"`
-	Reward           [][]*hexutil.Big `json:"reward,omitempty"`
-	BaseFee          []*hexutil.Big   `json:"baseFeePerGas,omitempty"`
-	GasUsedRatio     []float64        `json:"gasUsedRatio"`
-	BlobBaseFee      []*hexutil.Big   `json:"baseFeePerBlobGas,omitempty"`
-	BlobGasUsedRatio []float64        `json:"blobGasUsedRatio,omitempty"`
 }
 
 func generateAccountsUsingMnemonic(MNEMONIC string, N int) (accounts Accounts) {
@@ -328,8 +346,8 @@ func validateBlock(block map[string]interface{}) error {
 		return fmt.Errorf("invalid miner address length: %s", miner)
 	}
 
-	// Validate "hash" (must be 66 characters and not start with '0x0')
-	if hash, ok := block["hash"].(string); !ok || len(hash) != 66 || strings.HasPrefix(hash, "0x0") {
+	// Validate "hash" (must be 66 characters )
+	if hash, ok := block["hash"].(string); !ok || len(hash) != 66 {
 		return fmt.Errorf("invalid hash: %s", hash)
 	}
 
@@ -339,6 +357,255 @@ func validateBlock(block map[string]interface{}) error {
 	}
 
 	// If all validations pass, return nil
+	return nil
+}
+
+// validateHeader performs various checks on an Ethereum block header
+func validateHeader(header map[string]interface{}) error {
+	// Helper function to validate hex string
+	validateHex := func(value string, fieldName string, exactLength int) error {
+		if !strings.HasPrefix(value, "0x") {
+			return fmt.Errorf("%s must start with 0x", fieldName)
+		}
+
+		value = strings.TrimPrefix(value, "0x")
+		if exactLength > 0 && len(value) != exactLength {
+			return fmt.Errorf("%s must be exactly %d hex chars long", fieldName, exactLength)
+		}
+
+		// Handle empty hex string after 0x
+		if len(value) == 0 {
+			return fmt.Errorf("%s cannot be empty", fieldName)
+		}
+
+		// Pad single digits with leading zero for hex decoding
+		if len(value)%2 != 0 {
+			value = "0" + value
+		}
+
+		if _, err := hex.DecodeString(value); err != nil {
+			return fmt.Errorf("%s contains invalid hex characters", fieldName)
+		}
+
+		return nil
+	}
+
+	// Required fields check
+	requiredFields := []string{
+		"baseFeePerGas", "difficulty", "extraData", "gasLimit",
+		"gasUsed", "hash", "logsBloom", "miner", "mixHash",
+		"nonce", "number", "parentHash", "receiptsRoot",
+		"sha3Uncles", "stateRoot", "timestamp", "totalDifficulty",
+		"transactionsRoot",
+	}
+
+	for _, field := range requiredFields {
+		if _, exists := header[field]; !exists {
+			return fmt.Errorf("missing required field: %s", field)
+		}
+	}
+
+	// Validate hash (66 chars including 0x prefix = 32 bytes)
+	if err := validateHex(header["hash"].(string), "hash", 64); err != nil {
+		return err
+	}
+
+	// Validate parent hash
+	if err := validateHex(header["parentHash"].(string), "parentHash", 64); err != nil {
+		return err
+	}
+
+	// Validate miner address (42 chars including 0x prefix = 20 bytes)
+	if err := validateHex(header["miner"].(string), "miner", 40); err != nil {
+		return err
+	}
+
+	// Validate timestamps
+	timestampHex := strings.TrimPrefix(header["timestamp"].(string), "0x")
+	timestamp, _ := new(big.Int).SetString(timestampHex, 16)
+	blockTime := time.Unix(timestamp.Int64(), 0)
+
+	// Check if timestamp is within reasonable bounds (not more than 1 hour in the future)
+	if blockTime.After(time.Now().Add(time.Hour)) {
+		return fmt.Errorf("block timestamp is too far in the future")
+	}
+
+	// Validate gas limits
+	gasLimitHex := strings.TrimPrefix(header["gasLimit"].(string), "0x")
+	gasLimit, _ := new(big.Int).SetString(gasLimitHex, 16)
+
+	gasUsedHex := strings.TrimPrefix(header["gasUsed"].(string), "0x")
+	gasUsed, _ := new(big.Int).SetString(gasUsedHex, 16)
+
+	// Check if gasUsed exceeds gasLimit
+	if gasUsed.Cmp(gasLimit) > 0 {
+		return fmt.Errorf("gas used exceeds gas limit")
+	}
+
+	// Validate difficulty (no exact length requirement)
+	if err := validateHex(header["difficulty"].(string), "difficulty", 0); err != nil {
+		return err
+	}
+
+	// Validate nonce
+	if err := validateHex(header["nonce"].(string), "nonce", 16); err != nil {
+		return err
+	}
+
+	// Validate logs bloom (256 bytes = 512 hex chars)
+	if err := validateHex(header["logsBloom"].(string), "logsBloom", 512); err != nil {
+		return err
+	}
+
+	// Validate block number
+	if err := validateHex(header["number"].(string), "number", 0); err != nil {
+		return err
+	}
+
+	// Extra data length validation
+	extraData := strings.TrimPrefix(header["extraData"].(string), "0x")
+	if len(extraData) == 0 {
+		return fmt.Errorf("extra data cannot be empty")
+	}
+
+	// All validations passed
+	return nil
+}
+
+// validateSnapshot performs validation checks on a Snapshot struct
+func validateSnapshot(snap *bor.Snapshot) error {
+	if snap == nil {
+		return fmt.Errorf("snapshot is nil")
+	}
+
+	// Validate Hash size (should be 32 bytes)
+	if len(snap.Hash) != common.HashLength {
+		return fmt.Errorf("invalid hash length: got %d, want %d", len(snap.Hash), common.HashLength)
+	}
+
+	// Validate Recents
+	if len(snap.Recents) == 0 {
+		return fmt.Errorf("recents map is empty")
+	}
+
+	// Check recent addresses
+	for blockNum, addr := range snap.Recents {
+		if addr == (common.Address{}) {
+			return fmt.Errorf("zero address found in recents at block %d", blockNum)
+		}
+	}
+
+	// Validate ValidatorSet
+	if snap.ValidatorSet == nil {
+		return fmt.Errorf("validator set is nil")
+	}
+
+	if len(snap.ValidatorSet.Validators) == 0 {
+		return fmt.Errorf("validators list is empty")
+	}
+
+	// Create a map to check for unique IDs
+	idMap := make(map[uint64]bool)
+	// Create a map to check for unique addresses
+	addrMap := make(map[common.Address]bool)
+
+	// Validate each validator
+	for i, validator := range snap.ValidatorSet.Validators {
+		// Check if validator is nil
+		if validator == nil {
+			return fmt.Errorf("validator at index %d is nil", i)
+		}
+
+		// Check ID uniqueness (commented out as per example showing all IDs as 0)
+		if idMap[validator.ID] {
+			return fmt.Errorf("duplicate validator ID found: %d", validator.ID)
+		}
+		idMap[validator.ID] = true
+
+		// Check address validity
+		if validator.Address == (common.Address{}) {
+			return fmt.Errorf("validator at index %d has zero address", i)
+		}
+
+		// Check address uniqueness
+		if addrMap[validator.Address] {
+			return fmt.Errorf("duplicate validator address found: %s", validator.Address.Hex())
+		}
+		addrMap[validator.Address] = true
+
+		// Check voting power
+		if validator.VotingPower <= 0 {
+			return fmt.Errorf("validator at index %d has non-positive voting power: %d", i, validator.VotingPower)
+		}
+	}
+
+	// Validate Proposer
+	if snap.ValidatorSet.Proposer == nil {
+		return fmt.Errorf("proposer is nil")
+	}
+
+	// Check if proposer is one of the validators
+	if !addrMap[snap.ValidatorSet.Proposer.Address] {
+		return fmt.Errorf("proposer address %s not found in validator set", snap.ValidatorSet.Proposer.Address.Hex())
+	}
+
+	// All validations passed
+	return nil
+}
+
+// validateBlockSigners performs validation checks on a BlockSigners struct
+func validateBlockSigners(bs *bor.BlockSigners) error {
+	if bs == nil {
+		return fmt.Errorf("block signers is nil")
+	}
+
+	// Validate Author address
+	if bs.Author == (common.Address{}) {
+		return fmt.Errorf("author address is zero")
+	}
+
+	// Validate Signers length matches Diff
+	if len(bs.Signers) != bs.Diff {
+		return fmt.Errorf("signers length (%d) does not match diff (%d)", len(bs.Signers), bs.Diff)
+	}
+
+	// Must have at least one signer
+	if len(bs.Signers) == 0 {
+		return fmt.Errorf("signers list is empty")
+	}
+
+	// Validate first signer
+	if bs.Signers[0].Signer == (common.Address{}) {
+		return fmt.Errorf("first signer address is zero")
+	}
+
+	// Validate first signer difficulty matches Diff
+	if bs.Signers[0].Difficulty != uint64(bs.Diff) {
+		return fmt.Errorf("first signer difficulty (%d) does not match diff (%d)",
+			bs.Signers[0].Difficulty, bs.Diff)
+	}
+
+	// Validate author is first signer
+	if bs.Author != bs.Signers[0].Signer {
+		return fmt.Errorf("author (%s) is not the first signer (%s)",
+			bs.Author.Hex(), bs.Signers[0].Signer.Hex())
+	}
+
+	// Validate remaining signers
+	for i := 1; i < len(bs.Signers); i++ {
+		// Check non-zero address
+		if bs.Signers[i].Signer == (common.Address{}) {
+			return fmt.Errorf("signer at position %d has zero address", i)
+		}
+
+		// Check difficulty is exactly one less than previous
+		expectedDifficulty := bs.Signers[i-1].Difficulty - 1
+		if bs.Signers[i].Difficulty != expectedDifficulty {
+			return fmt.Errorf("invalid difficulty sequence at position %d: got %d, want %d",
+				i, bs.Signers[i].Difficulty, expectedDifficulty)
+		}
+	}
+
 	return nil
 }
 
@@ -367,6 +634,51 @@ func validateHexBigInt(value interface{}, fieldName string, customValidation fun
 	return nil
 }
 
+// prepareRawTransferRequest creates a new JSON-RPC request for sending a signed ETH transfer
+func prepareRawSimpleTransferTx(from Account, toAddress common.Address, value *big.Int, responseMap *ResponseMap) ([]byte, error) {
+	// Create transaction data
+	tx := types.NewTransaction(
+		from.nonce.Uint64(),  // nonce
+		toAddress,            // to
+		value,                // value
+		21000,                // gas limit (standard transfer)
+		responseMap.gasPrice, // gas price
+		nil,                  // data
+	)
+
+	// Sign the transaction
+	signedTx, err := types.SignTx(
+		tx,
+		types.NewEIP155Signer(responseMap.chainId),
+		from.key,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Encode the signed transaction
+	signedTxBytes, err := signedTx.MarshalBinary()
+	if err != nil {
+		return nil, err
+	}
+
+	// Create and return the JSON-RPC request with the raw signed transaction
+	return signedTxBytes, nil
+}
+
+// prepareEstimateGasRequest creates a new JSON-RPC request for estimating gas for an ETH transfer
+func prepareEstimateGasRequest(from Account, toAddress common.Address, value *big.Int) map[string]interface{} {
+	// Prepare transaction parameters for gas estimation
+	txParams := map[string]interface{}{
+		"from":  from.addr.Hex(),
+		"to":    toAddress.Hex(),
+		"value": hexutil.EncodeBig(value),
+	}
+
+	// Create and return the JSON-RPC request
+	return txParams
+}
+
 var testCases = []TestCase{
 	{
 		Key: "eth_chainId",
@@ -383,7 +695,7 @@ var testCases = []TestCase{
 				return err
 			}
 
-			(*rm).chainId = intValue
+			rm.chainId = intValue
 			return nil
 		},
 	},
@@ -401,14 +713,14 @@ var testCases = []TestCase{
 			if err != nil {
 				return err
 			}
-			(*rm).mostRecentBlockNumber = intValue
+			rm.mostRecentBlockNumber = intValue
 			return nil
 		},
 	},
 	{
 		Key: "eth_getTransactionCount",
 		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
-			return NewRequest("eth_getTransactionCount", []interface{}{(*rm).accounts[0].addr, "latest"}), nil
+			return NewRequest("eth_getTransactionCount", []interface{}{rm.accounts[0].addr, "latest"}), nil
 		},
 		HandleResponse: func(rm *ResponseMap, resp Response) error {
 			parsed, err := parseResponse[string](resp.Result)
@@ -421,7 +733,7 @@ var testCases = []TestCase{
 			}
 
 			// set nonce for accounts[0]
-			(*rm).accounts[0].nonce = intValue
+			rm.accounts[0].nonce = intValue
 			return nil
 		},
 	},
@@ -438,7 +750,7 @@ var testCases = []TestCase{
 			if (*currentProposerAddress == common.Address{}) {
 				return fmt.Errorf("invalid proposer address: %s", currentProposerAddress)
 			}
-			(*rm).currentProposerAddress = *currentProposerAddress
+			rm.currentProposerAddress = *currentProposerAddress
 			return nil
 		},
 	},
@@ -462,7 +774,7 @@ var testCases = []TestCase{
 	{
 		Key: "eth_getBlockByNumber",
 		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
-			return NewRequest("eth_getBlockByNumber", []interface{}{fmt.Sprintf("0x%x", (*rm).mostRecentBlockNumber), true}), nil
+			return NewRequest("eth_getBlockByNumber", []interface{}{fmt.Sprintf("0x%x", rm.mostRecentBlockNumber), true}), nil
 		},
 		HandleResponse: func(rm *ResponseMap, resp Response) error {
 			block, err := parseResponse[map[string]interface{}](resp.Result)
@@ -474,14 +786,75 @@ var testCases = []TestCase{
 				return err
 			}
 			blockHash, _ := (*block)["hash"].(string)
-			(*rm).mostRecentBlockHash = common.HexToHash(blockHash)
+			parentHash, _ := (*block)["parentHash"].(string)
+			totalDifficulty, _ := (*block)["totalDifficulty"].(string)
+			rm.mostRecentBlockHash = common.HexToHash(blockHash)
+			rm.mostRecentBlockParentHash = common.HexToHash(parentHash)
+			rm.mostRecentBlockTotalDifficulty, _ = hexStringToBigInt(totalDifficulty)
+			return nil
+		},
+	},
+	{
+		Key: "eth_getBlockByHash",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			// requests most recent parent block
+			return NewRequest("eth_getBlockByHash", []interface{}{fmt.Sprintf("0x%x", rm.mostRecentBlockParentHash), true}), nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			block, err := parseResponse[map[string]interface{}](resp.Result)
+			if err != nil {
+				return err
+			}
+			err = validateBlock(*block)
+			if err != nil {
+				return err
+			}
+			totalDifficultyHex, _ := (*block)["totalDifficulty"].(string)
+			totalDifficulty, _ := hexStringToBigInt(totalDifficultyHex)
+			if rm.mostRecentBlockTotalDifficulty.Cmp(totalDifficulty) <= 0 {
+				return fmt.Errorf("parent block must always have less total difficulty than child block")
+			}
+			return nil
+		},
+	},
+	{
+		Key: "eth_getHeaderByNumber",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("eth_getHeaderByNumber", []interface{}{fmt.Sprintf("0x%x", rm.mostRecentBlockNumber)}), nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			header, err := parseResponse[map[string]interface{}](resp.Result)
+			if err != nil {
+				return err
+			}
+			err = validateHeader(*header)
+			if err != nil {
+				return err
+			}
+			return nil
+		},
+	},
+	{
+		Key: "eth_getHeaderByHash",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("eth_getHeaderByHash", []interface{}{fmt.Sprintf("0x%x", rm.mostRecentBlockHash)}), nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			header, err := parseResponse[map[string]interface{}](resp.Result)
+			if err != nil {
+				return err
+			}
+			err = validateHeader(*header)
+			if err != nil {
+				return err
+			}
 			return nil
 		},
 	},
 	{
 		Key: "eth_getBalance",
 		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
-			return NewRequest("eth_getBalance", []interface{}{(*rm).accounts[0].addr, "latest"}), nil
+			return NewRequest("eth_getBalance", []interface{}{rm.accounts[0].addr, "latest"}), nil
 		},
 		HandleResponse: func(rm *ResponseMap, resp Response) error {
 			parsed, err := parseResponse[string](resp.Result)
@@ -517,7 +890,7 @@ var testCases = []TestCase{
 			if (*gasPrice).Cmp(big.NewInt(0)) <= 0 {
 				return fmt.Errorf("gas price must be greater than 0")
 			}
-			(*rm).gasPrice = gasPrice
+			rm.gasPrice = gasPrice
 			return nil
 		},
 	},
@@ -612,7 +985,7 @@ var testCases = []TestCase{
 	{
 		Key: "bor_getAuthor (by number)",
 		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
-			return NewRequest("bor_getAuthor", []interface{}{(*rm).mostRecentBlockNumber}), nil
+			return NewRequest("bor_getAuthor", []interface{}{fmt.Sprintf("0x%x", rm.mostRecentBlockNumber)}), nil
 		},
 		HandleResponse: func(rm *ResponseMap, resp Response) error {
 			address, err := parseResponse[common.Address](resp.Result)
@@ -644,7 +1017,7 @@ var testCases = []TestCase{
 	{
 		Key: "bor_getAuthor (by hash)",
 		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
-			return NewRequest("bor_getAuthor", []interface{}{(*rm).mostRecentBlockHash}), nil
+			return NewRequest("bor_getAuthor", []interface{}{rm.mostRecentBlockParentHash}), nil
 		},
 		HandleResponse: func(rm *ResponseMap, resp Response) error {
 			address, err := parseResponse[common.Address](resp.Result)
@@ -654,6 +1027,165 @@ var testCases = []TestCase{
 			if (*address == common.Address{}) {
 				return fmt.Errorf("invalid author address")
 			}
+			return nil
+		},
+	},
+	{
+		Key: "bor_getRootHash",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("bor_getRootHash", []interface{}{new(big.Int).Sub(rm.mostRecentBlockNumber, big.NewInt(20)), rm.mostRecentBlockNumber}), nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			rootHash, err := parseResponse[string](resp.Result)
+			if err != nil {
+				return err
+			}
+			if len(*rootHash) != 64 {
+				return fmt.Errorf("invalid root hash size")
+			}
+			return nil
+		},
+	},
+
+	{
+		Key: "eth_estimateGas (simple transfer)",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			txParams := prepareEstimateGasRequest(rm.accounts[0], rm.accounts[1].addr, big.NewInt(1000))
+			return NewRequest("eth_estimateGas", []interface{}{txParams}), nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			parsed, err := parseResponse[string](resp.Result)
+			if err != nil {
+				return err
+			}
+			estimatedGas, err := hexStringToBigInt(*parsed)
+			if err != nil {
+				return err
+			}
+
+			if (*estimatedGas).Cmp(big.NewInt(21000)) != 0 {
+				return fmt.Errorf("simple transfer must always be 21000")
+			}
+			return nil
+		},
+	},
+	{
+		Key: "bor_getSigners",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("bor_getSigners", []interface{}{fmt.Sprintf("0x%x", rm.mostRecentBlockNumber)}), nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			signers, err := parseResponse[[]common.Address](resp.Result)
+			if err != nil {
+				return err
+			}
+			if len(*signers) == 0 {
+				return fmt.Errorf("each block must have at least one signer")
+			}
+			return nil
+		},
+	},
+	{
+		Key: "bor_getSignersAtHash",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("bor_getSignersAtHash", []interface{}{rm.mostRecentBlockParentHash}), nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			signers, err := parseResponse[[]common.Address](resp.Result)
+			if err != nil {
+				return err
+			}
+			if len(*signers) == 0 {
+				return fmt.Errorf("each block must have at least one signer")
+			}
+			return nil
+		},
+	},
+	{
+		Key: "bor_getSnapshot",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("bor_getSnapshot", []interface{}{fmt.Sprintf("0x%x", rm.mostRecentBlockNumber)}), nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			snapshot, err := parseResponse[bor.Snapshot](resp.Result)
+			if err != nil {
+				return err
+			}
+			err = validateSnapshot(snapshot)
+			if err != nil {
+				return err
+			}
+			return nil
+		},
+	},
+	{
+		Key: "bor_getSnapshotAtHash",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("bor_getSnapshotAtHash", []interface{}{rm.mostRecentBlockParentHash}), nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			snapshot, err := parseResponse[bor.Snapshot](resp.Result)
+			if err != nil {
+				return err
+			}
+			err = validateSnapshot(snapshot)
+			if err != nil {
+				return err
+			}
+			return nil
+		},
+	},
+	{
+		Key: "bor_getSnapshotProposer",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("bor_getSnapshotProposer", []interface{}{}), nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			address, err := parseResponse[common.Address](resp.Result)
+			if err != nil {
+				return err
+			}
+			if (*address == common.Address{}) {
+				return fmt.Errorf("invalid proposer address")
+			}
+			return nil
+		},
+	},
+	{
+		Key: "bor_getSnapshotProposerSequence",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("bor_getSnapshotProposerSequence", []interface{}{}), nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			blockSigners, err := parseResponse[bor.BlockSigners](resp.Result)
+			if err != nil {
+				return err
+			}
+			err = validateBlockSigners(blockSigners)
+			if err != nil {
+				return err
+			}
+			return nil
+		},
+	},
+	{
+		Key: "eth_fillTransaction",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			txParams := prepareEstimateGasRequest(rm.accounts[0], rm.accounts[1].addr, big.NewInt(1000))
+			return NewRequest("eth_fillTransaction", []interface{}{txParams}), nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			transactionResult, err := parseResponse[SignTransactionResult](resp.Result)
+			if err != nil {
+				return err
+			}
+			if transactionResult.Tx.ChainId().Cmp(rm.chainId) != 0 {
+				return fmt.Errorf("invalid chainid: expect %d received %d", rm.chainId, transactionResult.Tx.ChainId())
+			}
+			if transactionResult.Tx.Nonce() != rm.accounts[0].nonce.Uint64() {
+				return fmt.Errorf("invalid nonce: expect %d received %d", rm.accounts[0].nonce.Uint64(), transactionResult.Tx.Nonce())
+			}
+
 			return nil
 		},
 	},
