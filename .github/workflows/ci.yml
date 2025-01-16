@@ -58,7 +58,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           path: matic-cli
-
+      # test
       - name: Create .env file
         working-directory: matic-cli
         env:
