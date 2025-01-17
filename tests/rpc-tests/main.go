@@ -22,6 +22,7 @@ import (
 	"github.com/ethereum/go-ethereum/consensus/bor"
 	"github.com/ethereum/go-ethereum/consensus/bor/valset"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
 	hdwallet "github.com/miguelmota/go-ethereum-hdwallet"
 )
 
@@ -48,14 +49,18 @@ type RPCError struct {
 }
 
 type ResponseMap struct {
-	chainId                        *big.Int
-	mostRecentBlockNumber          *big.Int
-	mostRecentBlockHash            common.Hash
-	mostRecentBlockTotalDifficulty *big.Int
-	mostRecentBlockParentHash      common.Hash
-	currentProposerAddress         common.Address
-	accounts                       Accounts
-	gasPrice                       *big.Int
+	chainId                                 *big.Int
+	mostRecentBlockNumber                   *big.Int
+	mostRecentBlockHash                     common.Hash
+	mostRecentBlockTotalDifficulty          *big.Int
+	mostRecentBlockParentHash               common.Hash
+	currentProposerAddress                  common.Address
+	accounts                                Accounts
+	gasPrice                                *big.Int
+	stateSyncTxHash                         common.Hash
+	stateSyncBlockNumber                    *big.Int
+	stateSyncBlockHash                      common.Hash
+	stateSyncTxIndexOnGetTransactionReceipt int
 }
 type Account struct {
 	key   *ecdsa.PrivateKey
@@ -71,6 +76,32 @@ type feeHistoryResult struct {
 	BlobBaseFee      []*hexutil.Big   `json:"baseFeePerBlobGas,omitempty"`
 	BlobGasUsedRatio []float64        `json:"blobGasUsedRatio,omitempty"`
 }
+
+type RPCTransaction struct {
+	BlockHash           *common.Hash      `json:"blockHash"`
+	BlockNumber         *hexutil.Big      `json:"blockNumber"`
+	From                common.Address    `json:"from"`
+	Gas                 hexutil.Uint64    `json:"gas"`
+	GasPrice            *hexutil.Big      `json:"gasPrice"`
+	GasFeeCap           *hexutil.Big      `json:"maxFeePerGas,omitempty"`
+	GasTipCap           *hexutil.Big      `json:"maxPriorityFeePerGas,omitempty"`
+	MaxFeePerBlobGas    *hexutil.Big      `json:"maxFeePerBlobGas,omitempty"`
+	Hash                common.Hash       `json:"hash"`
+	Input               hexutil.Bytes     `json:"input"`
+	Nonce               hexutil.Uint64    `json:"nonce"`
+	To                  *common.Address   `json:"to"`
+	TransactionIndex    *hexutil.Uint64   `json:"transactionIndex"`
+	Value               *hexutil.Big      `json:"value"`
+	Type                hexutil.Uint64    `json:"type"`
+	Accesses            *types.AccessList `json:"accessList,omitempty"`
+	ChainID             *hexutil.Big      `json:"chainId,omitempty"`
+	BlobVersionedHashes []common.Hash     `json:"blobVersionedHashes,omitempty"`
+	V                   *hexutil.Big      `json:"v"`
+	R                   *hexutil.Big      `json:"r"`
+	S                   *hexutil.Big      `json:"s"`
+	YParity             *hexutil.Uint64   `json:"yParity,omitempty"`
+}
+
 type TestCase struct {
 	Key            string
 	PrepareRequest func(*ResponseMap) (*Request, error)
@@ -110,37 +141,48 @@ func main() {
 	failedTestCases := []FailedTestCase{}
 	responseMap.accounts = generateAccountsUsingMnemonic(*mnemonic, 10)
 	testCaseBatches := []BatchTestCase{
-		[]TestCase{
-			mapTestCases["eth_chainId"],
-			mapTestCases["eth_blockNumber"],
-			mapTestCases["eth_getTransactionCount"],
-			mapTestCases["eth_getBalance"],
-			mapTestCases["eth_gasPrice"],
-			mapTestCases["eth_feeHistory"],
-			mapTestCases["eth_maxPriorityFeePerGas"],
-			mapTestCases["eth_syncing"],
+		{
+			mapTestCases["bor_getAuthor (no params)"],
 			mapTestCases["bor_getCurrentProposer"],
 			mapTestCases["bor_getCurrentValidators"],
-			mapTestCases["bor_getAuthor (no params)"],
 			mapTestCases["bor_getSnapshotProposer"],
 			mapTestCases["bor_getSnapshotProposerSequence"],
+			mapTestCases["eth_blockNumber"],
+			mapTestCases["eth_chainId"],
+			mapTestCases["eth_feeHistory"],
+			mapTestCases["eth_gasPrice"],
+			mapTestCases["eth_getBalance"],
+			mapTestCases["eth_getTransactionCount"],
+			mapTestCases["eth_maxPriorityFeePerGas"],
+			mapTestCases["eth_syncing"],
 		},
-		[]TestCase{
-			mapTestCases["eth_getBlockByNumber"],
-			mapTestCases["eth_getHeaderByNumber"],
-			mapTestCases["eth_estimateGas (simple transfer)"],
+		{
 			mapTestCases["bor_getAuthor (by number)"],
 			mapTestCases["bor_getRootHash"],
 			mapTestCases["bor_getSigners"],
 			mapTestCases["bor_getSnapshot"],
+			mapTestCases["eth_estimateGas (simple transfer)"],
 			mapTestCases["eth_fillTransaction"],
+			mapTestCases["eth_getBlockByNumber"],
+			mapTestCases["eth_getHeaderByNumber"],
+			mapTestCases["eth_getLogs (state sync tx)"],
 		},
-		[]TestCase{
+		{
 			mapTestCases["bor_getAuthor (by hash)"],
-			mapTestCases["eth_getBlockByHash"],
-			mapTestCases["eth_getHeaderByHash"],
 			mapTestCases["bor_getSignersAtHash"],
 			mapTestCases["bor_getSnapshotAtHash"],
+			mapTestCases["eth_getBlockByHash"],
+			mapTestCases["eth_getBlockReceipts (state sync tx)"],
+			mapTestCases["eth_getHeaderByHash"],
+			mapTestCases["eth_getTransactionByHash (state sync tx)"],
+			mapTestCases["eth_getTransactionReceipt (state sync tx)"],
+			mapTestCases["eth_getTransactionReceiptsByBlock (state sync tx)"],
+			// - eth_getRawTransactionByBlockHashAndIndex
+			// - eth_getRawTransactionByBlockNumberAndIndex
+			// - eth_getRawTransactionByHash
+			// - eth_getTransactionByBlockHashAndIndex
+			// - eth_getTransactionByBlockNumberAndIndex
+			// - eth_getTransactionByHash
 		},
 	}
 
@@ -604,6 +646,112 @@ func validateBlockSigners(bs *bor.BlockSigners) error {
 			return fmt.Errorf("invalid difficulty sequence at position %d: got %d, want %d",
 				i, bs.Signers[i].Difficulty, expectedDifficulty)
 		}
+	}
+
+	return nil
+}
+
+func validateStateSyncTxReceipt(receipt map[string]interface{}) error {
+	// Validate from and to addresses are 0x0
+	zeroAddress := "0x0000000000000000000000000000000000000000"
+
+	from, ok := receipt["from"].(string)
+	if !ok || !strings.EqualFold(from, zeroAddress) {
+		return fmt.Errorf("invalid 'from' address: expected %s, got %s", zeroAddress, from)
+	}
+
+	to, ok := receipt["to"].(string)
+	if !ok || !strings.EqualFold(to, zeroAddress) {
+		return fmt.Errorf("invalid 'to' address: expected %s, got %s", zeroAddress, to)
+	}
+
+	// Validate gas values are 0
+	if receipt["cumulativeGasUsed"] != "0x0" {
+		return fmt.Errorf("cumulativeGasUsed must be 0x0")
+	}
+
+	if receipt["effectiveGasPrice"] != "0x0" {
+		return fmt.Errorf("effectiveGasPrice must be 0x0")
+	}
+
+	if receipt["gasUsed"] != "0x0" {
+		return fmt.Errorf("gasUsed must be 0x0")
+	}
+
+	// Validate logs contain required state sync log
+	logs, ok := receipt["logs"].([]interface{})
+	if !ok {
+		return fmt.Errorf("invalid logs field")
+	}
+
+	stateSyncAddress := "0x0000000000000000000000000000000000001001"
+	expectedTopic, err := hex.DecodeString("5a22725590b0a51c923940223f7458512164b1113359a735e86e7f27f44791ee")
+	if err != nil {
+		return fmt.Errorf("failed to decode expected topic: %v", err)
+	}
+
+	foundStateSyncLog := false
+	for _, logInterface := range logs {
+		log, ok := logInterface.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		address, ok := log["address"].(string)
+		if !ok || !strings.EqualFold(address, stateSyncAddress) {
+			continue
+		}
+
+		topics, ok := log["topics"].([]interface{})
+		if !ok || len(topics) == 0 {
+			continue
+		}
+
+		firstTopic, ok := topics[0].(string)
+		if !ok {
+			continue
+		}
+
+		// Remove "0x" prefix if present
+		firstTopic = strings.TrimPrefix(firstTopic, "0x")
+		topicBytes, err := hex.DecodeString(firstTopic)
+		if err != nil {
+			continue
+		}
+
+		if bytes.Equal(topicBytes, expectedTopic) {
+			foundStateSyncLog = true
+			break
+		}
+	}
+
+	if !foundStateSyncLog {
+		return fmt.Errorf("state sync log not found")
+	}
+
+	return nil
+}
+
+func handleGetStateSyncBlockReceipts(rm *ResponseMap, resp Response, method string) error {
+	txReceipts, err := parseResponse[[]map[string]interface{}](resp.Result)
+	if err != nil {
+		return err
+	}
+
+	// state sync tx must always be the last one
+	stateSyncTx := (*txReceipts)[len(*txReceipts)-1]
+
+	err = validateStateSyncTxReceipt((*txReceipts)[len(*txReceipts)-1])
+	if err != nil {
+		return fmt.Errorf("last receipt on block must be state sync tx: %s", err)
+	}
+	txIndexHexStringWihtoutPrefix := (stateSyncTx)["transactionIndex"].(string)[2:]
+	txIndexOnMethod, err := strconv.ParseInt(txIndexHexStringWihtoutPrefix, 16, 0)
+	if err != nil {
+		return fmt.Errorf("error converting hex to int:%s", err)
+	}
+	if int(txIndexOnMethod) != rm.stateSyncTxIndexOnGetTransactionReceipt {
+		return fmt.Errorf("error on state sync tx index in block %s: transaction index on method %s: %d | transaction index on method eth_getTransactionReceipt: %d", rm.stateSyncBlockHash, method, txIndexOnMethod, rm.stateSyncTxIndexOnGetTransactionReceipt)
 	}
 
 	return nil
@@ -1187,6 +1335,104 @@ var testCases = []TestCase{
 			}
 
 			return nil
+		},
+	},
+	{
+		Key: "eth_getLogs (state sync tx)",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			// Define the event topic for StateCommitted(uint256 indexed stateId, bool success)
+			eventSignature := "StateCommitted(uint256,bool)"
+			eventTopic := crypto.Keccak256Hash([]byte(eventSignature))
+
+			address := common.HexToAddress("0x0000000000000000000000000000000000001001")
+
+			fromBlock := new(big.Int).Sub(rm.mostRecentBlockNumber, big.NewInt(20000))
+			// Create the filter object
+			filter := map[string]interface{}{
+				"address":   address.Hex(),
+				"topics":    [][]common.Hash{{eventTopic}},
+				"fromBlock": fmt.Sprintf("0x%x", fromBlock),
+				"toBlock":   fmt.Sprintf("0x%x", rm.mostRecentBlockNumber),
+			}
+
+			return NewRequest("eth_getLogs", []interface{}{filter}), nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			logs, err := parseResponse[[]types.Log](resp.Result)
+			if err != nil {
+				return err
+			}
+			if len(*logs) == 0 {
+				return fmt.Errorf("must have at least one state sync event in this block range")
+			}
+			rm.stateSyncTxHash = (*logs)[len(*logs)-1].TxHash
+			rm.stateSyncBlockHash = (*logs)[len(*logs)-1].BlockHash
+
+			blockNumber := (int64)((*logs)[len(*logs)-1].BlockNumber)
+			rm.stateSyncBlockNumber = big.NewInt(blockNumber)
+
+			return nil
+		},
+	},
+	{
+		Key: "eth_getTransactionReceipt (state sync tx)",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("eth_getTransactionReceipt", []interface{}{rm.stateSyncTxHash}), nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			stateSyncTxReceipt, err := parseResponse[map[string]interface{}](resp.Result)
+			if err != nil {
+				return err
+			}
+			err = validateStateSyncTxReceipt(*stateSyncTxReceipt)
+			if err != nil {
+				return err
+			}
+
+			txIndexHexStringWihtoutPrefix := (*stateSyncTxReceipt)["transactionIndex"].(string)[2:]
+			txIndex, err := strconv.ParseInt(txIndexHexStringWihtoutPrefix, 16, 0)
+			if err != nil {
+				return fmt.Errorf("error converting hex to int:%s", err)
+			}
+			rm.stateSyncTxIndexOnGetTransactionReceipt = int(txIndex)
+			return nil
+		},
+	},
+	{
+		Key: "eth_getTransactionByHash (state sync tx)",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("eth_getTransactionByHash", []interface{}{rm.stateSyncTxHash}), nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			tx, err := parseResponse[RPCTransaction](resp.Result)
+			if err != nil {
+				return err
+			}
+
+			method := "eth_getTransactionByHash"
+			if int(*tx.TransactionIndex) != rm.stateSyncTxIndexOnGetTransactionReceipt {
+				return fmt.Errorf("error on state sync tx index in block %s: transaction index on method %s: %d | transaction index on method eth_getTransactionReceipt: %d", rm.stateSyncBlockHash, method, int(*tx.TransactionIndex), rm.stateSyncTxIndexOnGetTransactionReceipt)
+			}
+
+			return nil
+		},
+	},
+	{
+		Key: "eth_getTransactionReceiptsByBlock (state sync tx)",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("eth_getTransactionReceiptsByBlock", []interface{}{rm.stateSyncBlockHash}), nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			return handleGetStateSyncBlockReceipts(rm, resp, "eth_getTransactionReceiptsByBlock")
+		},
+	},
+	{
+		Key: "eth_getBlockReceipts (state sync tx)",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("eth_getBlockReceipts", []interface{}{rm.stateSyncBlockHash}), nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			return handleGetStateSyncBlockReceipts(rm, resp, "eth_getBlockReceipts")
 		},
 	},
 }
