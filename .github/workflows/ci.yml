@@ -58,7 +58,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           path: matic-cli
-      # test
+
       - name: Create .env file
         working-directory: matic-cli
         env:
@@ -70,7 +70,6 @@ jobs:
           sed -i 's,/absolute/path/to/your/,/home/runner/work/matic-cli/matic-cli/matic-cli/gcp/,' .env
           sed -i 's,YOUR_PROJECT_ID,prj-polygonlabs-pos-v1-dev,' .env
           sed -i 's,MATIC_CLI_BRANCH=master,MATIC_CLI_BRANCH=$GITHUB_HEAD_REF,' .env
-          sed -i 's,polygon-user,mardizzone@polygonlabs.cloud,' .env
 
       - name: Get GitHub action runner IP
         id: ip
