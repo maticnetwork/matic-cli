@@ -1,6 +1,6 @@
 ## Simulation tests for milestones
 
-Milestone feature in the PoS V1 chain aims to make the finality of chain more deterministic rather than probabilistic. As it introduces explicit finality, it affects lot of people operating on the chain. The simulation based tests helps to generate different scenarios and test the feature effectively.
+Milestone feature in the PoS V1 chain aims to make the finality of chain more deterministic rather than probabilistic. As it introduces explicit finality, it affects lot of people operating on the chain. The simulation based tests help to generate different scenarios and test the feature effectively.
 
 ### Branches to use and some exceptions
 
