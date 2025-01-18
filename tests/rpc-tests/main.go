@@ -49,18 +49,19 @@ type RPCError struct {
 }
 
 type ResponseMap struct {
-	chainId                                 *big.Int
-	mostRecentBlockNumber                   *big.Int
-	mostRecentBlockHash                     common.Hash
-	mostRecentBlockTotalDifficulty          *big.Int
-	mostRecentBlockParentHash               common.Hash
-	currentProposerAddress                  common.Address
-	accounts                                Accounts
-	gasPrice                                *big.Int
-	stateSyncTxHash                         common.Hash
-	stateSyncBlockNumber                    *big.Int
-	stateSyncBlockHash                      common.Hash
-	stateSyncTxIndexOnGetTransactionReceipt int
+	chainId                                *big.Int
+	mostRecentBlockNumber                  *big.Int
+	mostRecentBlockHash                    common.Hash
+	mostRecentBlockTotalDifficulty         *big.Int
+	mostRecentBlockParentHash              common.Hash
+	currentProposerAddress                 common.Address
+	accounts                               Accounts
+	gasPrice                               *big.Int
+	stateSyncTxHash                        common.Hash
+	stateSyncBlockNumber                   *big.Int
+	stateSyncBlockHash                     common.Hash
+	stateSyncTxIndex                       int
+	stateSyncExpectedBlockTransactionCount int
 }
 type Account struct {
 	key   *ecdsa.PrivateKey
@@ -140,6 +141,10 @@ func main() {
 	mapRequestIdToKey := make(map[int]string)
 	failedTestCases := []FailedTestCase{}
 	responseMap.accounts = generateAccountsUsingMnemonic(*mnemonic, 10)
+
+	// Test cases are grouped into batches when there are no dependencies between them.
+	// If one test case depends on the response of another to construct its request,
+	// it should be placed in a subsequent batch to maintain the correct order.
 	testCaseBatches := []BatchTestCase{
 		{
 			mapTestCases["bor_getAuthor (no params)"],
@@ -161,28 +166,35 @@ func main() {
 			mapTestCases["bor_getRootHash"],
 			mapTestCases["bor_getSigners"],
 			mapTestCases["bor_getSnapshot"],
-			mapTestCases["eth_estimateGas (simple transfer)"],
+			mapTestCases["Simple Transfer Scenario: eth_estimateGas"],
 			mapTestCases["eth_fillTransaction"],
 			mapTestCases["eth_getBlockByNumber"],
 			mapTestCases["eth_getHeaderByNumber"],
-			mapTestCases["eth_getLogs (state sync tx)"],
+			mapTestCases["StateSyncTx Scenario: eth_getLogs"],
 		},
 		{
 			mapTestCases["bor_getAuthor (by hash)"],
 			mapTestCases["bor_getSignersAtHash"],
 			mapTestCases["bor_getSnapshotAtHash"],
 			mapTestCases["eth_getBlockByHash"],
-			mapTestCases["eth_getBlockReceipts (state sync tx)"],
 			mapTestCases["eth_getHeaderByHash"],
-			mapTestCases["eth_getTransactionByHash (state sync tx)"],
-			mapTestCases["eth_getTransactionReceipt (state sync tx)"],
-			mapTestCases["eth_getTransactionReceiptsByBlock (state sync tx)"],
-			// - eth_getRawTransactionByBlockHashAndIndex
-			// - eth_getRawTransactionByBlockNumberAndIndex
-			// - eth_getRawTransactionByHash
-			// - eth_getTransactionByBlockHashAndIndex
-			// - eth_getTransactionByBlockNumberAndIndex
-			// - eth_getTransactionByHash
+			mapTestCases["StateSyncTx Scenario: eth_getTransactionReceipt"],
+		},
+		{
+			mapTestCases["StateSyncTx Scenario: eth_getBlockReceipts"],
+			mapTestCases["StateSyncTx Scenario: eth_getTransactionByHash"],
+			mapTestCases["StateSyncTx Scenario: eth_getTransactionReceiptsByBlock"],
+			mapTestCases["StateSyncTx Scenario: eth_getTransactionByBlockHashAndIndex"],
+			mapTestCases["StateSyncTx Scenario: eth_getTransactionByBlockNumberAndIndex"],
+		},
+		{
+			mapTestCases["StateSyncTx Scenario: eth_getBlockTransactionCountByHash"],
+			mapTestCases["StateSyncTx Scenario: eth_getBlockTransactionCountByNumber"],
+			// Simple Transfer Scenario:
+			// 		- eth_getRawTransactionByBlockHashAndIndex
+			// 		- eth_getRawTransactionByBlockNumberAndIndex
+			// 		- eth_getRawTransactionByHash
+			// for state sync tx scenario:
 		},
 	}
 
@@ -750,8 +762,8 @@ func handleGetStateSyncBlockReceipts(rm *ResponseMap, resp Response, method stri
 	if err != nil {
 		return fmt.Errorf("error converting hex to int:%s", err)
 	}
-	if int(txIndexOnMethod) != rm.stateSyncTxIndexOnGetTransactionReceipt {
-		return fmt.Errorf("error on state sync tx index in block %s: transaction index on method %s: %d | transaction index on method eth_getTransactionReceipt: %d", rm.stateSyncBlockHash, method, txIndexOnMethod, rm.stateSyncTxIndexOnGetTransactionReceipt)
+	if int(txIndexOnMethod) != rm.stateSyncTxIndex {
+		return fmt.Errorf("error on state sync tx index in block %s: transaction index on method %s: %d | transaction index on method eth_getTransactionReceipt: %d", rm.stateSyncBlockHash, method, txIndexOnMethod, rm.stateSyncTxIndex)
 	}
 
 	return nil
@@ -1196,7 +1208,7 @@ var testCases = []TestCase{
 	},
 
 	{
-		Key: "eth_estimateGas (simple transfer)",
+		Key: "Simple Transfer Scenario: eth_estimateGas",
 		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
 			txParams := prepareEstimateGasRequest(rm.accounts[0], rm.accounts[1].addr, big.NewInt(1000))
 			return NewRequest("eth_estimateGas", []interface{}{txParams}), nil
@@ -1338,7 +1350,7 @@ var testCases = []TestCase{
 		},
 	},
 	{
-		Key: "eth_getLogs (state sync tx)",
+		Key: "StateSyncTx Scenario: eth_getLogs",
 		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
 			// Define the event topic for StateCommitted(uint256 indexed stateId, bool success)
 			eventSignature := "StateCommitted(uint256,bool)"
@@ -1346,7 +1358,7 @@ var testCases = []TestCase{
 
 			address := common.HexToAddress("0x0000000000000000000000000000000000001001")
 
-			fromBlock := new(big.Int).Sub(rm.mostRecentBlockNumber, big.NewInt(20000))
+			fromBlock := new(big.Int).Sub(rm.mostRecentBlockNumber, big.NewInt(30000))
 			// Create the filter object
 			filter := map[string]interface{}{
 				"address":   address.Hex(),
@@ -1375,8 +1387,12 @@ var testCases = []TestCase{
 		},
 	},
 	{
-		Key: "eth_getTransactionReceipt (state sync tx)",
+		Key: "StateSyncTx Scenario: eth_getTransactionReceipt",
 		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			if (rm.stateSyncTxHash == common.Hash{}) {
+				return nil, fmt.Errorf("no state sync tx given for request")
+			}
+
 			return NewRequest("eth_getTransactionReceipt", []interface{}{rm.stateSyncTxHash}), nil
 		},
 		HandleResponse: func(rm *ResponseMap, resp Response) error {
@@ -1394,13 +1410,17 @@ var testCases = []TestCase{
 			if err != nil {
 				return fmt.Errorf("error converting hex to int:%s", err)
 			}
-			rm.stateSyncTxIndexOnGetTransactionReceipt = int(txIndex)
+			rm.stateSyncTxIndex = int(txIndex)
 			return nil
 		},
 	},
 	{
-		Key: "eth_getTransactionByHash (state sync tx)",
+		Key: "StateSyncTx Scenario: eth_getTransactionByHash",
 		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			if (rm.stateSyncBlockHash == common.Hash{}) {
+				return nil, fmt.Errorf("no state sync tx given for request")
+			}
+
 			return NewRequest("eth_getTransactionByHash", []interface{}{rm.stateSyncTxHash}), nil
 		},
 		HandleResponse: func(rm *ResponseMap, resp Response) error {
@@ -1410,16 +1430,64 @@ var testCases = []TestCase{
 			}
 
 			method := "eth_getTransactionByHash"
-			if int(*tx.TransactionIndex) != rm.stateSyncTxIndexOnGetTransactionReceipt {
-				return fmt.Errorf("error on state sync tx index in block %s: transaction index on method %s: %d | transaction index on method eth_getTransactionReceipt: %d", rm.stateSyncBlockHash, method, int(*tx.TransactionIndex), rm.stateSyncTxIndexOnGetTransactionReceipt)
+			if int(*tx.TransactionIndex) != rm.stateSyncTxIndex {
+				return fmt.Errorf("error on state sync tx index in block %s: transaction index on method %s: %d | transaction index on method eth_getTransactionReceipt: %d", rm.stateSyncBlockHash, method, int(*tx.TransactionIndex), rm.stateSyncTxIndex)
 			}
 
 			return nil
 		},
 	},
 	{
-		Key: "eth_getTransactionReceiptsByBlock (state sync tx)",
+		Key: "StateSyncTx Scenario: eth_getTransactionByBlockHashAndIndex",
 		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			if (rm.stateSyncBlockHash == common.Hash{}) {
+				return nil, fmt.Errorf("no state sync tx given for request")
+			}
+
+			return NewRequest("eth_getTransactionByBlockHashAndIndex", []interface{}{rm.stateSyncBlockHash, fmt.Sprintf("0x%x", rm.stateSyncTxIndex)}), nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			tx, err := parseResponse[RPCTransaction](resp.Result)
+			if err != nil {
+				return err
+			}
+
+			method := "eth_getTransactionByBlockHashAndIndex"
+			if int(*tx.TransactionIndex) != rm.stateSyncTxIndex {
+				return fmt.Errorf("error on state sync tx index in block %s: transaction index on method %s: %d | transaction index on method eth_getTransactionReceipt: %d", rm.stateSyncBlockHash, method, int(*tx.TransactionIndex), rm.stateSyncTxIndex)
+			}
+
+			return nil
+		},
+	},
+	{
+		Key: "StateSyncTx Scenario: eth_getTransactionByBlockNumberAndIndex",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			if rm.stateSyncBlockNumber == nil {
+				return nil, fmt.Errorf("no state sync tx given for request")
+			}
+			return NewRequest("eth_getTransactionByBlockNumberAndIndex", []interface{}{fmt.Sprintf("0x%x", rm.stateSyncBlockNumber), fmt.Sprintf("0x%x", rm.stateSyncTxIndex)}), nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			tx, err := parseResponse[RPCTransaction](resp.Result)
+			if err != nil {
+				return err
+			}
+
+			method := "eth_getTransactionByBlockNumberAndIndex"
+			if int(*tx.TransactionIndex) != rm.stateSyncTxIndex {
+				return fmt.Errorf("error on state sync tx index in block %s: transaction index on method %s: %d | transaction index on method eth_getTransactionReceipt: %d", rm.stateSyncBlockHash, method, int(*tx.TransactionIndex), rm.stateSyncTxIndex)
+			}
+
+			return nil
+		},
+	},
+	{
+		Key: "StateSyncTx Scenario: eth_getTransactionReceiptsByBlock",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			if (rm.stateSyncBlockHash == common.Hash{}) {
+				return nil, fmt.Errorf("no state sync tx given for request")
+			}
 			return NewRequest("eth_getTransactionReceiptsByBlock", []interface{}{rm.stateSyncBlockHash}), nil
 		},
 		HandleResponse: func(rm *ResponseMap, resp Response) error {
@@ -1427,12 +1495,70 @@ var testCases = []TestCase{
 		},
 	},
 	{
-		Key: "eth_getBlockReceipts (state sync tx)",
+		Key: "StateSyncTx Scenario: eth_getBlockReceipts",
 		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			if (rm.stateSyncBlockHash == common.Hash{}) {
+				return nil, fmt.Errorf("no state sync tx given for request")
+			}
 			return NewRequest("eth_getBlockReceipts", []interface{}{rm.stateSyncBlockHash}), nil
 		},
 		HandleResponse: func(rm *ResponseMap, resp Response) error {
-			return handleGetStateSyncBlockReceipts(rm, resp, "eth_getBlockReceipts")
+			err := handleGetStateSyncBlockReceipts(rm, resp, "eth_getBlockReceipts")
+			if err != nil {
+				return err
+			}
+
+			txReceipts, err := parseResponse[[]map[string]interface{}](resp.Result)
+			if err != nil {
+				return err
+			}
+			rm.stateSyncExpectedBlockTransactionCount = len(*txReceipts)
+
+			return nil
+		},
+	},
+	{
+		Key: "StateSyncTx Scenario: eth_getBlockTransactionCountByNumber",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("eth_getBlockTransactionCountByNumber", []interface{}{fmt.Sprintf("0x%x", rm.stateSyncBlockNumber)}), nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			parsed, err := parseResponse[string](resp.Result)
+			if err != nil {
+				return err
+			}
+			receivedCount, err := hexStringToBigInt(*parsed)
+			if err != nil {
+				return err
+			}
+			expectedCount := big.NewInt(int64(rm.stateSyncExpectedBlockTransactionCount))
+			if expectedCount.Cmp(receivedCount) != 0 {
+				return fmt.Errorf("invalid transaction count. expected: %s | received: %s", expectedCount, receivedCount)
+			}
+
+			return nil
+		},
+	},
+	{
+		Key: "StateSyncTx Scenario: eth_getBlockTransactionCountByHash",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("eth_getBlockTransactionCountByHash", []interface{}{rm.stateSyncBlockHash}), nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			parsed, err := parseResponse[string](resp.Result)
+			if err != nil {
+				return err
+			}
+			receivedCount, err := hexStringToBigInt(*parsed)
+			if err != nil {
+				return err
+			}
+			expectedCount := big.NewInt(int64(rm.stateSyncExpectedBlockTransactionCount))
+			if expectedCount.Cmp(receivedCount) != 0 {
+				return fmt.Errorf("invalid transaction count. expected: %s | received: %s", expectedCount, receivedCount)
+			}
+
+			return nil
 		},
 	},
 }
