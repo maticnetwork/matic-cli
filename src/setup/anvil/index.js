@@ -126,6 +126,10 @@ export class Anvil{
             }),
         },
         {
+          title: 'Checking accounts',
+          task: () => console.log(this.config.accounts),
+        },
+        {
           title: 'Setup validators',
           task: () => this.getStakeTasks(),
         },
