@@ -1408,6 +1408,8 @@ export class Devnet {
           erigonAccounts.forEach((acc) => {
             this.config.accounts.push(acc)
           })
+          console.log("Helllllllllllllllllllllllloooooooooooo")
+          console.log(erigonAccounts)
         }
       }
     }])
