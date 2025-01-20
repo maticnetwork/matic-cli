@@ -1391,6 +1391,7 @@ export class Devnet {
 
         // setup accounts from signer dump data (based on number of validators)
         this.config.accounts = this.signerDumpData
+        console.log(this.config.accounts)
           .slice(0, this.config.numOfBorValidators)
           .map((s) => {
             return getAccountFromPrivateKey(s.priv_key)
@@ -1402,6 +1403,8 @@ export class Devnet {
             .map((s) => {
               return getAccountFromPrivateKey(s.priv_key)
             })
+          console.log("Helooooooooooooooooooooooooooooooooooooooooo accounts ")
+          console.log(erigonAccounts)
 
           erigonAccounts.forEach((acc) => {
             this.config.accounts.push(acc)
