@@ -58,7 +58,6 @@ export class Anvil{
 
                  PATH: `${process.env.HOME}/.foundry/bin:${process.env.PATH}`
               },
-              timeout: 6000
             }),
         },
       ],
