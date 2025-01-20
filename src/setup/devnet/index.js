@@ -1452,6 +1452,7 @@ export class Devnet {
 
     const accountTasks = await this.accountTask()
     await accountTasks.run()
+    console.log(this.config.accounts)
 
     if (!this.config.network) {
       const genesisTasks = await this.genesisTask(genesis)
