@@ -436,12 +436,12 @@ async function runRemoteSetupWithMaticCLI(ips, devnetId) {
     // write an anvil script ; 
     console.log('📍Deploying contracts for bor on machine ' + ip + ' ...')
     await timer(60000)
-    command = 'cd ~/matic-cli/devnet && bash ganache-deployment-bor.sh'
+    command = 'cd ~/matic-cli/devnet && bash anvil-deployment-bor.sh'
     await runSshCommand(ip, command, maxRetries)
 
     console.log('📍Deploying state-sync contracts on machine ' + ip + ' ...')
     await timer(60000)
-    command = 'cd ~/matic-cli/devnet && bash ganache-deployment-sync.sh'
+    command = 'cd ~/matic-cli/devnet && bash anvil-deployment-sync.sh'
     await runSshCommand(ip, command, maxRetries)
   }
 }

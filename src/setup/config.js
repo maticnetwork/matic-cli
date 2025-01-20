@@ -71,8 +71,8 @@ export default class Config {
   async loadAccounts() {
     if (!this.privateKey || !this.keystorePassword) {
       const keystoreDetails = await getKeystoreDetails(this)
-      this.accounts =  createAccountsFromMnemonics("clock radar mass judge dismiss just intact mind resemble fringe diary casino", 5)
-      //this.accounts.push(getAccountFromPrivateKey(keystoreDetails.privateKey))
+      //this.accounts =  createAccountsFromMnemonics("clock radar mass judge dismiss just intact mind resemble fringe diary casino", 5)
+      this.accounts.push(getAccountFromPrivateKey(keystoreDetails.privateKey))
       this.set({ keystorePassword: keystoreDetails.keystorePassword })
       this.set({ keystorePassword: keystoreDetails.keystorePassword })
     }
