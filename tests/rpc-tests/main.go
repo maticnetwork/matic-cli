@@ -13,6 +13,7 @@ import (
 	"math/big"
 	"math/rand"
 	"net/http"
+	testcontract "rpc-tests/contracts"
 	"strconv"
 	"strings"
 	"time"
@@ -62,6 +63,15 @@ type ResponseMap struct {
 	stateSyncBlockHash                     common.Hash
 	stateSyncTxIndex                       int
 	stateSyncExpectedBlockTransactionCount int
+	expectedGasToCreateTransaction         *big.Int
+	expectedValueToStoreInContract         *big.Int
+	expectedKeyToStoreInContract           string
+	pushedTxHash                           common.Hash
+	pushedTxBlockNumber                    *big.Int
+	pushedTxBlockHash                      common.Hash
+	pushedTxTransactionIndex               *big.Int
+	pushedTxDeployedContractAddress        common.Address
+	expectedRawTx                          string
 }
 type Account struct {
 	key   *ecdsa.PrivateKey
@@ -119,6 +129,12 @@ type SignTransactionResult struct {
 	Tx  *types.Transaction `json:"tx"`
 }
 
+type accessListResult struct {
+	Accesslist *types.AccessList `json:"accessList"`
+	Error      string            `json:"error,omitempty"`
+	GasUsed    hexutil.Uint64    `json:"gasUsed"`
+}
+
 var (
 	rpcURL   = flag.String("rpc-url", "", "RPC Url to be tested")
 	mnemonic = flag.String("mnemonic", "", "mnemonic to be used on transactions")
@@ -137,11 +153,12 @@ func main() {
 
 	// Ethereum node RPC endpoint
 	mapTestCases := testCasesToMap(testCases)
-	responseMap := ResponseMap{}
+	rm := ResponseMap{}
 	mapRequestIdToKey := make(map[int]string)
 	failedTestCases := []FailedTestCase{}
-	responseMap.accounts = generateAccountsUsingMnemonic(*mnemonic, 10)
-
+	rm.accounts = generateAccountsUsingMnemonic(*mnemonic, 10)
+	rm.expectedGasToCreateTransaction = big.NewInt(323898)
+	rm.expectedValueToStoreInContract = big.NewInt(30)
 	// Test cases are grouped into batches when there are no dependencies between them.
 	// If one test case depends on the response of another to construct its request,
 	// it should be placed in a subsequent batch to maintain the correct order.
@@ -166,10 +183,10 @@ func main() {
 			mapTestCases["bor_getRootHash"],
 			mapTestCases["bor_getSigners"],
 			mapTestCases["bor_getSnapshot"],
-			mapTestCases["Simple Transfer Scenario: eth_estimateGas"],
-			mapTestCases["eth_fillTransaction"],
 			mapTestCases["eth_getBlockByNumber"],
 			mapTestCases["eth_getHeaderByNumber"],
+			mapTestCases["Create Transaction Scenario: eth_estimateGas"],
+			mapTestCases["Create Transaction Scenario: eth_fillTransaction"],
 			mapTestCases["StateSyncTx Scenario: eth_getLogs"],
 		},
 		{
@@ -178,9 +195,13 @@ func main() {
 			mapTestCases["bor_getSnapshotAtHash"],
 			mapTestCases["eth_getBlockByHash"],
 			mapTestCases["eth_getHeaderByHash"],
+			mapTestCases["Create Transaction Scenario: eth_sendRawTransaction"],
+			mapTestCases["Create Transaction Scenario: eth_createAccessList"],
 			mapTestCases["StateSyncTx Scenario: eth_getTransactionReceipt"],
 		},
 		{
+			mapTestCases["Create Transaction Scenario: eth_getRawTransactionByHash"],
+			mapTestCases["Create Transaction Scenario: eth_getTransactionReceipt"],
 			mapTestCases["StateSyncTx Scenario: eth_getBlockReceipts"],
 			mapTestCases["StateSyncTx Scenario: eth_getTransactionByHash"],
 			mapTestCases["StateSyncTx Scenario: eth_getTransactionReceiptsByBlock"],
@@ -188,13 +209,26 @@ func main() {
 			mapTestCases["StateSyncTx Scenario: eth_getTransactionByBlockNumberAndIndex"],
 		},
 		{
+			mapTestCases["Create Transaction Scenario: eth_getCode"],
+			mapTestCases["Create Transaction Scenario: eth_call"],
+			mapTestCases["Create Transaction Scenario: eth_getRawTransactionByBlockHashAndIndex"],
+			mapTestCases["Create Transaction Scenario: eth_getRawTransactionByBlockNumberAndIndex"],
 			mapTestCases["StateSyncTx Scenario: eth_getBlockTransactionCountByHash"],
 			mapTestCases["StateSyncTx Scenario: eth_getBlockTransactionCountByNumber"],
-			// Simple Transfer Scenario:
-			// 		- eth_getRawTransactionByBlockHashAndIndex
-			// 		- eth_getRawTransactionByBlockNumberAndIndex
-			// 		- eth_getRawTransactionByHash
-			// for state sync tx scenario:
+			// Create Transaction Scenario:
+			// 		- eth_getProof
+			// 		- eth_getStorageAt
+			// debug scenario:
+			// 		- debug_traceBlockByHash
+			// 		- debug_traceBlockByNumber
+			// 		- debug_traceCall
+			// 		- debug_traceTransaction
+			// old scenarios:
+			// 		- eth_newBlockFilter
+			//      - eth_newFilter
+			//      - eth_newPendingTransactionFilter
+			//      - eth_pendingTransactions
+
 		},
 	}
 
@@ -205,7 +239,7 @@ func main() {
 		requests := make([]Request, 0)
 		countTestCases += len(testCaseBatch)
 		for _, testCase := range testCaseBatch {
-			req, err := testCase.PrepareRequest(&responseMap)
+			req, err := testCase.PrepareRequest(&rm)
 			if err != nil {
 				failedTestCases = append(failedTestCases, FailedTestCase{Key: testCase.Key, Err: err})
 				continue
@@ -231,7 +265,7 @@ func main() {
 				failedTestCases = append(failedTestCases, FailedTestCase{Key: key, Err: fmt.Errorf("request error; message: %s | code: %d", response.Error.Message, response.Error.Code)})
 				continue
 			}
-			err := mapTestCases[key].HandleResponse(&responseMap, response)
+			err := mapTestCases[key].HandleResponse(&rm, response)
 			if err != nil {
 				failedTestCases = append(failedTestCases, FailedTestCase{Key: key, Err: err})
 			}
@@ -794,45 +828,42 @@ func validateHexBigInt(value interface{}, fieldName string, customValidation fun
 	return nil
 }
 
-// prepareRawTransferRequest creates a new JSON-RPC request for sending a signed ETH transfer
-func prepareRawSimpleTransferTx(from Account, toAddress common.Address, value *big.Int, responseMap *ResponseMap) ([]byte, error) {
-	// Create transaction data
-	tx := types.NewTransaction(
-		from.nonce.Uint64(),  // nonce
-		toAddress,            // to
-		value,                // value
-		21000,                // gas limit (standard transfer)
-		responseMap.gasPrice, // gas price
-		nil,                  // data
-	)
+func generateInputForDeployTestContract(key string, value *big.Int) []byte {
+	abi, _ := testcontract.TestcontractMetaData.GetAbi()
+	input, _ := abi.Pack("", key, value)
 
-	// Sign the transaction
-	signedTx, err := types.SignTx(
-		tx,
-		types.NewEIP155Signer(responseMap.chainId),
-		from.key,
-	)
+	return append(common.FromHex(testcontract.TestcontractBin), input...)
+}
+
+func generateInputForCallGetValue(key string) []byte {
+	abi, _ := testcontract.TestcontractMetaData.GetAbi()
+	input, _ := abi.Pack("getValue", key)
+	return input
+}
+
+func generateRawTransaction(nonce uint64, gasLimit uint64, gasPrice *big.Int, data []byte, privateKey *ecdsa.PrivateKey, chainID *big.Int) string {
+	tx := types.NewContractCreation(nonce, big.NewInt(0), gasLimit, gasPrice, data)
+	signer := types.LatestSignerForChainID(chainID)
+	signedTx, err := types.SignTx(tx, signer, privateKey)
 	if err != nil {
-		return nil, err
+		log.Fatalf("Failed to sign transaction: %v", err)
 	}
 
-	// Encode the signed transaction
-	signedTxBytes, err := signedTx.MarshalBinary()
+	rawTxBytes, err := signedTx.MarshalBinary()
 	if err != nil {
-		return nil, err
+		log.Fatalf("Failed to marshal transaction: %v", err)
 	}
-
-	// Create and return the JSON-RPC request with the raw signed transaction
-	return signedTxBytes, nil
+	return fmt.Sprintf("0x%s", hex.EncodeToString(rawTxBytes))
 }
 
 // prepareEstimateGasRequest creates a new JSON-RPC request for estimating gas for an ETH transfer
-func prepareEstimateGasRequest(from Account, toAddress common.Address, value *big.Int) map[string]interface{} {
+func prepareEstimateGasRequest(from Account, input []byte) map[string]interface{} {
 	// Prepare transaction parameters for gas estimation
 	txParams := map[string]interface{}{
 		"from":  from.addr.Hex(),
-		"to":    toAddress.Hex(),
-		"value": hexutil.EncodeBig(value),
+		"to":    nil,
+		"value": "0x0",
+		"input": fmt.Sprintf("0x%s", hex.EncodeToString(input)),
 	}
 
 	// Create and return the JSON-RPC request
@@ -1208,9 +1239,9 @@ var testCases = []TestCase{
 	},
 
 	{
-		Key: "Simple Transfer Scenario: eth_estimateGas",
+		Key: "Create Transaction Scenario: eth_estimateGas",
 		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
-			txParams := prepareEstimateGasRequest(rm.accounts[0], rm.accounts[1].addr, big.NewInt(1000))
+			txParams := prepareEstimateGasRequest(rm.accounts[0], generateInputForDeployTestContract(rm.expectedKeyToStoreInContract, rm.expectedValueToStoreInContract))
 			return NewRequest("eth_estimateGas", []interface{}{txParams}), nil
 		},
 		HandleResponse: func(rm *ResponseMap, resp Response) error {
@@ -1223,8 +1254,8 @@ var testCases = []TestCase{
 				return err
 			}
 
-			if (*estimatedGas).Cmp(big.NewInt(21000)) != 0 {
-				return fmt.Errorf("simple transfer must always be 21000")
+			if (*estimatedGas).Cmp(rm.expectedGasToCreateTransaction) != 0 {
+				return fmt.Errorf("invalid gas estimation: expected %s but actual is %s ", rm.expectedGasToCreateTransaction, estimatedGas)
 			}
 			return nil
 		},
@@ -1329,9 +1360,9 @@ var testCases = []TestCase{
 		},
 	},
 	{
-		Key: "eth_fillTransaction",
+		Key: "Create Transaction Scenario: eth_fillTransaction",
 		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
-			txParams := prepareEstimateGasRequest(rm.accounts[0], rm.accounts[1].addr, big.NewInt(1000))
+			txParams := prepareEstimateGasRequest(rm.accounts[0], generateInputForDeployTestContract(rm.expectedKeyToStoreInContract, rm.expectedValueToStoreInContract))
 			return NewRequest("eth_fillTransaction", []interface{}{txParams}), nil
 		},
 		HandleResponse: func(rm *ResponseMap, resp Response) error {
@@ -1558,6 +1589,186 @@ var testCases = []TestCase{
 				return fmt.Errorf("invalid transaction count. expected: %s | received: %s", expectedCount, receivedCount)
 			}
 
+			return nil
+		},
+	},
+	{
+		Key: "Create Transaction Scenario: eth_sendRawTransaction",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			rm.expectedRawTx = generateRawTransaction(
+				rm.accounts[0].nonce.Uint64(),
+				rm.expectedGasToCreateTransaction.Uint64(),
+				rm.gasPrice,
+				generateInputForDeployTestContract(rm.expectedKeyToStoreInContract, rm.expectedValueToStoreInContract),
+				rm.accounts[0].key, rm.chainId)
+			return NewRequest("eth_sendRawTransaction",
+					[]interface{}{rm.expectedRawTx}),
+				nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			txHash, err := parseResponse[common.Hash](resp.Result)
+			if err != nil {
+				return err
+			}
+			rm.pushedTxHash = *txHash
+
+			// sleeps 5 seconds to wait until tx is available for next request
+			time.Sleep(5 * time.Second)
+			return nil
+		},
+	},
+	{
+		Key: "Create Transaction Scenario: eth_createAccessList",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("eth_createAccessList",
+					[]interface{}{prepareEstimateGasRequest(rm.accounts[0], generateInputForDeployTestContract(rm.expectedKeyToStoreInContract, rm.expectedValueToStoreInContract))}),
+				nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			accessListResult, err := parseResponse[accessListResult](resp.Result)
+			if err != nil {
+				return err
+			}
+			if len(*accessListResult.Accesslist) == 0 {
+				return fmt.Errorf("should return at least on access list")
+			}
+			return nil
+		},
+	},
+	{
+		Key: "Create Transaction Scenario: eth_getRawTransactionByHash",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("eth_getRawTransactionByHash",
+					[]interface{}{rm.pushedTxHash}),
+				nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			rawTx, err := parseResponse[hexutil.Bytes](resp.Result)
+			if err != nil {
+				return err
+			}
+			rawTxPrefixed := fmt.Sprintf("0x%s", hex.EncodeToString(*rawTx))
+			if rawTxPrefixed != rm.expectedRawTx {
+				return fmt.Errorf("invalid raw tx returned: expected %s , actual %s", rm.expectedRawTx, rawTxPrefixed)
+			}
+			return nil
+		},
+	},
+	{
+		Key: "Create Transaction Scenario: eth_getTransactionReceipt",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("eth_getTransactionReceipt",
+					[]interface{}{rm.pushedTxHash}),
+				nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			txReceipt, err := parseResponse[map[string]interface{}](resp.Result)
+			if err != nil {
+				return err
+			}
+
+			rm.pushedTxBlockNumber, _ = hexStringToBigInt((*txReceipt)["blockNumber"].(string))
+			rm.pushedTxBlockHash = common.HexToHash((*txReceipt)["blockHash"].(string))
+			rm.pushedTxTransactionIndex, _ = hexStringToBigInt((*txReceipt)["transactionIndex"].(string))
+			rm.pushedTxDeployedContractAddress = common.HexToAddress((*txReceipt)["contractAddress"].(string))
+			return nil
+		},
+	},
+	{
+		Key: "Create Transaction Scenario: eth_getCode",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("eth_getCode",
+					[]interface{}{rm.pushedTxDeployedContractAddress, "latest"}),
+				nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			code, err := parseResponse[hexutil.Bytes](resp.Result)
+			if err != nil {
+				return err
+			}
+			runtimeCode := fmt.Sprintf("0x%s", hex.EncodeToString(*code))
+			// Check if the deployed bytecode is longer than the runtime code
+			if len(testcontract.TestcontractMetaData.Bin) < len(runtimeCode) {
+				return fmt.Errorf("deployed bytecode is shorter than runtime code")
+			}
+
+			// Compare the first 40 characters
+			if len(runtimeCode) < 40 || len(testcontract.TestcontractMetaData.Bin) < 40 {
+				return fmt.Errorf("bytecode is too short for the comparison")
+			}
+			if runtimeCode[:40] != testcontract.TestcontractMetaData.Bin[:40] {
+				return fmt.Errorf("first 40 characters do not match")
+			}
+
+			// Check if the remaining runtime code matches the end of the deployed bytecode
+			offset := len(testcontract.TestcontractMetaData.Bin) - len(runtimeCode[40:])
+			if runtimeCode[40:] != testcontract.TestcontractMetaData.Bin[offset:] {
+				return fmt.Errorf("remaining runtime code does not match the end of the deployed bytecode")
+			}
+			return nil
+		},
+	},
+	{
+		Key: "Create Transaction Scenario: eth_call",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			txParams := map[string]interface{}{
+				"to":   fmt.Sprintf("%s", rm.pushedTxDeployedContractAddress),
+				"data": fmt.Sprintf("0x%s", hex.EncodeToString(generateInputForCallGetValue(rm.expectedKeyToStoreInContract))),
+			}
+			return NewRequest("eth_call",
+					[]interface{}{txParams}),
+				nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			hexStringStoredValue, err := parseResponse[string](resp.Result)
+			if err != nil {
+				return err
+			}
+			value := new(big.Int)
+			if _, success := value.SetString((*hexStringStoredValue)[2:], 16); !success {
+				log.Fatalf("Failed to convert hex string to big.Int")
+			}
+			if value.Cmp(rm.expectedValueToStoreInContract) != 0 {
+				return fmt.Errorf("invalid returned value: expected %s , actual %s", rm.expectedValueToStoreInContract, value)
+			}
+			return nil
+		},
+	},
+	{
+		Key: "Create Transaction Scenario: eth_getRawTransactionByBlockNumberAndIndex",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("eth_getRawTransactionByBlockNumberAndIndex",
+					[]interface{}{fmt.Sprintf("0x%x", rm.pushedTxBlockNumber), fmt.Sprintf("0x%s", rm.pushedTxTransactionIndex)}),
+				nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			rawTx, err := parseResponse[hexutil.Bytes](resp.Result)
+			if err != nil {
+				return err
+			}
+			rawTxPrefixed := fmt.Sprintf("0x%s", hex.EncodeToString(*rawTx))
+			if rawTxPrefixed != rm.expectedRawTx {
+				return fmt.Errorf("invalid raw tx returned: expected %s , actual %s", rm.expectedRawTx, rawTxPrefixed)
+			}
+			return nil
+		},
+	},
+	{
+		Key: "Create Transaction Scenario: eth_getRawTransactionByBlockHashAndIndex",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("eth_getRawTransactionByBlockHashAndIndex",
+					[]interface{}{rm.pushedTxBlockHash, fmt.Sprintf("0x%s", rm.pushedTxTransactionIndex)}),
+				nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			rawTx, err := parseResponse[hexutil.Bytes](resp.Result)
+			if err != nil {
+				return err
+			}
+			rawTxPrefixed := fmt.Sprintf("0x%s", hex.EncodeToString(*rawTx))
+			if rawTxPrefixed != rm.expectedRawTx {
+				return fmt.Errorf("invalid raw tx returned: expected %s , actual %s", rm.expectedRawTx, rawTxPrefixed)
+			}
 			return nil
 		},
 	},
