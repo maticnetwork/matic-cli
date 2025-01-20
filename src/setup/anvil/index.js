@@ -54,6 +54,11 @@ export class Anvil{
             execa('bash', ['anvil-stake.sh'], {
               cwd: this.config.targetDirectory,
               stdio: getRemoteStdio(),
+              env : {...process.env,
+
+                 PATH: `${process.env.HOME}/.foundry/bin:${process.env.PATH}`
+              },
+              timeout: 6000
             }),
         },
       ],

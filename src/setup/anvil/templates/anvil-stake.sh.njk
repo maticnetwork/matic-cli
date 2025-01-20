@@ -7,6 +7,9 @@ DEPLOYER_PRIVATE_KEY="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7b
 STAKE={{ obj.config.defaultStake }}
 FEE={{ obj.config.defaultFee }}
 
+export SERVER_PORT={{ obj.serverPort }}
+
+
 # Navigate to the matic contracts directory
 cd {{ obj.contracts.repositoryDir }}
 
@@ -15,6 +18,6 @@ cd {{ obj.contracts.repositoryDir }}
 # forge script scripts/stake.s.sol --rpc-url http://127.0.0.1:9545 \
   # --broadcast --private-key {{ acc.privateKey }} \
   # --constructor-args {{ acc.address }} $STAKE $FEE
-  forge script scripts/matic-cli-scripts/Stake.s.sol:MaticStake --rpc-url http://localhost:9545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --broadcast --sig "run(address,bytes,uint256,uint256)" 0x83ADC4326EDdeE8C548Fbe46eb8DB8aE0EcdFA36 0x4e02c8e34f394783aa141b25058db45cd3530010bac2af4192967d847b36449aaef2117b8d9cb5b947e38cd786a33f5dc5c3f7b585860dfb505bc440d06e3620 10000000000000000000 10000000000000000000
+  forge script scripts/matic-cli-scripts/Stake.s.sol:MaticStake --rpc-url http://localhost:$SERVER_PORT --private-key $DEPLOYER_PRIVATE_KEY --broadcast --sig "run(address,bytes,uint256,uint256)" {{ acc.address }} {{ acc.publicKey }} 10000000000000000000 10000000000000000000
 sleep 10
 {% endfor %}
