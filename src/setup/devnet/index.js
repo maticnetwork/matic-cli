@@ -1393,7 +1393,9 @@ export class Devnet {
         this.config.accounts = this.signerDumpData
           .slice(0, this.config.numOfBorValidators)
           .map((s) => {
-            return getAccountFromPrivateKey(s.priv_key)
+            //return getAccountFromPrivateKey(s.priv_key)
+              const account = getAccountFromPrivateKey(s.priv_key);
+              return { ...account, pub_key: s.pub_key };
           })
 
         if (this.config.numOfErigonValidators > 0) {
