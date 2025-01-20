@@ -20,6 +20,7 @@ cd {{ obj.contracts.repositoryDir }}
 
 export ETHERSCANAPIKEY={{ obj.config.etherscanAPIKey }}
 echo "$ETHERSCANAPIKEY"
+echo "DEPLOYER_PRIVATE_KEY=$DEPLOYER_PRIVATE_KEY" >> .env
 echo "ETHERSCAN_API_KEY=$ETHERSCANAPIKEY" >> .env 
 echo "HEIMDALL_ID='$HEIMDALL_ID'" >> .env
 
