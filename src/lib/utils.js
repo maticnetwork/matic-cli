@@ -7,6 +7,7 @@ import Web3 from 'web3'
 import nunjucks from 'nunjucks'
 import ethCrypto from 'eth-crypto'
 import { bufferToHex, privateToPublic, toBuffer } from 'ethereumjs-util'
+import { ethers } from 'ethers'
 
 //
 // Add custom nunjucks filters
