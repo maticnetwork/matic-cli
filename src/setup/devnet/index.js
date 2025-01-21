@@ -700,8 +700,8 @@ export class Devnet {
                 'UserKnownHostsFile=/dev/null',
                 '-i',
                 '~/cert.pem',
-                `${this.config.targetDirectory}/ganache-start.sh`,
-                `${ganacheUser}@${ganacheURL.hostname}:~/ganache-start.sh`
+                `${this.config.targetDirectory}/anvil-start.sh`,
+                `${ganacheUser}@${ganacheURL.hostname}:~/anvil-start.sh`
               ],
               { stdio: getRemoteStdio() }
             )
@@ -1410,8 +1410,6 @@ export class Devnet {
           erigonAccounts.forEach((acc) => {
             this.config.accounts.push(acc)
           })
-          console.log("Helllllllllllllllllllllllloooooooooooo")
-          console.log(erigonAccounts)
         }
       }
     }])
