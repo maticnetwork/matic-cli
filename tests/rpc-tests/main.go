@@ -65,6 +65,7 @@ type ResponseMap struct {
 	stateSyncExpectedBlockTransactionCount int
 	expectedGasToCreateTransaction         *big.Int
 	expectedValueToStoreInContract         *big.Int
+	expectedSlot0Value                     *big.Int
 	expectedKeyToStoreInContract           string
 	pushedTxHash                           common.Hash
 	pushedTxBlockNumber                    *big.Int
@@ -72,6 +73,7 @@ type ResponseMap struct {
 	pushedTxTransactionIndex               *big.Int
 	pushedTxDeployedContractAddress        common.Address
 	expectedRawTx                          string
+	pushedTxDeployedContractRuntimeCode    *[]byte
 }
 type Account struct {
 	key   *ecdsa.PrivateKey
@@ -135,6 +137,22 @@ type accessListResult struct {
 	GasUsed    hexutil.Uint64    `json:"gasUsed"`
 }
 
+type storageResult struct {
+	Key   string       `json:"key"`
+	Value *hexutil.Big `json:"value"`
+	Proof []string     `json:"proof"`
+}
+
+type accountResult struct {
+	Address      common.Address  `json:"address"`
+	AccountProof []string        `json:"accountProof"`
+	Balance      *hexutil.Big    `json:"balance"`
+	CodeHash     common.Hash     `json:"codeHash"`
+	Nonce        hexutil.Uint64  `json:"nonce"`
+	StorageHash  common.Hash     `json:"storageHash"`
+	StorageProof []storageResult `json:"storageProof"`
+}
+
 var (
 	rpcURL   = flag.String("rpc-url", "", "RPC Url to be tested")
 	mnemonic = flag.String("mnemonic", "", "mnemonic to be used on transactions")
@@ -157,8 +175,10 @@ func main() {
 	mapRequestIdToKey := make(map[int]string)
 	failedTestCases := []FailedTestCase{}
 	rm.accounts = generateAccountsUsingMnemonic(*mnemonic, 10)
-	rm.expectedGasToCreateTransaction = big.NewInt(323898)
+	rm.expectedGasToCreateTransaction = big.NewInt(356725)
 	rm.expectedValueToStoreInContract = big.NewInt(30)
+	rm.expectedSlot0Value = big.NewInt(42) // first variable set on contract
+
 	// Test cases are grouped into batches when there are no dependencies between them.
 	// If one test case depends on the response of another to construct its request,
 	// it should be placed in a subsequent batch to maintain the correct order.
@@ -213,11 +233,10 @@ func main() {
 			mapTestCases["Create Transaction Scenario: eth_call"],
 			mapTestCases["Create Transaction Scenario: eth_getRawTransactionByBlockHashAndIndex"],
 			mapTestCases["Create Transaction Scenario: eth_getRawTransactionByBlockNumberAndIndex"],
+			mapTestCases["Create Transaction Scenario: eth_getStorageAt"],
+			mapTestCases["Create Transaction Scenario: eth_getProof"],
 			mapTestCases["StateSyncTx Scenario: eth_getBlockTransactionCountByHash"],
 			mapTestCases["StateSyncTx Scenario: eth_getBlockTransactionCountByNumber"],
-			// Create Transaction Scenario:
-			// 		- eth_getProof
-			// 		- eth_getStorageAt
 			// debug scenario:
 			// 		- debug_traceBlockByHash
 			// 		- debug_traceBlockByNumber
@@ -825,6 +844,17 @@ func validateHexBigInt(value interface{}, fieldName string, customValidation fun
 		return customValidation(bigValue)
 	}
 
+	return nil
+}
+
+// ValidateCodeHash checks if the provided runtime code matches the account's codeHash
+func ValidateCodeHash(runtimeCode []byte, accountResult *accountResult) error {
+	calculatedCodeHash := crypto.Keccak256Hash(runtimeCode)
+
+	if calculatedCodeHash != accountResult.CodeHash {
+		return fmt.Errorf("code hash mismatch: calculated %s, account has %s",
+			calculatedCodeHash.Hex(), accountResult.CodeHash.Hex())
+	}
 	return nil
 }
 
@@ -1612,8 +1642,8 @@ var testCases = []TestCase{
 			}
 			rm.pushedTxHash = *txHash
 
-			// sleeps 5 seconds to wait until tx is available for next request
-			time.Sleep(5 * time.Second)
+			// sleeps 10 seconds to wait until tx is available for next request
+			time.Sleep(10 * time.Second)
 			return nil
 		},
 	},
@@ -1686,23 +1716,27 @@ var testCases = []TestCase{
 			if err != nil {
 				return err
 			}
+			codeCopy := make([]byte, len(*code))
+			copy(codeCopy, *code)
+
+			rm.pushedTxDeployedContractRuntimeCode = &codeCopy
 			runtimeCode := fmt.Sprintf("0x%s", hex.EncodeToString(*code))
 			// Check if the deployed bytecode is longer than the runtime code
 			if len(testcontract.TestcontractMetaData.Bin) < len(runtimeCode) {
 				return fmt.Errorf("deployed bytecode is shorter than runtime code")
 			}
 
-			// Compare the first 40 characters
-			if len(runtimeCode) < 40 || len(testcontract.TestcontractMetaData.Bin) < 40 {
+			// Compare the first 12 characters
+			if len(runtimeCode) < 12 || len(testcontract.TestcontractMetaData.Bin) < 12 {
 				return fmt.Errorf("bytecode is too short for the comparison")
 			}
-			if runtimeCode[:40] != testcontract.TestcontractMetaData.Bin[:40] {
-				return fmt.Errorf("first 40 characters do not match")
+			if runtimeCode[:12] != testcontract.TestcontractMetaData.Bin[:12] {
+				return fmt.Errorf("first 12 characters do not match")
 			}
 
 			// Check if the remaining runtime code matches the end of the deployed bytecode
-			offset := len(testcontract.TestcontractMetaData.Bin) - len(runtimeCode[40:])
-			if runtimeCode[40:] != testcontract.TestcontractMetaData.Bin[offset:] {
+			offset := len(testcontract.TestcontractMetaData.Bin) - len(runtimeCode[12:])
+			if runtimeCode[12:] != testcontract.TestcontractMetaData.Bin[offset:] {
 				return fmt.Errorf("remaining runtime code does not match the end of the deployed bytecode")
 			}
 			return nil
@@ -1726,7 +1760,7 @@ var testCases = []TestCase{
 			}
 			value := new(big.Int)
 			if _, success := value.SetString((*hexStringStoredValue)[2:], 16); !success {
-				log.Fatalf("Failed to convert hex string to big.Int")
+				return fmt.Errorf("failed to convert hex string to big.Int")
 			}
 			if value.Cmp(rm.expectedValueToStoreInContract) != 0 {
 				return fmt.Errorf("invalid returned value: expected %s , actual %s", rm.expectedValueToStoreInContract, value)
@@ -1738,7 +1772,7 @@ var testCases = []TestCase{
 		Key: "Create Transaction Scenario: eth_getRawTransactionByBlockNumberAndIndex",
 		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
 			return NewRequest("eth_getRawTransactionByBlockNumberAndIndex",
-					[]interface{}{fmt.Sprintf("0x%x", rm.pushedTxBlockNumber), fmt.Sprintf("0x%s", rm.pushedTxTransactionIndex)}),
+					[]interface{}{fmt.Sprintf("0x%x", rm.pushedTxBlockNumber), fmt.Sprintf("0x%x", rm.pushedTxTransactionIndex)}),
 				nil
 		},
 		HandleResponse: func(rm *ResponseMap, resp Response) error {
@@ -1757,7 +1791,7 @@ var testCases = []TestCase{
 		Key: "Create Transaction Scenario: eth_getRawTransactionByBlockHashAndIndex",
 		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
 			return NewRequest("eth_getRawTransactionByBlockHashAndIndex",
-					[]interface{}{rm.pushedTxBlockHash, fmt.Sprintf("0x%s", rm.pushedTxTransactionIndex)}),
+					[]interface{}{rm.pushedTxBlockHash, fmt.Sprintf("0x%x", rm.pushedTxTransactionIndex)}),
 				nil
 		},
 		HandleResponse: func(rm *ResponseMap, resp Response) error {
@@ -1769,6 +1803,58 @@ var testCases = []TestCase{
 			if rawTxPrefixed != rm.expectedRawTx {
 				return fmt.Errorf("invalid raw tx returned: expected %s , actual %s", rm.expectedRawTx, rawTxPrefixed)
 			}
+			return nil
+		},
+	},
+	{
+		Key: "Create Transaction Scenario: eth_getStorageAt",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("eth_getStorageAt",
+					[]interface{}{rm.pushedTxDeployedContractAddress, "0x0", "latest"}),
+				nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			hexStringOnSlot0, err := parseResponse[string](resp.Result)
+			if err != nil {
+				return err
+			}
+			slot0Value := new(big.Int)
+			if _, success := slot0Value.SetString((*hexStringOnSlot0)[2:], 16); !success {
+				return fmt.Errorf("failed to convert hex string to big.Int")
+			}
+			if slot0Value.Cmp(rm.expectedSlot0Value) != 0 {
+				return fmt.Errorf("invalid slot 0 returned : expected %s , actual %s", rm.expectedSlot0Value, slot0Value)
+			}
+
+			return nil
+		},
+	},
+	{
+		Key: "Create Transaction Scenario: eth_getProof",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("eth_getProof",
+					[]interface{}{rm.pushedTxDeployedContractAddress, []string{"0x0"}, "latest"}),
+				nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			accountResult, err := parseResponse[accountResult](resp.Result)
+			if err != nil {
+				return err
+			}
+
+			err = ValidateCodeHash(*rm.pushedTxDeployedContractRuntimeCode, accountResult)
+			if err != nil {
+				return err
+			}
+
+			if len(accountResult.AccountProof) == 0 {
+				return fmt.Errorf("must not be an empty account proof array")
+			}
+
+			if len(accountResult.StorageProof) == 0 {
+				return fmt.Errorf("must not be an empty storage proof array")
+			}
+
 			return nil
 		},
 	},

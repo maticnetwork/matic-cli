@@ -2,6 +2,8 @@
 pragma solidity ^0.8.0;
 
 contract TestContract {
+    uint256 public number = 42; // Slot 0
+
     // State variable to store the value
     mapping(string => uint256) public storedValues;
 
