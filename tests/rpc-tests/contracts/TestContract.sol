@@ -4,6 +4,8 @@ pragma solidity ^0.8.0;
 contract TestContract {
     uint256 public number = 42; // Slot 0
 
+    event ContractDeployed();
+
     // State variable to store the value
     mapping(string => uint256) public storedValues;
 
@@ -11,6 +13,7 @@ contract TestContract {
     // Constructor to initialize the value
     constructor(string memory key, uint256 value) {
         setValue(key, value);
+        emit ContractDeployed();
     }
 
     // Public function to query the stored value
@@ -27,5 +30,6 @@ contract TestContract {
 
 
 // to generate bindings:
-// solc --abi --bin TestContract.sol -o .
+// cd ./tests/rpc-tests/contracts
+// solc --abi --bin TestContract.sol -o . --overwrite
 // abigen --abi TestContract.abi --bin TestContract.bin --pkg testcontract --out TestContract.go

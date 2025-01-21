@@ -31,8 +31,8 @@ var (
 
 // TestcontractMetaData contains all meta data concerning the Testcontract contract.
 var TestcontractMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[{\"internalType\":\"string\",\"name\":\"key\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"key\",\"type\":\"string\"}],\"name\":\"getValue\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"number\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"key\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"setValue\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"name\":\"storedValues\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
-	Bin: "0x6080604052602a60005534801561001557600080fd5b50604051610736380380610736833981810160405281019061003791906100f2565b610047828261004e60201b60201c565b50506102bf565b8060018360405161005f9190610177565b9081526020016040518091039020819055505050565b6000610088610083846101b3565b61018e565b9050828152602081018484840111156100a057600080fd5b6100ab848285610204565b509392505050565b600082601f8301126100c457600080fd5b81516100d4848260208601610075565b91505092915050565b6000815190506100ec816102a8565b92915050565b6000806040838503121561010557600080fd5b600083015167ffffffffffffffff81111561011f57600080fd5b61012b858286016100b3565b925050602061013c858286016100dd565b9150509250929050565b6000610151826101e4565b61015b81856101ef565b935061016b818560208601610204565b80840191505092915050565b60006101838284610146565b915081905092915050565b60006101986101a9565b90506101a48282610237565b919050565b6000604051905090565b600067ffffffffffffffff8211156101ce576101cd610268565b5b6101d782610297565b9050602081019050919050565b600081519050919050565b600081905092915050565b6000819050919050565b60005b83811015610222578082015181840152602081019050610207565b83811115610231576000848401525b50505050565b61024082610297565b810181811067ffffffffffffffff8211171561025f5761025e610268565b5b80604052505050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b6000601f19601f8301169050919050565b6102b1816101fa565b81146102bc57600080fd5b50565b610468806102ce6000396000f3fe608060405234801561001057600080fd5b506004361061004c5760003560e01c80637c2da7aa146100515780638381f58a1461006d578063960384a01461008b578063bd796846146100bb575b600080fd5b61006b6004803603810190610066919061022c565b6100eb565b005b610075610112565b60405161008291906102d7565b60405180910390f35b6100a560048036038101906100a091906101eb565b610118565b6040516100b291906102d7565b60405180910390f35b6100d560048036038101906100d091906101eb565b610140565b6040516100e291906102d7565b60405180910390f35b806001836040516100fc91906102c0565b9081526020016040518091039020819055505050565b60005481565b600060018260405161012a91906102c0565b9081526020016040518091039020549050919050565b6001818051602081018201805184825260208301602085012081835280955050505050506000915090505481565b600061018161017c84610317565b6102f2565b90508281526020810184848401111561019957600080fd5b6101a4848285610368565b509392505050565b600082601f8301126101bd57600080fd5b81356101cd84826020860161016e565b91505092915050565b6000813590506101e58161041b565b92915050565b6000602082840312156101fd57600080fd5b600082013567ffffffffffffffff81111561021757600080fd5b610223848285016101ac565b91505092915050565b6000806040838503121561023f57600080fd5b600083013567ffffffffffffffff81111561025957600080fd5b610265858286016101ac565b9250506020610276858286016101d6565b9150509250929050565b600061028b82610348565b6102958185610353565b93506102a5818560208601610377565b80840191505092915050565b6102ba8161035e565b82525050565b60006102cc8284610280565b915081905092915050565b60006020820190506102ec60008301846102b1565b92915050565b60006102fc61030d565b905061030882826103aa565b919050565b6000604051905090565b600067ffffffffffffffff821115610332576103316103db565b5b61033b8261040a565b9050602081019050919050565b600081519050919050565b600081905092915050565b6000819050919050565b82818337600083830152505050565b60005b8381101561039557808201518184015260208101905061037a565b838111156103a4576000848401525b50505050565b6103b38261040a565b810181811067ffffffffffffffff821117156103d2576103d16103db565b5b80604052505050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b6000601f19601f8301169050919050565b6104248161035e565b811461042f57600080fd5b5056fea2646970667358221220e37938c3322225435c113cadd65719bbbd65008fd8236a89ce0c885dbb37e12f64736f6c63430008010033",
+	ABI: "[{\"inputs\":[{\"internalType\":\"string\",\"name\":\"key\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"ContractDeployed\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"key\",\"type\":\"string\"}],\"name\":\"getValue\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"number\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"key\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"setValue\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"name\":\"storedValues\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
+	Bin: "0x6080604052602a60005534801561001557600080fd5b506040516107623803806107628339818101604052810190610037919061011e565b610047828261007a60201b60201c565b7fdaf2a119a79dac8445fdc10627116c03f4b0ffb5cf1aee5223ac18a7453e631f60405160405180910390a150506102eb565b8060018360405161008b91906101a3565b9081526020016040518091039020819055505050565b60006100b46100af846101df565b6101ba565b9050828152602081018484840111156100cc57600080fd5b6100d7848285610230565b509392505050565b600082601f8301126100f057600080fd5b81516101008482602086016100a1565b91505092915050565b600081519050610118816102d4565b92915050565b6000806040838503121561013157600080fd5b600083015167ffffffffffffffff81111561014b57600080fd5b610157858286016100df565b925050602061016885828601610109565b9150509250929050565b600061017d82610210565b610187818561021b565b9350610197818560208601610230565b80840191505092915050565b60006101af8284610172565b915081905092915050565b60006101c46101d5565b90506101d08282610263565b919050565b6000604051905090565b600067ffffffffffffffff8211156101fa576101f9610294565b5b610203826102c3565b9050602081019050919050565b600081519050919050565b600081905092915050565b6000819050919050565b60005b8381101561024e578082015181840152602081019050610233565b8381111561025d576000848401525b50505050565b61026c826102c3565b810181811067ffffffffffffffff8211171561028b5761028a610294565b5b80604052505050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b6000601f19601f8301169050919050565b6102dd81610226565b81146102e857600080fd5b50565b610468806102fa6000396000f3fe608060405234801561001057600080fd5b506004361061004c5760003560e01c80637c2da7aa146100515780638381f58a1461006d578063960384a01461008b578063bd796846146100bb575b600080fd5b61006b6004803603810190610066919061022c565b6100eb565b005b610075610112565b60405161008291906102d7565b60405180910390f35b6100a560048036038101906100a091906101eb565b610118565b6040516100b291906102d7565b60405180910390f35b6100d560048036038101906100d091906101eb565b610140565b6040516100e291906102d7565b60405180910390f35b806001836040516100fc91906102c0565b9081526020016040518091039020819055505050565b60005481565b600060018260405161012a91906102c0565b9081526020016040518091039020549050919050565b6001818051602081018201805184825260208301602085012081835280955050505050506000915090505481565b600061018161017c84610317565b6102f2565b90508281526020810184848401111561019957600080fd5b6101a4848285610368565b509392505050565b600082601f8301126101bd57600080fd5b81356101cd84826020860161016e565b91505092915050565b6000813590506101e58161041b565b92915050565b6000602082840312156101fd57600080fd5b600082013567ffffffffffffffff81111561021757600080fd5b610223848285016101ac565b91505092915050565b6000806040838503121561023f57600080fd5b600083013567ffffffffffffffff81111561025957600080fd5b610265858286016101ac565b9250506020610276858286016101d6565b9150509250929050565b600061028b82610348565b6102958185610353565b93506102a5818560208601610377565b80840191505092915050565b6102ba8161035e565b82525050565b60006102cc8284610280565b915081905092915050565b60006020820190506102ec60008301846102b1565b92915050565b60006102fc61030d565b905061030882826103aa565b919050565b6000604051905090565b600067ffffffffffffffff821115610332576103316103db565b5b61033b8261040a565b9050602081019050919050565b600081519050919050565b600081905092915050565b6000819050919050565b82818337600083830152505050565b60005b8381101561039557808201518184015260208101905061037a565b838111156103a4576000848401525b50505050565b6103b38261040a565b810181811067ffffffffffffffff821117156103d2576103d16103db565b5b80604052505050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b6000601f19601f8301169050919050565b6104248161035e565b811461042f57600080fd5b5056fea264697066735822122069f53b67aaa429e62f0de4434b68dc10b9ecde3831ceabfa630ea336363f5e4864736f6c63430008010033",
 }
 
 // TestcontractABI is the input ABI used to generate the binding from.
@@ -314,4 +314,137 @@ func (_Testcontract *TestcontractSession) SetValue(key string, value *big.Int) (
 // Solidity: function setValue(string key, uint256 value) returns()
 func (_Testcontract *TestcontractTransactorSession) SetValue(key string, value *big.Int) (*types.Transaction, error) {
 	return _Testcontract.Contract.SetValue(&_Testcontract.TransactOpts, key, value)
+}
+
+// TestcontractContractDeployedIterator is returned from FilterContractDeployed and is used to iterate over the raw logs and unpacked data for ContractDeployed events raised by the Testcontract contract.
+type TestcontractContractDeployedIterator struct {
+	Event *TestcontractContractDeployed // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *TestcontractContractDeployedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(TestcontractContractDeployed)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(TestcontractContractDeployed)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *TestcontractContractDeployedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *TestcontractContractDeployedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// TestcontractContractDeployed represents a ContractDeployed event raised by the Testcontract contract.
+type TestcontractContractDeployed struct {
+	Raw types.Log // Blockchain specific contextual infos
+}
+
+// FilterContractDeployed is a free log retrieval operation binding the contract event 0xdaf2a119a79dac8445fdc10627116c03f4b0ffb5cf1aee5223ac18a7453e631f.
+//
+// Solidity: event ContractDeployed()
+func (_Testcontract *TestcontractFilterer) FilterContractDeployed(opts *bind.FilterOpts) (*TestcontractContractDeployedIterator, error) {
+
+	logs, sub, err := _Testcontract.contract.FilterLogs(opts, "ContractDeployed")
+	if err != nil {
+		return nil, err
+	}
+	return &TestcontractContractDeployedIterator{contract: _Testcontract.contract, event: "ContractDeployed", logs: logs, sub: sub}, nil
+}
+
+// WatchContractDeployed is a free log subscription operation binding the contract event 0xdaf2a119a79dac8445fdc10627116c03f4b0ffb5cf1aee5223ac18a7453e631f.
+//
+// Solidity: event ContractDeployed()
+func (_Testcontract *TestcontractFilterer) WatchContractDeployed(opts *bind.WatchOpts, sink chan<- *TestcontractContractDeployed) (event.Subscription, error) {
+
+	logs, sub, err := _Testcontract.contract.WatchLogs(opts, "ContractDeployed")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(TestcontractContractDeployed)
+				if err := _Testcontract.contract.UnpackLog(event, "ContractDeployed", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseContractDeployed is a log parse operation binding the contract event 0xdaf2a119a79dac8445fdc10627116c03f4b0ffb5cf1aee5223ac18a7453e631f.
+//
+// Solidity: event ContractDeployed()
+func (_Testcontract *TestcontractFilterer) ParseContractDeployed(log types.Log) (*TestcontractContractDeployed, error) {
+	event := new(TestcontractContractDeployed)
+	if err := _Testcontract.contract.UnpackLog(event, "ContractDeployed", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
 }

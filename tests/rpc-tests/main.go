@@ -74,6 +74,8 @@ type ResponseMap struct {
 	pushedTxDeployedContractAddress        common.Address
 	expectedRawTx                          string
 	pushedTxDeployedContractRuntimeCode    *[]byte
+	filterId                               string
+	blockFilterId                          string
 }
 type Account struct {
 	key   *ecdsa.PrivateKey
@@ -154,8 +156,9 @@ type accountResult struct {
 }
 
 var (
-	rpcURL   = flag.String("rpc-url", "", "RPC Url to be tested")
-	mnemonic = flag.String("mnemonic", "", "mnemonic to be used on transactions")
+	rpcURL      = flag.String("rpc-url", "", "RPC Url to be tested")
+	mnemonic    = flag.String("mnemonic", "", "mnemonic to be used on transactions")
+	filterTests = flag.Bool("filter-test", false, "True if want to include filter tests (recommended just when there is no load balancer)")
 )
 
 func main() {
@@ -175,7 +178,7 @@ func main() {
 	mapRequestIdToKey := make(map[int]string)
 	failedTestCases := []FailedTestCase{}
 	rm.accounts = generateAccountsUsingMnemonic(*mnemonic, 10)
-	rm.expectedGasToCreateTransaction = big.NewInt(356725)
+	rm.expectedGasToCreateTransaction = big.NewInt(358270)
 	rm.expectedValueToStoreInContract = big.NewInt(30)
 	rm.expectedSlot0Value = big.NewInt(42) // first variable set on contract
 
@@ -231,24 +234,22 @@ func main() {
 		{
 			mapTestCases["Create Transaction Scenario: eth_getCode"],
 			mapTestCases["Create Transaction Scenario: eth_call"],
+			mapTestCases["Create Transaction Scenario: eth_newFilter"],
+			mapTestCases["Create Transaction Scenario: eth_newBlockFilter"],
 			mapTestCases["Create Transaction Scenario: eth_getRawTransactionByBlockHashAndIndex"],
 			mapTestCases["Create Transaction Scenario: eth_getRawTransactionByBlockNumberAndIndex"],
 			mapTestCases["Create Transaction Scenario: eth_getStorageAt"],
 			mapTestCases["Create Transaction Scenario: eth_getProof"],
 			mapTestCases["StateSyncTx Scenario: eth_getBlockTransactionCountByHash"],
 			mapTestCases["StateSyncTx Scenario: eth_getBlockTransactionCountByNumber"],
-			// debug scenario:
-			// 		- debug_traceBlockByHash
-			// 		- debug_traceBlockByNumber
-			// 		- debug_traceCall
-			// 		- debug_traceTransaction
-			// old scenarios:
-			// 		- eth_newBlockFilter
-			//      - eth_newFilter
-			//      - eth_newPendingTransactionFilter
-			//      - eth_pendingTransactions
-
 		},
+	}
+
+	if *filterTests {
+		testCaseBatches = append(testCaseBatches, BatchTestCase{
+			mapTestCases["Create Transaction Scenario: eth_getFilterChanges (from eth_newFilter)"],
+			mapTestCases["Create Transaction Scenario: eth_getFilterChanges (from eth_newBlockFilter)"],
+		})
 	}
 
 	timeStart := time.Now()
@@ -797,16 +798,12 @@ func validateStateSyncTxReceipt(receipt map[string]interface{}) error {
 	return nil
 }
 
-func handleGetStateSyncBlockReceipts(rm *ResponseMap, resp Response, method string) error {
-	txReceipts, err := parseResponse[[]map[string]interface{}](resp.Result)
-	if err != nil {
-		return err
-	}
+func handleGetStateSyncBlockReceipts(rm *ResponseMap, resp Response, method string, txReceipts *[]map[string]interface{}) error {
 
 	// state sync tx must always be the last one
 	stateSyncTx := (*txReceipts)[len(*txReceipts)-1]
 
-	err = validateStateSyncTxReceipt((*txReceipts)[len(*txReceipts)-1])
+	err := validateStateSyncTxReceipt((*txReceipts)[len(*txReceipts)-1])
 	if err != nil {
 		return fmt.Errorf("last receipt on block must be state sync tx: %s", err)
 	}
@@ -1552,7 +1549,12 @@ var testCases = []TestCase{
 			return NewRequest("eth_getTransactionReceiptsByBlock", []interface{}{rm.stateSyncBlockHash}), nil
 		},
 		HandleResponse: func(rm *ResponseMap, resp Response) error {
-			return handleGetStateSyncBlockReceipts(rm, resp, "eth_getTransactionReceiptsByBlock")
+			txReceipts, err := parseResponse[[]map[string]interface{}](resp.Result)
+			if err != nil {
+				return err
+			}
+
+			return handleGetStateSyncBlockReceipts(rm, resp, "eth_getTransactionReceiptsByBlock", txReceipts)
 		},
 	},
 	{
@@ -1564,15 +1566,16 @@ var testCases = []TestCase{
 			return NewRequest("eth_getBlockReceipts", []interface{}{rm.stateSyncBlockHash}), nil
 		},
 		HandleResponse: func(rm *ResponseMap, resp Response) error {
-			err := handleGetStateSyncBlockReceipts(rm, resp, "eth_getBlockReceipts")
-			if err != nil {
-				return err
-			}
-
 			txReceipts, err := parseResponse[[]map[string]interface{}](resp.Result)
 			if err != nil {
 				return err
 			}
+
+			err = handleGetStateSyncBlockReceipts(rm, resp, "eth_getBlockReceipts", txReceipts)
+			if err != nil {
+				return err
+			}
+
 			rm.stateSyncExpectedBlockTransactionCount = len(*txReceipts)
 
 			return nil
@@ -1855,6 +1858,87 @@ var testCases = []TestCase{
 				return fmt.Errorf("must not be an empty storage proof array")
 			}
 
+			return nil
+		},
+	},
+	{
+		Key: "Create Transaction Scenario: eth_newFilter",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			eventSignature := "ContractDeployed()"
+			eventTopic := crypto.Keccak256Hash([]byte(eventSignature))
+
+			params := map[string]interface{}{
+				"fromBlock": fmt.Sprintf("0x%x", rm.pushedTxBlockNumber.Sub(rm.pushedTxBlockNumber, big.NewInt(1))),
+				"toBlock":   fmt.Sprintf("0x%x", rm.pushedTxBlockNumber.Add(rm.pushedTxBlockNumber, big.NewInt(1))),
+				"address":   rm.pushedTxDeployedContractAddress,
+				"topics":    [][]common.Hash{{eventTopic}},
+			}
+			return NewRequest("eth_newFilter",
+					[]interface{}{params}),
+				nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			filterId, err := parseResponse[string](resp.Result)
+			if err != nil {
+				return err
+			}
+
+			rm.filterId = *filterId
+			return nil
+		},
+	},
+	{
+		Key: "Create Transaction Scenario: eth_newBlockFilter",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("eth_newBlockFilter",
+					[]interface{}{}),
+				nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			blockFilterId, err := parseResponse[string](resp.Result)
+			if err != nil {
+				return err
+			}
+
+			rm.blockFilterId = *blockFilterId
+			return nil
+		},
+	},
+	{
+		Key: "Create Transaction Scenario: eth_getFilterChanges (from eth_newFilter)",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("eth_getFilterChanges",
+					[]interface{}{rm.filterId}),
+				nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			events, err := parseResponse[[]interface{}](resp.Result)
+			if err != nil {
+				return err
+			}
+
+			if len(*events) == 0 {
+				return fmt.Errorf("must be at least one event")
+			}
+			return nil
+		},
+	},
+	{
+		Key: "Create Transaction Scenario: eth_getFilterChanges (from eth_newBlockFilter)",
+		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
+			return NewRequest("eth_getFilterChanges",
+					[]interface{}{rm.blockFilterId}),
+				nil
+		},
+		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			events, err := parseResponse[[]interface{}](resp.Result)
+			if err != nil {
+				return err
+			}
+
+			if len(*events) == 0 {
+				return fmt.Errorf("must be at least one event")
+			}
 			return nil
 		},
 	},
