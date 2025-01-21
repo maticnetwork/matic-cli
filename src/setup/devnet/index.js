@@ -1390,13 +1390,22 @@ export class Devnet {
         this.config.genesisAddresses = genesisAddresses
 
         // setup accounts from signer dump data (based on number of validators)
-        this.config.accounts = this.signerDumpData
-          .slice(0, this.config.numOfBorValidators)
-          .map((s) => {
-            //return getAccountFromPrivateKey(s.priv_key)
-              const account = getAccountFromPrivateKey(s.priv_key);
-              return { ...account, pub_key: s.pub_key };
-          })
+        //this.config.accounts = this.signerDumpData
+        //  .slice(0, this.config.numOfBorValidators)
+        //  .map((s) => {
+        //    //return getAccountFromPrivateKey(s.priv_key)
+        //      const account = getAccountFromPrivateKey(s.priv_key);
+        //      return { ...account, pub_key: s.pub_key };
+        //  })
+this.config.accounts = this.signerDumpData
+  .slice(0, this.config.numOfBorValidators)
+  .map((s) => {
+    const account = getAccountFromPrivateKey(s.priv_key);
+    const sanitizedPubKey = s.pub_key.startsWith("0x04")
+      ? "0x" + s.pub_key.slice(4)
+      : s.pub_key; // Remove "04" prefix if present
+    return { ...account, pub_key: sanitizedPubKey };
+  })
 
         if (this.config.numOfErigonValidators > 0) {
           const erigonAccounts = this.signerDumpData
