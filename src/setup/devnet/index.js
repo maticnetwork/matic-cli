@@ -750,13 +750,13 @@ export class Devnet {
               ], { stdio: getRemoteStdio() })
 
               // NOTE: Target location would vary depending on bor/heimdall version. Currently the setup works with bor and heimdall v0.3.x
-              await execa('ssh', [
-                '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
-                '-i', '~/cert.pem',
-                                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                                'sudo mv ~/ganache.service /lib/systemd/system/'
-              ], { stdio: getRemoteStdio() })
-            }
+            //  await execa('ssh', [
+            //    '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
+            //    '-i', '~/cert.pem',
+            //                    `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+            //                    'sudo mv ~/ganache.service /lib/systemd/system/'
+            //  ], { stdio: getRemoteStdio() })
+            //}
             await execa('ssh', [
               '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
               '-i', '~/cert.pem',
@@ -824,13 +824,13 @@ export class Devnet {
               ], { stdio: getRemoteStdio() })
 
               // NOTE: Target location would vary depending on bor/heimdall version. Currently the setup works with bor and heimdall v0.3.x
-              await execa('ssh', [
-                '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
-                '-i', '~/cert.pem',
-                                `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
-                                'sudo mv ~/ganache.service /lib/systemd/system/'
-              ], { stdio: getRemoteStdio() })
-            }
+            //  await execa('ssh', [
+            //    '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
+            //    '-i', '~/cert.pem',
+            //                    `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
+            //                    'sudo mv ~/ganache.service /lib/systemd/system/'
+            //  ], { stdio: getRemoteStdio() })
+            //}
             await execa('ssh', [
               '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
               '-i', '~/cert.pem',
@@ -931,20 +931,20 @@ export class Devnet {
 
             // Execute service files
             if (i === 0 && !this.config.network && this.config.numOfBorValidators !== 0) {
-              await execa(
-                'ssh',
-                [
-                  '-o',
-                  'StrictHostKeyChecking=no',
-                  '-o',
-                  'UserKnownHostsFile=/dev/null',
-                  '-i',
-                  '~/cert.pem',
-                  `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                  'sudo systemctl start ganache.service'
-                ],
-                { stdio: getRemoteStdio() }
-              )
+              //await execa(
+              //  'ssh',
+              //  [
+              //    '-o',
+              //    'StrictHostKeyChecking=no',
+              //    '-o',
+              //    'UserKnownHostsFile=/dev/null',
+              //    '-i',
+              //    '~/cert.pem',
+              //    `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+              //    'sudo systemctl start ganache.service'
+              //  ],
+              //  { stdio: getRemoteStdio() }
+              //)
             }
 
             if (i >= this.config.numOfBorValidators + this.config.numOfBorSentries) {
@@ -1139,20 +1139,20 @@ export class Devnet {
 
             // Execute service files
             if (i === 0 && !this.config.network && this.config.numOfBorValidators === 0) {
-              await execa(
-                'ssh',
-                [
-                  '-o',
-                  'StrictHostKeyChecking=no',
-                  '-o',
-                  'UserKnownHostsFile=/dev/null',
-                  '-i',
-                  '~/cert.pem',
-                  `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
-                  'sudo systemctl start ganache.service'
-                ],
-                { stdio: getRemoteStdio() }
-              )
+              //await execa(
+              //  'ssh',
+              //  [
+              //    '-o',
+              //    'StrictHostKeyChecking=no',
+              //    '-o',
+              //    'UserKnownHostsFile=/dev/null',
+              //    '-i',
+              //    '~/cert.pem',
+              //    `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
+              //    'sudo systemctl start ganache.service'
+              //  ],
+              //  { stdio: getRemoteStdio() }
+              //)
             }
 
             if (i < this.config.numOfErigonValidators) {
