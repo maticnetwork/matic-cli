@@ -92,7 +92,6 @@ export class Anvil{
           ...process.env,
           PATH: `${process.env.HOME}/.foundry/bin:${process.env.PATH}`
           }, 
-          timeout: 6000 
         })
   },
 }, 
@@ -112,7 +111,6 @@ export class Anvil{
             execa('bash', ['anvil-deploy-dependencies.sh'], {
               cwd: this.config.targetDirectory,
               stdio: getRemoteStdio(),
-              timeout: 6000
             })
         },
         {
@@ -121,7 +119,6 @@ export class Anvil{
             execa('bash', ['anvil-deployment.sh'], {
               cwd: this.config.targetDirectory,
               stdio: getRemoteStdio(),
-              timeout: 6000
             }),
         },
         {
