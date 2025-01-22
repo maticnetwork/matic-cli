@@ -943,7 +943,11 @@ export class Devnet {
                   `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                   'sudo systemctl start anvil.service'
                 ],
-                { stdio: getRemoteStdio() }
+                { stdio: getRemoteStdio(),
+                  env: {...process.env,
+                    PATH: `${process.env.HOME}/.foundry/bin:${process.env.PATH}`
+                    }
+                }
               )
             }
 
