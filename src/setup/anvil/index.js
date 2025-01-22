@@ -86,7 +86,7 @@ export class Anvil{
             //'--mnemonic', `${this.mnemonic}`,
             '--code-size-limit', '10000000000',
             '--verbosity',
-            `--dump-state ${this.dbDir}`
+            '--dump-state', `${this.dbDir}`
         ], {
             stdio: 'inherit',
           env: {
