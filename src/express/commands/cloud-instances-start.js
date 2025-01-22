@@ -19,7 +19,7 @@ async function startGanache(doc) {
   }
   console.log('📍Running ganache in machine ' + ip + ' ...')
   const command =
-    'sudo systemctl start ganache.service || echo "ganache not running on current machine..."'
+    'sudo systemctl start anvil.service || echo "ganache not running on current machine..."'
   await runSshCommand(ip, command, maxRetries)
 }
 

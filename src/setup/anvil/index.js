@@ -9,7 +9,8 @@ import { processTemplateFiles } from '../../lib/utils.js';
 import { getDefaultBranch } from '../helper.js';
 import { Contracts } from '../contracts/index.js';
 import { getRemoteStdio } from '../../express/common/remote-worker.js';
-import { createAccountsFromMnemonics } from '../../lib/utils.js';
+//import { createAccountsFromMnemonics } from '../../lib/utils.js';
+
 
 export class Anvil{
   constructor(config, options = {}) {
@@ -71,7 +72,7 @@ export class Anvil{
     return new Listr(
       [
         {
-          title: `Reset Anvil ${this.config.accounts}`,
+          title: `Reset Anvil`,
           task: () => fs.remove(this.dbDir),
         },
         {
@@ -85,7 +86,8 @@ export class Anvil{
             '--accounts', '10',
             //'--mnemonic', `${this.mnemonic}`,
             '--code-size-limit', '10000000000',
-            '--verbosity'
+            '--verbosity',
+            '--state', `${this.dbDir}`
         ], {
             stdio: 'inherit',
           env: {
@@ -125,10 +127,10 @@ export class Anvil{
           title: 'Setup validators',
           task: () => this.getStakeTasks(),
         },
-        //{
-        //  title: 'Stop Anvil',
-        //  task: () => server?.kill('SIGINT'),
-        //},
+        {
+          title: 'Stop Anvil',
+          task: () => server?.kill('SIGINT'),
+        },
       ],
       { exitOnError: true }
     );

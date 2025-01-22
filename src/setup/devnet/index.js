@@ -687,8 +687,8 @@ export class Devnet {
           }
           // copy the Ganache files to the first node
 
-          const ganacheURL = new URL(this.config.ethURL)
-          const ganacheUser = this.config.ethHostUser
+          const anvilURL= new URL(this.config.ethURL)
+          const anvilUser = this.config.ethHostUser
 
           if (!this.config.network) {
             await execa(
@@ -701,7 +701,7 @@ export class Devnet {
                 '-i',
                 '~/cert.pem',
                 `${this.config.targetDirectory}/anvil-start.sh`,
-                `${ganacheUser}@${ganacheURL.hostname}:~/anvil-start.sh`
+                `${anvilUser}@${anvilURL.hostname}:~/anvil-start.sh`
               ],
               { stdio: getRemoteStdio() }
             )
@@ -717,7 +717,7 @@ export class Devnet {
                 '-i',
                 '~/cert.pem',
                 `${this.config.targetDirectory}/data`,
-                `${ganacheUser}@${ganacheURL.hostname}:~/data`
+                `${anvilUser}@${anvilURL.hostname}:~/data`
               ],
               { stdio: getRemoteStdio() }
             )
@@ -750,12 +750,12 @@ export class Devnet {
               ], { stdio: getRemoteStdio() })
 
               // NOTE: Target location would vary depending on bor/heimdall version. Currently the setup works with bor and heimdall v0.3.x
-              //await execa('ssh', [
-              //  '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
-              //  '-i', '~/cert.pem',
-              //                  `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-              //                  'sudo mv ~/ganache.service /lib/systemd/system/'
-              //], { stdio: getRemoteStdio() })
+              await execa('ssh', [
+                '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
+                '-i', '~/cert.pem',
+                                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                                'sudo mv ~/anvil.service /lib/systemd/system/'
+              ], { stdio: getRemoteStdio() })
             }
             await execa('ssh', [
               '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
@@ -931,20 +931,24 @@ export class Devnet {
 
             // Execute service files
             if (i === 0 && !this.config.network && this.config.numOfBorValidators !== 0) {
-              //await execa(
-              //  'ssh',
-              //  [
-              //    '-o',
-              //    'StrictHostKeyChecking=no',
-              //    '-o',
-              //    'UserKnownHostsFile=/dev/null',
-              //    '-i',
-              //    '~/cert.pem',
-              //    `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-              //    'sudo systemctl start ganache.service'
-              //  ],
-              //  { stdio: getRemoteStdio() }
-              //)
+              await execa(
+                'ssh',
+                [
+                  '-o',
+                  'StrictHostKeyChecking=no',
+                  '-o',
+                  'UserKnownHostsFile=/dev/null',
+                  '-i',
+                  '~/cert.pem',
+                  `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                  'sudo systemctl start anvil.service'
+                ],
+                { stdio: getRemoteStdio(),
+                  env: {...process.env,
+                    PATH: `${process.env.HOME}/.foundry/bin:${process.env.PATH}`
+                    }
+                }
+              )
             }
 
             if (i >= this.config.numOfBorValidators + this.config.numOfBorSentries) {
@@ -1139,20 +1143,20 @@ export class Devnet {
 
             // Execute service files
             if (i === 0 && !this.config.network && this.config.numOfBorValidators === 0) {
-              //await execa(
-              //  'ssh',
-              //  [
-              //    '-o',
-              //    'StrictHostKeyChecking=no',
-              //    '-o',
-              //    'UserKnownHostsFile=/dev/null',
-              //    '-i',
-              //    '~/cert.pem',
-              //    `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
-              //    'sudo systemctl start ganache.service'
-              //  ],
-              //  { stdio: getRemoteStdio() }
-              //)
+              await execa(
+                'ssh',
+                [
+                  '-o',
+                  'StrictHostKeyChecking=no',
+                  '-o',
+                  'UserKnownHostsFile=/dev/null',
+                  '-i',
+                  '~/cert.pem',
+                  `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
+                  'sudo systemctl start anvil.service'
+                ],
+                { stdio: getRemoteStdio() }
+              )
             }
 
             if (i < this.config.numOfErigonValidators) {
