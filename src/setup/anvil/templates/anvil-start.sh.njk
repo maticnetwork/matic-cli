@@ -2,4 +2,14 @@
 
 set -x
 
-echo "Helllllllllllloooooooooooooooooo!!!!!!!!!!"
+DATA_DIR={{ obj.dbDir }}
+
+anvil \
+  --port 9545 \
+  --balance 1000000000000000 \
+  --gas-limit 1000000000000 \
+  --gas-price 1 \
+  --code-size-limit 10000000000 \
+  --load-state '$DATA_DIR/anvil-db.json' \
+  --verbosity
+
