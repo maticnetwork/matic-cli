@@ -302,7 +302,7 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType, devnetId) {
 
       console.log('📍Stopping ganache (if present) on machine ' + ip + ' ...')
       command =
-        "sudo systemctl stop ganache.service || echo 'ganache not running on current machine...'"
+        "sudo systemctl stop anvil.service || echo 'ganache not running on current machine...'"
       await runSshCommand(ip, command, maxRetries)
     }
     console.log('📍Stopping heimdall (if present) on machine ' + ip + ' ...')
