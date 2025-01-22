@@ -134,6 +134,10 @@ async function installCommonPackages(ip) {
   command = 'sudo apt install build-essential -y'
   await runSshCommand(ip, command, maxRetries)
 
+  console.log('📍Configuring locale ...')
+  command = 'sudo locale-gen en_US.UTF-8 && sudo update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8'
+  await runSshCommand(ip, command, maxRetries)
+
   console.log('📍Installing jq...')
   command = 'sudo apt install jq -y'
   await runSshCommand(ip, command, maxRetries)
@@ -189,6 +193,17 @@ async function installHostSpecificPackages(ip) {
   console.log('📍Installing ganache...')
   command = 'sudo npm install -g ganache -y'
   await runSshCommand(ip, command, maxRetries)
+
+
+  console.log('📍Installing anvil...')
+  command ='curl -L https://foundry.paradigm.xyz | bash && export PATH="$HOME/.foundry/bin:$PATH" >> ~/.bashrc && source ~/.bashrc && foundryup'
+  await runSshCommand(ip, command, maxRetries)
+
+  
+  console.log('📍Checking anvil...')
+  command = 'export PATH="$HOME/.foundry/bin:$PATH" && forge --version'
+  await runSshCommand(ip, command, maxRetries)
+
 }
 
 export async function installDocker(ip, user) {
@@ -440,16 +455,18 @@ async function runRemoteSetupWithMaticCLI(ips, devnetId) {
   command =
     'cd ~/matic-cli/devnet && ../bin/matic-cli.js setup devnet -c ../configs/devnet/remote-setup-config.yaml'
   await runSshCommand(ip, command, maxRetries)
+  console.log("We are here!")
 
   if (!process.env.NETWORK) {
+    // write an anvil script ; 
     console.log('📍Deploying contracts for bor on machine ' + ip + ' ...')
     await timer(60000)
-    command = 'cd ~/matic-cli/devnet && bash ganache-deployment-bor.sh'
+    command = 'cd ~/matic-cli/devnet && bash anvil-deployment-bor.sh'
     await runSshCommand(ip, command, maxRetries)
 
     console.log('📍Deploying state-sync contracts on machine ' + ip + ' ...')
     await timer(60000)
-    command = 'cd ~/matic-cli/devnet && bash ganache-deployment-sync.sh'
+    command = 'cd ~/matic-cli/devnet && bash anvil-deployment-sync.sh'
     await runSshCommand(ip, command, maxRetries)
   }
 }
@@ -509,12 +526,4 @@ export async function start() {
     await runRemoteSetupWithMaticCLI(dnsIps, devnetId)
   }
 
-  const doc = await yaml.load(
-    fs.readFileSync(
-      `../../deployments/devnet-${devnetId}/${devnetType}-setup-config.yaml`,
-      'utf8'
-    )
-  )
-
-  await fundGanacheAccounts(doc)
 }

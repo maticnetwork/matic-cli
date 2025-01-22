@@ -123,13 +123,28 @@ export class Genesis {
               }
             )
         },
+
+        {
+          title: 'Adding forge to path',
+          task: () =>
+            execa('bash', ['-c', 'export PATH="$HOME/.foundry/bin:$PATH"'], {
+              stdio: getRemoteStdio()
+            })
+        },
         {
           title: 'Compile matic-contracts',
           task: () =>
-            execa('npm', ['run', 'truffle:compile'], {
-              cwd: this.maticContractDir,
+            //execa('forge', ['build'], {
+            //  cwd: this.maticContractDir,
+            //  stdio: getRemoteStdio()
+            //})
+            execa('forge', ['build'], {
+    env: {
+    ...process.env,
+    PATH: `${process.env.HOME}/.foundry/bin:${process.env.PATH}`
+  },
               stdio: getRemoteStdio()
-            })
+})
         },
         {
           title: 'Prepare validators for genesis file',

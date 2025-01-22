@@ -11,10 +11,10 @@ export class Contracts {
   constructor(config, options = {}) {
     this.config = config
 
-    this.repositoryName = 'contracts'
+    this.repositoryName = 'pos-contracts'
     this.repositoryUrl =
-      options.repositoryUrl || 'https://github.com/maticnetwork/contracts'
-    this.repositoryBranch = options.repositoryBranch || 'master'
+      options.repositoryUrl || 'https://github.com/AryaLanjewar3005/pos-contracts.git'    
+    this.repositoryBranch = options.repositoryBranch || 'anvil-integration-0.0'
   }
 
   get name() {
@@ -58,6 +58,14 @@ export class Contracts {
   compileTasks() {
     return [
       {
+        title: 'Checkout anvil-integration-0.0',
+        task: () => 
+          execa('git', ['checkout', 'anvil-integration-0.0'], {
+            cwd: this.repositoryDir,
+            stdio: getRemoteStdio() 
+          })
+      },
+      {
         title: 'Install dependencies for matic contracts',
         task: () =>
           execa('npm', ['install', '--omit=dev'], {
@@ -84,10 +92,29 @@ export class Contracts {
           )
       },
       {
+        title: 'Generate interfaces',
+        task: ()=> 
+          execa('npm', ['run', 'generate:interfaces'], {
+            env : {
+              ...process.env,
+              PATH: `${process.env.HOME}/.foundry/bin:${process.env.PATH}`
+            },
+            cwd: this.repositoryDir,
+            stdio: getRemoteStdio()
+          })
+      },
+      {
         title: 'Compile matic contracts',
         task: () =>
-          execa('npm', ['run', 'truffle:compile'], {
-            cwd: this.repositoryDir,
+          //execa('forge', ['build'], {
+          //  cwd: this.repositoryDir,
+          //  stdio: getRemoteStdio()
+          //})
+          execa('forge', ['build'], {
+            env: {
+              ...process.env,
+              PATH: `${process.env.HOME}/.foundry/bin:${process.env.PATH}`
+            },
             stdio: getRemoteStdio()
           })
       }

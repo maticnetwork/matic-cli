@@ -12,6 +12,7 @@ import { bufferToHex, privateToPublic, toBuffer } from 'ethereumjs-util'
 import { Heimdall } from '../heimdall/index.js'
 import { Bor } from '../bor/index.js'
 import { Ganache } from '../ganache/index.js'
+import { Anvil } from '../anvil/index.js'
 import { Genesis } from '../genesis/index.js'
 import { getDefaultBranch } from '../helper.js'
 import {
@@ -699,8 +700,8 @@ export class Devnet {
                 'UserKnownHostsFile=/dev/null',
                 '-i',
                 '~/cert.pem',
-                `${this.config.targetDirectory}/ganache-start.sh`,
-                `${ganacheUser}@${ganacheURL.hostname}:~/ganache-start.sh`
+                `${this.config.targetDirectory}/anvil-start.sh`,
+                `${ganacheUser}@${ganacheURL.hostname}:~/anvil-start.sh`
               ],
               { stdio: getRemoteStdio() }
             )
@@ -749,12 +750,12 @@ export class Devnet {
               ], { stdio: getRemoteStdio() })
 
               // NOTE: Target location would vary depending on bor/heimdall version. Currently the setup works with bor and heimdall v0.3.x
-              await execa('ssh', [
-                '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
-                '-i', '~/cert.pem',
-                                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                                'sudo mv ~/ganache.service /lib/systemd/system/'
-              ], { stdio: getRemoteStdio() })
+              //await execa('ssh', [
+              //  '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
+              //  '-i', '~/cert.pem',
+              //                  `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+              //                  'sudo mv ~/ganache.service /lib/systemd/system/'
+              //], { stdio: getRemoteStdio() })
             }
             await execa('ssh', [
               '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
@@ -823,12 +824,12 @@ export class Devnet {
               ], { stdio: getRemoteStdio() })
 
               // NOTE: Target location would vary depending on bor/heimdall version. Currently the setup works with bor and heimdall v0.3.x
-              await execa('ssh', [
-                '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
-                '-i', '~/cert.pem',
-                                `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
-                                'sudo mv ~/ganache.service /lib/systemd/system/'
-              ], { stdio: getRemoteStdio() })
+              //await execa('ssh', [
+              //  '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
+              //  '-i', '~/cert.pem',
+              //                  `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
+              //                  'sudo mv ~/ganache.service /lib/systemd/system/'
+              //], { stdio: getRemoteStdio() })
             }
             await execa('ssh', [
               '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
@@ -915,20 +916,20 @@ export class Devnet {
 
             // Execute service files
             if (i === 0 && !this.config.network && this.config.numOfBorValidators !== 0) {
-              await execa(
-                'ssh',
-                [
-                  '-o',
-                  'StrictHostKeyChecking=no',
-                  '-o',
-                  'UserKnownHostsFile=/dev/null',
-                  '-i',
-                  '~/cert.pem',
-                  `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                  'sudo systemctl start ganache.service'
-                ],
-                { stdio: getRemoteStdio() }
-              )
+              //await execa(
+              //  'ssh',
+              //  [
+              //    '-o',
+              //    'StrictHostKeyChecking=no',
+              //    '-o',
+              //    'UserKnownHostsFile=/dev/null',
+              //    '-i',
+              //    '~/cert.pem',
+              //    `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+              //    'sudo systemctl start ganache.service'
+              //  ],
+              //  { stdio: getRemoteStdio() }
+              //)
             }
 
             if (i >= this.config.numOfBorValidators + this.config.numOfBorSentries) {
@@ -1108,20 +1109,20 @@ export class Devnet {
 
             // Execute service files
             if (i === 0 && !this.config.network && this.config.numOfBorValidators === 0) {
-              await execa(
-                'ssh',
-                [
-                  '-o',
-                  'StrictHostKeyChecking=no',
-                  '-o',
-                  'UserKnownHostsFile=/dev/null',
-                  '-i',
-                  '~/cert.pem',
-                  `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
-                  'sudo systemctl start ganache.service'
-                ],
-                { stdio: getRemoteStdio() }
-              )
+              //await execa(
+              //  'ssh',
+              //  [
+              //    '-o',
+              //    'StrictHostKeyChecking=no',
+              //    '-o',
+              //    'UserKnownHostsFile=/dev/null',
+              //    '-i',
+              //    '~/cert.pem',
+              //    `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
+              //    'sudo systemctl start ganache.service'
+              //  ],
+              //  { stdio: getRemoteStdio() }
+              //)
             }
 
             if (i < this.config.numOfErigonValidators) {
@@ -1360,17 +1361,30 @@ export class Devnet {
         this.config.genesisAddresses = genesisAddresses
 
         // setup accounts from signer dump data (based on number of validators)
-        this.config.accounts = this.signerDumpData
-          .slice(0, this.config.numOfBorValidators)
-          .map((s) => {
-            return getAccountFromPrivateKey(s.priv_key)
-          })
+        //this.config.accounts = this.signerDumpData
+        //  .slice(0, this.config.numOfBorValidators)
+        //  .map((s) => {
+        //    //return getAccountFromPrivateKey(s.priv_key)
+        //      const account = getAccountFromPrivateKey(s.priv_key);
+        //      return { ...account, pub_key: s.pub_key };
+        //  })
+this.config.accounts = this.signerDumpData
+  .slice(0, this.config.numOfBorValidators)
+  .map((s) => {
+    const account = getAccountFromPrivateKey(s.priv_key);
+    const sanitizedPubKey = s.pub_key.startsWith("0x04")
+      ? "0x" + s.pub_key.slice(4)
+      : s.pub_key; // Remove "04" prefix if present
+    return { ...account, pub_key: sanitizedPubKey };
+  })
 
         if (this.config.numOfErigonValidators > 0) {
           const erigonAccounts = this.signerDumpData
             .slice(this.config.numOfBorValidators, this.config.numOfBorValidators + this.config.numOfErigonValidators)
             .map((s) => {
-              return getAccountFromPrivateKey(s.priv_key)
+              //return getAccountFromPrivateKey(s.priv_key)
+              const account = getAccountFromPrivateKey(s.priv_key);
+              return { ...account, pub_key: s.pub_key };
             })
 
           erigonAccounts.forEach((acc) => {
@@ -1406,6 +1420,7 @@ export class Devnet {
 
   async getTasks() {
     const ganache = this.ganache
+    const anvil = this.anvil
     const heimdall = this.heimdall
     const bor = this.bor
     const genesis = this.genesis
@@ -1417,6 +1432,7 @@ export class Devnet {
 
     const accountTasks = await this.accountTask()
     await accountTasks.run()
+    console.log(this.config.accounts)
 
     if (!this.config.network) {
       const genesisTasks = await this.genesisTask(genesis)
@@ -1543,10 +1559,19 @@ export class Devnet {
           }
         }
       },
+      //{
+      //  title: ganache.taskTitle,
+      //  task: () => {
+      //    return ganache.getTasks()
+      //  },
+      //  enabled: () => {
+      //    return (this.config.devnetType === 'docker' || 'remote') && !this.config.network
+      //  }
+      //},
       {
-        title: ganache.taskTitle,
+        title: anvil.taskTitle,
         task: () => {
-          return ganache.getTasks()
+          return anvil.getTasks()
         },
         enabled: () => {
           return (this.config.devnetType === 'docker' || 'remote') && !this.config.network
@@ -1602,6 +1627,9 @@ async function setupDevnet(config) {
   const devnet = new Devnet(config)
   devnet.ganache = new Ganache(config, {
     contractsBranch: config.contractsBranch
+  })
+  devnet.anvil = new Anvil(config, {
+    contractsBranch : config.contractsBranch
   })
   devnet.bor = new Bor(config, {
     repositoryUrl: config.borRepo,
