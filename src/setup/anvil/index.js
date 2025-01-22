@@ -125,10 +125,10 @@ export class Anvil{
           title: 'Setup validators',
           task: () => this.getStakeTasks(),
         },
-        //{
-        //  title: 'Stop Anvil',
-        //  task: () => server?.kill('SIGINT'),
-        //},
+        {
+          title: 'Stop Anvil',
+          task: () => server?.kill('SIGINT'),
+        },
       ],
       { exitOnError: true }
     );
