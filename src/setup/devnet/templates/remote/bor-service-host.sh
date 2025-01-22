@@ -19,7 +19,7 @@ EOF
 
 cat > anvil.service <<EOF
 [Unit]
-    Description=ganache
+    Description=anvil
 [Service]
     WorkingDirectory=$HOME
     Environment=PATH=$PATH
