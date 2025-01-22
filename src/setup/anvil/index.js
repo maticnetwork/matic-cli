@@ -15,8 +15,8 @@ export class Anvil{
   constructor(config, options = {}) {
     this.config = config;
     this.mnemonic = config.mnemonic
-    //this.deployerAccount = createAccountsFromMnemonics(this.mnemonic, 1)
-    //console.log(`Deployer's account : ${this.deployerAccount[0]}`)
+    this.deployerAccount = createAccountsFromMnemonics(this.mnemonic, 1)
+    console.log(`Deployer's account : ${this.deployerAccount[0]}`)
 
     this.dbName = options.dbName || 'anvil-db';
     this.serverPort = options.serverPort || 9545;
@@ -71,7 +71,7 @@ export class Anvil{
     return new Listr(
       [
         {
-          title: `Reset Anvil ${this.config.accounts}`,
+          title: `Reset Anvil`,
           task: () => fs.remove(this.dbDir),
         },
         {
@@ -85,7 +85,8 @@ export class Anvil{
             '--accounts', '10',
             //'--mnemonic', `${this.mnemonic}`,
             '--code-size-limit', '10000000000',
-            '--verbosity'
+            '--verbosity',
+            `--dump-state ${this.dbDir}`
         ], {
             stdio: 'inherit',
           env: {
