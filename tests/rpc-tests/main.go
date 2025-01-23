@@ -612,13 +612,34 @@ func validateSnapshot(snap *bor.Snapshot) error {
 		return fmt.Errorf("validators list is empty")
 	}
 
-	// Create a map to check for unique IDs
-	idMap := make(map[uint64]bool)
 	// Create a map to check for unique addresses
 	addrMap := make(map[common.Address]bool)
 
 	// Validate each validator
-	for i, validator := range snap.ValidatorSet.Validators {
+	err := validateValidators(snap.ValidatorSet.Validators, &addrMap)
+	if err != nil {
+		return err
+	}
+
+	// Validate Proposer
+	if snap.ValidatorSet.Proposer == nil {
+		return fmt.Errorf("proposer is nil")
+	}
+
+	// Check if proposer is one of the validators
+	if !addrMap[snap.ValidatorSet.Proposer.Address] {
+		return fmt.Errorf("proposer address %s not found in validator set", snap.ValidatorSet.Proposer.Address.Hex())
+	}
+
+	// All validations passed
+	return nil
+}
+
+func validateValidators(validators []*valset.Validator, addrMap *map[common.Address]bool) error {
+	// Create a map to check for unique IDs
+	idMap := make(map[uint64]bool)
+
+	for i, validator := range validators {
 		// Check if validator is nil
 		if validator == nil {
 			return fmt.Errorf("validator at index %d is nil", i)
@@ -636,28 +657,16 @@ func validateSnapshot(snap *bor.Snapshot) error {
 		}
 
 		// Check address uniqueness
-		if addrMap[validator.Address] {
+		if (*addrMap)[validator.Address] {
 			return fmt.Errorf("duplicate validator address found: %s", validator.Address.Hex())
 		}
-		addrMap[validator.Address] = true
+		(*addrMap)[validator.Address] = true
 
 		// Check voting power
 		if validator.VotingPower <= 0 {
 			return fmt.Errorf("validator at index %d has non-positive voting power: %d", i, validator.VotingPower)
 		}
 	}
-
-	// Validate Proposer
-	if snap.ValidatorSet.Proposer == nil {
-		return fmt.Errorf("proposer is nil")
-	}
-
-	// Check if proposer is one of the validators
-	if !addrMap[snap.ValidatorSet.Proposer.Address] {
-		return fmt.Errorf("proposer address %s not found in validator set", snap.ValidatorSet.Proposer.Address.Hex())
-	}
-
-	// All validations passed
 	return nil
 }
 
@@ -798,7 +807,7 @@ func validateStateSyncTxReceipt(receipt map[string]interface{}) error {
 	return nil
 }
 
-func handleGetStateSyncBlockReceipts(rm *ResponseMap, resp Response, method string, txReceipts *[]map[string]interface{}) error {
+func handleGetStateSyncBlockReceipts(rm *ResponseMap, method string, txReceipts *[]map[string]interface{}) error {
 
 	// state sync tx must always be the last one
 	stateSyncTx := (*txReceipts)[len(*txReceipts)-1]
@@ -978,6 +987,7 @@ var testCases = []TestCase{
 			return NewRequest("bor_getCurrentValidators", []interface{}{}), nil
 		},
 		HandleResponse: func(rm *ResponseMap, resp Response) error {
+			fmt.Printf("%s\n", resp.Result)
 			validators, err := parseResponse[[]valset.Validator](resp.Result)
 			if err != nil {
 				return err
@@ -985,7 +995,17 @@ var testCases = []TestCase{
 			if len(*validators) == 0 {
 				return fmt.Errorf("must be at least one validator")
 			}
-			// todo: more validators verification
+			// Create a map to check for unique addresses
+			addrMap := make(map[common.Address]bool)
+			validatorSet := make([]*valset.Validator, len(*validators))
+			for i, validator := range *validators {
+				validatorSet[i] = &validator
+			}
+
+			err = validateValidators(validatorSet, &addrMap)
+			if err != nil {
+				return err
+			}
 			return nil
 		},
 	},
@@ -1554,7 +1574,7 @@ var testCases = []TestCase{
 				return err
 			}
 
-			return handleGetStateSyncBlockReceipts(rm, resp, "eth_getTransactionReceiptsByBlock", txReceipts)
+			return handleGetStateSyncBlockReceipts(rm, "eth_getTransactionReceiptsByBlock", txReceipts)
 		},
 	},
 	{
@@ -1571,7 +1591,7 @@ var testCases = []TestCase{
 				return err
 			}
 
-			err = handleGetStateSyncBlockReceipts(rm, resp, "eth_getBlockReceipts", txReceipts)
+			err = handleGetStateSyncBlockReceipts(rm, "eth_getBlockReceipts", txReceipts)
 			if err != nil {
 				return err
 			}
@@ -1698,6 +1718,9 @@ var testCases = []TestCase{
 			txReceipt, err := parseResponse[map[string]interface{}](resp.Result)
 			if err != nil {
 				return err
+			}
+			if *txReceipt == nil {
+				return fmt.Errorf("no transaction pushed")
 			}
 
 			rm.pushedTxBlockNumber, _ = hexStringToBigInt((*txReceipt)["blockNumber"].(string))
@@ -1866,7 +1889,9 @@ var testCases = []TestCase{
 		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
 			eventSignature := "ContractDeployed()"
 			eventTopic := crypto.Keccak256Hash([]byte(eventSignature))
-
+			if rm.pushedTxBlockNumber == nil {
+				return nil, fmt.Errorf("no block number given to prepare request")
+			}
 			params := map[string]interface{}{
 				"fromBlock": fmt.Sprintf("0x%x", rm.pushedTxBlockNumber.Sub(rm.pushedTxBlockNumber, big.NewInt(1))),
 				"toBlock":   fmt.Sprintf("0x%x", rm.pushedTxBlockNumber.Add(rm.pushedTxBlockNumber, big.NewInt(1))),
