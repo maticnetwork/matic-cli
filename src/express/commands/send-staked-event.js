@@ -55,7 +55,7 @@ export async function sendStakedEvent(validatorID) {
   let dest = './signer-dump.json'
   await runScpCommand(src, dest, maxRetries)
 
-  src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/code/contracts/contractAddresses.json`
+  src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/code/pos-contracts/contractAddresses.json`
   dest = './contractAddresses.json'
   await runScpCommand(src, dest, maxRetries)
 

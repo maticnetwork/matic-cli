@@ -118,9 +118,14 @@ export async function sendTopUpFeeEvent(validatorID) {
     validatorAccount,
     pkey
   )
+  try{
   const Receipt = await rootChainWeb3.eth.sendSignedTransaction(
     signedTx.rawTransaction
   )
+    return Receipt
+  } catch (error){
+    console.error(`❌ Error in :`, error)
+  }
   console.log('TopUpForFee Receipt txHash:  ' + Receipt.transactionHash)
 
   let newValidatorBalance = await getValidatorBalance(
