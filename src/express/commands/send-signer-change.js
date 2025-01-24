@@ -9,6 +9,7 @@ import { isValidatorIdCorrect } from '../common/validators-utils.js'
 
 import {
   runScpCommand,
+  runSshCommand,
   runSshCommandWithReturn,
   maxRetries
 } from '../common/remote-worker.js'
@@ -54,7 +55,7 @@ export async function sendSignerChangeEvent(validatorID) {
   let dest = './signer-dump.json'
   await runScpCommand(src, dest, maxRetries)
 
-  src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/code/contracts/contractAddresses.json`
+  src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/code/pos-contracts/contractAddresses.json`
   dest = './contractAddresses.json'
   await runScpCommand(src, dest, maxRetries)
 
@@ -87,21 +88,29 @@ export async function sendSignerChangeEvent(validatorID) {
   console.log('NewValidatorAddr', newAccAddr, newAccPubKey)
   console.log('NewValidatorPrivKey', wallet.getPrivateKeyString())
 
-  const tx = stakeManagerContract.methods.updateSigner(
-    validatorID,
-    newAccPubKey
-  )
-  const signedTx = await getSignedTx(
-    rootChainWeb3,
-    StakeManagerProxyAddress,
-    tx,
-    validatorAccount,
-    pkey
-  )
-  const Receipt = await rootChainWeb3.eth.sendSignedTransaction(
-    signedTx.rawTransaction
-  )
-  console.log('UpdateSigner Receipt', Receipt.transactionHash)
+  console.log("Public key : ", newAccPubKey)
+
+    console.log('📍 Changing Signer.....')
+  let command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${StakeManagerProxyAddress} "updateSigner(uint256,bytes)" ${validatorID} ${newAccPubKey} --rpc-url http://localhost:9545 --private-key ${pkey}`
+    await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
+  console.log("done!")
+
+
+  //const tx = stakeManagerContract.methods.updateSigner(
+  //  validatorID,
+  //  newAccPubKey
+  //)
+  //const signedTx = await getSignedTx(
+  //  rootChainWeb3,
+  //  StakeManagerProxyAddress,
+  //  tx,
+  //  validatorAccount,
+  //  pkey
+  //)
+  //const Receipt = await rootChainWeb3.eth.sendSignedTransaction(
+  //  signedTx.rawTransaction
+  //)
+  //console.log('UpdateSigner Receipt', Receipt.transactionHash)
 
   let newSigner = await getValidatorSigner(doc, machine0, validatorID)
 

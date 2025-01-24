@@ -20,8 +20,8 @@ import fs from 'fs'
 
 import shell from 'shelljs'
 import dotenv from 'dotenv'
-import { fundGanacheAccounts } from '../common/ganache-utils.js'
-import { log } from 'console'
+//import { fundGanacheAccounts } from '../common/ganache-utils.js'
+import { fundAnvilAccounts } from '../common/anvil-utils.js'
 
 async function terraformApply(devnetId) {
   console.log('📍Executing terraform apply...')
@@ -525,5 +525,13 @@ export async function start() {
   } else {
     await runRemoteSetupWithMaticCLI(dnsIps, devnetId)
   }
+  const doc = await yaml.load(
+    fs.readFileSync(
+      `../../deployments/devnet-${devnetId}/${devnetType}-setup-config.yaml`,
+      'utf8'
+    )
+  )
+
+  await fundAnvilAccounts(doc)
 
 }
