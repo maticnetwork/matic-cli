@@ -10,16 +10,16 @@ import dotenv from 'dotenv'
 
 import shell from 'shelljs'
 
-async function startGanache(doc) {
+async function startAnvil(doc) {
   let ip
   if (doc.numOfBorValidators === 0) {
     ip = `${doc.ethHostUser}@${doc.devnetErigonHosts[0]}`
   } else {
     ip = `${doc.ethHostUser}@${doc.devnetBorHosts[0]}`
   }
-  console.log('📍Running ganache in machine ' + ip + ' ...')
+  console.log('📍Running anvil in machine ' + ip + ' ...')
   const command =
-    'sudo systemctl start anvil.service || echo "ganache not running on current machine..."'
+    'sudo systemctl start anvil.service || echo "anvil not running on current machine..."'
   await runSshCommand(ip, command, maxRetries)
 }
 
@@ -58,7 +58,7 @@ export async function startInstances() {
   if (devnetType === 'remote') {
     console.log('📍Waiting 30s before restarting all services...')
     await timer(30000)
-    await startGanache(doc)
+    await startAnvil(doc)
     await restartAll(true)
   } else {
     console.log('📍Waiting 20s to ensure instances are started...')
