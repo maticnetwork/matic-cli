@@ -68,7 +68,7 @@ export async function sendStakedEvent(validatorID) {
 
   const StakeManagerProxyAddress = contractAddresses.root.StakeManagerProxy
 
-  const MaticTokenAddr = contractAddresses.root.tokens.TestToken
+  const MaticTokenAddr = contractAddresses.root.tokens.MaticToken
   const MaticTokenContract = new rootChainWeb3.eth.Contract(
     ERC20ABI,
     MaticTokenAddr
@@ -119,7 +119,7 @@ export async function sendStakedEvent(validatorID) {
 
   await timer(12000)
 
-    command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "approve(address,uint256)" ${StakeManagerProxyAddress} 100000000000000000000 --rpc-url http://localhost:9545 --private-key ${pkey}`
+    command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "approve(address,uint256)" ${StakeManagerProxyAddress} 1000000000000000000000 --rpc-url http://localhost:9545 --private-key ${pkey}`
     await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
   console.log("done!")
   
