@@ -6,6 +6,7 @@ import { isValidatorIdCorrect } from '../common/validators-utils.js'
 
 import {
   runScpCommand,
+  runSshCommand,
   runSshCommandWithReturn,
   maxRetries
 } from '../common/remote-worker.js'
@@ -23,6 +24,8 @@ export async function sendStakeUpdateEvent(validatorID) {
 
   const doc = await loadDevnetConfig(devnetType)
   let machine0
+  const fundingKey = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+
 
   if (
     !isValidatorIdCorrect(
@@ -53,7 +56,7 @@ export async function sendStakeUpdateEvent(validatorID) {
   let dest = './signer-dump.json'
   await runScpCommand(src, dest, maxRetries)
 
-  src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/code/contracts/contractAddresses.json`
+  src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/code/pos-contracts/contractAddresses.json`
   dest = './contractAddresses.json'
   await runScpCommand(src, dest, maxRetries)
 
@@ -63,7 +66,7 @@ export async function sendStakeUpdateEvent(validatorID) {
 
   const StakeManagerProxyAddress = contractAddresses.root.StakeManagerProxy
 
-  const MaticTokenAddr = contractAddresses.root.tokens.TestToken
+  const MaticTokenAddr = contractAddresses.root.tokens.MaticToken
   const MaticTokenContract = new rootChainWeb3.eth.Contract(
     ERC20ABI,
     MaticTokenAddr
@@ -102,22 +105,37 @@ export async function sendStakeUpdateEvent(validatorID) {
   console.log('Old Validator Power:  ' + oldValidatorPower)
 
   // Adding 100 MATIC stake
-  tx = stakeManagerContract.methods.restake(
-    validatorID,
-    rootChainWeb3.utils.toWei('100'),
-    false
-  )
-  signedTx = await getSignedTx(
-    rootChainWeb3,
-    StakeManagerProxyAddress,
-    tx,
-    validatorAccount,
-    pkey
-  )
-  const Receipt = await rootChainWeb3.eth.sendSignedTransaction(
-    signedTx.rawTransaction
-  )
-  console.log('Restake Receipt txHash:  ' + Receipt.transactionHash)
+    let command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "transfer(address,uint256)" ${validatorAccount} 100000000000000000000 --rpc-url http://localhost:9545 --private-key ${fundingKey}`
+    await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
+  console.log("done!")
+
+      command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "approve(address,uint256)" ${StakeManagerProxyAddress} 100000000000000000000 --rpc-url http://localhost:9545 --private-key ${pkey}`
+    await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
+  console.log("done!")
+
+
+
+  command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${StakeManagerProxyAddress} "restakePOL(uint256,uint256,bool)" ${validatorID} 100000000000000000000 false --rpc-url http://localhost:9545 --private-key ${pkey}`
+  await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
+  console.log("done!")
+
+
+  //tx = stakeManagerContract.methods.restake(
+  //  validatorID,
+  //  rootChainWeb3.utils.toWei('100'),
+  //  false
+  //)
+  //signedTx = await getSignedTx(
+  //  rootChainWeb3,
+  //  StakeManagerProxyAddress,
+  //  tx,
+  //  validatorAccount,
+  //  pkey
+  //)
+  //const Receipt = await rootChainWeb3.eth.sendSignedTransaction(
+  //  signedTx.rawTransaction
+  //)
+  //console.log('Restake Receipt txHash:  ' + Receipt.transactionHash)
 
   let newValidatorPower = await getValidatorPower(doc, machine0, validatorID)
 

@@ -140,7 +140,7 @@ export async function monitor(exitWhenDone) {
 
   console.log('📍Checking for StateSyncs && Checkpoints')
 
-  const src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/code/contracts/contractAddresses.json`
+  const src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/code/pos-contracts/contractAddresses.json`
   const dest = './contractAddresses.json'
   await runScpCommand(src, dest, maxRetries)
 

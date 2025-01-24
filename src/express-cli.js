@@ -44,7 +44,8 @@ import { rpcTest } from '../tests/rpc-tests/rpc-test.js'
 import { constants } from './express/common/constants.js'
 
 import pkg from '../package.json' assert { type: 'json' }
-import { fundGanacheAccounts } from './express/common/ganache-utils.js'
+//import { fundGanacheAccounts } from './express/common/ganache-utils.js'
+import { fundAnvilAccounts } from './express/common/anvil-utils.js'
 
 function checkCloudProvider(provider, _) {
   const supportedClouds = [constants.cloud.AWS, constants.cloud.GCP]
@@ -645,7 +646,7 @@ export async function cli() {
       '⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...'
     )
     await rpcTest()
-  } else if (options.fundGanacheAccounts) {
+  } else if (options.fundAnvilAccounts) {
     console.log('📍Command --fund-ganache-accounts')
     if (!checkDir(false)) {
       console.log(
@@ -653,6 +654,6 @@ export async function cli() {
       )
       process.exit(1)
     }
-    await fundGanacheAccounts()
+    await fundAnvilAccounts()
   }
 }

@@ -8,11 +8,12 @@ DATA_DIR={{ obj.dbDir }}
 
 anvil \
   --port 9545 \
+  --host 0.0.0.0 \
   --balance 1000000000000000 \
   --gas-limit 1000000000000 \
   --gas-price 1 \
   --code-size-limit 10000000000 \
   --state $DATA_DIR \
   --verbosity \
-  --block-time 4
+  --block-time 1
 
