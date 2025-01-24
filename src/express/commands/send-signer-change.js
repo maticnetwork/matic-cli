@@ -119,7 +119,7 @@ export async function sendSignerChangeEvent(validatorID) {
 }
 
 async function getValidatorSigner(doc, machine0, validatorID) {
-  const command = `curl localhost:1317/staking/validator/${validatorID}`
+  const command = `curl localhost:1317/stake/validator/${validatorID}`
   const out = await runSshCommandWithReturn(
     `${doc.ethHostUser}@${machine0}`,
     command,
