@@ -103,8 +103,8 @@ export function createAccountsFromMnemonics(mnemonics, totalAccounts) {
   const accounts = []
   for(let i = 0; i < totalAccounts; i++) {
     //const account = new ethers.HDNodeWallet(ethers.Mnemonic.fromPhrase(mnemonics) , `m/44'/60'/0'/0/${i}`)
-    const mn = new ethers.Mnemonic.fromPhrase(mnemonics);
-    const account = new ethers.HDNodeWallet.fromMnemonic(mn, `m/44'/60'/0'/0/${i}`);
+    const mn = ethers.Mnemonic.fromPhrase(mnemonics);
+    const account = ethers.HDNodeWallet.fromMnemonic(mn, `m/44'/60'/0'/0/${i}`);
 
     accounts.push(account)
   }
