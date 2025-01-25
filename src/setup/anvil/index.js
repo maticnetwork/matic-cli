@@ -9,15 +9,15 @@ import { processTemplateFiles } from '../../lib/utils.js';
 import { getDefaultBranch } from '../helper.js';
 import { Contracts } from '../contracts/index.js';
 import { getRemoteStdio } from '../../express/common/remote-worker.js';
-//import { createAccountsFromMnemonics } from '../../lib/utils.js';
+import { createAccountsFromMnemonics } from '../../lib/utils.js';
 
 
 export class Anvil{
   constructor(config, options = {}) {
     this.config = config;
     this.mnemonic = config.mnemonic
-    //this.deployerAccount = createAccountsFromMnemonics(this.mnemonic, 1)
-    //console.log(`Deployer's account : ${this.deployerAccount[0]}`)
+    this.deployerAccount = createAccountsFromMnemonics(this.mnemonic, 1)
+    console.log(`Deployer's account : ${this.deployerAccount[0]}`)
 
     this.dbName = options.dbName || 'anvil-db';
     this.serverPort = options.serverPort || 9545;

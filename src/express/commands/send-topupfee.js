@@ -24,7 +24,8 @@ export async function sendTopUpFeeEvent(validatorID) {
 
   const doc = await loadDevnetConfig(devnetType)
   let machine0
-  const fundingKey = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+  const fundingKey =
+    '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
 
   if (
     !isValidatorIdCorrect(
@@ -66,7 +67,7 @@ export async function sendTopUpFeeEvent(validatorID) {
   const StakeManagerProxyAddress = contractAddresses.root.StakeManagerProxy
 
   const MaticTokenAddr = contractAddresses.root.tokens.MaticToken
-  console.log("address")
+  console.log('address')
   console.log(MaticTokenAddr)
 
   const MaticTokenContract = new rootChainWeb3.eth.Contract(
@@ -88,15 +89,14 @@ export async function sendTopUpFeeEvent(validatorID) {
 
   console.log('📍 Sending MATIC-TOKENS to validators account')
   let command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "transfer(address,uint256)" ${validatorAccount} 100000000000000000000 --rpc-url http://localhost:9545 --private-key ${fundingKey}`
-    await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
-  console.log("done!")
+  await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
+  console.log('done!')
 
   await timer(12000)
 
-  
   command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "approve(address,uint256)" ${StakeManagerProxyAddress} 100000000000000000000 --rpc-url http://localhost:9545 --private-key ${pkey}`
-    await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
-  console.log("done!")
+  await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
+  console.log('done!')
 
   //let tx = MaticTokenContract.methods.approve(
   //  StakeManagerProxyAddress,
@@ -127,13 +127,13 @@ export async function sendTopUpFeeEvent(validatorID) {
     machine0,
     validatorAccount
   )
-  console.log("Waiting 20 sec...")
+  console.log('Waiting 20 sec...')
   await timer(20000)
 
   console.log('Old Validator Balance:  ' + oldValidatorBalance)
   command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${StakeManagerProxyAddress} "topUpForFee(address,uint256)" ${validatorAccount} 10000000000000000000 --rpc-url http://localhost:9545 --private-key ${pkey}`
-    await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
-  console.log("done!")
+  await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
+  console.log('done!')
   //
   //
   //
