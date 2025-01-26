@@ -26,7 +26,6 @@ ganacheCmd.action(ganache)
 const anvilCmd = new Command('anvil')
 anvilCmd.action(anvil)
 
-
 const localnetCmd = new Command('localnet')
 localnetCmd.action(localnet)
 

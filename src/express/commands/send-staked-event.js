@@ -26,8 +26,8 @@ export async function sendStakedEvent(validatorID) {
 
   const doc = await loadDevnetConfig(devnetType)
   let machine0
-  const fundingKey = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
-
+  const fundingKey =
+    '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
 
   if (
     !isValidatorIdCorrect(
@@ -112,22 +112,22 @@ export async function sendStakedEvent(validatorID) {
 
   console.log('NewValidatorAddr', newAccAddr, newAccPubKey)
   console.log('NewValidatorPrivKey', wallet.getPrivateKeyString())
-    console.log('📍 Sending MATIC-TOKENS to validators account')
+  console.log('📍 Sending MATIC-TOKENS to validators account')
   let command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "transfer(address,uint256)" ${validatorAccount} 100000000000000000000 --rpc-url http://localhost:9545 --private-key ${fundingKey}`
-    await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
-  console.log("done!")
+  await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
+  console.log('done!')
 
   await timer(12000)
 
-    command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "approve(address,uint256)" ${StakeManagerProxyAddress} 1000000000000000000000 --rpc-url http://localhost:9545 --private-key ${pkey}`
-    await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
-  console.log("done!")
-  
+  command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "approve(address,uint256)" ${StakeManagerProxyAddress} 1000000000000000000000 --rpc-url http://localhost:9545 --private-key ${pkey}`
+  await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
+  console.log('done!')
+
   await timer(12000)
 
   command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${StakeManagerProxyAddress} "stakeForPOL(address,uint256,uint256,bool,bytes)" ${newAccAddr} ${stakeAmount} ${heimdallFee} false ${newAccPubKey} --rpc-url http://localhost:9545 --private-key ${pkey}`
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
-  console.log("done!")
+  console.log('done!')
 
   //tx = stakeManagerContract.methods.stakeFor(
   //  newAccAddr,
