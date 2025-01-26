@@ -139,12 +139,12 @@ export class Genesis {
             //  stdio: getRemoteStdio()
             //})
             execa('forge', ['build'], {
-    env: {
-    ...process.env,
-    PATH: `${process.env.HOME}/.foundry/bin:${process.env.PATH}`
-  },
+              env: {
+                ...process.env,
+                PATH: `${process.env.HOME}/.foundry/bin:${process.env.PATH}`
+              },
               stdio: getRemoteStdio()
-})
+            })
         },
         {
           title: 'Prepare validators for genesis file',

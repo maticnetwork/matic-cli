@@ -88,13 +88,12 @@ export async function sendSignerChangeEvent(validatorID) {
   console.log('NewValidatorAddr', newAccAddr, newAccPubKey)
   console.log('NewValidatorPrivKey', wallet.getPrivateKeyString())
 
-  console.log("Public key : ", newAccPubKey)
+  console.log('Public key : ', newAccPubKey)
 
-    console.log('📍 Changing Signer.....')
+  console.log('📍 Changing Signer.....')
   let command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${StakeManagerProxyAddress} "updateSigner(uint256,bytes)" ${validatorID} ${newAccPubKey} --rpc-url http://localhost:9545 --private-key ${pkey}`
-    await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
-  console.log("done!")
-
+  await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
+  console.log('done!')
 
   //const tx = stakeManagerContract.methods.updateSigner(
   //  validatorID,

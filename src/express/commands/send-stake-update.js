@@ -24,8 +24,8 @@ export async function sendStakeUpdateEvent(validatorID) {
 
   const doc = await loadDevnetConfig(devnetType)
   let machine0
-  const fundingKey = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
-
+  const fundingKey =
+    '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
 
   if (
     !isValidatorIdCorrect(
@@ -105,20 +105,17 @@ export async function sendStakeUpdateEvent(validatorID) {
   console.log('Old Validator Power:  ' + oldValidatorPower)
 
   // Adding 100 MATIC stake
-    let command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "transfer(address,uint256)" ${validatorAccount} 100000000000000000000 --rpc-url http://localhost:9545 --private-key ${fundingKey}`
-    await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
-  console.log("done!")
+  let command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "transfer(address,uint256)" ${validatorAccount} 100000000000000000000 --rpc-url http://localhost:9545 --private-key ${fundingKey}`
+  await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
+  console.log('done!')
 
-      command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "approve(address,uint256)" ${StakeManagerProxyAddress} 100000000000000000000 --rpc-url http://localhost:9545 --private-key ${pkey}`
-    await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
-  console.log("done!")
-
-
+  command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "approve(address,uint256)" ${StakeManagerProxyAddress} 100000000000000000000 --rpc-url http://localhost:9545 --private-key ${pkey}`
+  await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
+  console.log('done!')
 
   command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${StakeManagerProxyAddress} "restakePOL(uint256,uint256,bool)" ${validatorID} 100000000000000000000 false --rpc-url http://localhost:9545 --private-key ${pkey}`
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
-  console.log("done!")
-
+  console.log('done!')
 
   //tx = stakeManagerContract.methods.restake(
   //  validatorID,
