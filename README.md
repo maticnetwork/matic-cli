@@ -287,7 +287,7 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
   - Requires both `RPC_URL` and `MNEMONIC` set
     - `MNEMONIC` need funds on its first derivation account (m/44'/60'/0'/0/1) to deploy a small contract
-  - Executes RPC methods against the provided RPC url and do all checks dynamically 
+  - Executes RPC methods against the provided RPC url and do all checks dynamically
 
 - `../../bin/express-cli.js --relay`
 

@@ -12,7 +12,9 @@ export async function startRpcTest() {
   shell.pushd('../../tests/rpc-tests')
   shell.exec('go mod tidy')
 
-  shell.exec(`go run main.go --rpc-url "${process.env.RPC_URL}" --mnemonic "${process.env.MNEMONIC}" `)
+  shell.exec(
+    `go run main.go --rpc-url "${process.env.RPC_URL}" --mnemonic "${process.env.MNEMONIC}" `
+  )
 
   shell.popd()
 }
