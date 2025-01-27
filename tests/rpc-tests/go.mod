@@ -2,7 +2,10 @@ module rpc-tests
 
 go 1.22.1
 
-require github.com/ethereum/go-ethereum v1.14.12
+require (
+	github.com/ethereum/go-ethereum v1.14.12
+	github.com/miguelmota/go-ethereum-hdwallet v0.1.2
+)
 
 require (
 	github.com/BurntSushi/toml v1.4.0 // indirect
@@ -58,7 +61,6 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/maticnetwork/crand v1.0.2 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
-	github.com/miguelmota/go-ethereum-hdwallet v0.1.2 // indirect
 	github.com/mmcloughlin/addchain v0.4.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect

@@ -987,7 +987,6 @@ var testCases = []TestCase{
 			return NewRequest("bor_getCurrentValidators", []interface{}{}), nil
 		},
 		HandleResponse: func(rm *ResponseMap, resp Response) error {
-			fmt.Printf("%s\n", resp.Result)
 			validators, err := parseResponse[[]valset.Validator](resp.Result)
 			if err != nil {
 				return err
