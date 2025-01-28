@@ -1,8 +1,5 @@
 // noinspection JSUnresolvedFunction
 
-import { getDevnetId, loadDevnetConfig } from '../common/config-utils.js'
-
-import { runScpCommand, maxRetries } from '../common/remote-worker.js'
 import shell from 'shelljs'
 import dotenv from 'dotenv'
 
