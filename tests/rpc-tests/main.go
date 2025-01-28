@@ -29,7 +29,7 @@ import (
 
 // Request represents the JSON-RPC request payload.
 type Request struct {
-	Jsonrpc string      `json:"jsonrpc"`
+	JsonRPC string      `json:"jsonrpc"`
 	Method  string      `json:"method"`
 	Params  interface{} `json:"params"`
 	ID      int         `json:"id"`
@@ -37,7 +37,7 @@ type Request struct {
 
 // Response represents the JSON-RPC response payload.
 type Response struct {
-	Jsonrpc string          `json:"jsonrpc"`
+	JsonRPC string          `json:"jsonrpc"`
 	ID      int             `json:"id"`
 	Result  json.RawMessage `json:"result"`
 	Error   *RPCError       `json:"error"`
@@ -176,7 +176,7 @@ func main() {
 	mapTestCases := testCasesToMap(testCases)
 	rm := ResponseMap{}
 	mapRequestIdToKey := make(map[int]string)
-	failedTestCases := []FailedTestCase{}
+	var failedTestCases []FailedTestCase
 	rm.accounts = generateAccountsUsingMnemonic(*mnemonic, 10)
 	rm.expectedGasToCreateTransaction = big.NewInt(358270)
 	rm.expectedValueToStoreInContract = big.NewInt(30)
@@ -319,34 +319,41 @@ func CallEthereumRPC(reqPayload []Request, rpcURL string) ([]Response, error) {
 		return nil, fmt.Errorf("error marshalling request: %w", err)
 	}
 
-	// Make the HTTP POST request
-	resp, err := http.Post(rpcURL, "application/json", bytes.NewBuffer(reqBytes))
-	if err != nil {
-		return nil, fmt.Errorf("error making RPC call: %w", err)
-	}
-	defer resp.Body.Close()
+	// Encapsulate the entire HTTP request/response cycle in a closure
+	rpcResp, err := func() ([]Response, error) {
+		// Make the HTTP POST request
+		resp, err := http.Post(rpcURL, "application/json", bytes.NewBuffer(reqBytes))
+		if err != nil {
+			return nil, fmt.Errorf("error making RPC call: %w", err)
+		}
+		defer resp.Body.Close()
 
-	// Read the response body
-	body, err := io.ReadAll(resp.Body)
+		// Read the response body
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, fmt.Errorf("error reading response body: %w", err)
+		}
+
+		// Deserialize the response
+		var internalResp []Response
+		if err := json.Unmarshal(body, &internalResp); err != nil {
+			return nil, fmt.Errorf("error unmarshalling response: %w", err)
+		}
+
+		return internalResp, nil
+	}()
 	if err != nil {
-		return nil, fmt.Errorf("error reading response body: %w", err)
+		return nil, err
 	}
 
-	// Deserialize the response
-	var rpcResp []Response
-	err = json.Unmarshal(body, &rpcResp)
-	if err != nil {
-		return nil, fmt.Errorf("error unmarshalling response: %w", err)
-	}
-
-	// Return the response
+	// Return the final result
 	return rpcResp, nil
 }
 
 // NewRequest creates a new Request with Jsonrpc set to "2.0" and other fields given as parameters.
 func NewRequest(method string, params interface{}) *Request {
 	return &Request{
-		Jsonrpc: "2.0",
+		JsonRPC: "2.0",
 		Method:  method,
 		Params:  params,
 		ID:      rand.Int(),
@@ -369,8 +376,8 @@ func generateAccountsUsingMnemonic(MNEMONIC string, N int) (accounts Accounts) {
 	}
 
 	for i := 1; i <= N; i++ {
-		var dpath = "m/44'/60'/0'/0/" + strconv.Itoa(i)
-		path := hdwallet.MustParseDerivationPath(dpath)
+		var derivPath = "m/44'/60'/0'/0/" + strconv.Itoa(i)
+		path := hdwallet.MustParseDerivationPath(derivPath)
 		account, err := wallet.Derive(path, false)
 		if err != nil {
 			log.Fatal(err)
@@ -586,11 +593,6 @@ func validateSnapshot(snap *bor.Snapshot) error {
 		return fmt.Errorf("snapshot is nil")
 	}
 
-	// Validate Hash size (should be 32 bytes)
-	if len(snap.Hash) != common.HashLength {
-		return fmt.Errorf("invalid hash length: got %d, want %d", len(snap.Hash), common.HashLength)
-	}
-
 	// Validate Recents
 	if len(snap.Recents) == 0 {
 		return fmt.Errorf("recents map is empty")
@@ -767,17 +769,17 @@ func validateStateSyncTxReceipt(receipt map[string]interface{}) error {
 
 	foundStateSyncLog := false
 	for _, logInterface := range logs {
-		log, ok := logInterface.(map[string]interface{})
+		logEvent, ok := logInterface.(map[string]interface{})
 		if !ok {
 			continue
 		}
 
-		address, ok := log["address"].(string)
+		address, ok := logEvent["address"].(string)
 		if !ok || !strings.EqualFold(address, stateSyncAddress) {
 			continue
 		}
 
-		topics, ok := log["topics"].([]interface{})
+		topics, ok := logEvent["topics"].([]interface{})
 		if !ok || len(topics) == 0 {
 			continue
 		}
@@ -816,8 +818,8 @@ func handleGetStateSyncBlockReceipts(rm *ResponseMap, method string, txReceipts 
 	if err != nil {
 		return fmt.Errorf("last receipt on block must be state sync tx: %s", err)
 	}
-	txIndexHexStringWihtoutPrefix := (stateSyncTx)["transactionIndex"].(string)[2:]
-	txIndexOnMethod, err := strconv.ParseInt(txIndexHexStringWihtoutPrefix, 16, 0)
+	txIndexHexStringWithoutPrefix := (stateSyncTx)["transactionIndex"].(string)[2:]
+	txIndexOnMethod, err := strconv.ParseInt(txIndexHexStringWithoutPrefix, 16, 0)
 	if err != nil {
 		return fmt.Errorf("error converting hex to int:%s", err)
 	}
@@ -868,7 +870,7 @@ func generateInputForDeployTestContract(key string, value *big.Int) []byte {
 	abi, _ := testcontract.TestcontractMetaData.GetAbi()
 	input, _ := abi.Pack("", key, value)
 
-	return append(common.FromHex(testcontract.TestcontractBin), input...)
+	return append(common.FromHex(testcontract.TestcontractMetaData.Bin), input...)
 }
 
 func generateInputForCallGetValue(key string) []byte {
@@ -878,7 +880,14 @@ func generateInputForCallGetValue(key string) []byte {
 }
 
 func generateRawTransaction(nonce uint64, gasLimit uint64, gasPrice *big.Int, data []byte, privateKey *ecdsa.PrivateKey, chainID *big.Int) string {
-	tx := types.NewContractCreation(nonce, big.NewInt(0), gasLimit, gasPrice, data)
+	tx := types.NewTx(&types.LegacyTx{
+		Nonce:    nonce,
+		To:       nil,
+		Value:    big.NewInt(0),
+		Gas:      gasLimit,
+		GasPrice: gasPrice,
+		Data:     data,
+	})
 	signer := types.LatestSignerForChainID(chainID)
 	signedTx, err := types.SignTx(tx, signer, privateKey)
 	if err != nil {
@@ -1482,8 +1491,8 @@ var testCases = []TestCase{
 				return err
 			}
 
-			txIndexHexStringWihtoutPrefix := (*stateSyncTxReceipt)["transactionIndex"].(string)[2:]
-			txIndex, err := strconv.ParseInt(txIndexHexStringWihtoutPrefix, 16, 0)
+			txIndexHexStringWithoutPrefix := (*stateSyncTxReceipt)["transactionIndex"].(string)[2:]
+			txIndex, err := strconv.ParseInt(txIndexHexStringWithoutPrefix, 16, 0)
 			if err != nil {
 				return fmt.Errorf("error converting hex to int:%s", err)
 			}
