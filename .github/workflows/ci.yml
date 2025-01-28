@@ -82,7 +82,7 @@ jobs:
           echo "SG_CIDR_BLOCKS=[\"${{ steps.ip.outputs.ipv4 }}/32\"]" >> secret.tfvars
 
       - name: Authenticate with GCP via OIDC
-        id : auth
+        id: auth
         uses: google-github-actions/auth@v2
         with:
           token_format: access_token
