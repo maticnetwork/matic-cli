@@ -16,7 +16,7 @@ concurrency:
 
 env:
   NODE_VERSION: '18.19.0'
-  OIDC_PROVIDER: projects/23849419004/locations/global/workloadIdentityPools/polygonlabs-shared-prod/providers/oidc-shared-prod
+  OIDC_PROVIDER: projects/198945073119/locations/global/workloadIdentityPools/prj-polygonlabs-pos-v1-dev/providers/oi-prj-polygonlabs-pos-v1-dev
   OIDC_SERVICE_ACCOUNT: prj-polygonlabs-pos-v1-dev-sa@prj-polygonlabs-pos-v1-dev.iam.gserviceaccount.com
   OIDC_PROJECT_ID: prj-polygonlabs-pos-v1-dev
 
