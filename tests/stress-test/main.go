@@ -239,8 +239,8 @@ func generateAccountsUsingMnemonic() (accounts Accounts) {
 	}
 
 	for i := 1; i <= N; i++ {
-		var dpath = "m/44'/60'/0'/0/" + strconv.Itoa(i)
-		path := hdwallet.MustParseDerivationPath(dpath)
+		var derivPath = "m/44'/60'/0'/0/" + strconv.Itoa(i)
+		path := hdwallet.MustParseDerivationPath(derivPath)
 		account, err := wallet.Derive(path, false)
 		if err != nil {
 			log.Fatal(err)

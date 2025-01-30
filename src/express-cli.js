@@ -8,6 +8,7 @@ import {
 import { terraformInit } from './express/commands/init.js'
 import { terraformDestroy } from './express/commands/destroy.js'
 import { startStressTest } from './express/commands/stress.js'
+import { startRpcTest } from './express/commands/rpc.js'
 import { sendStateSyncTx } from './express/commands/send-state-sync.js'
 import { sendStakedEvent } from './express/commands/send-staked-event.js'
 import { sendStakeUpdateEvent } from './express/commands/send-stake-update.js'
@@ -40,7 +41,6 @@ import { shadow } from './express/commands/shadow.js'
 import { relay } from './express/commands/relay.js'
 import { keypairAdd } from './express/commands/keypair-add.js'
 import { keypairDestroy } from './express/commands/keypair-destroy.js'
-import { rpcTest } from '../tests/rpc-tests/rpc-test.js'
 import { constants } from './express/common/constants.js'
 
 import pkg from '../package.json' assert { type: 'json' }
@@ -644,7 +644,7 @@ export async function cli() {
     console.log(
       '⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...'
     )
-    await rpcTest()
+    await startRpcTest()
   } else if (options.fundGanacheAccounts) {
     console.log('📍Command --fund-ganache-accounts')
     if (!checkDir(false)) {
