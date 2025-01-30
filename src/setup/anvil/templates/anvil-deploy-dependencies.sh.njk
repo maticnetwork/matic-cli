@@ -26,6 +26,6 @@ sleep 10
 
 forge create --rpc-url http://localhost:$SERVER_PORT --private-key  $ANVIL_ACC contracts/root/predicates/TransferWithSigUtils.sol:TransferWithSigUtils --broadcast
 
-cast send --rpc-url http://localhost:$SERVER_PORT --private-key $ANVIL_ACC {{ obj.config.primaryAccount.address }} --value 100000000000000  
+cast send --rpc-url http://localhost:$SERVER_PORT --private-key $ANVIL_ACC {{ obj.config.primaryAccount.address }} --value 100ether 
 
 sleep 10
