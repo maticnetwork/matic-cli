@@ -51,7 +51,7 @@ export async function fundAnvilAccounts(doc) {
   for (let i = 0; i < signerDump.length; i++) {
     const txReceipt = await rootChainWeb3.eth.sendTransaction({
       to: signerDump[i].address,
-      from: signerDump[0],
+      from: signerDump[0].address,
       value: rootChainWeb3.utils.toWei(EthAmount, 'ether')
     })
     console.log(
