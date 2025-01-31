@@ -1,7 +1,6 @@
 import fs from 'fs'
 import { loadDevnetConfig } from '../common/config-utils.js'
 import { maxRetries, runScpCommand } from './remote-worker.js'
-import { createAccountsFromMnemonics } from '../../lib/utils.js'
 import Web3 from 'web3'
 import dotenv from 'dotenv'
 
@@ -38,11 +37,9 @@ export async function fundAnvilAccounts(doc) {
 
   console.log('📍Transferring funds from anvil account[0] to others...')
 
-  console.log('doc : ', doc)
-  //const unlockedAccouts = createAccountsFromMnemonics()
-  const accounts = await rootChainWeb3.eth.getAccounts();
-  console.log("Available Accounts:", accounts);
-  const anvilAccount = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8'
+  const accounts = await rootChainWeb3.eth.getAccounts()
+  console.log("Available Accounts:", accounts)
+  const anvilAccount = accounts[1]
 
   const src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/devnet/signer-dump.json`
   const dest = './signer-dump.json'
