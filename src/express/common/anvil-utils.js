@@ -37,7 +37,6 @@ export async function fundAnvilAccounts(doc) {
 
   console.log('📍Transferring funds from anvil account[0] to others...')
 
-  const anvilAccount = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8'
 
   const src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/devnet/signer-dump.json`
   const dest = './signer-dump.json'
@@ -52,7 +51,7 @@ export async function fundAnvilAccounts(doc) {
   for (let i = 0; i < signerDump.length; i++) {
     const txReceipt = await rootChainWeb3.eth.sendTransaction({
       to: signerDump[i].address,
-      from: anvilAccount,
+      from: signerDump[0],
       value: rootChainWeb3.utils.toWei(EthAmount, 'ether')
     })
     console.log(
