@@ -48,7 +48,7 @@ export async function fundAnvilAccounts(doc) {
 
   const rootChainWeb3 = new Web3(`http://${machine0}:9545`)
 
-  for (let i = 0; i < signerDump.length; i++) {
+  for (let i = 1; i < signerDump.length; i++) {
     const txReceipt = await rootChainWeb3.eth.sendTransaction({
       to: signerDump[i].address,
       from: signerDump[0].address,
@@ -56,7 +56,7 @@ export async function fundAnvilAccounts(doc) {
     })
     console.log(
       '📍Funds transferred from ' +
-        anvilAccount +
+        signerDump[0].address +
         ' to ' +
         signerDump[i].address +
         ' with txHash ' +
