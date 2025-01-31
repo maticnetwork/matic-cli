@@ -855,7 +855,7 @@ export async function editMaticCliDockerYAMLConfig() {
   setCommonConfigs(doc)
   setEthHostUser('ubuntu', doc)
   setConfigValue('devnetType', 'docker', doc)
-  setEthURL('ganache', doc)
+  setEthURL('anvil', doc)
 
   fs.writeFile(
     `${process.cwd()}/docker-setup-config.yaml`,

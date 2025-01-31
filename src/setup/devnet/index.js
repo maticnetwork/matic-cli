@@ -11,7 +11,6 @@ import { bufferToHex, privateToPublic, toBuffer } from 'ethereumjs-util'
 
 import { Heimdall } from '../heimdall/index.js'
 import { Bor } from '../bor/index.js'
-import { Ganache } from '../ganache/index.js'
 import { Anvil } from '../anvil/index.js'
 import { Genesis } from '../genesis/index.js'
 import { getDefaultBranch } from '../helper.js'
@@ -348,10 +347,10 @@ export class Devnet {
           //   }
           // }
           // process template files
-          await processTemplateFiles(this.config.targetDirectory, {
-            obj: this,
-            ganache: this.ganache
-          })
+          //await processTemplateFiles(this.config.targetDirectory, {
+          //  obj: this,
+          //  ganache: this.ganache
+          //})
 
           for (let i = 0; i < this.totalBorNodes; i++) {
             await fs.copyFile(
@@ -685,7 +684,7 @@ export class Devnet {
           if (this.config.devnetBorHosts === undefined || this.config.devnetErigonHosts === undefined) {
             return
           }
-          // copy the Ganache files to the first node
+          // copy the Anvil files to the first node
 
           const anvilURL= new URL(this.config.ethURL)
           const anvilUser = this.config.ethHostUser
@@ -828,7 +827,7 @@ export class Devnet {
               //  '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
               //  '-i', '~/cert.pem',
               //                  `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
-              //                  'sudo mv ~/ganache.service /lib/systemd/system/'
+              //                  'sudo mv ~/anvil.service /lib/systemd/system/'
               //], { stdio: getRemoteStdio() })
             }
             await execa('ssh', [
@@ -1452,7 +1451,6 @@ this.config.accounts = this.signerDumpData
   }
 
   async getTasks() {
-    const ganache = this.ganache
     const anvil = this.anvil
     const heimdall = this.heimdall
     const bor = this.bor
@@ -1592,15 +1590,6 @@ this.config.accounts = this.signerDumpData
           }
         }
       },
-      //{
-      //  title: ganache.taskTitle,
-      //  task: () => {
-      //    return ganache.getTasks()
-      //  },
-      //  enabled: () => {
-      //    return (this.config.devnetType === 'docker' || 'remote') && !this.config.network
-      //  }
-      //},
       {
         title: anvil.taskTitle,
         task: () => {
@@ -1658,9 +1647,6 @@ this.config.accounts = this.signerDumpData
 
 async function setupDevnet(config) {
   const devnet = new Devnet(config)
-  devnet.ganache = new Ganache(config, {
-    contractsBranch: config.contractsBranch
-  })
   devnet.anvil = new Anvil(config, {
     contractsBranch : config.contractsBranch
   })
@@ -1820,7 +1806,7 @@ export default async function (command) {
       type: 'input',
       name: 'ethURL',
       message: 'Please enter ETH url',
-      default: 'http://ganache:9545'
+      default: 'http://anvil:9545'
     })
   }
 
