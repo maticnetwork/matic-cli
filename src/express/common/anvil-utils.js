@@ -3,6 +3,7 @@ import { loadDevnetConfig } from '../common/config-utils.js'
 import { maxRetries, runScpCommand } from './remote-worker.js'
 import Web3 from 'web3'
 import dotenv from 'dotenv'
+import { createAccountsFromMnemonics } from '../../lib/utils.js'
 
 const EthAmount = '10'
 
@@ -47,15 +48,14 @@ export async function fundAnvilAccounts(doc) {
 
   const rootChainWeb3 = new Web3(`http://${machine0}:9545`)
 
-  const accounts = await rootChainWeb3.eth.getAccounts()
-  console.log("Available Accounts:", accounts)
-  const anvilAccount = accounts[1]
+  const accounts = createAccountsFromMnemonics(process.env.MNEMONIC, 3)
+  const anvilAccount = accounts[1].address
 
 
   for (let i = 0; i < signerDump.length; i++) {
     const txReceipt = await rootChainWeb3.eth.sendTransaction({
       to: signerDump[i].address,
-      from: signerDump[0],
+      from: anvilAccount,
       value: rootChainWeb3.utils.toWei(EthAmount, 'ether')
     })
     console.log(
