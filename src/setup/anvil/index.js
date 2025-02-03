@@ -109,16 +109,6 @@ export class Anvil {
             )
           }
         },
-
-        //{
-        //  title: 'Start Anvil',
-        //  task: () => {
-        //    server = execa(`anvil --port 9545 --balance 1000000000000000 --gas-limit 1000000000000 --gas-price 1 --accounts 3 --code-size-limit 10000000000 --verbose`, {
-        //      stdio: 'inherit',
-        //    });
-        //    return server;
-        //  },
-        //},
         {
           title: 'Deploy dependencies',
           task: () =>
@@ -179,7 +169,7 @@ export class Anvil {
 }
 
 async function setupAnvil(config) {
-  const anvil = new AnvilSetup(config, {
+  const anvil = new Anvil(config, {
     contractsBranch: config.contractsBranch
   })
 
