@@ -18,3 +18,4 @@ signer-dump.json
 /configs/devnet/remote-setup-config.yaml
 
 .dccache
+.vscode
