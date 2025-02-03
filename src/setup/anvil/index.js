@@ -15,6 +15,7 @@ export class Anvil {
   constructor(config, options = {}) {
     this.config = config
     this.mnemonic = config.mnemonic
+    console.log(this.mnemonic)
     this.deployerAccount = createAccountsFromMnemonics(this.mnemonic, 1)
     console.log(`Deployer's account : ${this.deployerAccount[0].privateKey}`)
     this.deployerPrivateKey = this.deployerAccount[0].privateKey;
@@ -109,16 +110,6 @@ export class Anvil {
             )
           }
         },
-
-        //{
-        //  title: 'Start Anvil',
-        //  task: () => {
-        //    server = execa(`anvil --port 9545 --balance 1000000000000000 --gas-limit 1000000000000 --gas-price 1 --accounts 3 --code-size-limit 10000000000 --verbose`, {
-        //      stdio: 'inherit',
-        //    });
-        //    return server;
-        //  },
-        //},
         {
           title: 'Deploy dependencies',
           task: () =>
@@ -179,7 +170,7 @@ export class Anvil {
 }
 
 async function setupAnvil(config) {
-  const anvil = new AnvilSetup(config, {
+  const anvil = new Anvil(config, {
     contractsBranch: config.contractsBranch
   })
 
