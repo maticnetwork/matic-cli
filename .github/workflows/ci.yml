@@ -167,6 +167,7 @@ jobs:
           sudo ln -sf /usr/bin/python2 /usr/bin/python
           curl -L https://foundry.paradigm.xyz | bash
           export PATH="$HOME/.foundry/bin:$PATH"
+          source /home/runner/.bashrc
           foundryup
 
       - name: Setup node
