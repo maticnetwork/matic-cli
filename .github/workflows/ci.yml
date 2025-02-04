@@ -166,7 +166,7 @@ jobs:
           sudo apt install python2 jq curl
           sudo ln -sf /usr/bin/python2 /usr/bin/python
           curl -L https://foundry.paradigm.xyz | bash
-          source ~/.bashrc
+          export PATH="$HOME/.foundry/bin:$PATH"
           foundryup
 
       - name: Setup node
