@@ -5,7 +5,10 @@ import execa from 'execa'
 import fs from 'fs-extra'
 
 import { loadConfig } from '../config.js'
-import { processTemplateFiles, createAccountsFromMnemonics } from '../../lib/utils.js'
+import {
+  processTemplateFiles,
+  createAccountsFromMnemonics
+} from '../../lib/utils.js'
 import { getDefaultBranch } from '../helper.js'
 import { Contracts } from '../contracts/index.js'
 import { getRemoteStdio } from '../../express/common/remote-worker.js'

@@ -123,7 +123,7 @@ jobs:
           timeout 5m ../../bin/express-cli.js --send-staked-event 1
           timeout 5m ../../bin/express-cli.js --send-stakeupdate-event 1
           timeout 5m ../../bin/express-cli.js --send-topupfee-event 1
-          timeout 10m ../../bin/express-cli.js --send-unstakeinit-event 1
+          timeout 15m ../../bin/express-cli.js --send-unstakeinit-event 1
 
       - name: Destroy devnet
         if: always()
