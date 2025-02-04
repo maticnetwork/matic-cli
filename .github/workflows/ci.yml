@@ -165,6 +165,7 @@ jobs:
           sudo snap install solc
           sudo apt install python2 jq curl
           sudo ln -sf /usr/bin/python2 /usr/bin/python
+          curl -L https://foundry.paradigm.xyz | bash && export PATH="$HOME/.foundry/bin:$PATH" >> ~/.bashrc && source ~/.bashrc && foundryup
 
       - name: Setup node
         uses: actions/setup-node@v4
