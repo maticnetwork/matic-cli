@@ -24,8 +24,8 @@ export async function sendStakeUpdateEvent(validatorID) {
 
   const doc = await loadDevnetConfig(devnetType)
   let machine0
-  //const fundingKey =
-    //'0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+  // const fundingKey =
+  // '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
 
   if (
     !isValidatorIdCorrect(
@@ -83,11 +83,11 @@ export async function sendStakeUpdateEvent(validatorID) {
     StakeManagerProxyAddress
   )
 
-  let tx = MaticTokenContract.methods.approve(
+  const tx = MaticTokenContract.methods.approve(
     StakeManagerProxyAddress,
     rootChainWeb3.utils.toWei('1000')
   )
-  let signedTx = await getSignedTx(
+  const signedTx = await getSignedTx(
     rootChainWeb3,
     MaticTokenAddr,
     tx,
@@ -117,22 +117,22 @@ export async function sendStakeUpdateEvent(validatorID) {
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
   console.log('done!')
 
-  //tx = stakeManagerContract.methods.restake(
+  // tx = stakeManagerContract.methods.restake(
   //  validatorID,
   //  rootChainWeb3.utils.toWei('100'),
   //  false
-  //)
-  //signedTx = await getSignedTx(
+  // )
+  // signedTx = await getSignedTx(
   //  rootChainWeb3,
   //  StakeManagerProxyAddress,
   //  tx,
   //  validatorAccount,
   //  pkey
-  //)
-  //const Receipt = await rootChainWeb3.eth.sendSignedTransaction(
+  // )
+  // const Receipt = await rootChainWeb3.eth.sendSignedTransaction(
   //  signedTx.rawTransaction
-  //)
-  //console.log('Restake Receipt txHash:  ' + Receipt.transactionHash)
+  // )
+  // console.log('Restake Receipt txHash:  ' + Receipt.transactionHash)
 
   let newValidatorPower = await getValidatorPower(doc, machine0, validatorID)
 

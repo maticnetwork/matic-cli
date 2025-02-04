@@ -5,7 +5,11 @@ import { timer } from '../common/time-utils.js'
 import { checkValidatorsLength } from './send-staked-event.js'
 import { isValidatorIdCorrect } from '../common/validators-utils.js'
 
-import { runScpCommand, maxRetries, runSshCommand } from '../common/remote-worker.js'
+import {
+  runScpCommand,
+  maxRetries,
+  runSshCommand
+} from '../common/remote-worker.js'
 
 import dotenv from 'dotenv'
 import fs from 'fs-extra'
@@ -81,17 +85,17 @@ export async function sendUnstakeInitEvent(validatorID) {
   //   validatorAccount,
   //   pkey
   // )
-  let command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${StakeManagerProxyAddress} "unstakePOL(uint256)" ${validatorID} --rpc-url http://localhost:9545 --private-key ${pkey}`
+  const command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${StakeManagerProxyAddress} "unstakePOL(uint256)" ${validatorID} --rpc-url http://localhost:9545 --private-key ${pkey}`
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
   console.log('done!')
 
   const oldValidatorsCount = await checkValidatorsLength(doc, machine0)
   console.log('oldValidatorsCount : ', oldValidatorsCount)
 
-  //const Receipt = await rootChainWeb3.eth.sendSignedTransaction(
+  // const Receipt = await rootChainWeb3.eth.sendSignedTransaction(
   //  signedTx.rawTransaction
-  //)
-  //console.log('Unstake Receipt', Receipt.transactionHash)
+  // )
+  // console.log('Unstake Receipt', Receipt.transactionHash)
 
   let newValidatorsCount = await checkValidatorsLength(doc, machine0)
 

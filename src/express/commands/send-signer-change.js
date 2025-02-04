@@ -91,25 +91,25 @@ export async function sendSignerChangeEvent(validatorID) {
   console.log('Public key : ', newAccPubKey)
 
   console.log('📍 Changing Signer.....')
-  let command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${StakeManagerProxyAddress} "updateSigner(uint256,bytes)" ${validatorID} ${newAccPubKey} --rpc-url http://localhost:9545 --private-key ${pkey}`
+  const command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${StakeManagerProxyAddress} "updateSigner(uint256,bytes)" ${validatorID} ${newAccPubKey} --rpc-url http://localhost:9545 --private-key ${pkey}`
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
   console.log('done!')
 
-  //const tx = stakeManagerContract.methods.updateSigner(
+  // const tx = stakeManagerContract.methods.updateSigner(
   //  validatorID,
   //  newAccPubKey
-  //)
-  //const signedTx = await getSignedTx(
+  // )
+  // const signedTx = await getSignedTx(
   //  rootChainWeb3,
   //  StakeManagerProxyAddress,
   //  tx,
   //  validatorAccount,
   //  pkey
-  //)
-  //const Receipt = await rootChainWeb3.eth.sendSignedTransaction(
+  // )
+  // const Receipt = await rootChainWeb3.eth.sendSignedTransaction(
   //  signedTx.rawTransaction
-  //)
-  //console.log('UpdateSigner Receipt', Receipt.transactionHash)
+  // )
+  // console.log('UpdateSigner Receipt', Receipt.transactionHash)
 
   let newSigner = await getValidatorSigner(doc, machine0, validatorID)
 
