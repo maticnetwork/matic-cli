@@ -203,7 +203,7 @@ jobs:
           cd matic-cli/devnet/code/pos-contracts
           CONTRACT_ADDRESS=$(jq -r .root.tokens.MaticToken contractAddresses.json)
           cd ../../devnet
-          forge script scripts/matic-cli-scripts/Deposit.s.sol:MaticDeposit --rpc-url http://localhost:9545 --private-key $(jq -r '.accounts[0].privateKey' signer-dump.json) --broadcast --sig "run(address,address,uint256)" $(jq -r '.accounts[0].address' signer-dump.json) $CONTRACT_ADDRESS 100000000000000000000
+          forge script scripts/matic-cli-scripts/Deposit.s.sol:MaticDeposit --rpc-url http://localhost:9545 --private-key $(jq -r '.[0].privateKey' signer-dump.json) --broadcast --sig "run(address,address,uint256)" $(jq -r '.[0].address' signer-dump.json) $CONTRACT_ADDRESS 100000000000000000000
           cd -
           timeout 60m bash matic-cli/.github/integration-tests/smoke_test.sh
 
