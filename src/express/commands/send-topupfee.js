@@ -1,7 +1,5 @@
 import { loadDevnetConfig } from '../common/config-utils.js'
-import Web3 from 'web3'
 import { timer } from '../common/time-utils.js'
-import { getSignedTx } from '../common/tx-utils.js'
 import { isValidatorIdCorrect } from '../common/validators-utils.js'
 
 import {
@@ -14,9 +12,6 @@ import {
 import dotenv from 'dotenv'
 import fs from 'fs-extra'
 
-import stakeManagerABI from '../../abi/StakeManagerABI.json' assert { type: 'json' }
-import ERC20ABI from '../../abi/ERC20ABI.json' assert { type: 'json' }
-
 export async function sendTopUpFeeEvent(validatorID) {
   dotenv.config({ path: `${process.cwd()}/.env` })
   const devnetType =
@@ -24,8 +19,8 @@ export async function sendTopUpFeeEvent(validatorID) {
 
   const doc = await loadDevnetConfig(devnetType)
   let machine0
-  const fundingKey =
-    '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+  // const fundingKey =
+  // '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
 
   if (
     !isValidatorIdCorrect(
@@ -50,7 +45,6 @@ export async function sendTopUpFeeEvent(validatorID) {
   }
 
   validatorID = Number(validatorID)
-  const rootChainWeb3 = new Web3(`http://${machine0}:9545`)
 
   let src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/devnet/signer-dump.json`
   let dest = './signer-dump.json'
@@ -70,11 +64,6 @@ export async function sendTopUpFeeEvent(validatorID) {
   console.log('address')
   console.log(MaticTokenAddr)
 
-  const MaticTokenContract = new rootChainWeb3.eth.Contract(
-    ERC20ABI,
-    MaticTokenAddr
-  )
-
   const signerDump = JSON.parse(
     fs.readFileSync(`${process.cwd()}/signer-dump.json`, 'utf8')
   )
@@ -82,13 +71,8 @@ export async function sendTopUpFeeEvent(validatorID) {
   const validatorAccount = signerDump[validatorID - 1].address
   console.log(signerDump[validatorID - 1].address)
 
-  const stakeManagerContract = new rootChainWeb3.eth.Contract(
-    stakeManagerABI,
-    StakeManagerProxyAddress
-  )
-
   console.log('📍 Sending MATIC-TOKENS to validators account')
-  let command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "transfer(address,uint256)" ${validatorAccount} 100000000000000000000 --rpc-url http://localhost:9545 --private-key ${fundingKey}`
+  let command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "transfer(address,uint256)" ${validatorAccount} 100000000000000000000 --rpc-url http://localhost:9545 --private-key ${signerDump[0].priv_key}`
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
   console.log('done!')
 
@@ -139,13 +123,13 @@ export async function sendTopUpFeeEvent(validatorID) {
   //
   //
   //
-  /// /signedTx = await getSignedTx(
-  /// /  rootChainWeb3,
-  /// /  StakeManagerProxyAddress,
-  /// /  tx,
-  /// /  validatorAccount,
-  /// /  pkey
-  /// /)
+  // signedTx = await getSignedTx(
+  // rootChainWeb3,
+  // StakeManagerProxyAddress,
+  // tx,
+  // validatorAccount,
+  // pkey
+  // )
   // try{
   // const Receipt = await rootChainWeb3.eth.sendSignedTransaction(
   //  signedTx.rawTransaction

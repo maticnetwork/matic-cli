@@ -3,6 +3,7 @@
 set -x
 
 # private key to deploy contracts
+export ANVIL_ACC={{ obj.deployerPrivateKey }}
 export PRIVATE_KEY={{ obj.config.primaryAccount.privateKey }}
 export MNEMONIC={{ obj.config.primaryAccount.privateKey }}
 
@@ -19,6 +20,11 @@ cd {{ obj.contracts.repositoryDir }}
 
 export PATH="$HOME/.foundry/bin:$PATH"
 
- forge create --rpc-url http://localhost:9545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 contracts/common/lib/Common.sol:Common --broadcast 
 
-forge create --rpc-url http://localhost:9545 --private-key  0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 contracts/root/predicates/TransferWithSigUtils.sol:TransferWithSigUtils --broadcast
+ forge create --rpc-url http://localhost:$SERVER_PORT --private-key $ANVIL_ACC contracts/common/lib/Common.sol:Common --broadcast
+
+forge create --rpc-url http://localhost:$SERVER_PORT --private-key  $ANVIL_ACC contracts/root/predicates/TransferWithSigUtils.sol:TransferWithSigUtils --broadcast
+
+cast send --rpc-url http://localhost:$SERVER_PORT --private-key $ANVIL_ACC {{ obj.config.primaryAccount.address }} --value 1000ether
+
+sleep 10

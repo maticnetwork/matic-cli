@@ -134,10 +134,10 @@ export class Genesis {
         {
           title: 'Compile matic-contracts',
           task: () =>
-            // execa('forge', ['build'], {
+            //execa('forge', ['build'], {
             //  cwd: this.maticContractDir,
             //  stdio: getRemoteStdio()
-            // })
+            //})
             execa('forge', ['build'], {
               env: {
                 ...process.env,

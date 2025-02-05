@@ -5,10 +5,7 @@ import execa from 'execa'
 import fs from 'fs-extra'
 
 import { loadConfig } from '../config.js'
-import {
-  processTemplateFiles,
-  createAccountsFromMnemonics
-} from '../../lib/utils.js'
+import { processTemplateFiles, createAccountsFromMnemonics} from '../../lib/utils.js'
 import { getDefaultBranch } from '../helper.js'
 import { Contracts } from '../contracts/index.js'
 import { getRemoteStdio } from '../../express/common/remote-worker.js'
@@ -19,6 +16,7 @@ export class Anvil {
     this.mnemonic = config.mnemonic
     this.deployerAccount = createAccountsFromMnemonics(this.mnemonic, 1)
     console.log(`Deployer's account : ${this.deployerAccount[0].privateKey}`)
+    this.deployerPrivateKey = this.deployerAccount[0].privateKey;
 
     this.dbName = options.dbName || 'anvil-db'
     this.serverPort = options.serverPort || 9545
@@ -93,7 +91,7 @@ export class Anvil {
                 '1',
                 '--accounts',
                 '10',
-                // '--mnemonic', `${this.mnemonic}`,
+                '--mnemonic', `${this.mnemonic}`,
                 '--code-size-limit',
                 '10000000000',
                 '--verbosity',

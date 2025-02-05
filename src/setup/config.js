@@ -7,7 +7,7 @@ import chalk from 'chalk'
 import YAML from 'yaml'
 
 import { getChainIds, getKeystoreDetails } from './helper.js'
-// import { getAccountFromPrivateKey } from '../lib/utils.js'
+import { getAccountFromPrivateKey } from '../lib/utils.js'
 import { getRemoteStdio } from '../express/common/remote-worker.js'
 
 const defaultConfigFileName = 'config.json'
