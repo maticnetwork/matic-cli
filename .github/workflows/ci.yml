@@ -171,10 +171,12 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Setup Foundry (Anvil, Forge, Cast)
-        uses: foundry-rs/setup-foundry@v1
-        with:
-          foundry-bin: anvil
+      - name: Install Anvil & Forge Manually
+        run: |
+        curl -L https://foundry.paradigm.xyz | bash
+        export PATH="$HOME/.foundry/bin:$PATH"
+        source /home/runner/.bashrc
+        foundryup 
 
       - name: Bootstrap devnet
         run: |
