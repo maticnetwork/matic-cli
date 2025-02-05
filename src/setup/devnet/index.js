@@ -687,7 +687,7 @@ export class Devnet {
           }
           // copy the Ganache files to the first node
 
-          const anvilURL= new URL(this.config.ethURL)
+          const anvilURL = new URL(this.config.ethURL)
           const anvilUser = this.config.ethHostUser
 
           if (!this.config.network) {
@@ -824,12 +824,12 @@ export class Devnet {
               ], { stdio: getRemoteStdio() })
 
               // NOTE: Target location would vary depending on bor/heimdall version. Currently the setup works with bor and heimdall v0.3.x
-              //await execa('ssh', [
+              // await execa('ssh', [
               //  '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
               //  '-i', '~/cert.pem',
               //                  `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
               //                  'sudo mv ~/ganache.service /lib/systemd/system/'
-              //], { stdio: getRemoteStdio() })
+              // ], { stdio: getRemoteStdio() })
             }
             await execa('ssh', [
               '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
@@ -928,10 +928,12 @@ export class Devnet {
                   `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                   'sudo systemctl start anvil.service'
                 ],
-                { stdio: getRemoteStdio(),
-                  env: {...process.env,
+                {
+                  stdio: getRemoteStdio(),
+                  env: {
+                    ...process.env,
                     PATH: `${process.env.HOME}/.foundry/bin:${process.env.PATH}`
-                    }
+                  }
                 }
               )
             }
@@ -1365,30 +1367,30 @@ export class Devnet {
         this.config.genesisAddresses = genesisAddresses
 
         // setup accounts from signer dump data (based on number of validators)
-        //this.config.accounts = this.signerDumpData
+        // this.config.accounts = this.signerDumpData
         //  .slice(0, this.config.numOfBorValidators)
         //  .map((s) => {
         //    //return getAccountFromPrivateKey(s.priv_key)
         //      const account = getAccountFromPrivateKey(s.priv_key);
         //      return { ...account, pub_key: s.pub_key };
         //  })
-this.config.accounts = this.signerDumpData
-  .slice(0, this.config.numOfBorValidators)
-  .map((s) => {
-    const account = getAccountFromPrivateKey(s.priv_key);
-    const sanitizedPubKey = s.pub_key.startsWith("0x04")
-      ? "0x" + s.pub_key.slice(4)
-      : s.pub_key; // Remove "04" prefix if present
-    return { ...account, pub_key: sanitizedPubKey };
-  })
+        this.config.accounts = this.signerDumpData
+          .slice(0, this.config.numOfBorValidators)
+          .map((s) => {
+            const account = getAccountFromPrivateKey(s.priv_key)
+            const sanitizedPubKey = s.pub_key.startsWith('0x04')
+              ? '0x' + s.pub_key.slice(4)
+              : s.pub_key // Remove "04" prefix if present
+            return { ...account, pub_key: sanitizedPubKey }
+          })
 
         if (this.config.numOfErigonValidators > 0) {
           const erigonAccounts = this.signerDumpData
             .slice(this.config.numOfBorValidators, this.config.numOfBorValidators + this.config.numOfErigonValidators)
             .map((s) => {
-              //return getAccountFromPrivateKey(s.priv_key)
-              const account = getAccountFromPrivateKey(s.priv_key);
-              return { ...account, pub_key: s.pub_key };
+              // return getAccountFromPrivateKey(s.priv_key)
+              const account = getAccountFromPrivateKey(s.priv_key)
+              return { ...account, pub_key: s.pub_key }
             })
 
           erigonAccounts.forEach((acc) => {
@@ -1563,7 +1565,7 @@ this.config.accounts = this.signerDumpData
           }
         }
       },
-      //{
+      // {
       //  title: ganache.taskTitle,
       //  task: () => {
       //    return ganache.getTasks()
@@ -1571,7 +1573,7 @@ this.config.accounts = this.signerDumpData
       //  enabled: () => {
       //    return (this.config.devnetType === 'docker' || 'remote') && !this.config.network
       //  }
-      //},
+      // },
       {
         title: anvil.taskTitle,
         task: () => {
@@ -1633,7 +1635,7 @@ async function setupDevnet(config) {
     contractsBranch: config.contractsBranch
   })
   devnet.anvil = new Anvil(config, {
-    contractsBranch : config.contractsBranch
+    contractsBranch: config.contractsBranch
   })
   devnet.bor = new Bor(config, {
     repositoryUrl: config.borRepo,

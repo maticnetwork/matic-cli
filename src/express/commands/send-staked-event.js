@@ -87,22 +87,22 @@ export async function sendStakedEvent(validatorID) {
     StakeManagerProxyAddress
   )
 
-  //let tx = MaticTokenContract.methods.approve(
+  // let tx = MaticTokenContract.methods.approve(
   //  StakeManagerProxyAddress,
   //  rootChainWeb3.utils.toWei('50')
-  //)
-  //let signedTx = await getSignedTx(
+  // )
+  // let signedTx = await getSignedTx(
   //  rootChainWeb3,
   //  MaticTokenAddr,
   //  tx,
   //  validatorAccount,
   //  pkey
-  //)
+  // )
   //
-  //const approvalReceipt = await rootChainWeb3.eth.sendSignedTransaction(
+  // const approvalReceipt = await rootChainWeb3.eth.sendSignedTransaction(
   //  signedTx.rawTransaction
-  //)
-  //console.log('Approval Receipt txHash:  ' + approvalReceipt.transactionHash)
+  // )
+  // console.log('Approval Receipt txHash:  ' + approvalReceipt.transactionHash)
 
   const RandomSeed = 'random' + Math.random()
   const newAccPrivKey = hdkey.fromMasterSeed(RandomSeed)._hdkey._privateKey
@@ -129,28 +129,28 @@ export async function sendStakedEvent(validatorID) {
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
   console.log('done!')
 
-  //tx = stakeManagerContract.methods.stakeFor(
+  // tx = stakeManagerContract.methods.stakeFor(
   //  newAccAddr,
   //  stakeAmount,
   //  heimdallFee,
   //  false,
   //  newAccPubKey
-  //)
-  //signedTx = await getSignedTx(
+  // )
+  // signedTx = await getSignedTx(
   //  rootChainWeb3,
   //  StakeManagerProxyAddress,
   //  tx,
   //  validatorAccount,
   //  pkey
-  //)
+  // )
 
   const oldValidatorsCount = await checkValidatorsLength(doc, machine0)
   console.log('oldValidatorsCount : ', oldValidatorsCount)
 
-  //const receipt = await rootChainWeb3.eth.sendSignedTransaction(
+  // const receipt = await rootChainWeb3.eth.sendSignedTransaction(
   //  signedTx.rawTransaction
-  //)
-  //console.log('StakeFor Receipt txHash :  ' + receipt.transactionHash)
+  // )
+  // console.log('StakeFor Receipt txHash :  ' + receipt.transactionHash)
 
   let newValidatorsCount = await checkValidatorsLength(doc, machine0)
 

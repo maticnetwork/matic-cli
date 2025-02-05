@@ -5,11 +5,10 @@ import execa from 'execa'
 import fs from 'fs-extra'
 
 import { loadConfig } from '../config.js'
-import { processTemplateFiles } from '../../lib/utils.js'
+import { processTemplateFiles, createAccountsFromMnemonics } from '../../lib/utils.js'
 import { getDefaultBranch } from '../helper.js'
 import { Contracts } from '../contracts/index.js'
 import { getRemoteStdio } from '../../express/common/remote-worker.js'
-import { createAccountsFromMnemonics } from '../../lib/utils.js'
 
 export class Anvil {
   constructor(config, options = {}) {
@@ -72,7 +71,7 @@ export class Anvil {
     return new Listr(
       [
         {
-          title: `Reset Anvil`,
+          title: 'Reset Anvil',
           task: () => fs.remove(this.dbDir)
         },
         {
@@ -91,7 +90,7 @@ export class Anvil {
                 '1',
                 '--accounts',
                 '10',
-                //'--mnemonic', `${this.mnemonic}`,
+                // '--mnemonic', `${this.mnemonic}`,
                 '--code-size-limit',
                 '10000000000',
                 '--verbosity',
@@ -109,7 +108,7 @@ export class Anvil {
           }
         },
 
-        //{
+        // {
         //  title: 'Start Anvil',
         //  task: () => {
         //    server = execa(`anvil --port 9545 --balance 1000000000000000 --gas-limit 1000000000000 --gas-price 1 --accounts 3 --code-size-limit 10000000000 --verbose`, {
@@ -117,7 +116,7 @@ export class Anvil {
         //    });
         //    return server;
         //  },
-        //},
+        // },
         {
           title: 'Deploy dependencies',
           task: () =>
