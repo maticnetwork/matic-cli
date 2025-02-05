@@ -165,15 +165,16 @@ jobs:
           sudo snap install solc
           sudo apt install python2 jq curl
           sudo ln -sf /usr/bin/python2 /usr/bin/python
-          curl -L https://foundry.paradigm.xyz | bash
-          export PATH="$HOME/.foundry/bin:$PATH"
-          source /home/runner/.bashrc
-          foundryup
 
       - name: Setup node
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup Foundry (Anvil, Forge, Cast)
+        uses: foundry-rs/setup-foundry@v1
+        with:
+          foundry-bin: anvil
 
       - name: Bootstrap devnet
         run: |
