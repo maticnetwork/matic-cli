@@ -51,7 +51,9 @@ export async function fundAnvilAccounts(doc) {
   const accounts = createAccountsFromMnemonics(process.env.MNEMONIC, 3)
   const anvilAccount = accounts[1]
 
-  const account = rootChainWeb3.eth.accounts.privateKeyToAccount(anvilAccount.privateKey)
+  const account = rootChainWeb3.eth.accounts.privateKeyToAccount(
+    anvilAccount.privateKey
+  )
   rootChainWeb3.eth.accounts.wallet.add(account)
 
   // Set default account
