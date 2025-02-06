@@ -17,6 +17,9 @@ concurrency:
 
 env:
   NODE_VERSION: '18.19.0'
+  OIDC_PROVIDER: projects/198945073119/locations/global/workloadIdentityPools/prj-polygonlabs-pos-v1-dev/providers/oi-prj-polygonlabs-pos-v1-dev
+  OIDC_SERVICE_ACCOUNT: prj-polygonlabs-pos-v1-dev-sa@prj-polygonlabs-pos-v1-dev.iam.gserviceaccount.com
+  OIDC_PROJECT_ID: prj-polygonlabs-pos-v1-dev
 
 jobs:
   lint:
@@ -64,8 +67,9 @@ jobs:
         run: |
           cp .env.example .env
           sed -i 's,YOUR_IDENTIFIER,matic-cli-ci,' .env
-          sed -i 's,aws-key,matic-cli-ci-key,' .env
-          sed -i 's,/absolute/path/to/your/,/home/runner/work/matic-cli/matic-cli/matic-cli/aws/,' .env
+          sed -i 's,gcp-key,matic-cli-ci-key,' .env
+          sed -i 's,/absolute/path/to/your/,/home/runner/work/matic-cli/matic-cli/matic-cli/gcp/,' .env
+          sed -i 's,YOUR_PROJECT_ID,prj-polygonlabs-pos-v1-dev,' .env
           sed -i 's,MATIC_CLI_BRANCH=master,MATIC_CLI_BRANCH=$GITHUB_HEAD_REF,' .env
 
       - name: Get GitHub action runner IP
@@ -78,20 +82,25 @@ jobs:
           touch secret.tfvars
           echo "SG_CIDR_BLOCKS=[\"${{ steps.ip.outputs.ipv4 }}/32\"]" >> secret.tfvars
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@master
+      - name: Authenticate with GCP via OIDC
+        id: auth
+        uses: google-github-actions/auth@v2
         with:
-          aws-region: eu-west-1
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/MaticCLIGitHubActionsRole
-          role-session-name: GithubActionsSession
+          token_format: access_token
+          workload_identity_provider: ${{ env.OIDC_PROVIDER }}
+          service_account: ${{ env.OIDC_SERVICE_ACCOUNT }}
+          project_id: ${{ env.OIDC_PROJECT_ID }}
 
-      - name: Create aws key pair
+      - name: Set up GCP SDK
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: Create gcp key pair
         working-directory: matic-cli
         run: |
-          mkdir aws
-          cd aws
-          aws ec2 create-key-pair --key-name matic-cli-ci-key --key-type rsa --key-format pem --query "KeyMaterial" --output text > matic-cli-ci-key.pem
-          chmod 700 matic-cli-ci-key.pem
+          mkdir gcp
+          cd gcp
+          ssh-keygen -t ed25519 -f ./matic-cli-ci-key
+          chmod 700 matic-cli-ci-key
 
       - name: Setup node
         uses: actions/setup-node@v4
@@ -104,12 +113,11 @@ jobs:
 
       - name: Init devnet
         working-directory: matic-cli
-        run: ./bin/express-cli.js --init aws
+        run: ./bin/express-cli.js --init gcp
 
       - name: Start devnet
         working-directory: matic-cli/deployments/devnet-1
         run: |
-          ls -la
           ../../bin/express-cli.js --start
 
       - name: Run stateSynced and checkpoint tests
@@ -132,11 +140,6 @@ jobs:
         run: |
           echo "Running --destroy"
           ../../bin/express-cli.js --destroy
-
-      - name: Delete aws key pair
-        if: always()
-        working-directory: matic-cli/aws
-        run: aws ec2 delete-key-pair --key-name matic-cli-ci-key
 
   e2e-docker:
     permissions:
