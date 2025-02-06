@@ -1,9 +1,9 @@
 module rpc-tests
 
-go 1.22.1
+go 1.23.2
 
 require (
-	github.com/ethereum/go-ethereum v1.14.12
+	github.com/ethereum/go-ethereum v1.14.13
 	github.com/miguelmota/go-ethereum-hdwallet v0.1.2
 )
 
@@ -94,4 +94,4 @@ require (
 	rsc.io/tmplfunc v0.0.3 // indirect
 )
 
-replace github.com/ethereum/go-ethereum => github.com/maticnetwork/bor v1.5.4
+replace github.com/ethereum/go-ethereum => github.com/maticnetwork/bor v1.5.5

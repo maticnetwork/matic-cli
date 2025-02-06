@@ -80,7 +80,6 @@ resource "aws_instance" "dockerized_server" {
 
 # elastic ips
 resource "aws_eip" "eip" {
-  vpc = true
   count = (var.DOCKERIZED == "yes") ? 1 : (var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT + var.BOR_ARCHIVE_COUNT + var.ERIGON_VALIDATOR_COUNT + var.ERIGON_SENTRY_COUNT + var.ERIGON_ARCHIVE_COUNT)
   instance                  = (var.DOCKERIZED == "yes") ? aws_instance.dockerized_server[count.index].id : (count.index >= var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT + var.BOR_ARCHIVE_COUNT ) ? aws_instance.erigon_node_server[count.index - (var.BOR_VALIDATOR_COUNT + var.BOR_SENTRY_COUNT + var.BOR_ARCHIVE_COUNT)].id : aws_instance.bor_node_server[count.index].id
   depends_on                = [aws_internet_gateway.devnet_internet_gateway]
