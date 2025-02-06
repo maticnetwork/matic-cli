@@ -5,19 +5,22 @@ import execa from 'execa'
 import fs from 'fs-extra'
 
 import { loadConfig } from '../config.js'
-import { processTemplateFiles } from '../../lib/utils.js'
+import {
+  processTemplateFiles,
+  createAccountsFromMnemonics
+} from '../../lib/utils.js'
 import { getDefaultBranch } from '../helper.js'
 import { Contracts } from '../contracts/index.js'
 import { getRemoteStdio } from '../../express/common/remote-worker.js'
-import { createAccountsFromMnemonics } from '../../lib/utils.js'
 
 export class Anvil {
   constructor(config, options = {}) {
     this.config = config
     this.mnemonic = config.mnemonic
+    console.log(this.mnemonic)
     this.deployerAccount = createAccountsFromMnemonics(this.mnemonic, 1)
     console.log(`Deployer's account : ${this.deployerAccount[0].privateKey}`)
-    this.deployerPrivateKey = this.deployerAccount[0].privateKey;
+    this.deployerPrivateKey = this.deployerAccount[0].privateKey
 
     this.dbName = options.dbName || 'anvil-db'
     this.serverPort = options.serverPort || 9545
@@ -73,7 +76,7 @@ export class Anvil {
     return new Listr(
       [
         {
-          title: `Reset Anvil`,
+          title: 'Reset Anvil',
           task: () => fs.remove(this.dbDir)
         },
         {
@@ -92,7 +95,8 @@ export class Anvil {
                 '1',
                 '--accounts',
                 '10',
-                '--mnemonic', `${this.mnemonic}`,
+                '--mnemonic',
+                `${this.mnemonic}`,
                 '--code-size-limit',
                 '10000000000',
                 '--verbosity',
@@ -109,16 +113,6 @@ export class Anvil {
             )
           }
         },
-
-        //{
-        //  title: 'Start Anvil',
-        //  task: () => {
-        //    server = execa(`anvil --port 9545 --balance 1000000000000000 --gas-limit 1000000000000 --gas-price 1 --accounts 3 --code-size-limit 10000000000 --verbose`, {
-        //      stdio: 'inherit',
-        //    });
-        //    return server;
-        //  },
-        //},
         {
           title: 'Deploy dependencies',
           task: () =>
@@ -179,7 +173,7 @@ export class Anvil {
 }
 
 async function setupAnvil(config) {
-  const anvil = new AnvilSetup(config, {
+  const anvil = new Anvil(config, {
     contractsBranch: config.contractsBranch
   })
 

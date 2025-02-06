@@ -51,18 +51,19 @@ export async function fundAnvilAccounts(doc) {
   const accounts = createAccountsFromMnemonics(process.env.MNEMONIC, 3)
   const anvilAccount = accounts[1]
 
-  const account = rootChainWeb3.eth.accounts.privateKeyToAccount(anvilAccount.privateKey)
+  const account = rootChainWeb3.eth.accounts.privateKeyToAccount(
+    anvilAccount.privateKey
+  )
   rootChainWeb3.eth.accounts.wallet.add(account)
 
   // Set default account
   rootChainWeb3.eth.defaultAccount = account.address
 
-
   for (let i = 0; i < signerDump.length; i++) {
     const txReceipt = await rootChainWeb3.eth.sendTransaction({
       to: signerDump[i].address,
       from: account.address,
-      gas : 21000,
+      gas: 21000,
       value: rootChainWeb3.utils.toWei(EthAmount, 'ether')
     })
     console.log(

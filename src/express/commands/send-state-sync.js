@@ -36,8 +36,6 @@ export async function sendStateSyncTx() {
   const signerDump = JSON.parse(
     fs.readFileSync(`${process.cwd()}/signer-dump.json`, 'utf8')
   )
-  
-
 
   src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/code/pos-contracts/contractAddresses.json`
   dest = './contractAddresses.json'
@@ -50,11 +48,10 @@ export async function sendStateSyncTx() {
   const MaticToken = contractAddresses.root.tokens.MaticToken
 
   console.log('📍Sending StateSync Tx')
-  //const command = `cd ~/matic-cli/devnet/code/contracts && npm run truffle exec scripts/deposit.js -- --network development ${MaticToken} 100000000000000000000`
+  // const command = `cd ~/matic-cli/devnet/code/contracts && npm run truffle exec scripts/deposit.js -- --network development ${MaticToken} 100000000000000000000`
 
-  const command = `export PATH="$HOME/.foundry/bin:$PATH" && cd ~/matic-cli/devnet/code/pos-contracts && forge script scripts/matic-cli-scripts/Deposit.s.sol:MaticDeposit --rpc-url http://localhost:9545 --private-key ${signerDump[0].priv_key} --broadcast --sig "run(address,address,uint256)" 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 ${MaticToken} 100000000000000000000`
+  const command = `export PATH="$HOME/.foundry/bin:$PATH" && cd ~/matic-cli/devnet/code/pos-contracts && forge script scripts/matic-cli-scripts/Deposit.s.sol:MaticDeposit --rpc-url http://localhost:9545 --private-key ${signerDump[0].priv_key} --broadcast --sig "run(address,address,uint256)" ${signerDump[0].address} ${MaticToken} 100000000000000000000`
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
-
 
   console.log(
     '📍StateSync Tx Sent, check with "../../bin/express-cli.js --monitor"'

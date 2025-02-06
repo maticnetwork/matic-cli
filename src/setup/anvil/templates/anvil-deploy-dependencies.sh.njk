@@ -25,6 +25,6 @@ export PATH="$HOME/.foundry/bin:$PATH"
 
 forge create --rpc-url http://localhost:$SERVER_PORT --private-key  $ANVIL_ACC contracts/root/predicates/TransferWithSigUtils.sol:TransferWithSigUtils --broadcast
 
-cast send --rpc-url http://localhost:$SERVER_PORT --private-key $ANVIL_ACC {{ obj.config.primaryAccount.address }} --value 1000ether 
+cast send --rpc-url http://localhost:$SERVER_PORT --private-key $ANVIL_ACC {{ obj.config.primaryAccount.address }} --value 10000ether 
 
 sleep 10

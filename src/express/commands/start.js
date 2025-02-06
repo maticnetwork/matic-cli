@@ -20,7 +20,6 @@ import fs from 'fs'
 
 import shell from 'shelljs'
 import dotenv from 'dotenv'
-//import { fundGanacheAccounts } from '../common/ganache-utils.js'
 import { fundAnvilAccounts } from '../common/anvil-utils.js'
 
 async function terraformApply(devnetId) {
@@ -191,10 +190,6 @@ async function installHostSpecificPackages(ip) {
                     sudo ln -sf ~/.nvm/versions/node/v18.19.0/bin/npx /usr/bin/npx`
   await runSshCommand(ip, command, maxRetries)
 
-  console.log('📍Installing ganache...')
-  command = 'sudo npm install -g ganache -y'
-  await runSshCommand(ip, command, maxRetries)
-
   console.log('📍Installing anvil...')
   command =
     'curl -L https://foundry.paradigm.xyz | bash && export PATH="$HOME/.foundry/bin:$PATH" >> ~/.bashrc && source ~/.bashrc && foundryup'
@@ -299,9 +294,9 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType, devnetId) {
       let command = 'sudo rm -rf ~/matic-cli/devnet'
       await runSshCommand(ip, command, maxRetries)
 
-      console.log('📍Stopping ganache (if present) on machine ' + ip + ' ...')
+      console.log('📍Stopping anvil (if present) on machine ' + ip + ' ...')
       command =
-        "sudo systemctl stop anvil.service || echo 'ganache not running on current machine...'"
+        "sudo systemctl stop anvil.service || echo 'anvil not running on current machine...'"
       await runSshCommand(ip, command, maxRetries)
     }
     console.log('📍Stopping heimdall (if present) on machine ' + ip + ' ...')
@@ -370,8 +365,8 @@ async function runDockerSetupWithMaticCLI(ips, devnetId) {
     'cd ~/matic-cli/devnet && ../bin/matic-cli.js setup devnet -c ../configs/devnet/docker-setup-config.yaml'
   await runSshCommand(ip, command, maxRetries)
 
-  console.log('📍Starting ganache...')
-  command = 'cd ~/matic-cli/devnet && bash docker-ganache-start.sh'
+  console.log('📍Starting anvil...')
+  command = 'cd ~/matic-cli/devnet && bash docker-anvil-start.sh'
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Starting heimdall...')
@@ -389,12 +384,12 @@ async function runDockerSetupWithMaticCLI(ips, devnetId) {
   if (!process.env.NETWORK) {
     await timer(60000)
     console.log('📍Deploying contracts for bor...')
-    command = 'cd ~/matic-cli/devnet && bash ganache-deployment-bor.sh'
+    command = 'cd ~/matic-cli/devnet && bash anvil-deployment-bor.sh'
     await runSshCommand(ip, command, maxRetries)
 
     await timer(60000)
     console.log('📍Deploying state-sync contracts...')
-    command = 'cd ~/matic-cli/devnet && bash ganache-deployment-sync.sh'
+    command = 'cd ~/matic-cli/devnet && bash anvil-deployment-sync.sh'
     await runSshCommand(ip, command, maxRetries)
   }
 
