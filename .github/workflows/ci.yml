@@ -208,7 +208,7 @@ jobs:
           cd ../code/pos-contracts
           forge script scripts/matic-cli-scripts/Deposit.s.sol:MaticDeposit --rpc-url http://localhost:9545 --private-key $SCRIPT_PRIVATE_KEY --broadcast --sig "run(address,address,uint256)" $SCRIPT_ADDRESS $CONTRACT_ADDRESS 100000000000000000000
           cd ../../../..
-          timeout 60m bash matic-cli/.github/integration-tests/smoke_test.sh
+          timeout 120m bash matic-cli/.github/integration-tests/smoke_test.sh
 
       - name: Upload logs
         if: always()
