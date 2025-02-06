@@ -326,7 +326,12 @@ func CallEthereumRPC(reqPayload []Request, rpcURL string) ([]Response, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error making RPC call: %w", err)
 		}
-		defer resp.Body.Close()
+		defer func(Body io.ReadCloser) {
+			err := Body.Close()
+			if err != nil {
+				log.Fatalf("error closing the reader: %v", err)
+			}
+		}(resp.Body)
 
 		// Read the response body
 		body, err := io.ReadAll(resp.Body)

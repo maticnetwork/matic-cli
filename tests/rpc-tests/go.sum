@@ -158,8 +158,8 @@ github.com/kylelemons/godebug v1.1.0 h1:RPNrshWIDI6G2gRW9EHilWtl7Z6Sb1BR0xunSBf0
 github.com/kylelemons/godebug v1.1.0/go.mod h1:9/0rRGxNHcop5bhtWyNeEfOS8JIWk580+fNqagV/RAw=
 github.com/leanovate/gopter v0.2.9 h1:fQjYxZaynp97ozCzfOyOuAGOU4aU/z37zf/tOujFk7c=
 github.com/leanovate/gopter v0.2.9/go.mod h1:U2L/78B+KVFIx2VmW6onHJQzXtFb+p5y3y2Sh+Jxxv8=
-github.com/maticnetwork/bor v1.5.4 h1:nETrihseS0Jhh2TEb0kI0olj1btBHmrrOZNaJm1JTOQ=
-github.com/maticnetwork/bor v1.5.4/go.mod h1:oKRrn3rmA2hVx/WLsTiIOM7HY/Qrl8HGvhZivaRLvh0=
+github.com/maticnetwork/bor v1.5.5 h1:lFWgs9Jgxv2x6MqsvV6HDCsIuPWABYVfJm1bPWGHED4=
+github.com/maticnetwork/bor v1.5.5/go.mod h1:oKRrn3rmA2hVx/WLsTiIOM7HY/Qrl8HGvhZivaRLvh0=
 github.com/maticnetwork/crand v1.0.2 h1:Af0tAivC8zrxXDpGWNWVT/0s1fOz8w0eRbahZgURS8I=
 github.com/maticnetwork/crand v1.0.2/go.mod h1:/NRNL3bj2eYdqpWmoIP5puxndTpi0XRxpj5ZKxfHjyg=
 github.com/mattn/go-runewidth v0.0.9/go.mod h1:H031xJmbD/WCDINGzjvQ9THkh0rPKHF+m2gUSrubnMI=
