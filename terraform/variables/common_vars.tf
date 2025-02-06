@@ -73,7 +73,7 @@ variable "PORTS_IN" {
   // 1317: heimdall
   // 8545: bor https
   // 8546: bor rpc websockets
-  // 9545: ganache
+  // 9545: anvil 
   // 1337:
   // 26656: heimdall comms
   // 8080: hasura console
