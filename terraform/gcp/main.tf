@@ -21,7 +21,6 @@ resource "google_compute_network" "vpc_network" {
   name                    = "${var.VM_NAME}-vpc"
   auto_create_subnetworks = false
   mtu                     = 1460
-  delete_default_routes_on_create = true
 }
 
 resource "google_compute_subnetwork" "public-subnetwork" {
