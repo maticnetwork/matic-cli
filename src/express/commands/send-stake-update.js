@@ -14,7 +14,6 @@ import {
 import dotenv from 'dotenv'
 import fs from 'fs-extra'
 
-import stakeManagerABI from '../../abi/StakeManagerABI.json' assert { type: 'json' }
 import ERC20ABI from '../../abi/ERC20ABI.json' assert { type: 'json' }
 
 export async function sendStakeUpdateEvent(validatorID) {
@@ -24,8 +23,8 @@ export async function sendStakeUpdateEvent(validatorID) {
 
   const doc = await loadDevnetConfig(devnetType)
   let machine0
-  const fundingKey =
-    '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
+  // const fundingKey =
+  // '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
 
   if (
     !isValidatorIdCorrect(
@@ -77,17 +76,11 @@ export async function sendStakeUpdateEvent(validatorID) {
   )
   const pkey = signerDump[validatorID - 1].priv_key
   const validatorAccount = signerDump[validatorID - 1].address
-
-  const stakeManagerContract = new rootChainWeb3.eth.Contract(
-    stakeManagerABI,
-    StakeManagerProxyAddress
-  )
-
-  let tx = MaticTokenContract.methods.approve(
+  const tx = MaticTokenContract.methods.approve(
     StakeManagerProxyAddress,
     rootChainWeb3.utils.toWei('1000')
   )
-  let signedTx = await getSignedTx(
+  const signedTx = await getSignedTx(
     rootChainWeb3,
     MaticTokenAddr,
     tx,
@@ -105,7 +98,7 @@ export async function sendStakeUpdateEvent(validatorID) {
   console.log('Old Validator Power:  ' + oldValidatorPower)
 
   // Adding 100 MATIC stake
-  let command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "transfer(address,uint256)" ${validatorAccount} 100000000000000000000 --rpc-url http://localhost:9545 --private-key ${fundingKey}`
+  let command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "transfer(address,uint256)" ${validatorAccount} 100000000000000000000 --rpc-url http://localhost:9545 --private-key ${signerDump[0].priv_key}`
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
   console.log('done!')
 
@@ -117,22 +110,22 @@ export async function sendStakeUpdateEvent(validatorID) {
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
   console.log('done!')
 
-  //tx = stakeManagerContract.methods.restake(
+  // tx = stakeManagerContract.methods.restake(
   //  validatorID,
   //  rootChainWeb3.utils.toWei('100'),
   //  false
-  //)
-  //signedTx = await getSignedTx(
+  // )
+  // signedTx = await getSignedTx(
   //  rootChainWeb3,
   //  StakeManagerProxyAddress,
   //  tx,
   //  validatorAccount,
   //  pkey
-  //)
-  //const Receipt = await rootChainWeb3.eth.sendSignedTransaction(
+  // )
+  // const Receipt = await rootChainWeb3.eth.sendSignedTransaction(
   //  signedTx.rawTransaction
-  //)
-  //console.log('Restake Receipt txHash:  ' + Receipt.transactionHash)
+  // )
+  // console.log('Restake Receipt txHash:  ' + Receipt.transactionHash)
 
   let newValidatorPower = await getValidatorPower(doc, machine0, validatorID)
 

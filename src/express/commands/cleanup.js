@@ -6,7 +6,7 @@ import {
 import { maxRetries, runSshCommand } from '../common/remote-worker.js'
 import { timer } from '../common/time-utils.js'
 import dotenv from 'dotenv'
-//import { fundGanacheAccounts } from '../common/ganache-utils.js'
+// import { fundGanacheAccounts } from '../common/ganache-utils.js'
 import { fundAnvilAccounts } from '../common/anvil-utils.js'
 
 export async function cleanup() {
@@ -18,7 +18,7 @@ export async function cleanup() {
   await startServices(doc)
   await deployBorContractsAndStateSync(doc)
   await fundAnvilAccounts(doc)
-  //await fundGanacheAccounts(doc)
+  // await fundGanacheAccounts(doc)
 }
 
 export async function stopServices(doc) {

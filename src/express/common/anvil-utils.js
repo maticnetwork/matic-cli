@@ -3,6 +3,7 @@ import { loadDevnetConfig } from '../common/config-utils.js'
 import { maxRetries, runScpCommand } from './remote-worker.js'
 import Web3 from 'web3'
 import dotenv from 'dotenv'
+import { createAccountsFromMnemonics } from '../../lib/utils.js'
 
 const EthAmount = '10'
 
@@ -37,8 +38,6 @@ export async function fundAnvilAccounts(doc) {
 
   console.log('📍Transferring funds from anvil account[0] to others...')
 
-  const anvilAccount = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8'
-
   const src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/devnet/signer-dump.json`
   const dest = './signer-dump.json'
   await runScpCommand(src, dest, maxRetries)
@@ -49,10 +48,22 @@ export async function fundAnvilAccounts(doc) {
 
   const rootChainWeb3 = new Web3(`http://${machine0}:9545`)
 
+  const accounts = createAccountsFromMnemonics(process.env.MNEMONIC, 3)
+  const anvilAccount = accounts[1]
+
+  const account = rootChainWeb3.eth.accounts.privateKeyToAccount(
+    anvilAccount.privateKey
+  )
+  rootChainWeb3.eth.accounts.wallet.add(account)
+
+  // Set default account
+  rootChainWeb3.eth.defaultAccount = account.address
+
   for (let i = 0; i < signerDump.length; i++) {
     const txReceipt = await rootChainWeb3.eth.sendTransaction({
       to: signerDump[i].address,
-      from: anvilAccount,
+      from: account.address,
+      gas: 21000,
       value: rootChainWeb3.utils.toWei(EthAmount, 'ether')
     })
     console.log(
