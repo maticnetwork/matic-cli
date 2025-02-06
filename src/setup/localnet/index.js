@@ -15,7 +15,7 @@ import { Bor } from '../bor/index.js'
 import { processTemplateFiles } from '../../lib/utils.js'
 
 async function setupLocalnet(config) {
-  const anvil= new Anvil(config, {
+  const anvil = new Anvil(config, {
     contractsBranch: config.contractsBranch
   })
   const bor = new Bor(config, {

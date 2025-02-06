@@ -1,5 +1,6 @@
 name: CI
 on:
+  workflow_dispatch:
   push:
     branches:
       - 'master'
@@ -123,7 +124,7 @@ jobs:
           timeout 5m ../../bin/express-cli.js --send-staked-event 1
           timeout 5m ../../bin/express-cli.js --send-stakeupdate-event 1
           timeout 5m ../../bin/express-cli.js --send-topupfee-event 1
-          timeout 10m ../../bin/express-cli.js --send-unstakeinit-event 1
+          timeout 15m ../../bin/express-cli.js --send-unstakeinit-event 1
 
       - name: Destroy devnet
         if: always()
@@ -170,6 +171,9 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
       - name: Bootstrap devnet
         run: |
           cd matic-cli
@@ -181,15 +185,15 @@ jobs:
       - name: Launch devnet
         run: |
           cd matic-cli/devnet
-          bash docker-ganache-start.sh
+          bash docker-anvil-start.sh
           bash docker-heimdall-start-all.sh
           bash docker-bor-setup.sh
           bash docker-bor-start-all.sh
           cd -
           timeout 2m bash matic-cli/.github/integration-tests/bor_health.sh
           cd -
-          bash ganache-deployment-bor.sh
-          bash ganache-deployment-sync.sh
+          bash anvil-deployment-bor.sh
+          bash anvil-deployment-sync.sh
 
       - name: Run smoke tests
         run: |
@@ -197,9 +201,14 @@ jobs:
           timeout 10m bash matic-cli/.github/integration-tests/fund_anvil_accounts.sh
           echo "Deposit 100 matic for each account to bor network"
           cd matic-cli/devnet/code/pos-contracts
-          npm run truffle exec scripts/deposit.js -- --network development $(jq -r .root.tokens.MaticToken contractAddresses.json) 100000000000000000000
-          cd -
-          timeout 60m bash matic-cli/.github/integration-tests/smoke_test.sh
+          CONTRACT_ADDRESS=$(jq -r .root.tokens.MaticToken contractAddresses.json)
+          cd ../../devnet
+          SCRIPT_ADDRESS=$(jq -r '.[0].address' signer-dump.json)
+          SCRIPT_PRIVATE_KEY=$(jq -r '.[0].priv_key' signer-dump.json)
+          cd ../code/pos-contracts
+          forge script scripts/matic-cli-scripts/Deposit.s.sol:MaticDeposit --rpc-url http://localhost:9545 --private-key $SCRIPT_PRIVATE_KEY --broadcast --sig "run(address,address,uint256)" $SCRIPT_ADDRESS $CONTRACT_ADDRESS 100000000000000000000
+          cd ../../../..
+          timeout 120m bash matic-cli/.github/integration-tests/smoke_test.sh
 
       - name: Upload logs
         if: always()
