@@ -8,11 +8,14 @@ import dotenv from 'dotenv'
 export async function terraformDestroy() {
   console.log('📍Executing terraform destroy...')
   dotenv.config({ path: `${process.cwd()}/.env` })
-  shell.exec('terraform destroy -auto-approve -var-file=./secret.tfvars', {
-    env: {
-      ...process.env
+  shell.exec(
+    'terraform apply -destroy -auto-approve -var-file=./secret.tfvars',
+    {
+      env: {
+        ...process.env
+      }
     }
-  })
+  )
   if (shell.error() == null) {
     const devnetId = getDevnetId()
     console.log(`📍Deleting ./deployments/devnet-${devnetId} folder...`)
