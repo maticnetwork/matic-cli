@@ -195,7 +195,7 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
 - `../../bin/express-cli.js --cleanup`
 
-  - Cleans up `ganache`, `bor`, `heimdall` and `bridge`, redeploys all the contracts and restarts all the services
+  - Cleans up `anvil`, `bor`, `heimdall` and `bridge`, redeploys all the contracts and restarts all the services
     The `express-cli` also provides additional testing commands, listed here.
 
 - `../../bin/express-cli.js --send-state-sync`
@@ -234,7 +234,7 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
 - ` ../../bin/express-cli.js --instances-start`
 
-  - Start the (previously stopped) VM instances associated with the deployed devnet. Also, it starts all services, such as ganache, heimdall, and bor
+  - Start the (previously stopped) VM instances associated with the deployed devnet. Also, it starts all services, such as anvil, heimdall, and bor
 
 - `../../bin/express-cli.js --stress [fund]`
 
@@ -293,8 +293,8 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
   - Relay transactions from testnet or mainnet to shadow node running in the devnet.
 
-- `../../bin/express-cli.js --fund-ganache-accounts`
-  - Transfers 10 eth to all the ganache accounts.
+- `../../bin/express-cli.js --fund-anvil-accounts`
+  - Transfers 10 eth to all the anvil accounts.
 
 Note: to allow `express-cli` to clone private repos, make sure the git configs in the `.env` file looks like the following (example for `BOR_REPO`)
 
@@ -311,7 +311,7 @@ The `express-cli` can also be used to perform few simulation based tests for the
 `matic-cli` has to be installed on a `ubuntu` VM (_host_) and - through a config file - it will point to
 other VMs' IPs (_remotes_).
 
-- Host machine will run a Polygon node (`bor` and `heimdall`) and a layer 1 node (`ganache`)
+- Host machine will run a Polygon node (`bor` and `heimdall`) and a layer 1 node (`anvil`)
 - Remote machines will only run a Polygon node each
 
 ### Requirements
@@ -372,11 +372,11 @@ Please, make sure to install the following software/packages on the VMs.
   sudo snap install solc
   ```
 
-- Ganache CLI (only _host_)
+- Anvil CLI (only _host_)
 
   ```bash
-  npm install --global ganache
-  ```
+    curl -L https://foundry.paradigm.xyz | bash && export PATH="$HOME/.foundry/bin:$PATH" >> ~/.bashrc && source ~/.bashrc && foundryup
+```
 
 #### **MacOS**
 
@@ -431,10 +431,10 @@ Please, make sure to install the following software/packages on the VMs.
   solc --version
   ```
 
-- Ganache CLI (only _host_)
+- Anvil CLI (only _host_)
 
   ```zsh
-  npm install --global ganache
+    curl -L https://foundry.paradigm.xyz | bash && export PATH="$HOME/.foundry/bin:$PATH" >> ~/.bashrc && source ~/.bashrc && foundryup
   ```
 
 ### Usage
@@ -500,12 +500,12 @@ In this case, the stack is already running, you would just need to deploy/sync s
 - Deploy contracts on Child chain
 
   ```bash
-  bash ganache-deployment-bor.sh
+  bash anvil-deployment-bor.sh
   ```
 
 - Sync contract addresses to Main chain
   ```bash
-  bash ganache-deployment-sync.sh
+  bash anvil-deployment-sync.sh
   ```
 
 #### Clean setup
@@ -514,7 +514,7 @@ Stop all services, remove the `matic-cli/devnet` folder, and you can start the p
 
 #### Notes
 
-1. The ganache URL hostname will be used for ganache `http://<host-machine-ip>:9545`
+1. The anvil URL hostname will be used for anvil `http://<host-machine-ip>:9545`
 2. Make sure that the _host_ machine has access to remote machines for transferring the data
    To persist ssh key for remote access, please run:
    ```bash
