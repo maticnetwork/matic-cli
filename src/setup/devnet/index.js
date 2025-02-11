@@ -1375,9 +1375,18 @@ export class Devnet {
           .slice(0, this.config.numOfBorValidators)
           .map((s) => {
             const account = getAccountFromPrivateKey(s.priv_key)
-            const sanitizedPubKey = s.pub_key.startsWith('0x04')
-              ? '0x' + s.pub_key.slice(4)
-              : s.pub_key // Remove "04" prefix if present
+
+            // Extract key from the format 'PubKeySecp256k1{04...}'
+            const match = s.pub_key.match(/{(.*)}/)
+            let sanitizedPubKey = s.pub_key
+
+            if (match) {
+              const keyWithPrefix = match[1] // Extract the key inside braces
+              sanitizedPubKey = keyWithPrefix.startsWith('04')
+                ? '0x' + keyWithPrefix.slice(2) // Remove '04' and add '0x'
+                : '0x' + keyWithPrefix
+            }
+
             return { ...account, pub_key: sanitizedPubKey }
           })
 
