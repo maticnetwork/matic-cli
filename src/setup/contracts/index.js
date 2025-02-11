@@ -75,7 +75,7 @@ export class Contracts {
           })
       },
       {
-        title: 'Process templates',
+        title: 'Process contracts templates',
         task: () =>
           execa(
             'npm',

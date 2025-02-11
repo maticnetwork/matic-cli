@@ -18,7 +18,8 @@ import {
   errorMissingConfigs,
   getAccountFromPrivateKey,
   getKeystoreFile,
-  getNewPrivateKey
+  getNewPrivateKey,
+  processTemplateFiles
 } from '../../lib/utils.js'
 import { loadConfig } from '../config.js'
 import fileReplacer from '../../lib/file-replacer.js'
@@ -261,7 +262,7 @@ export class Devnet {
               )
               .replace(
                 /bor_grpc_flag[ ]*=[ ]*".*"/gi,
-                'bor_grpc_flag = "true"'
+                'bor_grpc_flag = "false"'
               )
               .replace(
                 /bor_grpc_url[ ]*=[ ]*".*"/gi,
@@ -320,7 +321,7 @@ export class Devnet {
         }
       },
       {
-        title: 'Process templates',
+        title: 'Process njk templates',
         task: async () => {
           const templateDir = path.resolve(
             new URL(import.meta.url).pathname,
@@ -345,11 +346,11 @@ export class Devnet {
           //       .save()
           //   }
           // }
+
           // process template files
-          // await processTemplateFiles(this.config.targetDirectory, {
-          //  obj: this,
-          //  ganache: this.ganache
-          // })
+          await processTemplateFiles(this.config.targetDirectory, {
+            obj: this
+          })
 
           for (let i = 0; i < this.totalBorNodes; i++) {
             await fs.copyFile(
@@ -381,7 +382,7 @@ export class Devnet {
               )
               .replace(
                 /bor_grpc_flag[ ]*=[ ]*".*"/gi,
-                'bor_grpc_flag = "true"'
+                'bor_grpc_flag = "false"'
               )
               .replace(
                 /bor_grpc_url[ ]*=[ ]*".*"/gi,
@@ -432,7 +433,7 @@ export class Devnet {
         }
       },
       {
-        title: 'Process templates',
+        title: 'Process njk templates',
         task: async () => {
           const templateDir = path.resolve(
             new URL(import.meta.url).pathname,
@@ -1372,23 +1373,23 @@ export class Devnet {
         //      return { ...account, pub_key: s.pub_key };
         //  })
         this.config.accounts = this.signerDumpData
-  .slice(0, this.config.numOfBorValidators)
-  .map((s) => {
-    const account = getAccountFromPrivateKey(s.priv_key)
+          .slice(0, this.config.numOfBorValidators)
+          .map((s) => {
+            const account = getAccountFromPrivateKey(s.priv_key)
 
-    // Extract key from the format 'PubKeySecp256k1{04...}'
-    const match = s.pub_key.match(/{(.*)}/)
-    let sanitizedPubKey = s.pub_key
+            // Extract key from the format 'PubKeySecp256k1{04...}'
+            const match = s.pub_key.match(/{(.*)}/)
+            let sanitizedPubKey = s.pub_key
 
-    if (match) {
-      const keyWithPrefix = match[1] // Extract the key inside braces
-      sanitizedPubKey = keyWithPrefix.startsWith('04')
-        ? '0x' + keyWithPrefix.slice(2) // Remove '04' and add '0x'
-        : '0x' + keyWithPrefix
-    }
+            if (match) {
+              const keyWithPrefix = match[1] // Extract the key inside braces
+              sanitizedPubKey = keyWithPrefix.startsWith('04')
+                ? '0x' + keyWithPrefix.slice(2) // Remove '04' and add '0x'
+                : '0x' + keyWithPrefix
+            }
 
-    return { ...account, pub_key: sanitizedPubKey }
-  })
+            return { ...account, pub_key: sanitizedPubKey }
+          })
 
         if (this.config.numOfErigonValidators > 0) {
           const erigonAccounts = this.signerDumpData

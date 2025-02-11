@@ -72,7 +72,7 @@ for commit_hash in "${cosmos_commits[@]}"; do
     go mod tidy || { echo "go mod tidy failed"; exit 1; }
 
     # Run make build
-    make build || { echo "make build failed"; exit 1; }
+    make heimdalld || { echo "make heimdalld failed"; exit 1; }
 
     # Step 4: Commit and push changes
     git add go.mod go.sum
