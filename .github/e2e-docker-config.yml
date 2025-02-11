@@ -2,6 +2,7 @@ defaultStake: 10000
 defaultFee: 2000
 borChainId: 15001
 heimdallChainId: heimdall-15001
+heimdallRepo: https://github.com/0xPolygon/heimdall-v2.git
 contractsRepo: https://github.com/0xPolygon/pos-contracts.git
 contractsBranch: arya/matic-cli/pos-1869
 genesisContractsBranch: master

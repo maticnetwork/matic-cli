@@ -4,9 +4,9 @@ borChainId: 15005
 heimdallChainId: heimdall-4052
 borRepo: https://github.com/maticnetwork/bor.git
 borBranch: develop
-heimdallRepo: https://github.com/maticnetwork/heimdall.git
+heimdallRepo: https://github.com/0xPolygon/heimdall-v2.git
 heimdallBranch: develop
-contractsRepo: https://github.com/0xPolygon/pos-contracts.git 
+contractsRepo: https://github.com/0xPolygon/pos-contracts.git
 contractsBranch: arya/matic-cli/pos-1869
 genesisContractsRepo: https://github.com/maticnetwork/genesis-contracts.git
 genesisContractsBranch: master
@@ -39,4 +39,4 @@ devnetBorFlags:
   - config
   - config
 borDockerBuildContext: https://github.com/maticnetwork/bor.git#develop
-heimdallDockerBuildContext: https://github.com/maticnetwork/heimdall.git#develop
+heimdallDockerBuildContext: https://github.com/0xPolygon/heimdall-v2.git#develop

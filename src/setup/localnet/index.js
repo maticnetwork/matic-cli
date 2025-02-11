@@ -24,7 +24,7 @@ async function setupLocalnet(config) {
   })
   const heimdall = new Heimdall(config, {
     repositoryUrl:
-      config.heimdallRepo || 'https://github.com/maticnetwork/heimdall',
+      config.heimdallRepo || 'https://github.com/0xPolygon/heimdall-v2',
     repositoryBranch: config.heimdallBranch || 'develop'
   })
   const genesis = new Genesis(config, {

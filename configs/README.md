@@ -75,7 +75,7 @@ devnetHeimdallUsers:
 # Branch of bor to use. Repository: https://github.com/maticnetwork/bor
 borBranch: develop
 
-# Branch of Heimdall to use. Repository: https://github.com/maticnetwork/heimdall
+# Branch of Heimdall to use. Repository: https://github.com/0xPolygon/heimdall-v2
 heimdallBranch: develop
 
 # Branch of contract to use. Repository: https://github.com/maticnetwork/contracts

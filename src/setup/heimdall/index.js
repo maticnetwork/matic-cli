@@ -25,10 +25,10 @@ export class Heimdall {
     this.repositoryName = this.name
     this.repositoryBranch = options.repositoryBranch || 'develop'
     this.repositoryUrl =
-      options.repositoryUrl || 'https://github.com/maticnetwork/heimdall'
+      options.repositoryUrl || 'https://github.com/0xPolygon/heimdall-v2'
     this.dockerContext =
       options.dockerContext ||
-      'https://github.com/maticnetwork/heimdall.git#develop'
+      'https://github.com/0xPolygon/heimdall-v2.git#develop'
   }
 
   get name() {
