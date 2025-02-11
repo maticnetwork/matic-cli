@@ -17,7 +17,7 @@ numOfBorArchiveNodes: 0
 numOfErigonValidators: 0
 numOfErigonSentries: 0
 numOfErigonArchiveNodes: 0
-ethURL: http://ganache:9545
+ethURL: http://anvil:9545
 ethHostUser: ubuntu
 devnetType: docker
 borDockerBuildContext: 'https://github.com/maticnetwork/bor.git#develop'
@@ -25,3 +25,4 @@ heimdallDockerBuildContext: 'https://github.com/0xPolygon/heimdall-v2.git#develo
 sprintSizeBlockNumber:
   - '0'
 devnetBorFlags: config,config,config
+mnemonic: 'clock radar mass judge dismiss just intact mind resemble fringe diary casino'

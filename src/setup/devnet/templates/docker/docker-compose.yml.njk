@@ -17,6 +17,13 @@ services:
       - ./data:/data
     ports:
       - "9545:9545"
+  anvil:
+    image: ghcr.io/foundry-rs/foundry:latest
+    volumes:
+      - ./data:/data
+    ports:
+      - "9545:9545"
+    entrypoint: ["anvil"]
 
 {% for node in range(0, obj.totalNodes) %}
   rabbit{{ node }}:

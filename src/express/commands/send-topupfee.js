@@ -19,8 +19,6 @@ export async function sendTopUpFeeEvent(validatorID) {
 
   const doc = await loadDevnetConfig(devnetType)
   let machine0
-  // const fundingKey =
-  // '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
 
   if (
     !isValidatorIdCorrect(
@@ -82,30 +80,6 @@ export async function sendTopUpFeeEvent(validatorID) {
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
   console.log('done!')
 
-  // let tx = MaticTokenContract.methods.approve(
-  //  StakeManagerProxyAddress,
-  //  rootChainWeb3.utils.toWei('1000')
-  // )
-  // let signedTx = await getSignedTx(
-  //  rootChainWeb3,
-  //  MaticTokenAddr,
-  //  tx,
-  //  validatorAccount,
-  //  pkey
-  // )
-  // const approvalReceipt = await rootChainWeb3.eth.sendSignedTransaction(
-  //  signedTx.rawTransaction
-  // )
-  // console.log(
-  //  '\n\nApproval Receipt txHash:  ' + approvalReceipt.transactionHash
-  // )
-
-  // Adding 100 MATIC stake
-  // tx = stakeManagerContract.methods.topUpForFee(
-  //  validatorAccount,
-  //  rootChainWeb3.utils.toWei('100')
-  // )
-  //
   const oldValidatorBalance = await getValidatorBalance(
     doc,
     machine0,
@@ -118,27 +92,6 @@ export async function sendTopUpFeeEvent(validatorID) {
   command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${StakeManagerProxyAddress} "topUpForFee(address,uint256)" ${validatorAccount} 10000000000000000000 --rpc-url http://localhost:9545 --private-key ${pkey}`
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
   console.log('done!')
-  //
-  //
-  //
-  //
-  //
-  // signedTx = await getSignedTx(
-  // rootChainWeb3,
-  // StakeManagerProxyAddress,
-  // tx,
-  // validatorAccount,
-  // pkey
-  // )
-  // try{
-  // const Receipt = await rootChainWeb3.eth.sendSignedTransaction(
-  //  signedTx.rawTransaction
-  // )
-  //  return Receipt
-  // } catch (error){
-  //  console.error(`❌ Error in :`, error)
-  // }
-  // console.log('TopUpForFee Receipt txHash:  ' + Receipt.transactionHash)
 
   let newValidatorBalance = await getValidatorBalance(
     doc,

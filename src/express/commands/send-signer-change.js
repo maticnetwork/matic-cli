@@ -85,22 +85,6 @@ export async function sendSignerChangeEvent(validatorID) {
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
   console.log('done!')
 
-  // const tx = stakeManagerContract.methods.updateSigner(
-  //  validatorID,
-  //  newAccPubKey
-  // )
-  // const signedTx = await getSignedTx(
-  //  rootChainWeb3,
-  //  StakeManagerProxyAddress,
-  //  tx,
-  //  validatorAccount,
-  //  pkey
-  // )
-  // const Receipt = await rootChainWeb3.eth.sendSignedTransaction(
-  //  signedTx.rawTransaction
-  // )
-  // console.log('UpdateSigner Receipt', Receipt.transactionHash)
-
   let newSigner = await getValidatorSigner(doc, machine0, validatorID)
 
   while (newSigner === oldSigner) {
