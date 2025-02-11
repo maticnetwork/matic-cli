@@ -376,7 +376,9 @@ Please, make sure to install the following software/packages on the VMs.
 
   ```bash
     curl -L https://foundry.paradigm.xyz | bash && export PATH="$HOME/.foundry/bin:$PATH" >> ~/.bashrc && source ~/.bashrc && foundryup
-```
+  ```
+
+````
 
 #### **MacOS**
 
@@ -384,7 +386,7 @@ Please, make sure to install the following software/packages on the VMs.
 
   ```zsh
   xcode-select --install
-  ```
+````
 
 - Go 1.18+ (_host_ and _remotes_)
 
