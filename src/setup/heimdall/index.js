@@ -25,10 +25,10 @@ export class Heimdall {
     this.repositoryName = this.name
     this.repositoryBranch = options.repositoryBranch || 'develop'
     this.repositoryUrl =
-      options.repositoryUrl || 'https://github.com/maticnetwork/heimdall'
+      options.repositoryUrl || 'https://github.com/0xPolygon/heimdall-v2'
     this.dockerContext =
       options.dockerContext ||
-      'https://github.com/maticnetwork/heimdall.git#develop'
+      'https://github.com/0xPolygon/heimdall-v2.git#develop'
   }
 
   get name() {
@@ -327,7 +327,10 @@ export class Heimdall {
                 /bor_rpc_url[ ]*=[ ]*".*"/gi,
                 'bor_rpc_url = "http://localhost:8545"'
               )
-              .replace(/bor_grpc_flag[ ]*=[ ]*".*"/gi, 'bor_grpc_flag = "true"')
+              .replace(
+                /bor_grpc_flag[ ]*=[ ]*".*"/gi,
+                'bor_grpc_flag = "false"'
+              )
               .replace(
                 /bor_grpc_url[ ]*=[ ]*".*"/gi,
                 'bor_grpc_url = "localhost:3131"'

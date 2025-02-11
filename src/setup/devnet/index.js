@@ -18,7 +18,8 @@ import {
   errorMissingConfigs,
   getAccountFromPrivateKey,
   getKeystoreFile,
-  getNewPrivateKey
+  getNewPrivateKey,
+  processTemplateFiles
 } from '../../lib/utils.js'
 import { loadConfig } from '../config.js'
 import fileReplacer from '../../lib/file-replacer.js'
@@ -261,7 +262,7 @@ export class Devnet {
               )
               .replace(
                 /bor_grpc_flag[ ]*=[ ]*".*"/gi,
-                'bor_grpc_flag = "true"'
+                'bor_grpc_flag = "false"'
               )
               .replace(
                 /bor_grpc_url[ ]*=[ ]*".*"/gi,
@@ -294,7 +295,7 @@ export class Devnet {
             fileReplacer(this.heimdallGenesisFilePath(i))
               .replace(
                 /"matic_token_address":[ ]*".*"/gi,
-                `"matic_token_address": "${rootContracts.tokens.TestToken}"`
+                `"matic_token_address": "${rootContracts.tokens.MaticToken}"`
               )
               .replace(
                 /"staking_manager_address":[ ]*".*"/gi,
@@ -320,7 +321,7 @@ export class Devnet {
         }
       },
       {
-        title: 'Process templates',
+        title: 'Process njk templates',
         task: async () => {
           const templateDir = path.resolve(
             new URL(import.meta.url).pathname,
@@ -333,23 +334,22 @@ export class Devnet {
             this.config.targetDirectory
           )
 
-          // TODO: Uncomment when finalized for docker setup
-          // if (this.config.network) {
-          //   const chain = this.config.network
-          //   for (let i = 0; i < this.totalBorNodes; i++) {
-          //     fileReplacer(this.borGenesisFilePath(i))
-          //       .replace(
-          //         /NODE_DIR\/genesis.json/gi,
-          //         `${chain}`
-          //       )
-          //       .save()
-          //   }
-          // }
+          if (this.config.network) {
+            const chain = this.config.network
+            for (let i = 0; i < this.totalBorNodes; i++) {
+              fileReplacer(this.borGenesisFilePath(i))
+                .replace(
+                  /NODE_DIR\/genesis.json/gi,
+                   `${chain}`
+                )
+                .save()
+            }
+          }
           // process template files
-          // await processTemplateFiles(this.config.targetDirectory, {
-          //  obj: this,
-          //  ganache: this.ganache
-          // })
+          await processTemplateFiles(this.config.targetDirectory, {
+            obj: this,
+            ganache: this.anvil
+          })
 
           for (let i = 0; i < this.totalBorNodes; i++) {
             await fs.copyFile(
@@ -381,7 +381,7 @@ export class Devnet {
               )
               .replace(
                 /bor_grpc_flag[ ]*=[ ]*".*"/gi,
-                'bor_grpc_flag = "true"'
+                'bor_grpc_flag = "false"'
               )
               .replace(
                 /bor_grpc_url[ ]*=[ ]*".*"/gi,
@@ -432,7 +432,7 @@ export class Devnet {
         }
       },
       {
-        title: 'Process templates',
+        title: 'Process njk templates',
         task: async () => {
           const templateDir = path.resolve(
             new URL(import.meta.url).pathname,
@@ -1372,29 +1372,19 @@ export class Devnet {
         //      return { ...account, pub_key: s.pub_key };
         //  })
         this.config.accounts = this.signerDumpData
-  .slice(0, this.config.numOfBorValidators)
-  .map((s) => {
-    const account = getAccountFromPrivateKey(s.priv_key)
-
-    // Extract key from the format 'PubKeySecp256k1{04...}'
-    const match = s.pub_key.match(/{(.*)}/)
-    let sanitizedPubKey = s.pub_key
-
-    if (match) {
-      const keyWithPrefix = match[1] // Extract the key inside braces
-      sanitizedPubKey = keyWithPrefix.startsWith('04')
-        ? '0x' + keyWithPrefix.slice(2) // Remove '04' and add '0x'
-        : '0x' + keyWithPrefix
-    }
-
-    return { ...account, pub_key: sanitizedPubKey }
-  })
+          .slice(0, this.config.numOfBorValidators)
+          .map((s) => {
+            const account = getAccountFromPrivateKey(s.priv_key)
+            const sanitizedPubKey = s.pub_key.startsWith('0x04')
+              ? '0x' + s.pub_key.slice(4)
+              : s.pub_key // Remove "04" prefix if present
+            return { ...account, pub_key: sanitizedPubKey }
+          })
 
         if (this.config.numOfErigonValidators > 0) {
           const erigonAccounts = this.signerDumpData
             .slice(this.config.numOfBorValidators, this.config.numOfBorValidators + this.config.numOfErigonValidators)
             .map((s) => {
-              // return getAccountFromPrivateKey(s.priv_key)
               const account = getAccountFromPrivateKey(s.priv_key)
               return { ...account, pub_key: s.pub_key }
             })

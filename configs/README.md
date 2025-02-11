@@ -47,7 +47,7 @@ numOfNonValidators: 0
 devnetType: remote
 
 # URL to Ethereum RPC
-ethURL: http://ganache:9545
+ethURL: http://anvil:9545
 
 # Remote user for Ethereum RPC. Only effective when devnetType is `remote`.
 ethHostUser: ubuntu
@@ -73,22 +73,22 @@ devnetHeimdallUsers:
   - ubuntu
 
 # Branch of bor to use. Repository: https://github.com/maticnetwork/bor
-borBranch: c5569e4da9ebe0ce4e63aec571966c71234f7cfc # todo change to develop once https://polygon.atlassian.net/browse/POS-979 is solved
+borBranch: develop
 
-# Branch of Heimdall to use. Repository: https://github.com/maticnetwork/heimdall
+# Branch of Heimdall to use. Repository: https://github.com/0xPolygon/heimdall-v2
 heimdallBranch: develop
 
 # Branch of contract to use. Repository: https://github.com/maticnetwork/contracts
-contractsBranch: mardizzone/node-upgrade # todo change to master once contracts team merges the PR
+contractsBranch: arya/matic-cli/pos-1869
 
 # Branch of contract to use. Repository: https://github.com/maticnetwork/genesis-contracts
-genesisContractsBranch: mardizzone/node-upgrade # todo change to master once contracts team merges the PR
+genesisContractsBranch: master
 
 # Docker build context for bor. Used in docker setup. When specified, borBranch will be ignored.
 borDockerBuildContext: 'https://github.com/maticnetwork/bor.git#c5569e4da9ebe0ce4e63aec571966c71234f7cfc' # todo change to develop once https://polygon.atlassian.net/browse/POS-979 is solved"
 
 # Docker build context for heimdall. Used in docker setup. When specified, heimdallBranch will be ignored.
-heimdallDockerBuildContext: 'https://github.com/maticnetwork/heimdall.git#develop'
+heimdallDockerBuildContext: 'https://github.com/0xPolygon/heimdall-v2.git#develop'
 
 # Datadog api key required to setup datadog traces and metrics for the node.
 DD_API_KEY: <DATADOG API KEY> # Datadog API key

@@ -2,11 +2,11 @@
 borRepo: https://github.com/maticnetwork/bor.git
 borBranch: develop
 
-heimdallRepo: https://github.com/maticnetwork/heimdall.git
+heimdallRepo: https://github.com/0xPolygon/heimdall-v2.git
 heimdallBranch: develop
 
-contractsRepo: https://github.com/maticnetwork/contracts.git
-contractsBranch: mardizzone/node-16
+contractsRepo: https://github.com/0xPolygon/pos-contracts.git
+contractsBranch: arya/matic-cli/pos-1869
 
 genesisContractsRepo: https://github.com/maticnetwork/genesis-contracts.git
 genesisContractsBranch: master
@@ -17,12 +17,15 @@ defaultStake: 10000
 defaultFee: 2000
 
 # L1
-ethURL: http://ganacheURL:9545 # use localhost for local deployments
+ethURL: http://anvil:9545 # use localhost for local deployments
 ethHostUser: ubuntu
+
+# Misc
+mnemonic: "clock radar mass judge dismiss just intact mind resemble fringe diary casino"
 
 # Heimdall
 heimdallChainId: heimdall-4052
-heimdallDockerBuildContext: https://github.com/maticnetwork/heimdall.git#develop
+heimdallDockerBuildContext: https://github.com/0xPolygon/heimdall-v2.git#develop
 
 # Bor
 borChainId: 15005
@@ -35,7 +38,7 @@ numOfBorSentries: 1
 numOfBorArchiveNodes: 0
 borDockerBuildContext: https://github.com/maticnetwork/bor.git#develop
 devnetBorUsers: ubuntu,ubuntu
-devnetBorHosts: ["ec2-xx-xxx-xx-xxx.eu-west-1.compute.amazonaws.com"] # use localhost for local deployments
+devnetBorHosts: localhost # use localhost for local deployments
 devnetBorFlags: config,config
 
 # Erigon

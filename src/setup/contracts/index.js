@@ -59,7 +59,7 @@ export class Contracts {
   compileTasks() {
     return [
       {
-        title: 'Checkout arya/matic-cli/pos-1869',
+        title: 'Checkout contracts branch',
         task: () =>
           execa('git', ['checkout', 'arya/matic-cli/pos-1869'], {
             cwd: this.repositoryDir,
@@ -75,7 +75,7 @@ export class Contracts {
           })
       },
       {
-        title: 'Process templates',
+        title: 'Process contracts templates',
         task: () =>
           execa(
             'npm',

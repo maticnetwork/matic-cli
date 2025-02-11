@@ -10,12 +10,12 @@ import { loadConfig } from '../config.js'
 
 import { Genesis } from '../genesis/index.js'
 import { Heimdall } from '../heimdall/index.js'
-import { Ganache } from '../ganache/index.js'
+import { Anvil } from '../anvil/index.js'
 import { Bor } from '../bor/index.js'
 import { processTemplateFiles } from '../../lib/utils.js'
 
 async function setupLocalnet(config) {
-  const ganache = new Ganache(config, {
+  const anvil = new Anvil(config, {
     contractsBranch: config.contractsBranch
   })
   const bor = new Bor(config, {
@@ -24,7 +24,7 @@ async function setupLocalnet(config) {
   })
   const heimdall = new Heimdall(config, {
     repositoryUrl:
-      config.heimdallRepo || 'https://github.com/maticnetwork/heimdall',
+      config.heimdallRepo || 'https://github.com/0xPolygon/heimdall-v2',
     repositoryBranch: config.heimdallBranch || 'develop'
   })
   const genesis = new Genesis(config, {
@@ -37,9 +37,9 @@ async function setupLocalnet(config) {
   const tasks = new Listr(
     [
       {
-        title: ganache.taskTitle,
+        title: anvil.taskTitle,
         task: () => {
-          return ganache.getTasks()
+          return anvil.getTasks()
         }
       },
       {

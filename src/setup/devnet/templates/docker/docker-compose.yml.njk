@@ -8,15 +8,13 @@ networks:
         - subnet: 172.20.1.0/24
 
 services:
-  ganache:
-    image: "trufflesuite/ganache:latest"
-    container_name: ganache
-    networks:
-      - devnet-network
+  anvil:
+    image: ghcr.io/foundry-rs/foundry:latest
     volumes:
       - ./data:/data
     ports:
       - "9545:9545"
+    entrypoint: ["anvil"]
 
 {% for node in range(0, obj.totalNodes) %}
   rabbit{{ node }}:
@@ -36,7 +34,7 @@ services:
     image: local/heimdall
       {% endif %}
     {% else %}
-    image: "maticnetwork/heimdall:{{ obj.config.heimdallBranch }}"
+    image: "0xPolygon/heimdall-v2:{{ obj.config.heimdallBranch }}"
     {% endif %}
     container_name: heimdall{{ node }}
     depends_on:

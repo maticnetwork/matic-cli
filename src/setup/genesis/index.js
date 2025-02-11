@@ -106,7 +106,7 @@ export class Genesis {
             })
         },
         {
-          title: 'Process templates',
+          title: 'Process genesis contracts templates',
           task: () =>
             execa(
               'npm',

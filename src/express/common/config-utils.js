@@ -209,7 +209,7 @@ function validateEnvVars(cloud) {
     }),
     ERIGON_BRANCH: validStr({ default: 'main' }),
     HEIMDALL_REPO: validStr({
-      default: 'https://github.com/maticnetwork/heimdall.git'
+      default: 'https://github.com/0xPolygon/heimdall-v2.git'
     }),
     HEIMDALL_BRANCH: validStr({ default: 'develop' }),
     CONTRACTS_REPO: validStr({
@@ -231,7 +231,7 @@ function validateEnvVars(cloud) {
       default: 'https://github.com/maticnetwork/bor.git#develop'
     }),
     HEIMDALL_DOCKER_BUILD_CONTEXT: url({
-      default: 'https://github.com/maticnetwork/heimdall.git#develop'
+      default: 'https://github.com/0xPolygon/heimdall-v2.git#develop'
     }),
     VERBOSE: bool({ default: true }),
     DD_API_KEY: validStr({ default: 'DATADOG_API_KEY' }),

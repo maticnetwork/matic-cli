@@ -2,7 +2,9 @@ defaultStake: 10000
 defaultFee: 2000
 borChainId: 15001
 heimdallChainId: heimdall-15001
-contractsBranch: mardizzone/node-16
+heimdallRepo: https://github.com/0xPolygon/heimdall-v2.git
+contractsRepo: https://github.com/0xPolygon/pos-contracts.git
+contractsBranch: arya/matic-cli/pos-1869
 genesisContractsBranch: master
 sprintSize:
   - '64'
@@ -16,11 +18,12 @@ numOfBorArchiveNodes: 0
 numOfErigonValidators: 0
 numOfErigonSentries: 0
 numOfErigonArchiveNodes: 0
-ethURL: http://ganache:9545
+ethURL: http://anvil:9545
 ethHostUser: ubuntu
 devnetType: docker
 borDockerBuildContext: 'https://github.com/maticnetwork/bor.git#develop'
-heimdallDockerBuildContext: 'https://github.com/maticnetwork/heimdall.git#develop'
+heimdallDockerBuildContext: 'https://github.com/0xPolygon/heimdall-v2.git#develop'
 sprintSizeBlockNumber:
   - '0'
 devnetBorFlags: config,config,config
+mnemonic: 'clock radar mass judge dismiss just intact mind resemble fringe diary casino'
