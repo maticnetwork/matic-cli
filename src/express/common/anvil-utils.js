@@ -9,11 +9,6 @@ const EthAmount = '10'
 
 const borProdChainIds = [137, 8001, 8002] // mainnet, mumbai, amoy
 
-// Since we might reset and restart ganache multiple times during the setup,
-// and  considered that ganache is no longer maintained, plus
-// it is affected by this issue https://github.com/trufflesuite/ganache/issues/4404
-// we implemented this workaround waiting for a migration to hardhat
-// (see internal issue https://polygon.atlassian.net/browse/POS-1869)
 export async function fundAnvilAccounts(doc) {
   let machine0
   const devnetType =
@@ -68,7 +63,7 @@ export async function fundAnvilAccounts(doc) {
     })
     console.log(
       '📍Funds transferred from ' +
-        anvilAccount +
+        account.address +
         ' to ' +
         signerDump[i].address +
         ' with txHash ' +

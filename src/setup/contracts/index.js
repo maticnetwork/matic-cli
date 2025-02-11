@@ -114,13 +114,6 @@ export class Contracts {
             },
             stdio: getRemoteStdio()
           })
-      },
-      {
-        title: 'Checking contract addresses file',
-        task: () =>
-          console.log(
-            `localContractAddressPath : ${this.localContractAddressesPath} , contractPath : ${this.contractAddressesPath}`
-          )
       }
     ]
   }
