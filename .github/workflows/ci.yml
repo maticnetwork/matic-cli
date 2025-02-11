@@ -184,20 +184,14 @@ jobs:
       - name: Launch devnet
         run: |
           cd matic-cli/devnet
-          bash docker-ganache-start.sh
-          bash docker-heimdall-start-all.sh
-          bash docker-bor-setup.sh
-          bash docker-bor-start-all.sh
+          bash docker_devnet.sh
           cd -
           timeout 2m bash matic-cli/.github/integration-tests/bor_health.sh
-          cd -
-          bash ganache-deployment-bor.sh
-          bash ganache-deployment-sync.sh
 
       - name: Run smoke tests
         run: |
           echo "Funding ganache accounts..."
-          timeout 10m bash matic-cli/.github/integration-tests/fund_ganache_accounts.sh
+          timeout 10m bash matic-cli/.github/integration-tests/fund_anvil_accounts.sh
           echo "Deposit 100 matic for each account to bor network"
           cd matic-cli/devnet/code/contracts
           npm run truffle exec scripts/deposit.js -- --network development $(jq -r .root.tokens.MaticToken contractAddresses.json) 100000000000000000000
