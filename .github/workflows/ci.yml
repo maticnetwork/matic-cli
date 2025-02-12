@@ -61,6 +61,9 @@ jobs:
           path: matic-cli
       - uses: boonya/gh-action-name-generator@v1
         id: generator
+        with:
+          length: 8
+          style: lowercase
 
       - name: Create .env file
         working-directory: matic-cli
