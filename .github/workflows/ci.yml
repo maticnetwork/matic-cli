@@ -62,7 +62,7 @@ jobs:
       - uses: boonya/gh-action-name-generator@v1
         id: generator
         with:
-          length: 3
+          length: 2
           style: lowerCase
 
       - name: Create .env file
