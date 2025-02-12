@@ -63,7 +63,7 @@ jobs:
         id: generator
         with:
           length: 8
-          style: lowercase
+          style: lowerCase
 
       - name: Create .env file
         working-directory: matic-cli
