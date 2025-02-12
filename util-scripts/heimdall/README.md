@@ -131,7 +131,7 @@ The script performs the following steps for each specified Cosmos SDK commit:
    - Navigates to the Heimdall directory.
    - Checks out or creates the specified Heimdall branch.
    - Updates `go.mod` to replace the Cosmos SDK dependency with the target version.
-   - Runs `go mod tidy` and builds the project using `make heimdalld`.
+   - Runs `go mod tidy` and builds the project using `make build`.
 
    d. **Commit and Push Changes**:
 
