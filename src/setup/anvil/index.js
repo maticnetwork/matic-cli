@@ -19,10 +19,12 @@ export class Anvil {
     this.mnemonic = config.mnemonic
 
     if (!this.mnemonic) {
-      console.error('❌ Error: MNEMONIC is not set. Please set it in the configuration file or environment variables.')
+      console.error(
+        '❌ Error: MNEMONIC is not set. Please set it in the configuration file or environment variables.'
+      )
       process.exit(1)
     }
-    
+
     this.deployerAccount = createAccountsFromMnemonics(this.mnemonic, 1)
     console.log(`Deployer's account : ${this.deployerAccount[0].privateKey}`)
     this.deployerPrivateKey = this.deployerAccount[0].privateKey
