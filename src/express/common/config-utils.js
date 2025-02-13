@@ -405,11 +405,11 @@ function validateGitConfigs() {
     )
     process.exit(1)
   }
-  console.log('📍Validating heimdall...')
-  shell.exec(
-    `git ls-remote --exit-code --heads --tags ${process.env.HEIMDALL_REPO} ${process.env.HEIMDALL_BRANCH} ||
-    git fetch ${process.env.HEIMDALL_REPO} ${process.env.HEIMDALL_BRANCH}`
-  )
+  // console.log('📍Validating heimdall...')
+  // shell.exec(
+  //   `git ls-remote --exit-code --heads --tags ${process.env.HEIMDALL_REPO} ${process.env.HEIMDALL_BRANCH} ||
+  //   git fetch ${process.env.HEIMDALL_REPO} ${process.env.HEIMDALL_BRANCH}`
+  // )
   if (shell.error() != null) {
     console.log(
       '❌ Error while test-cloning heimdall repo, please check your configs!'
