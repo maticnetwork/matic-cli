@@ -57,14 +57,6 @@ const validCertPathStr = makeValidator((x) => {
 })
 
 function validateEnvVars(cloud) {
-  const mnemonic = process.env.MNEMONIC
-  if (!mnemonic) {
-    console.error(
-      '❌ Error: MNEMONIC is not set. Please set it in the environment variables.'
-    )
-    process.exit(1)
-  }
-
   // validating AWS infra vars
   if (cloud === constants.cloud.AWS) {
     cleanEnv(process.env, {
@@ -243,6 +235,11 @@ function validateEnvVars(cloud) {
     }),
     VERBOSE: bool({ default: true }),
     DD_API_KEY: validStr({ default: 'DATADOG_API_KEY' }),
+    MNEMONIC: validStr({
+      default:
+        'clock radar mass judge dismiss just intact ' +
+        'mind resemble fringe diary casino'
+    }),
     SPEED: num({ default: 200 }),
     MAX_ACCOUNTS: num({ default: 100000 }),
     FUND: bool({ default: true }),
