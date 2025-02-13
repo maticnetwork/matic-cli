@@ -198,7 +198,7 @@ jobs:
           npm install --prefer-offline --no-audit --progress=false
           mkdir devnet
           cd devnet
-          touch ~/.netrc && echo "machine github.com login marcello33 password ${{secrets.GH_ACCESS_TOKEN}}" > ~/.netrc`
+          touch ~/.netrc && echo "machine github.com login marcello33 password ${{secrets.GH_ACCESS_TOKEN}}" > ~/.netrc
           ../bin/matic-cli.js setup devnet -c ../../matic-cli/.github/e2e-docker-config.yml
 
       - name: Launch devnet
