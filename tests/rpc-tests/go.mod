@@ -1,9 +1,9 @@
 module rpc-tests
 
-go 1.22.1
+go 1.23.2
 
 require (
-	github.com/ethereum/go-ethereum v1.14.12
+	github.com/ethereum/go-ethereum v1.14.13
 	github.com/miguelmota/go-ethereum-hdwallet v0.1.2
 )
 
@@ -86,7 +86,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.27.0 // indirect
 	golang.org/x/crypto v0.31.0 // indirect
 	golang.org/x/exp v0.0.0-20240604190554-fc45aab8b7f8 // indirect
-	golang.org/x/net v0.26.0 // indirect
+	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
@@ -94,4 +94,4 @@ require (
 	rsc.io/tmplfunc v0.0.3 // indirect
 )
 
-replace github.com/ethereum/go-ethereum => github.com/maticnetwork/bor v1.5.4
+replace github.com/ethereum/go-ethereum => github.com/maticnetwork/bor v1.5.5
