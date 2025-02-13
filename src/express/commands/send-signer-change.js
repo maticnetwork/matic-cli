@@ -1,14 +1,12 @@
 import { loadDevnetConfig } from '../common/config-utils.js'
-import Web3 from 'web3'
-import { getSignedTx } from '../common/tx-utils.js'
 import { timer } from '../common/time-utils.js'
 import Wallet from 'ethereumjs-wallet'
-import stakeManagerABI from '../../abi/StakeManagerABI.json' assert { type: 'json' }
 
 import { isValidatorIdCorrect } from '../common/validators-utils.js'
 
 import {
   runScpCommand,
+  runSshCommand,
   runSshCommandWithReturn,
   maxRetries
 } from '../common/remote-worker.js'
@@ -48,13 +46,12 @@ export async function sendSignerChangeEvent(validatorID) {
   }
 
   validatorID = Number(validatorID)
-  const rootChainWeb3 = new Web3(`http://${machine0}:9545`)
 
   let src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/devnet/signer-dump.json`
   let dest = './signer-dump.json'
   await runScpCommand(src, dest, maxRetries)
 
-  src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/code/contracts/contractAddresses.json`
+  src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/code/pos-contracts/contractAddresses.json`
   dest = './contractAddresses.json'
   await runScpCommand(src, dest, maxRetries)
 
@@ -68,12 +65,6 @@ export async function sendSignerChangeEvent(validatorID) {
     fs.readFileSync(`${process.cwd()}/signer-dump.json`, 'utf8')
   )
   const pkey = signerDump[validatorID - 1].priv_key
-  const validatorAccount = signerDump[validatorID - 1].address
-
-  const stakeManagerContract = new rootChainWeb3.eth.Contract(
-    stakeManagerABI,
-    StakeManagerProxyAddress
-  )
 
   const oldSigner = await getValidatorSigner(doc, machine0, validatorID)
   console.log('OldValidatorSigner', oldSigner)
@@ -87,21 +78,12 @@ export async function sendSignerChangeEvent(validatorID) {
   console.log('NewValidatorAddr', newAccAddr, newAccPubKey)
   console.log('NewValidatorPrivKey', wallet.getPrivateKeyString())
 
-  const tx = stakeManagerContract.methods.updateSigner(
-    validatorID,
-    newAccPubKey
-  )
-  const signedTx = await getSignedTx(
-    rootChainWeb3,
-    StakeManagerProxyAddress,
-    tx,
-    validatorAccount,
-    pkey
-  )
-  const Receipt = await rootChainWeb3.eth.sendSignedTransaction(
-    signedTx.rawTransaction
-  )
-  console.log('UpdateSigner Receipt', Receipt.transactionHash)
+  console.log('Public key : ', newAccPubKey)
+
+  console.log('📍 Changing Signer.....')
+  const command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${StakeManagerProxyAddress} "updateSigner(uint256,bytes)" ${validatorID} ${newAccPubKey} --rpc-url http://localhost:9545 --private-key ${pkey}`
+  await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
+  console.log('done!')
 
   let newSigner = await getValidatorSigner(doc, machine0, validatorID)
 
