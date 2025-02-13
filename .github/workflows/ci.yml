@@ -76,6 +76,8 @@ jobs:
           sed -i 's,/absolute/path/to/your/,/home/runner/work/matic-cli/matic-cli/matic-cli/gcp/,' .env
           sed -i 's,YOUR_PROJECT_ID,prj-polygonlabs-pos-v1-dev,' .env
           sed -i 's,MATIC_CLI_BRANCH=master,MATIC_CLI_BRANCH=$GITHUB_HEAD_REF,' .env
+          sed -i 's,GITHUB_USERNAME=,GITHUB_USERNAME=marcello33,' .env
+          sed -i 's,GITHUB_ACCESS_TOKEN=,GITHUB_ACCESS_TOKEN=${{secrets.GH_ACCESS_TOKEN}},' .env
 
       - name: Get GitHub action runner IP
         id: ip
@@ -147,6 +149,10 @@ jobs:
           ../../bin/express-cli.js --destroy
 
   e2e-docker:
+    env:
+      GIT_TERMINAL_PROMPT: 1
+      GOPRIVATE: github.com/0xPolygon/heimdall-v2
+      GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
     permissions:
       id-token: write
       contents: write
@@ -188,6 +194,8 @@ jobs:
           npm install --prefer-offline --no-audit --progress=false
           mkdir devnet
           cd devnet
+          go env -w GOPRIVATE=github.com/0xPolygon/*
+          touch ~/.netrc && echo "machine github.com login marcello33 password ${{secrets.GH_ACCESS_TOKEN}}" > ~/.netrc`
           ../bin/matic-cli.js setup devnet -c ../../matic-cli/.github/e2e-docker-config.yml
 
       - name: Launch devnet
