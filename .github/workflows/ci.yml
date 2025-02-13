@@ -47,6 +47,10 @@ jobs:
         run: npm run lint:check
 
   e2e-remote:
+    env:
+      GIT_TERMINAL_PROMPT: 1
+      GOPRIVATE: github.com/0xPolygon/heimdall-v2
+      GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
     permissions:
       id-token: write
       contents: write
@@ -194,7 +198,6 @@ jobs:
           npm install --prefer-offline --no-audit --progress=false
           mkdir devnet
           cd devnet
-          go env -w GOPRIVATE=github.com/0xPolygon/*
           touch ~/.netrc && echo "machine github.com login marcello33 password ${{secrets.GH_ACCESS_TOKEN}}" > ~/.netrc`
           ../bin/matic-cli.js setup devnet -c ../../matic-cli/.github/e2e-docker-config.yml
 
