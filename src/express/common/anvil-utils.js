@@ -43,7 +43,13 @@ export async function fundAnvilAccounts(doc) {
 
   const rootChainWeb3 = new Web3(`http://${machine0}:9545`)
 
-  const accounts = createAccountsFromMnemonics(process.env.MNEMONIC, 3)
+  const mnemonic = process.env.MNEMONIC;
+  if (!mnemonic) {
+    console.error('❌ Error: MNEMONIC is not set. Please set it in the environment variables.');
+    process.exit(1);
+  }
+  
+  const accounts = createAccountsFromMnemonics(mnemonic, 3);
   const anvilAccount = accounts[1]
 
   const account = rootChainWeb3.eth.accounts.privateKeyToAccount(
