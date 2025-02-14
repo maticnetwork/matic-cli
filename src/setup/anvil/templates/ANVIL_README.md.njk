@@ -1,0 +1,87 @@
+# Anvil Deployment and Staking Guide
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [File Paths](#file-paths)
+- [Setup and Installation](#setup-and-installation)
+- [Managing the Anvil Instance](#managing-the-anvil-instance)
+- [Starting Anvil](#starting-anvil)
+- [Cleaning the Current Setup](#cleaning-the-current-setup)
+- [Deployment](#deployment)
+- [Staking](#staking)
+
+---
+
+## Overview
+
+By default, all contracts are deployed when running the Anvil instance. This guide covers the following tasks:
+
+- Starting and cleaning the Anvil instance
+- Deploying contracts
+- Staking tokens with the default account
+
+---
+
+## File Paths
+
+- **Contract Addresses JSON**: `{{ obj.contracts.contractAddressesPath }}`
+- **Anvil Database Path**: `{{ obj.dbDir }}`
+
+---
+
+## Setup and Installation
+
+Ensure that you have all prerequisites installed before proceeding (e.g., Bash shell, necessary environment variables). The default setup requires no additional configuration.
+
+---
+
+## Managing the Anvil Instance
+
+### Starting Anvil
+
+To start the Anvil blockchain instance, run the following command:
+
+```bash
+bash anvil-start.sh
+```
+
+### Cleaning the Current Setup
+
+If you need to remove the existing Anvil database or reset the setup, run:
+
+```bash
+bash anvil-clean.sh
+```
+
+> **Warning**: Cleaning the setup will remove all current data from the Anvil instance.
+
+After cleaning, restart Anvil using the command in the **Starting Anvil** section.
+
+---
+
+## Deployment
+
+Deploy your contracts on the Anvil instance by running:
+
+```bash
+bash anvil-deployment.sh
+```
+
+This script will deploy all contracts as specified in your configuration.
+
+---
+
+## Staking
+
+To stake tokens using the default account, execute:
+
+```bash
+bash anvil-stake.sh
+```
+
+This command stakes `{{ obj.config.defaultStake }}` tokens for the primary account at address `{{ obj.config.primaryAccount.address }}`.
+
+---
