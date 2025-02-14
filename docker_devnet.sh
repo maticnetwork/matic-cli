@@ -14,10 +14,16 @@ bash docker-bor-setup.sh || { echo "Failed to setup Bor"; exit 1; }
 # Start Bor
 bash docker-bor-start-all.sh || { echo "Failed to start Bor"; exit 1; }
 
-# Deploy Bor to Anvil 
-bash anvil-deployment-bor.sh || { echo "Failed to deploy Bor to Anvil"; exit 1; }
+# Deploy Mainnet contracts to Anvil
+bash anvil-deployment.sh || { echo "Failed to deploy mainnet contract on Anvil"; exit 1; }
 
-# Sync Anvil deployment
-bash anvil-deployment-sync.sh || { echo "Failed to sync Anvil deployment"; exit 1; }
+# Setup validators on Anvil
+bash anvil-stake.sh || { echo "Failed to setup validators on Anvil"; exit 1; }
+
+# Deploy Bor contracts
+bash anvil-deployment-bor.sh || { echo "Failed to deploy Bor contracts"; exit 1; }
+
+# Sync Anvil deployments
+bash anvil-deployment-sync.sh || { echo "Failed to sync Anvil deployments"; exit 1; }
 
 echo "Devnet setup complete."
