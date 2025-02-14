@@ -28,7 +28,9 @@ export class Anvil {
     this.deployerAccount = createAccountsFromMnemonics(this.mnemonic, 1)
     console.log(`Deployer's account : ${this.deployerAccount[0].address}`)
     this.deployerPrivateKey = this.deployerAccount[0].privateKey
-    console.log(`Deployer's private key : ${this.deployerAccount[0].privateKey}`)
+    console.log(
+      `Deployer's private key : ${this.deployerAccount[0].privateKey}`
+    )
 
     this.dbName = options.dbName || 'anvil-db'
     this.serverPort = options.serverPort || 9545
