@@ -19,7 +19,7 @@ defaultStake: 10000
 defaultFee: 2000
 
 # L1
-ethURL: http://localhost:9545 # use localhost for local deployments
+ethURL: http://localhost:9545 # Use localhost for local deployments
 ethHostUser: ubuntu
 
 # Misc
@@ -40,13 +40,13 @@ sprintSizeBlockNumber: '0'
 blockNumber: '0'
 blockTime: '2'
 
-numOfBorValidators: 2
+numOfBorValidators: 1
 numOfBorSentries: 1
 numOfBorArchiveNodes: 0
 
-devnetBorUsers: ubuntu,ubuntu,ubuntu
-devnetBorHosts: localhost # use localhost for local deployments
-devnetBorFlags: config,config,config
+devnetBorUsers: ubuntu,ubuntu
+devnetBorHosts: localhost # Use localhost for local deployments
+devnetBorFlags: config,config
 
 # Erigon
 numOfErigonValidators: 0

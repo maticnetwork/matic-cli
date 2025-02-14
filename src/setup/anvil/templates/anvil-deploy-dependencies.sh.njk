@@ -29,6 +29,4 @@ forge create --rpc-url http://localhost:$SERVER_PORT --private-key $PRIVATE_KEY 
 
 forge create --rpc-url http://localhost:$SERVER_PORT --private-key  $PRIVATE_KEY contracts/root/predicates/TransferWithSigUtils.sol:TransferWithSigUtils --broadcast
 
-cast send --rpc-url http://localhost:$SERVER_PORT --private-key $PRIVATE_KEY {{ obj.config.primaryAccount.address }} --value 10ether
-
 sleep 10
