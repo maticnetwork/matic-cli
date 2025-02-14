@@ -20,9 +20,9 @@ PRIMARY_ADDRESS=$(cast wallet address $PRIVATE_KEY)
 
 # Send funds from the default anvil account to the primary account.
 cast send $PRIMARY_ADDRESS \
-  --value 10ether \
-  --private-key 0x9b28f36fbd67381120752d6172ecdcf10e06ab2d9a1367aac00cdcd6ac7855d3 \
-  --rpc-url http://localhost:$SERVER_PORT
+--value 10ether \
+--private-key 0x9b28f36fbd67381120752d6172ecdcf10e06ab2d9a1367aac00cdcd6ac7855d3 \
+--rpc-url http://localhost:$SERVER_PORT
 
 sleep 2
 
