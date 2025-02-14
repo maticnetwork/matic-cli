@@ -47,7 +47,7 @@ numOfNonValidators: 0
 devnetType: remote
 
 # URL to Ethereum RPC
-ethURL: http://anvil:9545
+ethURL: http://ganache:9545
 
 # Remote user for Ethereum RPC. Only effective when devnetType is `remote`.
 ethHostUser: ubuntu
@@ -79,7 +79,7 @@ borBranch: develop
 heimdallBranch: develop
 
 # Branch of contract to use. Repository: https://github.com/maticnetwork/contracts
-contractsBranch: arya/matic-cli/pos-1869
+contractsBranch: mardizzone/node-16
 
 # Branch of contract to use. Repository: https://github.com/maticnetwork/genesis-contracts
 genesisContractsBranch: master

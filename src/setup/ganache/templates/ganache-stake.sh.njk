@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+
+set -x
+
+# stake
+STAKE={{ obj.config.defaultStake }}
+
+# fee
+FEE={{ obj.config.defaultFee }}
+
+# cd matic contracts
+cd {{ obj.contracts.repositoryDir }}
+
+# root contracts are deployed on base chain
+{% for acc in obj.config.accounts %}
+npm run truffle exec scripts/stake.js -- --network development {{ acc.address }} {{ acc.privateKey | publicKey }} $STAKE $FEE
+sleep 10
+{% endfor %}

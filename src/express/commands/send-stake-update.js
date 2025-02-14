@@ -6,7 +6,6 @@ import { isValidatorIdCorrect } from '../common/validators-utils.js'
 
 import {
   runScpCommand,
-  runSshCommand,
   runSshCommandWithReturn,
   maxRetries
 } from '../common/remote-worker.js'
@@ -14,6 +13,7 @@ import {
 import dotenv from 'dotenv'
 import fs from 'fs-extra'
 
+import stakeManagerABI from '../../abi/StakeManagerABI.json' assert { type: 'json' }
 import ERC20ABI from '../../abi/ERC20ABI.json' assert { type: 'json' }
 
 export async function sendStakeUpdateEvent(validatorID) {
@@ -53,7 +53,7 @@ export async function sendStakeUpdateEvent(validatorID) {
   let dest = './signer-dump.json'
   await runScpCommand(src, dest, maxRetries)
 
-  src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/code/pos-contracts/contractAddresses.json`
+  src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/code/contracts/contractAddresses.json`
   dest = './contractAddresses.json'
   await runScpCommand(src, dest, maxRetries)
 
@@ -63,7 +63,7 @@ export async function sendStakeUpdateEvent(validatorID) {
 
   const StakeManagerProxyAddress = contractAddresses.root.StakeManagerProxy
 
-  const MaticTokenAddr = contractAddresses.root.tokens.MaticToken
+  const MaticTokenAddr = contractAddresses.root.tokens.TestToken
   const MaticTokenContract = new rootChainWeb3.eth.Contract(
     ERC20ABI,
     MaticTokenAddr
@@ -74,11 +74,15 @@ export async function sendStakeUpdateEvent(validatorID) {
   )
   const pkey = signerDump[validatorID - 1].priv_key
   const validatorAccount = signerDump[validatorID - 1].address
-  const tx = MaticTokenContract.methods.approve(
+  const stakeManagerContract = new rootChainWeb3.eth.Contract(
+    stakeManagerABI,
+    StakeManagerProxyAddress
+  )
+  let tx = MaticTokenContract.methods.approve(
     StakeManagerProxyAddress,
     rootChainWeb3.utils.toWei('1000')
   )
-  const signedTx = await getSignedTx(
+  let signedTx = await getSignedTx(
     rootChainWeb3,
     MaticTokenAddr,
     tx,
@@ -96,35 +100,22 @@ export async function sendStakeUpdateEvent(validatorID) {
   console.log('Old Validator Power:  ' + oldValidatorPower)
 
   // Adding 100 MATIC stake
-  let command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "transfer(address,uint256)" ${validatorAccount} 100000000000000000000 --rpc-url http://localhost:9545 --private-key ${signerDump[0].priv_key}`
-  await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
-  console.log('done!')
-
-  command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "approve(address,uint256)" ${StakeManagerProxyAddress} 100000000000000000000 --rpc-url http://localhost:9545 --private-key ${pkey}`
-  await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
-  console.log('done!')
-
-  command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${StakeManagerProxyAddress} "restakePOL(uint256,uint256,bool)" ${validatorID} 100000000000000000000 false --rpc-url http://localhost:9545 --private-key ${pkey}`
-  await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
-  console.log('done!')
-
-  // tx = stakeManagerContract.methods.restake(
-  //  validatorID,
-  //  rootChainWeb3.utils.toWei('100'),
-  //  false
-  // )
-  // signedTx = await getSignedTx(
-  //  rootChainWeb3,
-  //  StakeManagerProxyAddress,
-  //  tx,
-  //  validatorAccount,
-  //  pkey
-  // )
-  // const Receipt = await rootChainWeb3.eth.sendSignedTransaction(
-  //  signedTx.rawTransaction
-  // )
-  // console.log('Restake Receipt txHash:  ' + Receipt.transactionHash)
-
+  tx = stakeManagerContract.methods.restake(
+    validatorID,
+    rootChainWeb3.utils.toWei('100'),
+    false
+  )
+  signedTx = await getSignedTx(
+    rootChainWeb3,
+    StakeManagerProxyAddress,
+    tx,
+    validatorAccount,
+    pkey
+  )
+  const Receipt = await rootChainWeb3.eth.sendSignedTransaction(
+    signedTx.rawTransaction
+  )
+  console.log('Restake Receipt txHash:  ' + Receipt.transactionHash)
   let newValidatorPower = await getValidatorPower(doc, machine0, validatorID)
 
   while (parseInt(newValidatorPower) !== parseInt(oldValidatorPower) + 100) {

@@ -4,7 +4,7 @@ import heimdall from './heimdall/index.js'
 import genesis from './genesis/index.js'
 import bor from './bor/index.js'
 import localnet from './localnet/index.js'
-import anvil from './anvil/index.js'
+import ganache from './ganache/index.js'
 import devnet from './devnet/index.js'
 
 //
@@ -19,8 +19,8 @@ genesisCmd.action(genesis)
 const borCmd = new Command('bor')
 borCmd.action(bor)
 
-const anvilCmd = new Command('anvil')
-anvilCmd.action(anvil)
+const ganacheCmd = new Command('ganache')
+ganacheCmd.action(ganache)
 
 const localnetCmd = new Command('localnet')
 localnetCmd.action(localnet)
@@ -32,7 +32,7 @@ export default [
   heimdallCmd,
   genesisCmd,
   borCmd,
-  anvilCmd,
+  ganacheCmd,
   localnetCmd,
   devnetCmd
 ]

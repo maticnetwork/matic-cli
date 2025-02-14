@@ -11,11 +11,10 @@ export class Contracts {
   constructor(config, options = {}) {
     this.config = config
 
-    this.repositoryName = 'pos-contracts'
+    this.repositoryName = 'contracts'
     this.repositoryUrl =
-      options.repositoryUrl || 'https://github.com/0xPolygon/pos-contracts.git'
-    this.repositoryBranch =
-      options.repositoryBranch || 'arya/matic-cli/pos-1869'
+      options.repositoryUrl || 'https://github.com/maticnetwork/contracts.git'
+    this.repositoryBranch = options.repositoryBranch || 'mardizzone/node-16'
   }
 
   get name() {
@@ -59,14 +58,6 @@ export class Contracts {
   compileTasks() {
     return [
       {
-        title: 'Checkout contracts branch',
-        task: () =>
-          execa('git', ['checkout', 'arya/matic-cli/pos-1869'], {
-            cwd: this.repositoryDir,
-            stdio: getRemoteStdio()
-          })
-      },
-      {
         title: 'Install dependencies for matic contracts',
         task: () =>
           execa('npm', ['install', '--omit=dev'], {
@@ -93,34 +84,12 @@ export class Contracts {
           )
       },
       {
-        title: 'Generate interfaces',
+        title: 'Compile matic contracts',
         task: () =>
-          execa('npm', ['run', 'generate:interfaces'], {
-            env: {
-              ...process.env,
-              PATH: `${process.env.HOME}/.foundry/bin:${process.env.PATH}`
-            },
+          execa('npm', ['run', 'truffle:compile'], {
             cwd: this.repositoryDir,
             stdio: getRemoteStdio()
           })
-      },
-      {
-        title: 'Compile matic contracts',
-        task: () =>
-          execa('forge', ['build'], {
-            env: {
-              ...process.env,
-              PATH: `${process.env.HOME}/.foundry/bin:${process.env.PATH}`
-            },
-            stdio: getRemoteStdio()
-          })
-      },
-      {
-        title: 'Checking contract addresses file',
-        task: () =>
-          console.log(
-            `localContractAddressPath : ${this.localContractAddressesPath} , contractPath : ${this.contractAddressesPath}`
-          )
       }
     ]
   }

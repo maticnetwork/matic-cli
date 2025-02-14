@@ -11,7 +11,7 @@ import { bufferToHex, privateToPublic, toBuffer } from 'ethereumjs-util'
 
 import { Heimdall } from '../heimdall/index.js'
 import { Bor } from '../bor/index.js'
-import { Anvil } from '../anvil/index.js'
+import { Ganache } from '../ganache/index.js'
 import { Genesis } from '../genesis/index.js'
 import { getDefaultBranch } from '../helper.js'
 import {
@@ -295,7 +295,7 @@ export class Devnet {
             fileReplacer(this.heimdallGenesisFilePath(i))
               .replace(
                 /"matic_token_address":[ ]*".*"/gi,
-                `"matic_token_address": "${rootContracts.tokens.MaticToken}"`
+                `"matic_token_address": "${rootContracts.tokens.TestToken}"`
               )
               .replace(
                 /"staking_manager_address":[ ]*".*"/gi,
@@ -348,7 +348,7 @@ export class Devnet {
           // process template files
           await processTemplateFiles(this.config.targetDirectory, {
             obj: this,
-            ganache: this.anvil
+            ganache: this.ganache
           })
 
           for (let i = 0; i < this.totalBorNodes; i++) {
@@ -683,9 +683,9 @@ export class Devnet {
           if (this.config.devnetBorHosts === undefined || this.config.devnetErigonHosts === undefined) {
             return
           }
-          // copy the Anvil files to the first node
-          const anvilURL = new URL(this.config.ethURL)
-          const anvilUser = this.config.ethHostUser
+          // copy the Ganache files to the first node
+          const ganacheURL = new URL(this.config.ethURL)
+          const ganacheUser = this.config.ethHostUser
 
           if (!this.config.network) {
             await execa(
@@ -697,8 +697,8 @@ export class Devnet {
                 'UserKnownHostsFile=/dev/null',
                 '-i',
                 '~/cert.pem',
-                `${this.config.targetDirectory}/anvil-start.sh`,
-                `${anvilUser}@${anvilURL.hostname}:~/anvil-start.sh`
+                `${this.config.targetDirectory}/ganache-start.sh`,
+                `${ganacheUser}@${ganacheURL.hostname}:~/ganache-start.sh`
               ],
               { stdio: getRemoteStdio() }
             )
@@ -714,7 +714,7 @@ export class Devnet {
                 '-i',
                 '~/cert.pem',
                 `${this.config.targetDirectory}/data`,
-                `${anvilUser}@${anvilURL.hostname}:~/data`
+                `${ganacheUser}@${ganacheURL.hostname}:~/data`
               ],
               { stdio: getRemoteStdio() }
             )
@@ -751,7 +751,7 @@ export class Devnet {
                 '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
                 '-i', '~/cert.pem',
                                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                                'sudo mv ~/anvil.service /lib/systemd/system/'
+                                'sudo mv ~/ganache.service /lib/systemd/system/'
               ], { stdio: getRemoteStdio() })
             }
             await execa('ssh', [
@@ -821,12 +821,12 @@ export class Devnet {
               ], { stdio: getRemoteStdio() })
 
               // NOTE: Target location would vary depending on bor/heimdall version. Currently the setup works with bor and heimdall v0.3.x
-              // await execa('ssh', [
-              //  '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
-              //  '-i', '~/cert.pem',
-              //                  `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
-              //                  'sudo mv ~/anvil.service /lib/systemd/system/'
-              // ], { stdio: getRemoteStdio() })
+              await execa('ssh', [
+                '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
+                '-i', '~/cert.pem',
+                               `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
+                               'sudo mv ~/ganache.service /lib/systemd/system/'
+              ], { stdio: getRemoteStdio() })
             }
             await execa('ssh', [
               '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
@@ -923,14 +923,10 @@ export class Devnet {
                   '-i',
                   '~/cert.pem',
                   `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                  'sudo systemctl start anvil.service'
+                  'sudo systemctl start ganache.service'
                 ],
                 {
-                  stdio: getRemoteStdio(),
-                  env: {
-                    ...process.env,
-                    PATH: `${process.env.HOME}/.foundry/bin:${process.env.PATH}`
-                  }
+                  stdio: getRemoteStdio()
                 }
               )
             }
@@ -1122,7 +1118,7 @@ export class Devnet {
                   '-i',
                   '~/cert.pem',
                   `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
-                  'sudo systemctl start anvil.service'
+                  'sudo systemctl start ganache.service'
                 ],
                 { stdio: getRemoteStdio() }
               )
@@ -1430,7 +1426,7 @@ export class Devnet {
   }
 
   async getTasks() {
-    const anvil = this.anvil
+    const ganache = this.ganache
     const heimdall = this.heimdall
     const bor = this.bor
     const genesis = this.genesis
@@ -1570,9 +1566,9 @@ export class Devnet {
         }
       },
       {
-        title: anvil.taskTitle,
+        title: ganache.taskTitle,
         task: () => {
-          return anvil.getTasks()
+          return ganache.getTasks()
         },
         enabled: () => {
           return (this.config.devnetType === 'docker' || 'remote') && !this.config.network
@@ -1626,7 +1622,7 @@ export class Devnet {
 
 async function setupDevnet(config) {
   const devnet = new Devnet(config)
-  devnet.anvil = new Anvil(config, {
+  devnet.ganache = new Ganache(config, {
     contractsBranch: config.contractsBranch
   })
   devnet.bor = new Bor(config, {
@@ -1785,7 +1781,7 @@ export default async function (command) {
       type: 'input',
       name: 'ethURL',
       message: 'Please enter ETH url',
-      default: 'http://anvil:9545'
+      default: 'http://ganache:9545'
     })
   }
 

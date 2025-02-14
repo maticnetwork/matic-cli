@@ -17,13 +17,13 @@ cat > metadata <<EOF
 VALIDATOR_ADDRESS=
 EOF
 
-cat > anvil.service <<EOF
+cat > ganache.service <<EOF
 [Unit]
-    Description=anvil
+    Description=ganache
 [Service]
     WorkingDirectory=$HOME
     Environment=PATH=$PATH
-    ExecStart=/bin/bash $HOME/anvil-start.sh
+    ExecStart=/bin/bash $HOME/ganache-start.sh
     User=ubuntu
     Type=simple
     KillSignal=SIGINT

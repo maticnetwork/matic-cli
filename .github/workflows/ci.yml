@@ -179,9 +179,6 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-
       - name: Bootstrap devnet
         run: |
           cd matic-cli
@@ -199,18 +196,13 @@ jobs:
 
       - name: Run smoke tests
         run: |
-          echo "Funding anvil accounts..."
-          timeout 10m bash matic-cli/.github/integration-tests/fund_anvil_accounts.sh
+          echo "Funding ganache accounts..."
+          timeout 10m bash matic-cli/.github/integration-tests/fund_ganache_accounts.sh
           echo "Deposit 100 matic for each account to bor network"
-          cd matic-cli/devnet/code/pos-contracts
-          CONTRACT_ADDRESS=$(jq -r .root.tokens.MaticToken contractAddresses.json)
-          cd ../../devnet
-          SCRIPT_ADDRESS=$(jq -r '.[0].address' signer-dump.json)
-          SCRIPT_PRIVATE_KEY=$(jq -r '.[0].priv_key' signer-dump.json)
-          cd ../code/pos-contracts
-          forge script scripts/matic-cli-scripts/Deposit.s.sol:MaticDeposit --rpc-url http://localhost:9545 --private-key $SCRIPT_PRIVATE_KEY --broadcast --sig "run(address,address,uint256)" $SCRIPT_ADDRESS $CONTRACT_ADDRESS 100000000000000000000
-          cd ../../../..
-          timeout 120m bash matic-cli/.github/integration-tests/smoke_test.sh
+          cd matic-cli/devnet/code/contracts
+          npm run truffle exec scripts/deposit.js -- --network development $(jq -r .root.tokens.MaticToken contractAddresses.json) 100000000000000000000
+          cd -
+          timeout 60m bash matic-cli/.github/integration-tests/smoke_test.sh
 
       - name: Upload logs
         if: always()

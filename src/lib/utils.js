@@ -7,7 +7,6 @@ import Web3 from 'web3'
 import nunjucks from 'nunjucks'
 import ethCrypto from 'eth-crypto'
 import { bufferToHex, privateToPublic, toBuffer } from 'ethereumjs-util'
-import { ethers } from 'ethers'
 
 //
 // Add custom nunjucks filters
@@ -96,17 +95,6 @@ export function getKeystoreFile(privateKeyString, password) {
   }
 }
 
-// creating a wallet using mnemonics from anvil
-export function createAccountsFromMnemonics(mnemonics, totalAccounts) {
-  const accounts = []
-  for (let i = 0; i < totalAccounts; i++) {
-    const mn = ethers.Mnemonic.fromPhrase(mnemonics)
-    const account = ethers.HDNodeWallet.fromMnemonic(mn, `m/44'/60'/0'/0/${i}`)
-
-    accounts.push(account)
-  }
-  return accounts
-}
 // return new generated private key
 export function getNewPrivateKey() {
   return web3.eth.accounts.create()

@@ -9,16 +9,8 @@ export MNEMONIC={{ obj.config.primaryAccount.privateKey }}
 # export heimdall id
 export HEIMDALL_ID={{ obj.config.heimdallChainId }}
 
-export DIR={{ obj.contracts.repositoryDir }}
-echo "$DIR"
-
-export SERVER_PORT={{ obj.serverPort }}
-
 # cd matic contracts repo
 cd {{ obj.contracts.repositoryDir }}
 
-
-export PATH="$HOME/.foundry/bin:$PATH"
-
-
-forge script scripts/deployment-scripts/syncChildStateToRoot.s.sol:SyncChildStateToRootScript --rpc-url http://localhost:$SERVER_PORT --private-key $PRIVATE_KEY --broadcast
+# bor contracts are deployed on child chain
+npm run truffle:migrate:dev:bor -- --reset -f 5 --to 5 --compile-none

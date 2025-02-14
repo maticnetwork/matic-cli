@@ -6,7 +6,7 @@ import {
 import { maxRetries, runSshCommand } from '../common/remote-worker.js'
 import { timer } from '../common/time-utils.js'
 import dotenv from 'dotenv'
-import { fundAnvilAccounts } from '../common/anvil-utils.js'
+import { fundGanacheAccounts } from '../common/ganache-utils.js'
 
 export async function cleanup() {
   dotenv.config({ path: `${process.cwd()}/.env` })
@@ -16,7 +16,7 @@ export async function cleanup() {
   await cleanupServices(doc)
   await startServices(doc)
   await deployBorContractsAndStateSync(doc)
-  await fundAnvilAccounts(doc)
+  await fundGanacheAccounts(doc)
 }
 
 export async function stopServices(doc) {
@@ -61,9 +61,9 @@ export async function stopServices(doc) {
   let command
   const stopServiceTasks = nodeIps.map(async (ip) => {
     if (isHostMap.get(ip)) {
-      console.log('📍Stopping anvil on machine ' + ip + ' ...')
+      console.log('📍Stopping ganache on machine ' + ip + ' ...')
       command =
-        'sudo systemctl stop anvil.service || echo "anvil not running on current machine..."'
+        'sudo systemctl stop ganache.service || echo "ganache not running on current machine..."'
       await runSshCommand(ip, command, maxRetries)
     }
 
@@ -127,9 +127,9 @@ async function cleanupServices(doc) {
   let command
   const cleanupServicesTasks = nodeIps.map(async (ip) => {
     if (isHostMap.get(ip)) {
-      console.log('📍Cleaning up anvil on machine ' + ip + ' ...')
+      console.log('📍Cleaning up ganache on machine ' + ip + ' ...')
       command =
-        'rm -rf ~/data/anvil-db && rm -rf ~/matic-cli/devnet/data/anvil-db'
+        'rm -rf ~/data/ganache-db && rm -rf ~/matic-cli/devnet/data/ganache-db'
       await runSshCommand(ip, command, maxRetries)
     }
 
@@ -202,16 +202,16 @@ async function startServices(doc) {
   let command
   const startServicesTasks = nodeIps.map(async (ip) => {
     if (isHostMap.get(ip)) {
-      console.log('📍Running anvil in machine ' + ip + ' ...')
-      command = 'sudo systemctl start anvil.service'
+      console.log('📍Running ganache in machine ' + ip + ' ...')
+      command = 'sudo systemctl start ganache.service'
       await runSshCommand(ip, command, maxRetries)
 
       console.log('📍Deploying main net contracts on machine ' + ip + ' ...')
-      command = 'cd ~/matic-cli/devnet && bash anvil-deployment.sh'
+      command = 'cd ~/matic-cli/devnet && bash ganache-deployment.sh'
       await runSshCommand(ip, command, maxRetries)
 
       console.log('📍Setting up validators on machine ' + ip + ' ...')
-      command = 'cd ~/matic-cli/devnet && bash anvil-stake.sh'
+      command = 'cd ~/matic-cli/devnet && bash ganache-stake.sh'
       await runSshCommand(ip, command, maxRetries)
     }
 
@@ -259,11 +259,11 @@ async function deployBorContractsAndStateSync(doc) {
 
   console.log('📍Deploying contracts for bor on machine ' + ip + ' ...')
   await timer(60000)
-  let command = 'cd ~/matic-cli/devnet && bash anvil-deployment-bor.sh'
+  let command = 'cd ~/matic-cli/devnet && bash ganache-deployment-bor.sh'
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Deploying state-sync contracts on machine ' + ip + ' ...')
   await timer(60000)
-  command = 'cd ~/matic-cli/devnet && bash anvil-deployment-sync.sh'
+  command = 'cd ~/matic-cli/devnet && bash ganache-deployment-sync.sh'
   await runSshCommand(ip, command, maxRetries)
 }

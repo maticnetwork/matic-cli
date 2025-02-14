@@ -3,8 +3,8 @@ defaultFee: 2000
 borChainId: 15001
 heimdallChainId: heimdall-15001
 heimdallRepo: https://github.com/0xPolygon/heimdall-v2.git
-contractsRepo: https://github.com/0xPolygon/pos-contracts.git
-contractsBranch: arya/matic-cli/pos-1869
+contractsRepo: https://github.com/maticnetwoek/contracts.git
+contractsBranch: mardizzone/node-16
 genesisContractsBranch: master
 sprintSize:
   - '64'
@@ -18,7 +18,7 @@ numOfBorArchiveNodes: 0
 numOfErigonValidators: 0
 numOfErigonSentries: 0
 numOfErigonArchiveNodes: 0
-ethURL: http://anvil:9545
+ethURL: http://ganache:9545
 ethHostUser: ubuntu
 devnetType: docker
 borDockerBuildContext: 'https://github.com/maticnetwork/bor.git#develop'

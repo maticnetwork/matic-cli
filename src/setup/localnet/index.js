@@ -10,12 +10,12 @@ import { loadConfig } from '../config.js'
 
 import { Genesis } from '../genesis/index.js'
 import { Heimdall } from '../heimdall/index.js'
-import { Anvil } from '../anvil/index.js'
+import { Ganache } from '../ganache/index.js'
 import { Bor } from '../bor/index.js'
 import { processTemplateFiles } from '../../lib/utils.js'
 
 async function setupLocalnet(config) {
-  const anvil = new Anvil(config, {
+  const ganache = new Ganache(config, {
     contractsBranch: config.contractsBranch
   })
   const bor = new Bor(config, {
@@ -37,9 +37,9 @@ async function setupLocalnet(config) {
   const tasks = new Listr(
     [
       {
-        title: anvil.taskTitle,
+        title: ganache.taskTitle,
         task: () => {
-          return anvil.getTasks()
+          return ganache.getTasks()
         }
       },
       {
