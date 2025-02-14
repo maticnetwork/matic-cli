@@ -209,7 +209,7 @@ async function startServices(doc) {
       console.log('📍Deploying dependencies on machine ' + ip + ' ...')
       command = 'cd ~/matic-cli/devnet && bash anvil-deploy-dependencies.sh'
       await runSshCommand(ip, command, maxRetries)
-      
+
       console.log('📍Deploying mainnet contracts on machine ' + ip + ' ...')
       command = 'cd ~/matic-cli/devnet && bash anvil-deployment.sh'
       await runSshCommand(ip, command, maxRetries)
