@@ -9,24 +9,25 @@ export PRIVATE_KEY={{ obj.config.primaryAccount.privateKey }}
 
 export SERVER_PORT={{ obj.serverPort }}
 
+# Determine the primary account address (derived from PRIVATE_KEY)
+PRIMARY_ADDRESS=$(cast wallet address $PRIVATE_KEY)
+
+# Send 1 ether using the anvil's default private key to the primary account.
+cast send $PRIMARY_ADDRESS \
+--value 1ether \
+--private-key 0x9b28f36fbd67381120752d6172ecdcf10e06ab2d9a1367aac00cdcd6ac7855d3 \
+--rpc-url http://localhost:$SERVER_PORT
+
+# Wait till the transaction gets included in the block.
+sleep 2
+
+echo "Sent 1 ether to $PRIMARY_ADDRESS"
+
 # cd matic contracts repo
 cd {{ obj.contracts.repositoryDir }}
 
 echo "DEPLOYER_PRIVATE_KEY=$PRIVATE_KEY" >> .env
 echo "HEIMDALL_ID='$HEIMDALL_ID'" >> .env
-
-# Determine the primary account address (derived from PRIVATE_KEY)
-PRIMARY_ADDRESS=$(cast wallet address $PRIVATE_KEY)
-
-# Send funds from the default anvil account to the primary account.
-cast send $PRIMARY_ADDRESS \
---value 10ether \
---private-key 0x9b28f36fbd67381120752d6172ecdcf10e06ab2d9a1367aac00cdcd6ac7855d3 \
---rpc-url http://localhost:$SERVER_PORT
-
-sleep 2
-
-echo "Sent 10 ether to $PRIMARY_ADDRESS"
 
 forge script scripts/deployment-scripts/deployContracts.s.sol:DeploymentScript --rpc-url http://localhost:$SERVER_PORT --private-key $PRIVATE_KEY --broadcast
 

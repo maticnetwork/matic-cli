@@ -11,21 +11,22 @@ FEE={{ obj.config.defaultFee }}
 
 export SERVER_PORT={{ obj.serverPort }}
 
-# Navigate to the matic contracts directory
-cd {{ obj.contracts.repositoryDir }}
-
 # Determine the primary account address (derived from PRIVATE_KEY)
 PRIMARY_ADDRESS=$(cast wallet address $PRIVATE_KEY)
 
-# Send funds from the default anvil account to the primary account.
+# Send 1 ether using the anvil's default private key to the primary account.
 cast send $PRIMARY_ADDRESS \
---value 10ether \
+--value 1ether \
 --private-key 0x9b28f36fbd67381120752d6172ecdcf10e06ab2d9a1367aac00cdcd6ac7855d3 \
 --rpc-url http://localhost:$SERVER_PORT
 
+# Wait till the transaction gets included in the block.
 sleep 2
 
-echo "Sent 10 ether to $PRIMARY_ADDRESS"
+echo "Sent 1 ether to $PRIMARY_ADDRESS"
+
+# Navigate to the matic contracts directory
+cd {{ obj.contracts.repositoryDir }}
 
 # Loop over the accounts and run the stake script for each
 {% for acc in obj.config.accounts %}
