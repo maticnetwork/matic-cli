@@ -2,29 +2,33 @@
 
 set -x
 
+export PATH="$HOME/.foundry/bin:$PATH"
+
 # private key to deploy contracts
-export ANVIL_ACC={{ obj.deployerPrivateKey }}
 export PRIVATE_KEY={{ obj.config.primaryAccount.privateKey }}
-export MNEMONIC={{ obj.config.primaryAccount.privateKey }}
-
-# export heimdall id
-export HEIMDALL_ID={{ obj.config.heimdallChainId }}
-
-export DIR={{ obj.contracts.repositoryDir }}
-echo "$DIR"
 
 export SERVER_PORT={{ obj.serverPort }}
 
 # cd matic contracts repo
 cd {{ obj.contracts.repositoryDir }}
 
-export PATH="$HOME/.foundry/bin:$PATH"
+# Get the primary account address (derived from PRIVATE_KEY)
+PRIMARY_ADDRESS=$(cast wallet address $PRIVATE_KEY)
 
+# Send funds from the default anvil account to the primary account.
+cast send $PRIMARY_ADDRESS \
+  --value 10ether \
+  --private-key 0x9b28f36fbd67381120752d6172ecdcf10e06ab2d9a1367aac00cdcd6ac7855d3 \
+  --rpc-url http://localhost:$SERVER_PORT
 
- forge create --rpc-url http://localhost:$SERVER_PORT --private-key $ANVIL_ACC contracts/common/lib/Common.sol:Common --broadcast
+sleep 2
 
-forge create --rpc-url http://localhost:$SERVER_PORT --private-key  $ANVIL_ACC contracts/root/predicates/TransferWithSigUtils.sol:TransferWithSigUtils --broadcast
+echo "Sent 10 ether to $PRIMARY_ADDRESS"
 
-cast send --rpc-url http://localhost:$SERVER_PORT --private-key $ANVIL_ACC {{ obj.config.primaryAccount.address }} --value 10000ether
+forge create --rpc-url http://localhost:$SERVER_PORT --private-key $PRIVATE_KEY contracts/common/lib/Common.sol:Common --broadcast
+
+forge create --rpc-url http://localhost:$SERVER_PORT --private-key  $PRIVATE_KEY contracts/root/predicates/TransferWithSigUtils.sol:TransferWithSigUtils --broadcast
+
+cast send --rpc-url http://localhost:$SERVER_PORT --private-key $PRIVATE_KEY {{ obj.config.primaryAccount.address }} --value 10ether
 
 sleep 10
