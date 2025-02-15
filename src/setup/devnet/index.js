@@ -406,7 +406,7 @@ export class Devnet {
             fileReplacer(this.heimdallGenesisFilePath(i))
               .replace(
                 /"pol_token_address":[ ]*".*"/gi,
-                `"pol_token_address": "${rootContracts.tokens.TestToken}"`
+                `"pol_token_address": "${rootContracts.tokens.MaticToken}"`
               )
               .replace(
                 /"staking_manager_address":[ ]*".*"/gi,
