@@ -96,11 +96,11 @@ export function getKeystoreFile(privateKeyString, password) {
   }
 }
 
-// creating a wallet using mnemonics from anvil
-export function createAccountsFromMnemonics(mnemonics, totalAccounts) {
+// creating a wallet using mnemonic from anvil
+export function createAccountsFromMnemonic(mnemonic, totalAccounts) {
   const accounts = []
   for (let i = 0; i < totalAccounts; i++) {
-    const mn = ethers.Mnemonic.fromPhrase(mnemonics)
+    const mn = ethers.Mnemonic.fromPhrase(mnemonic)
     const account = ethers.HDNodeWallet.fromMnemonic(mn, `m/44'/60'/0'/0/${i}`)
 
     accounts.push(account)

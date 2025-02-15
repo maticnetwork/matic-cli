@@ -2,6 +2,8 @@
 borRepo: https://github.com/maticnetwork/bor.git
 borBranch: develop
 
+# TODO-HV2: Remove this once heimdall-v2 is public.
+# Use this format for heimdall-v2: https://<username>:<token>@github.com/0xPolygon/heimdall-v2.git
 heimdallRepo: https://github.com/0xPolygon/heimdall-v2.git
 heimdallBranch: develop
 
@@ -17,28 +19,30 @@ defaultStake: 10000
 defaultFee: 2000
 
 # L1
-ethURL: http://anvil:9545 # use localhost for local deployments
+ethURL: http://localhost:9545 # Use localhost for local deployments
 ethHostUser: ubuntu
 
-# Misc
-mnemonic: "clock radar mass judge dismiss just intact mind resemble fringe diary casino"
-
 # Heimdall
-heimdallChainId: heimdall-4052
+heimdallChainId: heimdall-15005
+# TODO-HV2: Remove this once heimdall-v2 is public.
+# Use this format for heimdall-v2: https://<username>:<token>@github.com/0xPolygon/heimdall-v2.git#develop
 heimdallDockerBuildContext: https://github.com/0xPolygon/heimdall-v2.git#develop
 
 # Bor
 borChainId: 15005
-sprintSize: 64
-sprintSizeBlockNumber: 0
+borDockerBuildContext: https://github.com/maticnetwork/bor.git#develop
+
+sprintSize: '64'
+sprintSizeBlockNumber: '0'
 blockNumber: '0'
 blockTime: '2'
+
 numOfBorValidators: 1
 numOfBorSentries: 1
 numOfBorArchiveNodes: 0
-borDockerBuildContext: https://github.com/maticnetwork/bor.git#develop
+
 devnetBorUsers: ubuntu,ubuntu
-devnetBorHosts: localhost # use localhost for local deployments
+devnetBorHosts: localhost # Use localhost for local deployments
 devnetBorFlags: config,config
 
 # Erigon

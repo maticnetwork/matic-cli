@@ -134,9 +134,8 @@ async function relayTxs(p, ip, polygonProviderUrl, index) {
   let polygonBlock = startBlock
 
   while (true) {
-    const txCount = await polygonProvider.eth.getBlockTransactionCount(
-      polygonBlock
-    )
+    const txCount =
+      await polygonProvider.eth.getBlockTransactionCount(polygonBlock)
 
     print(`📍 Block ${polygonBlock} has ${txCount} transactions`, index)
 

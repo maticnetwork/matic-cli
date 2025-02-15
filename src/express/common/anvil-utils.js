@@ -3,7 +3,7 @@ import { loadDevnetConfig } from '../common/config-utils.js'
 import { maxRetries, runScpCommand } from './remote-worker.js'
 import Web3 from 'web3'
 import dotenv from 'dotenv'
-import { createAccountsFromMnemonics } from '../../lib/utils.js'
+import { createAccountsFromMnemonic } from '../../lib/utils.js'
 
 const EthAmount = '10'
 
@@ -22,8 +22,8 @@ export async function fundAnvilAccounts(doc) {
   }
 
   if (borProdChainIds.includes(doc.borChainId)) {
-    console.log('📍Fund anvil accounts only works for devnet')
-    console.log('📍Skipping in case of mainnet, mumbai or amoy')
+    console.log('📍 Fund anvil accounts only works for devnet')
+    console.log('📍 Skipping in case of mainnet, mumbai or amoy')
     return
   }
 
@@ -43,16 +43,12 @@ export async function fundAnvilAccounts(doc) {
 
   const rootChainWeb3 = new Web3(`http://${machine0}:9545`)
 
-  const mnemonic = process.env.MNEMONIC
-  if (!mnemonic) {
-    console.error(
-      '❌ Error: MNEMONIC is not set. Please set it in the environment variables.'
-    )
-    process.exit(1)
-  }
-
-  const accounts = createAccountsFromMnemonics(mnemonic, 3)
-  const anvilAccount = accounts[1]
+  // Default anvil mnemonic
+  const mnemonic = 'test test test test test test test test test test test junk'
+  const accounts = createAccountsFromMnemonic(mnemonic, 3)
+  const anvilAccount = accounts[0]
+  console.log('📍 Anvil account address: ', anvilAccount.address)
+  console.log('📍 Anvil account private key: ', anvilAccount.privateKey)
 
   const account = rootChainWeb3.eth.accounts.privateKeyToAccount(
     anvilAccount.privateKey
@@ -70,7 +66,7 @@ export async function fundAnvilAccounts(doc) {
       value: rootChainWeb3.utils.toWei(EthAmount, 'ether')
     })
     console.log(
-      '📍Funds transferred from ' +
+      '📍 Funds transferred from ' +
         anvilAccount +
         ' to ' +
         signerDump[i].address +

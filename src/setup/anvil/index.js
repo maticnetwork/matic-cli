@@ -7,7 +7,7 @@ import fs from 'fs-extra'
 import { loadConfig } from '../config.js'
 import {
   processTemplateFiles,
-  createAccountsFromMnemonics
+  createAccountsFromMnemonic
 } from '../../lib/utils.js'
 import { getDefaultBranch } from '../helper.js'
 import { Contracts } from '../contracts/index.js'
@@ -16,18 +16,17 @@ import { getRemoteStdio } from '../../express/common/remote-worker.js'
 export class Anvil {
   constructor(config, options = {}) {
     this.config = config
-    this.mnemonic = config.mnemonic
 
-    if (!this.mnemonic) {
-      console.error(
-        '❌ Error: MNEMONIC is not set. Please set it in the configuration file or environment variables.'
-      )
-      process.exit(1)
-    }
+    // Default anvil mnemonic
+    const mnemonic =
+      'test test test test test test test test test test test junk'
 
-    this.deployerAccount = createAccountsFromMnemonics(this.mnemonic, 1)
-    console.log(`Deployer's account : ${this.deployerAccount[0].privateKey}`)
+    this.deployerAccount = createAccountsFromMnemonic(mnemonic, 1)
+    console.log(`📍 Deployer's account : ${this.deployerAccount[0].address}`)
     this.deployerPrivateKey = this.deployerAccount[0].privateKey
+    console.log(
+      `📍 Deployer's private key : ${this.deployerAccount[0].privateKey}`
+    )
 
     this.dbName = options.dbName || 'anvil-db'
     this.serverPort = options.serverPort || 9545
@@ -80,6 +79,11 @@ export class Anvil {
   async getContractDeploymentTasks() {
     let server = null
 
+    // Default anvil mnemonic
+    const mnemonic =
+      'test test test test test test test test test test test junk'
+    const derivationPath = "m/44'/60'/0'/0/"
+
     return new Listr(
       [
         {
@@ -92,23 +96,25 @@ export class Anvil {
             server = execa(
               'anvil',
               [
+                '--host',
+                '0.0.0.0',
                 '--port',
                 `${this.serverPort}`,
+                '--mnemonic',
+                `${mnemonic}`,
+                '--derivation-path',
+                `${derivationPath}`,
                 '--balance',
-                '1000000000000000',
-                '--gas-limit',
-                '1000000000000',
+                '100000',
+                '--state',
+                `${this.dbDir}`,
+                '--block-time',
+                '2',
                 '--gas-price',
                 '1',
-                '--accounts',
-                '10',
-                '--mnemonic',
-                `${this.mnemonic}`,
-                '--code-size-limit',
-                '10000000000',
-                '--verbosity',
-                '--state',
-                `${this.dbDir}`
+                '--gas-limit',
+                '1000000000000',
+                '--disable-code-size-limit'
               ],
               {
                 stdio: 'inherit',

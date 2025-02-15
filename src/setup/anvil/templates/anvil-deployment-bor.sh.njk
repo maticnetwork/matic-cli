@@ -2,23 +2,12 @@
 
 set -x
 
-# private key to deploy contracts
-export PRIVATE_KEY={{ obj.config.primaryAccount.privateKey }}
-export MNEMONIC={{ obj.config.primaryAccount.privateKey }}
-
-# export heimdall id
-export HEIMDALL_ID={{ obj.config.heimdallChainId }}
-
-export DIR={{ obj.contracts.repositoryDir }}
-echo "$DIR"
-
-export SERVER_PORT={{ obj.serverPort }}
-
-# cd matic contracts repo
-cd {{ obj.contracts.repositoryDir }}
-
-
 export PATH="$HOME/.foundry/bin:$PATH"
 
-forge script scripts/deployment-scripts/childContractDeployment.s.sol:ChildContractDeploymentScript --rpc-url http://localhost:$SERVER_PORT --private-key $PRIVATE_KEY --broadcast
+BOR_PRIVATE_KEY={{ obj.config.primaryAccount.privateKey }}
 
+cd {{ obj.contracts.repositoryDir }}
+
+# We use --legacy here so that the transaction doesn't fail on Bor with low transaction fees,
+# and 8545 because we want to deploy the contract on the Bor (L2) and not on the Anvil (L1).
+forge script scripts/deployment-scripts/childContractDeployment.s.sol:ChildContractDeploymentScript --legacy --rpc-url http://localhost:8545 --private-key $BOR_PRIVATE_KEY --broadcast

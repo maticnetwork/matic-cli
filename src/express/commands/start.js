@@ -75,8 +75,8 @@ async function installRequiredSoftwareOnRemoteMachines(
     i === 0
       ? (user = `${doc.ethHostUser}`)
       : i >= borUsers.length
-      ? (user = `${erigonUsers[i - borUsers.length]}`)
-      : (user = `${borUsers[i]}`)
+        ? (user = `${erigonUsers[i - borUsers.length]}`)
+        : (user = `${borUsers[i]}`)
     ip = `${user}@${ipsArray[i]}`
     nodeIps.push(ip)
     /* eslint-disable */
@@ -277,8 +277,8 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType, devnetId) {
     i === 0
       ? (user = `${doc.ethHostUser}`)
       : i >= borUsers.length
-      ? (user = `${erigonUsers[i - borUsers.length]}`)
-      : (user = `${borUsers[i]}`)
+        ? (user = `${erigonUsers[i - borUsers.length]}`)
+        : (user = `${borUsers[i]}`)
     ip = `${user}@${ipsArray[i]}`
     nodeIps.push(ip)
     /* eslint-disable */

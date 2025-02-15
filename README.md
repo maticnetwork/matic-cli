@@ -470,8 +470,7 @@ DONE Devnet is ready
 Once the setup is done, use the aggregated script for local docker deployment
 
 ```bash
-chmod +x ../docker_devnet.sh
-../docker_devnet.sh
+bash ../docker_devnet.sh
 ```
 
 Logs will be stored under `logs/` folder
