@@ -5,7 +5,7 @@ borBranch: develop
 heimdallRepo: https://github.com/maticnetwork/heimdall.git
 heimdallBranch: develop
 
-contractsRepo: https://github.com/maticnetwork/pos-contracts.git
+contractsRepo: https://github.com/0xPolygon/pos-contracts.git
 contractsBranch: arya/matic-cli/pos-1869
 
 genesisContractsRepo: https://github.com/maticnetwork/genesis-contracts.git
