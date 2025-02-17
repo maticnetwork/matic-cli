@@ -8,17 +8,10 @@ networks:
         - subnet: 172.20.1.0/24
 
 services:
-  ganache:
-    image: "trufflesuite/ganache:latest"
-    container_name: ganache
-    networks:
-      - devnet-network
-    volumes:
-      - ./data:/data
-    ports:
-      - "9545:9545"
   anvil:
     image: ghcr.io/foundry-rs/foundry:latest
+    networks:
+      - devnet-network
     volumes:
       - ./data:/data
     ports:

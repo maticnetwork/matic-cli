@@ -200,7 +200,7 @@ export class Heimdall {
             fileReplacer(this.heimdallGenesisFilePath)
               .replace(
                 /"matic_token_address":[ ]*".*"/gi,
-                `"matic_token_address": "${rootContracts.tokens.TestToken}"`
+                `"matic_token_address": "${rootContracts.tokens.MaticToken}"`
               )
               .replace(
                 /"staking_manager_address":[ ]*".*"/gi,
