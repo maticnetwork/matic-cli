@@ -17,7 +17,7 @@ defaultStake: 10000
 defaultFee: 2000
 
 # L1
-ethURL: http://ganacheURL:9545 # use localhost for local deployments
+ethURL: http://ganache:9545 # use localhost for local deployments
 ethHostUser: ubuntu
 
 # Heimdall
@@ -30,13 +30,12 @@ sprintSize: 64
 sprintSizeBlockNumber: 0
 blockNumber: '0'
 blockTime: '2'
-numOfBorValidators: 1
-numOfBorSentries: 1
+numOfBorValidators: 3
+numOfBorSentries: 0
 numOfBorArchiveNodes: 0
 borDockerBuildContext: https://github.com/maticnetwork/bor.git#develop
-devnetBorUsers: ubuntu,ubuntu
-devnetBorHosts: ["ec2-xx-xxx-xx-xxx.eu-west-1.compute.amazonaws.com"] # use localhost for local deployments
-devnetBorFlags: config,config
+devnetBorUsers: ubuntu,ubuntu,ubuntu
+devnetBorFlags: config,config,config
 
 # Erigon
 numOfErigonValidators: 0
