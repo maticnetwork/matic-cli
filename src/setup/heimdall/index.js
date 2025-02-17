@@ -128,7 +128,7 @@ export class Heimdall {
     return execa(
       this.heimdalldCmd,
       [
-        'generate-validatorkey',
+        'generate-validator-key',
         this.config.primaryAccount.privateKey,
         '--home',
         this.heimdallDataDir
