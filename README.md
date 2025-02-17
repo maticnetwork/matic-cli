@@ -457,7 +457,7 @@ Adjust the [docker configs](configs/devnet/docker-setup-config.yaml) based on yo
 ```bash
 mkdir devnet \
   && cd devnet \
-  && ../bin/matic-cli.js setup devnet --config ../configs/devnet/docker-setup-config.yaml | tee setup.log
+  && ../bin/matic-cli.js setup devnet --config ../configs/devnet/docker-setup-config.yaml
 ```
 
 This will create and spin up the devnet.
@@ -470,8 +470,7 @@ DONE Devnet is ready
 Once the setup is done, use the aggregated script for local docker deployment
 
 ```bash
-chmod +x ../docker_devnet.sh
-../docker_devnet.sh
+bash ../docker_devnet.sh
 ```
 
 Logs will be stored under `logs/` folder
