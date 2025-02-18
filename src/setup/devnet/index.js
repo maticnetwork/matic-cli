@@ -262,7 +262,7 @@ export class Devnet {
               )
               .replace(
                 /bor_grpc_flag[ ]*=[ ]*".*"/gi,
-                'bor_grpc_flag = "true"'
+                'bor_grpc_flag = "false"'
               )
               .replace(
                 /bor_grpc_url[ ]*=[ ]*".*"/gi,
@@ -321,7 +321,7 @@ export class Devnet {
         }
       },
       {
-        title: 'Process templates',
+        title: 'Process njk templates',
         task: async () => {
           const templateDir = path.resolve(
             new URL(import.meta.url).pathname,
@@ -349,7 +349,7 @@ export class Devnet {
           // process template files
           await processTemplateFiles(this.config.targetDirectory, {
             obj: this,
-            ganache: this.anvil
+            anvil: this.anvil
           })
 
           for (let i = 0; i < this.totalBorNodes; i++) {
@@ -1465,7 +1465,6 @@ export class Devnet {
 
     const accountTasks = await this.accountTask()
     await accountTasks.run()
-    console.log(this.config.accounts)
 
     if (!this.config.network) {
       const genesisTasks = await this.genesisTask(genesis)

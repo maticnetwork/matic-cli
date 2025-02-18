@@ -20,5 +20,5 @@ cd {{ obj.contracts.repositoryDir }}
 
 export PATH="$HOME/.foundry/bin:$PATH"
 
-forge script scripts/deployment-scripts/childContractDeployment.s.sol:ChildContractDeploymentScript --rpc-url http://localhost:$SERVER_PORT --private-key $PRIVATE_KEY --broadcast
+forge script --legacy scripts/deployment-scripts/childContractDeployment.s.sol:ChildContractDeploymentScript --rpc-url http://localhost:8545 --private-key $PRIVATE_KEY --broadcast
 

@@ -2,7 +2,7 @@
 
 # Run the devnet - Consolidated script
 
-# Start Anvil
+# Start Anvil 
 bash docker-anvil-start.sh || { echo "Failed to start Anvil"; exit 1; }
 
 # Start Heimdall
@@ -14,9 +14,9 @@ bash docker-bor-setup.sh || { echo "Failed to setup Bor"; exit 1; }
 # Start Bor
 bash docker-bor-start-all.sh || { echo "Failed to start Bor"; exit 1; }
 
-sleep 2m
+sleep 5m
 
-# Deploy Bor to Anvil
+# Deploy Bor to Anvil 
 bash anvil-deployment-bor.sh || { echo "Failed to deploy Bor to Anvil"; exit 1; }
 
 # Sync Anvil deployment

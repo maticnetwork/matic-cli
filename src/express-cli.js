@@ -645,7 +645,7 @@ export async function cli() {
       '⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...'
     )
     await startRpcTest()
-  } else if (options.fundGanacheAccounts) {
+  } else if (options.fundAnvilAccounts) {
     console.log('📍Command --fund-anvil-accounts')
     if (!checkDir(false)) {
       console.log(
