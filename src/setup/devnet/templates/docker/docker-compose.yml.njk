@@ -29,14 +29,14 @@ services:
     build:
       context: {{ obj.config.heimdallDockerBuildContext }}
       dockerfile: Dockerfile
-    image: local/heimdall
+    image: local/heimdall-v2
       {% else %}
-    image: local/heimdall
+    image: local/heimdall-v2
       {% endif %}
     {% else %}
     image: "0xpolygon/heimdall-v2:{{ obj.config.heimdallBranch }}"
     {% endif %}
-    container_name: heimdall{{ node }}
+    container_name: heimdall-v2-{{ node }}
     depends_on:
       - rabbit{{ node }}
     networks:
@@ -66,12 +66,12 @@ services:
 
     container_name: bor{{ node }}
     # depends_on:
-    #  - heimdall{{ node }}
+    #  - heimdall-v2-{{ node }}
     networks:
       devnet-network:
           ipv4_address: 172.20.1.{{ node + 100 }}
     environment:
-      - HEIMDALL_URL=http://heimdall{{ node }}:1317
+      - HEIMDALL_URL=http://heimdall-v2-{{ node }}:1317
     volumes:
       - ./devnet/node{{ node }}/bor:/var/lib/bor
       - ./logs/node{{ node }}/bor:/logs
