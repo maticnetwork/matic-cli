@@ -7,7 +7,7 @@ import fs from 'fs-extra'
 import { loadConfig } from '../config.js'
 import {
   processTemplateFiles,
-  createAccountsFromMnemonics
+  createAccountsFromMnemonic
 } from '../../lib/utils.js'
 import { getDefaultBranch } from '../helper.js'
 import { Contracts } from '../contracts/index.js'
@@ -16,18 +16,18 @@ import { getRemoteStdio } from '../../express/common/remote-worker.js'
 export class Anvil {
   constructor(config, options = {}) {
     this.config = config
-    this.mnemonic = config.mnemonic
 
-    if (!this.mnemonic) {
-      console.error(
-        '❌ Error: MNEMONIC is not set. Please set it in the configuration file or environment variables.'
-      )
-      process.exit(1)
-    }
+    const defaultAnvilMnemonic =
+      'test test test test test test test test test test test junk'
+    const accounts = createAccountsFromMnemonic(defaultAnvilMnemonic, 1)
 
-    this.deployerAccount = createAccountsFromMnemonics(this.mnemonic, 1)
-    console.log(`Deployer's account : ${this.deployerAccount[0].privateKey}`)
-    this.deployerPrivateKey = this.deployerAccount[0].privateKey
+    this.defaultAnvilAccount = accounts[0]
+    console.log(`Default anvil account: ${this.defaultAnvilAccount.address}`)
+
+    this.defaultAnvilPrivateKey = this.defaultAnvilAccount.privateKey
+    console.log(
+      `Default anvil private key: ${this.defaultAnvilAccount.privateKey}`
+    )
 
     this.dbName = options.dbName || 'anvil-db'
     this.serverPort = options.serverPort || 9545
@@ -94,21 +94,12 @@ export class Anvil {
               [
                 '--port',
                 `${this.serverPort}`,
-                '--balance',
-                '1000000000000000',
-                '--gas-limit',
-                '1000000000000',
-                '--gas-price',
-                '1',
-                '--accounts',
-                '10',
-                '--mnemonic',
-                `${this.mnemonic}`,
-                '--code-size-limit',
-                '10000000000',
-                '--verbosity',
                 '--state',
-                `${this.dbDir}`
+                `${this.dbDir}`,
+                '--balance',
+                '1000000',
+                '--disable-block-gas-limit',
+                '--disable-code-size-limit'
               ],
               {
                 stdio: 'inherit',

@@ -5,15 +5,6 @@ set -x
 export PATH="$HOME/.foundry/bin:$PATH"
 
 DATA_DIR={{ obj.dbDir }}
+SERVER_PORT={{ obj.serverPort }}
 
-anvil \
-  --port 9545 \
-  --host 0.0.0.0 \
-  --balance 1000000000000000 \
-  --gas-limit 1000000000000 \
-  --gas-price 1 \
-  --code-size-limit 10000000000 \
-  --state $DATA_DIR \
-  --verbosity \
-  --block-time 1
-
+anvil --port $SERVER_PORT --state $DATA_DIR --balance 1000000 --disable-block-gas-limit --disable-code-size-limit

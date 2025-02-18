@@ -2,20 +2,12 @@
 
 set -x
 
-# private key to deploy contracts
-export PRIVATE_KEY={{ obj.config.primaryAccount.privateKey }}
-export MNEMONIC={{ obj.config.primaryAccount.privateKey }}
+DIR={{ obj.contracts.repositoryDir }}
+PRIVATE_KEY={{ obj.config.primaryAccount.privateKey }}
 
-# export heimdall id
-export HEIMDALL_ID={{ obj.config.heimdallChainId }}
-
-export DIR={{ obj.contracts.repositoryDir }}
-echo "$DIR"
-
-# cd matic contracts repo
-cd {{ obj.contracts.repositoryDir }}
-
-export PATH="$HOME/.foundry/bin:$PATH"
+# Matic contracts repo
+cd $DIR
 
 forge script --legacy scripts/deployment-scripts/childContractDeployment.s.sol:ChildContractDeploymentScript --rpc-url http://localhost:8545 --private-key $PRIVATE_KEY --broadcast
 
+sleep 5

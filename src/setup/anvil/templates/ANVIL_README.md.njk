@@ -1,0 +1,36 @@
+## Anvil
+
+By default, all the contracts are deployed.
+
+- Contract addresses json: `{{ obj.contracts.contractAddressesPath }}`
+- Anvil DB path: `{{ obj.dbDir }}`
+
+**To start Anvil**
+
+```bash
+bash anvil-start.sh
+```
+
+### Setup
+
+Note that, by default, it doesn't need to setup.
+
+**To clean the current setup**
+
+```bash
+bash anvil-clean.sh
+```
+
+**To deploy on anvil**
+
+```bash
+bash anvil-deployment.sh
+```
+
+**To stake with default addresses**
+
+```bash
+bash anvil-stake.sh
+```
+
+This will stake {{ obj.config.defaultStake }} tokens for {{ obj.config.primaryAccount.address }}.

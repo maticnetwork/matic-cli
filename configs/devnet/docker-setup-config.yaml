@@ -1,7 +1,12 @@
 # Repositories
+
+# TODO HV2: Remove this once heimdall-v2 is public.
+# Use this format for bor: https://<username>:<token>@github.com/maticnetwork/bor.git
 borRepo: https://github.com/maticnetwork/bor.git
 borBranch: raneet10/heimdallv2-changes
 
+# TODO HV2: Remove this once heimdall-v2 is public.
+# Use this format for heimdall-v2: https://<username>:<token>@github.com/0xPolygon/heimdall-v2.git
 heimdallRepo: https://github.com/0xPolygon/heimdall-v2.git
 heimdallBranch: develop
 
@@ -17,14 +22,13 @@ defaultStake: 10000
 defaultFee: 2000
 
 # L1
-ethURL: http://anvil:9545 # use localhost for local deployments
+ethURL: http://localhost:9545 # use localhost for local deployments
 ethHostUser: ubuntu
 
-# Misc
-mnemonic: "clock radar mass judge dismiss just intact mind resemble fringe diary casino"
-
 # Heimdall
-heimdallChainId: heimdall-4052
+heimdallChainId: heimdall-15005
+# TODO HV2: Remove this once heimdall-v2 is public.
+# Use this format for heimdall-v2: https://<username>:<token>@github.com/0xPolygon/heimdall-v2.git#develop
 heimdallDockerBuildContext: https://github.com/0xPolygon/heimdall-v2.git#develop
 
 # Bor
@@ -36,6 +40,8 @@ blockTime: '2'
 numOfBorValidators: 3
 numOfBorSentries: 0
 numOfBorArchiveNodes: 0
+# TODO HV2: Remove this once heimdall-v2 is public.
+# Use this format for bor: https://<username>:<token>@github.com/maticnetwork/bor.git#raneet10/heimdallv2-changes
 borDockerBuildContext: https://github.com/maticnetwork/bor.git#raneet10/heimdallv2-changes
 devnetBorUsers: ubuntu,ubuntu,ubuntu
 devnetBorFlags: config,config,config

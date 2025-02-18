@@ -2,23 +2,13 @@
 
 set -x
 
-# private key to deploy contracts
-export PRIVATE_KEY={{ obj.config.primaryAccount.privateKey }}
-export MNEMONIC={{ obj.config.primaryAccount.privateKey }}
+SERVER_PORT={{ obj.serverPort }}
+DIR={{ obj.contracts.repositoryDir }}
+ANVIL_PRIVATE_KEY={{ obj.defaultAnvilPrivateKey }}
 
-# export heimdall id
-export HEIMDALL_ID={{ obj.config.heimdallChainId }}
+# Matic contracts repo
+cd $DIR
 
-export DIR={{ obj.contracts.repositoryDir }}
-echo "$DIR"
+forge script scripts/deployment-scripts/syncChildStateToRoot.s.sol:SyncChildStateToRootScript --rpc-url http://localhost:$SERVER_PORT --private-key $ANVIL_PRIVATE_KEY --broadcast
 
-export SERVER_PORT={{ obj.serverPort }}
-
-# cd matic contracts repo
-cd {{ obj.contracts.repositoryDir }}
-
-
-export PATH="$HOME/.foundry/bin:$PATH"
-
-
-forge script scripts/deployment-scripts/syncChildStateToRoot.s.sol:SyncChildStateToRootScript --rpc-url http://localhost:$SERVER_PORT --private-key $PRIVATE_KEY --broadcast
+sleep 5

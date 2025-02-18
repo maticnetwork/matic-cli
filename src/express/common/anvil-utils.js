@@ -3,7 +3,7 @@ import { loadDevnetConfig } from '../common/config-utils.js'
 import { maxRetries, runScpCommand } from './remote-worker.js'
 import Web3 from 'web3'
 import dotenv from 'dotenv'
-import { createAccountsFromMnemonics } from '../../lib/utils.js'
+import { createAccountsFromMnemonic } from '../../lib/utils.js'
 
 const EthAmount = '10'
 
@@ -43,19 +43,15 @@ export async function fundAnvilAccounts(doc) {
 
   const rootChainWeb3 = new Web3(`http://${machine0}:9545`)
 
-  const mnemonic = process.env.MNEMONIC
-  if (!mnemonic) {
-    console.error(
-      '❌ Error: MNEMONIC is not set. Please set it in the environment variables.'
-    )
-    process.exit(1)
-  }
+  // Default anvil mnemonic
+  const defaultAnvilMnemonic =
+    'test test test test test test test test test test test junk'
 
-  const accounts = createAccountsFromMnemonics(mnemonic, 3)
-  const anvilAccount = accounts[1]
+  const accounts = createAccountsFromMnemonic(defaultAnvilMnemonic, 1)
+  const defaultAnvilAccount = accounts[0]
 
   const account = rootChainWeb3.eth.accounts.privateKeyToAccount(
-    anvilAccount.privateKey
+    defaultAnvilAccount.privateKey
   )
   rootChainWeb3.eth.accounts.wallet.add(account)
 
@@ -71,7 +67,7 @@ export async function fundAnvilAccounts(doc) {
     })
     console.log(
       '📍Funds transferred from ' +
-        anvilAccount +
+        defaultAnvilAccount +
         ' to ' +
         signerDump[i].address +
         ' with txHash ' +

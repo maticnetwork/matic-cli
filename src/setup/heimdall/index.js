@@ -256,7 +256,7 @@ export class Heimdall {
     }
   }
 
-  // TODO HV2: Remove this task once heimdall-v2 is public
+  // TODO HV2: Remove this once heimdall-v2 is public
   goPrivateTask() {
     return {
       title: 'Setup GOPRIVATE',

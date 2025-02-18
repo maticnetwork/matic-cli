@@ -2,22 +2,20 @@
 
 set -x
 
-# Set up default stake and fee values
-PRIVATE_KEY={{ obj.config.primaryAccount.privateKey }}
-STAKE={{ obj.config.defaultStake }}
-FEE={{ obj.config.defaultFee }}
+SERVER_PORT={{ obj.serverPort }}
+DIR={{ obj.contracts.repositoryDir }}
+ANVIL_PRIVATE_KEY={{ obj.defaultAnvilPrivateKey }}
 
-export SERVER_PORT={{ obj.serverPort }}
+{% for acc in obj.config.accounts %}
+cast send {{ acc.address }} --value 100ether --rpc-url http://localhost:$SERVER_PORT --private-key $ANVIL_PRIVATE_KEY
+sleep 2
+{% endfor %}
 
-
-# Navigate to the matic contracts directory
-cd {{ obj.contracts.repositoryDir }}
+# Matic contracts repo
+cd $DIR
 
 # Loop over accounts and run the stake script for each
 {% for acc in obj.config.accounts %}
-# forge script scripts/stake.s.sol --rpc-url http://127.0.0.1:9545 \
-  # --broadcast --private-key {{ acc.privateKey }} \
-  # --constructor-args {{ acc.address }} $STAKE $FEE
-  forge script scripts/matic-cli-scripts/stake.s.sol:MaticStake --rpc-url http://localhost:$SERVER_PORT --private-key $PRIVATE_KEY --broadcast --sig "run(address,bytes,uint256,uint256)" {{ acc.address }} {{ acc.pub_key }} 10000000000000000000 10000000000000000000
-sleep 10
+forge script scripts/matic-cli-scripts/stake.s.sol:MaticStake --rpc-url http://localhost:$SERVER_PORT --private-key $ANVIL_PRIVATE_KEY --broadcast --sig "run(address,bytes,uint256,uint256)" {{ acc.address }} {{ acc.pub_key }} 10000000000000000000 10000000000000000000
+sleep 2
 {% endfor %}

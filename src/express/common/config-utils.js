@@ -235,11 +235,6 @@ function validateEnvVars(cloud) {
     }),
     VERBOSE: bool({ default: true }),
     DD_API_KEY: validStr({ default: 'DATADOG_API_KEY' }),
-    MNEMONIC: validStr({
-      default:
-        'clock radar mass judge dismiss just intact ' +
-        'mind resemble fringe diary casino'
-    }),
     SPEED: num({ default: 200 }),
     MAX_ACCOUNTS: num({ default: 100000 }),
     FUND: bool({ default: true }),
@@ -512,7 +507,6 @@ function setCommonConfigs(doc) {
 
   setConfigValue('borChainId', borChainId, doc)
   setConfigValue('etherscanAPIKey', process.env.ETHERSCAN_API_KEY, doc)
-  setConfigValue('mnemonic', process.env.MNEMONIC, doc)
   setConfigValue('heimdallChainId', heimdallChainId, doc)
   setConfigList('sprintSize', process.env.SPRINT_SIZE, doc)
   setConfigList(
