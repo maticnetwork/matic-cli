@@ -47,7 +47,7 @@ numOfNonValidators: 0
 devnetType: remote
 
 # URL to Ethereum RPC
-ethURL: http://ganache:9545
+ethURL: http://anvil:9545
 
 # Remote user for Ethereum RPC. Only effective when devnetType is `remote`.
 ethHostUser: ubuntu

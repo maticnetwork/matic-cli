@@ -44,7 +44,7 @@ import { keypairDestroy } from './express/commands/keypair-destroy.js'
 import { constants } from './express/common/constants.js'
 
 import pkg from '../package.json' assert { type: 'json' }
-import { fundGanacheAccounts } from './express/common/ganache-utils.js'
+import { fundAnvilAccounts } from './express/common/anvil-utils.js'
 
 function checkCloudProvider(provider, _) {
   const supportedClouds = [constants.cloud.AWS, constants.cloud.GCP]
@@ -163,7 +163,7 @@ program
   )
   .option('-relay, --relay', 'Relay transaction to shadow node')
   .option('-rpc, --rpc-test', 'Run the rpc test command')
-  .option('-fga, --fund-ganache-accounts', 'Add funds to ganache accounts')
+  .option('-fga, --fund-anvil-accounts', 'Add funds to anvil accounts')
   .version(pkg.version)
 
 export async function cli() {
@@ -645,14 +645,14 @@ export async function cli() {
       '⛔ This command is only available for non-dockerized devnets. Make sure to target such environment...'
     )
     await startRpcTest()
-  } else if (options.fundGanacheAccounts) {
-    console.log('📍Command --fund-ganache-accounts')
+  } else if (options.fundAnvilAccounts) {
+    console.log('📍Command --fund-anvil-accounts')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
       )
       process.exit(1)
     }
-    await fundGanacheAccounts()
+    await fundAnvilAccounts()
   }
 }

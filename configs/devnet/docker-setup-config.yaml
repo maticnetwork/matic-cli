@@ -5,8 +5,8 @@ borBranch: develop
 heimdallRepo: https://github.com/maticnetwork/heimdall.git
 heimdallBranch: develop
 
-contractsRepo: https://github.com/maticnetwork/contracts.git
-contractsBranch: mardizzone/node-16
+contractsRepo: https://github.com/0xPolygon/pos-contracts.git
+contractsBranch: arya/matic-cli/pos-1869
 
 genesisContractsRepo: https://github.com/maticnetwork/genesis-contracts.git
 genesisContractsBranch: master
@@ -17,8 +17,11 @@ defaultStake: 10000
 defaultFee: 2000
 
 # L1
-ethURL: http://ganache:9545 # use localhost for local deployments
+ethURL: http://anvil:9545 # use localhost for local deployments
 ethHostUser: ubuntu
+
+# Misc
+mnemonic: "clock radar mass judge dismiss just intact mind resemble fringe diary casino" 
 
 # Heimdall
 heimdallChainId: heimdall-4052

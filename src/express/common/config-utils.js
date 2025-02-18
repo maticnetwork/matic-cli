@@ -511,6 +511,8 @@ function setCommonConfigs(doc) {
   }
 
   setConfigValue('borChainId', borChainId, doc)
+  setConfigValue('etherscanAPIKey', process.env.ETHERSCAN_API_KEY, doc)
+  setConfigValue('mnemonic', process.env.MNEMONIC, doc)
   setConfigValue('heimdallChainId', heimdallChainId, doc)
   setConfigList('sprintSize', process.env.SPRINT_SIZE, doc)
   setConfigList(
@@ -853,7 +855,7 @@ export async function editMaticCliDockerYAMLConfig() {
   setCommonConfigs(doc)
   setEthHostUser('ubuntu', doc)
   setConfigValue('devnetType', 'docker', doc)
-  setEthURL('ganache', doc)
+  setEthURL('anvil', doc)
 
   fs.writeFile(
     `${process.cwd()}/docker-setup-config.yaml`,
