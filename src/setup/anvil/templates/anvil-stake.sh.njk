@@ -7,7 +7,7 @@ DIR={{ obj.contracts.repositoryDir }}
 ANVIL_PRIVATE_KEY={{ obj.defaultAnvilPrivateKey }}
 
 {% for acc in obj.config.accounts %}
-cast send {{ acc.address }} --value 100ether --rpc-url http://localhost:$SERVER_PORT --private-key $ANVIL_PRIVATE_KEY
+cast send {{ acc.address }} --value 1000ether --rpc-url http://localhost:$SERVER_PORT --private-key $ANVIL_PRIVATE_KEY
 sleep 2
 {% endfor %}
 

@@ -95,19 +95,6 @@ export class Bor {
     return new Listr(
       [
         {
-          title: 'Setup GOPRIVATE',
-          task: () => {
-            return execa(
-              'go',
-              ['env', '-w', 'GOPRIVATE=github.com/0xPolygon/*'],
-              {
-                cwd: this.repositoryDir,
-                stdio: getRemoteStdio()
-              }
-            )
-          }
-        },
-        {
           title: 'Clone Bor repository',
           task: () =>
             cloneRepository(
