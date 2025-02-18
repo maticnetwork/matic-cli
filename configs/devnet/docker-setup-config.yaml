@@ -21,7 +21,7 @@ ethURL: http://anvil:9545 # use localhost for local deployments
 ethHostUser: ubuntu
 
 # Misc
-mnemonic: "clock radar mass judge dismiss just intact mind resemble fringe diary casino"
+mnemonic: 'clock radar mass judge dismiss just intact mind resemble fringe diary casino'
 
 # Heimdall
 heimdallChainId: heimdall-4052
