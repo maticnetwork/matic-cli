@@ -2,6 +2,8 @@
 
 set -x
 
+export PATH="$HOME/.foundry/bin:$PATH"
+
 SERVER_PORT={{ obj.serverPort }}
 DIR={{ obj.contracts.repositoryDir }}
 HEIMDALL_ID={{ obj.config.heimdallChainId }}

@@ -2,6 +2,8 @@
 
 set -x
 
+export PATH="$HOME/.foundry/bin:$PATH"
+
 DIR={{ obj.contracts.repositoryDir }}
 PRIVATE_KEY={{ obj.config.primaryAccount.privateKey }}
 
