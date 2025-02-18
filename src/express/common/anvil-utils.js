@@ -41,7 +41,7 @@ export async function fundAnvilAccounts(doc) {
     fs.readFileSync(`${process.cwd()}/signer-dump.json`, 'utf8')
   )
 
-  const rootChainWeb3 = new Web3(`http://${machine0}:9545`)
+  const rootChainWeb3 = new Web3("http://localhost:9545")
 
   // Default anvil mnemonic
   const defaultAnvilMnemonic =

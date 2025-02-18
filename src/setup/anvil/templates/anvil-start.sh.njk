@@ -7,4 +7,4 @@ export PATH="$HOME/.foundry/bin:$PATH"
 DATA_DIR={{ obj.dbDir }}
 SERVER_PORT={{ obj.serverPort }}
 
-anvil --host 0.0.0.0 --port $SERVER_PORT --state $DATA_DIR --balance 1000000 --disable-block-gas-limit --disable-code-size-limit
+anvil --port $SERVER_PORT --state $DATA_DIR --balance 1000000 --disable-block-gas-limit --disable-code-size-limit

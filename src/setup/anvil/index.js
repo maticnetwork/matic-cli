@@ -92,8 +92,6 @@ export class Anvil {
             server = execa(
               'anvil',
               [
-                '--host,',
-                '0.0.0.0',
                 '--port',
                 `${this.serverPort}`,
                 '--state',
