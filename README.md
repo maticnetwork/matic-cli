@@ -455,7 +455,7 @@ Adjust the [docker configs](configs/devnet/docker-setup-config.yaml) based on yo
 ```bash
 mkdir devnet \
   && cd devnet \
-  && ../bin/matic-cli.js setup devnet --config ../configs/devnet/docker-setup-config.yaml
+  && ../bin/matic-cli.js setup devnet --config ../configs/devnet/docker-setup-config.yaml | tee setup.log
 ```
 
 This will create and spin up the devnet.
@@ -492,7 +492,7 @@ Note: in case of docker setup, we have provided [some additional scripts](src/se
 Adjust the [remote configs](configs/devnet/remote-setup-config.yaml) and run
 
 ```bash
-../bin/matic-cli.js setup devnet --config ../configs/devnet/remote-setup-config.yaml
+../bin/matic-cli.js setup devnet --config ../configs/devnet/remote-setup-config.yaml | tee setup.log
 ```
 
 Alternatively, this step can be executed interactively with

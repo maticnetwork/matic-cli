@@ -3,11 +3,10 @@ set -e
 
 echo "Starting the smoke test for the local docker devnet..."
 
-cd ./devnet/code/contracts
+cd ./code/contracts
 echo "Executing a deposit..."
 npm run truffle exec scripts/deposit.js -- --network development $(jq -r .root.tokens.MaticToken contractAddresses.json) 100000000000000000000
 echo "Deposit executed successfully! StateSync will kick in soon..."
-cd ../../..
 
 echo ""
 balanceInit=$(docker exec bor0 bash -c "bor attach /var/lib/bor/data/bor.ipc -exec 'Math.round(web3.fromWei(eth.getBalance(eth.accounts[0])))'")
