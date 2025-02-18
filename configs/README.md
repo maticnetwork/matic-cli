@@ -7,7 +7,7 @@ For `mati-cli`, the configs are directly used to spin the network up.
 ## Usage
 
 ```bash
-matic-cli setup devnet --config path/to/config.yaml
+matic-cli setup devnet --config path/to/config.yaml | tee setup.log
 ```
 
 ## Option details with examples
