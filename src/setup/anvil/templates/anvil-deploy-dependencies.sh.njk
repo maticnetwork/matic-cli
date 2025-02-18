@@ -11,6 +11,8 @@ ANVIL_PRIVATE_KEY={{ obj.defaultAnvilPrivateKey }}
 # Matic contracts repo
 cd $DIR
 
+cast send {{ obj.config.primaryAccount.address }} --value 1000ether --rpc-url http://localhost:$SERVER_PORT --private-key $ANVIL_PRIVATE_KEY
+
 forge create contracts/common/lib/Common.sol:Common --rpc-url http://localhost:$SERVER_PORT --private-key $ANVIL_PRIVATE_KEY --broadcast
 
 forge create contracts/root/predicates/TransferWithSigUtils.sol:TransferWithSigUtils --rpc-url http://localhost:$SERVER_PORT --private-key  $ANVIL_PRIVATE_KEY --broadcast
