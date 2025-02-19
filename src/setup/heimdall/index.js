@@ -256,25 +256,11 @@ export class Heimdall {
     }
   }
 
-  // TODO HV2: Remove this task once heimdall-v2 is public
-  goPrivateTask() {
-    return {
-      title: 'Setup GOPRIVATE',
-      task: () => {
-        return execa('go', ['env', '-w', 'GOPRIVATE=github.com/0xPolygon/*'], {
-          cwd: this.repositoryDir,
-          stdio: getRemoteStdio()
-        })
-      }
-    }
-  }
-
   async getTasks() {
     return new Listr(
       [
         this.cloneRepositoryTask(),
         this.buildTask(),
-        this.goPrivateTask(),
         {
           title: 'Init Heimdall',
           task: () => {

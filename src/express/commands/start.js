@@ -335,25 +335,6 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType, devnetId) {
   await Promise.all(cleanupTasks)
 }
 
-// TODO HV2: Remove this function once heimdall-v2 is public
-async function setupPrivateGoMod(dnsIps, devnetType, devnetId) {
-  const doc = await yaml.load(
-    fs.readFileSync(
-      `../../deployments/devnet-${devnetId}/${devnetType}-setup-config.yaml`,
-      'utf8'
-    )
-  )
-  const ipsArray = splitToArray(dnsIps)
-  const ip = `${doc.ethHostUser}@${ipsArray[0]}`
-
-  console.log('📍Setting private module credentials for git...')
-  let command = `
-  touch ~/.netrc && 
-  echo "machine github.com login ${process.env.GITHUB_USERNAME} password ${process.env.GITHUB_ACCESS_TOKEN}" > ~/.netrc`
-
-  await runSshCommand(ip, command, maxRetries)
-}
-
 async function runDockerSetupWithMaticCLI(ips, devnetId) {
   const doc = await yaml.load(
     fs.readFileSync(
@@ -504,8 +485,6 @@ export async function start() {
   await prepareMaticCLI(dnsIps, devnetType, devnetId)
 
   await eventuallyCleanupPreviousDevnet(dnsIps, devnetType, devnetId)
-
-  await setupPrivateGoMod(dnsIps, devnetType, devnetId)
 
   if (devnetType === 'docker') {
     await runDockerSetupWithMaticCLI(dnsIps, devnetId)
