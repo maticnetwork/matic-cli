@@ -20,7 +20,7 @@ async function setupLocalnet(config) {
   })
   const bor = new Bor(config, {
     repositoryUrl: config.borRepo || 'https://github.com/maticnetwork/bor',
-    repositoryBranch: config.borBranch || 'develop'
+    repositoryBranch: config.borBranch || 'raneet10/heimdallv2-changes'
   })
   const heimdall = new Heimdall(config, {
     repositoryUrl:
