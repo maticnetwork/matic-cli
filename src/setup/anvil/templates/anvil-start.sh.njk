@@ -5,6 +5,7 @@ set -x
 export PATH="$HOME/.foundry/bin:$PATH"
 
 DATA_DIR={{ obj.dbDir }}
+MNEMONIC={{ obj.mnemonic }}
 
 anvil \
   --port 9545 \
@@ -15,5 +16,5 @@ anvil \
   --code-size-limit 10000000000 \
   --state $DATA_DIR \
   --verbosity \
-  --block-time 1
+  --block-time 1 \
 
