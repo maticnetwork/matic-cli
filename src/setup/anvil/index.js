@@ -17,7 +17,7 @@ export class Anvil {
   constructor(config, options = {}) {
     this.config = config
     this.mnemonic = config.mnemonic
-    console.log(this.mnemonic)
+    this.deployerAccount = createAccountsFromMnemonics(this.mnemonic, 1)
     this.deployerPrivateKey = this.deployerAccount[0].privateKey
 
     this.dbName = options.dbName || 'anvil-db'
