@@ -334,17 +334,18 @@ export class Devnet {
             this.config.targetDirectory
           )
 
-          if (this.config.network) {
-            const chain = this.config.network
-            for (let i = 0; i < this.totalBorNodes; i++) {
-              fileReplacer(this.borGenesisFilePath(i))
-                .replace(
-                  /NODE_DIR\/genesis.json/gi,
-                   `${chain}`
-                )
-                .save()
-            }
-          }
+          // TODO: Uncomment when finalized for docker setup
+          // if (this.config.network) {
+          //   const chain = this.config.network
+          //   for (let i = 0; i < this.totalBorNodes; i++) {
+          //     fileReplacer(this.borGenesisFilePath(i))
+          //       .replace(
+          //         /NODE_DIR\/genesis.json/gi,
+          //         `${chain}`
+          //       )
+          //       .save()
+          //   }
+          // }
           // process template files
           await processTemplateFiles(this.config.targetDirectory, {
             obj: this,
@@ -1363,13 +1364,6 @@ export class Devnet {
         this.config.genesisAddresses = genesisAddresses
 
         // setup accounts from signer dump data (based on number of validators)
-        // this.config.accounts = this.signerDumpData
-        //  .slice(0, this.config.numOfBorValidators)
-        //  .map((s) => {
-        //    //return getAccountFromPrivateKey(s.priv_key)
-        //      const account = getAccountFromPrivateKey(s.priv_key);
-        //      return { ...account, pub_key: s.pub_key };
-        //  })
         this.config.accounts = this.signerDumpData
           .slice(0, this.config.numOfBorValidators)
           .map((s) => {

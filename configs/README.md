@@ -73,7 +73,7 @@ devnetHeimdallUsers:
   - ubuntu
 
 # Branch of bor to use. Repository: https://github.com/maticnetwork/bor
-borBranch: develop
+borBranch: raneet10/heimdallv2-changes
 
 # Branch of Heimdall to use. Repository: https://github.com/0xPolygon/heimdall-v2
 heimdallBranch: develop
@@ -85,7 +85,7 @@ contractsBranch: arya/matic-cli/pos-1869
 genesisContractsBranch: master
 
 # Docker build context for bor. Used in docker setup. When specified, borBranch will be ignored.
-borDockerBuildContext: 'https://github.com/maticnetwork/bor.git#develop'
+borDockerBuildContext: 'https://github.com/maticnetwork/bor.git#raneet10/heimdallv2-changes'
 
 # Docker build context for heimdall. Used in docker setup. When specified, heimdallBranch will be ignored.
 heimdallDockerBuildContext: 'https://github.com/0xPolygon/heimdall-v2.git#develop'

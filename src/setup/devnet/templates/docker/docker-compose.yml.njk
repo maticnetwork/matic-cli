@@ -32,7 +32,7 @@ services:
     image: local/heimdall
       {% endif %}
     {% else %}
-    image: "0xPolygon/heimdall-v2:{{ obj.config.heimdallBranch }}"
+    image: "0xpolygon/heimdall-v2:{{ obj.config.heimdallBranch }}"
     {% endif %}
     container_name: heimdall{{ node }}
     depends_on:

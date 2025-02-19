@@ -3,7 +3,7 @@ defaultFee: 2000
 borChainId: 15005
 heimdallChainId: heimdall-4052
 borRepo: https://github.com/maticnetwork/bor.git
-borBranch: develop
+borBranch: raneet10/heimdallv2-changes
 heimdallRepo: https://github.com/0xPolygon/heimdall-v2.git
 heimdallBranch: develop
 contractsRepo: https://github.com/0xPolygon/pos-contracts.git
