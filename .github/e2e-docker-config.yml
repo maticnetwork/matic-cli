@@ -18,7 +18,7 @@ numOfBorArchiveNodes: 0
 numOfErigonValidators: 0
 numOfErigonSentries: 0
 numOfErigonArchiveNodes: 0
-ethURL: http://anvil:9545
+ethURL: http://localhost:9545
 ethHostUser: ubuntu
 devnetType: docker
 borDockerBuildContext: 'https://github.com/maticnetwork/bor.git#develop'
