@@ -1232,7 +1232,6 @@ export class Devnet {
     return new Listr([
       heimdall.cloneRepositoryTask(),
       heimdall.buildTask(),
-      heimdall.goPrivateTask(),
       {
         title: 'Create testnet files for Heimdall',
         task: async () => {
