@@ -294,8 +294,8 @@ export class Devnet {
           for (let i = 0; i < this.totalBorNodes; i++) {
             fileReplacer(this.heimdallGenesisFilePath(i))
               .replace(
-                /"matic_token_address":[ ]*".*"/gi,
-                `"matic_token_address": "${rootContracts.tokens.TestToken}"`
+                /"pol_token_address":[ ]*".*"/gi,
+                `"pol_token_address": "${rootContracts.tokens.TestToken}"`
               )
               .replace(
                 /"staking_manager_address":[ ]*".*"/gi,
@@ -406,8 +406,8 @@ export class Devnet {
           for (let i = 0; i < this.totalNodes; i++) {
             fileReplacer(this.heimdallGenesisFilePath(i))
               .replace(
-                /"matic_token_address":[ ]*".*"/gi,
-                `"matic_token_address": "${rootContracts.tokens.TestToken}"`
+                /"pol_token_address":[ ]*".*"/gi,
+                `"pol_token_address": "${rootContracts.tokens.TestToken}"`
               )
               .replace(
                 /"staking_manager_address":[ ]*".*"/gi,
