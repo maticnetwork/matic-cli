@@ -17,7 +17,7 @@ defaultStake: 10000
 defaultFee: 2000
 
 # L1
-ethURL: http://ganache:9545 # use localhost for local deployments
+ethURL: http://localhost:9545 # use localhost for local deployments
 ethHostUser: ubuntu
 
 # Misc

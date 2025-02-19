@@ -1773,7 +1773,7 @@ export default async function (command) {
       type: 'input',
       name: 'ethURL',
       message: 'Please enter ETH url',
-      default: 'http://ganache:9545'
+      default: 'http://localhost:9545'
     })
   }
 
