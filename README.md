@@ -378,7 +378,7 @@ Please, make sure to install the following software/packages on the VMs.
   npm install --global ganache
   ```
 
-````
+```
 
 #### **MacOS**
 
@@ -386,7 +386,7 @@ Please, make sure to install the following software/packages on the VMs.
 
   ```zsh
   xcode-select --install
-````
+```
 
 - Go 1.18+ (_host_ and _remotes_)
 

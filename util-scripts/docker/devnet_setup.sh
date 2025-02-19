@@ -2,7 +2,7 @@
 
 # Run the devnet - Consolidated script
 
-# Start ganache
+# Start Ganache
 bash docker-ganache-start.sh || { echo "Failed to start Ganache"; exit 1; }
 
 # Start Heimdall

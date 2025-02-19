@@ -123,8 +123,6 @@ export async function sendStakedEvent(validatorID) {
     pkey
   )
 
-  await timer(12000)
-
   const oldValidatorsCount = await checkValidatorsLength(doc, machine0)
   console.log('oldValidatorsCount : ', oldValidatorsCount)
 

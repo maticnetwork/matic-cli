@@ -13,7 +13,7 @@ export class Contracts {
 
     this.repositoryName = 'contracts'
     this.repositoryUrl =
-      options.repositoryUrl || 'https://github.com/maticnetwork/contracts.git'
+      options.repositoryUrl || 'https://github.com/maticnetwork/contracts'
     this.repositoryBranch = options.repositoryBranch || 'mardizzone/node-16'
   }
 

@@ -133,11 +133,6 @@ async function installCommonPackages(ip) {
   command = 'sudo apt install build-essential -y'
   await runSshCommand(ip, command, maxRetries)
 
-  console.log('📍Configuring locale ...')
-  command =
-    'sudo locale-gen en_US.UTF-8 && sudo update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8'
-  await runSshCommand(ip, command, maxRetries)
-
   console.log('📍Installing jq...')
   command = 'sudo apt install jq -y'
   await runSshCommand(ip, command, maxRetries)
@@ -361,7 +356,7 @@ async function runDockerSetupWithMaticCLI(ips, devnetId) {
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Starting ganache...')
-  command = 'cd ~/matic-cli/devnet && bash ganache-ganache-start.sh'
+  command = 'cd ~/matic-cli/devnet && bash docker-ganache-start.sh'
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Starting heimdall...')
