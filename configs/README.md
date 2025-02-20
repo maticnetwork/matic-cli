@@ -7,7 +7,7 @@ For `mati-cli`, the configs are directly used to spin the network up.
 ## Usage
 
 ```bash
-matic-cli setup devnet --config path/to/config.yaml
+matic-cli setup devnet --config path/to/config.yaml | tee setup.log
 ```
 
 ## Option details with examples
@@ -56,7 +56,6 @@ ethHostUser: ubuntu
 devnetBorHosts:
   - 172.20.1.100
   - 172.20.1.101
-
 # IPs of hosts where heimdall will run. Only effective when devnetType is `remote`. It's recommended to run bor and heimdall on same VMs, hence devnetBorHosts===devnetHeimdallHosts
 devnetHeimdallHosts:
   - 172.20.1.100
@@ -78,8 +77,8 @@ borBranch: c5569e4da9ebe0ce4e63aec571966c71234f7cfc # todo change to develop onc
 # Branch of Heimdall to use. Repository: https://github.com/maticnetwork/heimdall
 heimdallBranch: develop
 
-# Branch of contract to use. Repository: https://github.com/maticnetwork/contracts
-contractsBranch: mardizzone/node-upgrade # todo change to master once contracts team merges the PR
+# Branch of contract to use. Repository: https://github.com/0xPolygon/pos-contracts
+contractsBranch: arya/matic-cli/pos-1869 # todo change to master once contracts team merges the PR
 
 # Branch of contract to use. Repository: https://github.com/maticnetwork/genesis-contracts
 genesisContractsBranch: mardizzone/node-upgrade # todo change to master once contracts team merges the PR
