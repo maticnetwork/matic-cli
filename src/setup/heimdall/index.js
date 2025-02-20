@@ -282,6 +282,17 @@ export class Heimdall {
           }
         },
         {
+          title: 'Update Heimdall Config',
+          task: () => {
+            fileReplacer(this.heimdallAppConfigFilePath)
+              .replace(
+                /\[api\][\s\S]*?address[ ]*=[ ]*".*?"/gi,
+                '[api]\naddress = "tcp://0.0.0.0:1317"'
+              )
+              .save()
+          }
+        },
+        {
           title: 'Create Heimdall account from private key',
           task: () => {
             // It generates new account for validator
