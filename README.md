@@ -349,7 +349,7 @@ Please, make sure to install the following software/packages on the VMs.
 
   ```bash
   curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash \
-    && source /home/ubuntu/.bashrc \
+    && source ~/.bashrc \
     && nvm install 18.19.0 \
     && node --version
   ```
@@ -363,7 +363,7 @@ Please, make sure to install the following software/packages on the VMs.
 - Python 2 (only _host_)
 
   ```bash
-  sudo apt install python2 --yes && alias python="/usr/bin/python2"
+  sudo apt install python3 --yes && alias python="/usr/bin/python3"
   ```
 
 - Solc v0.5.16 (only _host_)
