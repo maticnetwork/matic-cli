@@ -455,7 +455,7 @@ Adjust the [docker configs](configs/devnet/docker-setup-config.yaml) based on yo
 ```bash
 mkdir devnet \
   && cd devnet \
-  && ../bin/matic-cli.js setup devnet --config ../configs/devnet/docker-setup-config.yaml
+  && ../bin/matic-cli.js setup devnet --config ../configs/devnet/docker-setup-config.yaml | tee setup.log
 ```
 
 This will create and spin up the devnet.
@@ -468,7 +468,19 @@ DONE Devnet is ready
 Once the setup is done, use the aggregated script for local docker deployment
 
 ```bash
-bash ../docker_devnet.sh
+bash ../util-scripts/docker/devnet_setup.sh
+```
+
+Then, fund the accounts in ganache
+
+```bash
+bash ../util-scripts/docker/fund_ganache_accounts.sh
+```
+
+To verify the deployment, run the smoke test to ensure everything is working properly. The script usually takes around 6mins to complete.
+
+```bash
+bash ../util-scripts/docker/smoke_test.sh
 ```
 
 Logs will be stored under `logs/` folder
