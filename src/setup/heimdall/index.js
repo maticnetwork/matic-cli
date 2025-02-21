@@ -321,6 +321,10 @@ export class Heimdall {
                 /bor_grpc_url[ ]*=[ ]*".*"/gi,
                 'bor_grpc_url = "localhost:3131"'
               )
+              .replace(
+                /(\[api\]\s*[\s\S]*?address\s*=\s*").*?"/gi,
+                '$1tcp://0.0.0.0:1317"'
+              )
               .save()
           }
         },

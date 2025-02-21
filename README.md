@@ -384,15 +384,17 @@ Please, make sure to install the following software/packages on the VMs.
 
   ```zsh
   xcode-select --install
- ```
+  ```
+
+````
 
 - Go 1.18+ (_host_ and _remotes_)
 
-  ```zsh
-  curl -O https://raw.githubusercontent.com/maticnetwork/node-ansible/master/go-install.sh
-  bash go-install.sh --remove
-  bash go-install.sh
-  ```
+ ```zsh
+ curl -O https://raw.githubusercontent.com/maticnetwork/node-ansible/master/go-install.sh
+ bash go-install.sh --remove
+ bash go-install.sh
+````
 
 - Rabbitmq (_host_ and _remotes_)
 

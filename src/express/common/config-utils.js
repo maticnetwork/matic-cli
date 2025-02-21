@@ -228,7 +228,8 @@ function validateEnvVars(cloud) {
       default: 'i-02a1f3a2884c9edbc,i-03b2d4b3014a4becd'
     }),
     BOR_DOCKER_BUILD_CONTEXT: url({
-      default: 'https://github.com/maticnetwork/bor.git#raneet10/heimdallv2-changes'
+      default:
+        'https://github.com/maticnetwork/bor.git#raneet10/heimdallv2-changes'
     }),
     HEIMDALL_DOCKER_BUILD_CONTEXT: url({
       default: 'https://github.com/0xPolygon/heimdall-v2.git#develop'
