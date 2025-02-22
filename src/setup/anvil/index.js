@@ -26,7 +26,8 @@ export class Anvil {
     }
 
     this.deployerAccount = createAccountsFromMnemonics(this.mnemonic, 1)
-    console.log(`Deployer's account : ${this.deployerAccount[0].privateKey}`)
+    console.log(`Deployer's account: ${this.deployerAccount[0].adress}`)
+
     this.deployerPrivateKey = this.deployerAccount[0].privateKey
 
     this.dbName = options.dbName || 'anvil-db'
@@ -92,6 +93,8 @@ export class Anvil {
             server = execa(
               'anvil',
               [
+                '--host',
+                '0.0.0.0',
                 '--port',
                 `${this.serverPort}`,
                 '--balance',
@@ -100,8 +103,6 @@ export class Anvil {
                 '1000000000000',
                 '--gas-price',
                 '1',
-                '--accounts',
-                '10',
                 '--mnemonic',
                 `${this.mnemonic}`,
                 '--code-size-limit',

@@ -17,8 +17,6 @@ export SERVER_PORT={{ obj.serverPort }}
 # cd matic contracts repo
 cd {{ obj.contracts.repositoryDir }}
 
-
 export PATH="$HOME/.foundry/bin:$PATH"
-
 
 forge script scripts/deployment-scripts/syncChildStateToRoot.s.sol:SyncChildStateToRootScript --rpc-url http://localhost:$SERVER_PORT --private-key $PRIVATE_KEY --broadcast
