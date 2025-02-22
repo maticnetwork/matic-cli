@@ -22,8 +22,8 @@ export async function fundAnvilAccounts(doc) {
   }
 
   if (borProdChainIds.includes(doc.borChainId)) {
-    console.log('📍Fund anvil accounts only works for devnet')
-    console.log('📍Skipping in case of mainnet, mumbai or amoy')
+    console.log('📍Funding anvil accounts only works for the devnet')
+    console.log('📍Skipping in case of mainnet or amoy')
     return
   }
 
@@ -31,7 +31,7 @@ export async function fundAnvilAccounts(doc) {
     ? (machine0 = doc.devnetBorHosts[0])
     : (machine0 = doc.devnetErigonHosts[0])
 
-  console.log('📍Transferring funds from anvil account[0] to others...')
+  console.log('📍Transferring 10 ETH from anvil account[0] to all others...')
 
   const src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/devnet/signer-dump.json`
   const dest = './signer-dump.json'
@@ -64,14 +64,14 @@ export async function fundAnvilAccounts(doc) {
 
   for (let i = 0; i < signerDump.length; i++) {
     const txReceipt = await rootChainWeb3.eth.sendTransaction({
-      to: signerDump[i].address,
       from: account.address,
+      to: signerDump[i].address,
       gas: 21000,
       value: rootChainWeb3.utils.toWei(EthAmount, 'ether')
     })
     console.log(
       '📍Funds transferred from ' +
-        anvilAccount +
+        account.address +
         ' to ' +
         signerDump[i].address +
         ' with txHash ' +

@@ -294,7 +294,7 @@ The `express-cli` also comes with additional utility commands, listed below. Som
   - Relay transactions from testnet or mainnet to shadow node running in the devnet.
 
 - `../../bin/express-cli.js --fund-anvil-accounts`
-  - Transfers 10 eth to all the anvil accounts.
+  - Transfers 10 ETH to all the anvil accounts.
 
 Note: to allow `express-cli` to clone private repos, make sure the git configs in the `.env` file looks like the following (example for `BOR_REPO`)
 
