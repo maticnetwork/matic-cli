@@ -471,10 +471,10 @@ Once the setup is done, use the aggregated script for local docker deployment
 bash ../util-scripts/docker/devnet_setup.sh
 ```
 
-Then, fund the accounts in ganache
+Then, fund the accounts in anvil 
 
 ```bash
-bash ../util-scripts/docker/fund_ganache_accounts.sh
+bash ../util-scripts/docker/fund_anvil_accounts.sh
 ```
 
 To verify the deployment, run the smoke test to ensure everything is working properly. The script usually takes around 6mins to complete.
