@@ -44,7 +44,7 @@ export class Contracts {
   cloneRepositoryTasks() {
     return [
       {
-        title: 'Clone matic contracts repository',
+        title: 'Clone PoS contracts repository',
         task: () =>
           cloneRepository(
             this.repositoryName,
@@ -58,14 +58,6 @@ export class Contracts {
 
   compileTasks() {
     return [
-      {
-        title: 'Checkout contracts branch',
-        task: () =>
-          execa('git', ['checkout', 'arya/matic-cli/pos-1869'], {
-            cwd: this.repositoryDir,
-            stdio: getRemoteStdio()
-          })
-      },
       {
         title: 'Install dependencies for matic contracts',
         task: () =>
@@ -119,7 +111,7 @@ export class Contracts {
         title: 'Checking contract addresses file',
         task: () =>
           console.log(
-            `localContractAddressPath : ${this.localContractAddressesPath} , contractPath : ${this.contractAddressesPath}`
+            `localContractAddressPath: ${this.localContractAddressesPath}, contractPath: ${this.contractAddressesPath}`
           )
       }
     ]
