@@ -471,7 +471,7 @@ Once the setup is done, use the aggregated script for local docker deployment
 bash ../util-scripts/docker/devnet_setup.sh
 ```
 
-Then, fund the accounts in anvil 
+Then, fund the accounts in anvil
 
 ```bash
 bash ../util-scripts/docker/fund_anvil_accounts.sh
