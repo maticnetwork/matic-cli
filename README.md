@@ -349,7 +349,7 @@ Please, make sure to install the following software/packages on the VMs.
 
   ```bash
   curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash \
-    && source /home/ubuntu/.bashrc \
+    && source ~/.bashrc \
     && nvm install 18.19.0 \
     && node --version
   ```
@@ -363,7 +363,7 @@ Please, make sure to install the following software/packages on the VMs.
 - Python 2 (only _host_)
 
   ```bash
-  sudo apt install python2 --yes && alias python="/usr/bin/python2"
+  sudo apt install python3 --yes && alias python="/usr/bin/python3"
   ```
 
 - Solc v0.5.16 (only _host_)
@@ -471,10 +471,10 @@ Once the setup is done, use the aggregated script for local docker deployment
 bash ../util-scripts/docker/devnet_setup.sh
 ```
 
-Then, fund the accounts in ganache
+Then, fund the accounts in anvil
 
 ```bash
-bash ../util-scripts/docker/fund_ganache_accounts.sh
+bash ../util-scripts/docker/fund_anvil_accounts.sh
 ```
 
 To verify the deployment, run the smoke test to ensure everything is working properly. The script usually takes around 6mins to complete.
