@@ -100,7 +100,7 @@ export class Ganache {
               port: this.serverPort
             })
 
-            return server.listen(this.serverPort)
+            return server.listen(this.serverPort, '0.0.0.0')
           }
         },
         {

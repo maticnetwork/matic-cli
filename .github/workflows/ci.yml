@@ -70,11 +70,11 @@ jobs:
           GITHUB_HEAD_REF: ${{ github.head_ref || github.ref_name }}
         run: |
           cp .env.example .env
-          sed -i 's,polygon-user,${{steps.generator.outputs.name}},' .env
+          sed -i "s,polygon-user,${{steps.generator.outputs.name}}," .env
           sed -i 's,gcp-key,matic-cli-ci-key,' .env
           sed -i 's,/absolute/path/to/your/,/home/runner/work/matic-cli/matic-cli/matic-cli/gcp/,' .env
           sed -i 's,YOUR_PROJECT_ID,prj-polygonlabs-pos-v1-dev,' .env
-          sed -i 's,MATIC_CLI_BRANCH=master,MATIC_CLI_BRANCH=$GITHUB_HEAD_REF,' .env
+          sed -i "s,mardizzone/heimdallv2-ganache,$GITHUB_HEAD_REF," .env
 
       - name: Get GitHub action runner IP
         id: ip

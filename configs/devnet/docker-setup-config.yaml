@@ -17,28 +17,33 @@ defaultStake: 10000
 defaultFee: 2000
 
 # L1
-ethURL: http://localhost:9545 # use localhost for local deployments
+ethURL: http://localhost:9545
 ethHostUser: ubuntu
 
-# Misc
-mnemonic: "clock radar mass judge dismiss just intact mind resemble fringe diary casino"
+# Anvil
+mnemonic: 'clock radar mass judge dismiss just intact mind resemble fringe diary casino'
 
 # Heimdall
-heimdallChainId: heimdall-4052
+heimdallChainId: heimdall-15005
 heimdallDockerBuildContext: https://github.com/0xPolygon/heimdall-v2.git#develop
 
 # Bor
 borChainId: 15005
-sprintSize: 64
-sprintSizeBlockNumber: 0
-blockNumber: '0'
+borDockerBuildContext: https://github.com/maticnetwork/bor.git#raneet10/heimdallv2-changes
+
 blockTime: '2'
-numOfBorValidators: 3
+blockNumber: '0'
+
+sprintSize: '64'
+sprintSizeBlockNumber: '0'
+
+# Bor
+numOfBorValidators: 1
 numOfBorSentries: 0
 numOfBorArchiveNodes: 0
-borDockerBuildContext: https://github.com/maticnetwork/bor.git#raneet10/heimdallv2-changes
-devnetBorUsers: ubuntu,ubuntu,ubuntu
-devnetBorFlags: config,config,config
+
+devnetBorUsers: ubuntu
+devnetBorFlags: config
 
 # Erigon
 numOfErigonValidators: 0
