@@ -79,32 +79,24 @@ export async function sendStakedEvent(validatorID) {
   const newAccAddr = wallet.getAddressString()
   const newAccPubKey = wallet.getPublicKeyString()
 
-  console.log('NewValidatorAddr', newAccAddr, newAccPubKey)
-  console.log('NewValidatorPrivKey', wallet.getPrivateKeyString())
-  console.log('📍 Sending MATIC-TOKENS to validators account')
+  console.log('📍 Sending Matic Tokens to validators account')
   let command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "transfer(address,uint256)" ${validatorAccount} 100000000000000000000 --rpc-url http://localhost:9545 --private-key ${signerDump[0].priv_key}`
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
-  console.log('done!')
-
+  
+  console.log('Waiting 12 secs for token transaction to be processed')
   await timer(12000)
 
   command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "approve(address,uint256)" ${StakeManagerProxyAddress} 1000000000000000000000 --rpc-url http://localhost:9545 --private-key ${pkey}`
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
-  console.log('done!')
 
+  console.log('Waiting 12 secs for Matic Token approval')
   await timer(12000)
 
   command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${StakeManagerProxyAddress} "stakeForPOL(address,uint256,uint256,bool,bytes)" ${newAccAddr} ${stakeAmount} ${heimdallFee} false ${newAccPubKey} --rpc-url http://localhost:9545 --private-key ${pkey}`
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
-  console.log('done!')
 
   const oldValidatorsCount = await checkValidatorsLength(doc, machine0)
   console.log('oldValidatorsCount : ', oldValidatorsCount)
-
-  // const receipt = await rootChainWeb3.eth.sendSignedTransaction(
-  //  signedTx.rawTransaction
-  // )
-  // console.log('StakeFor Receipt txHash :  ' + receipt.transactionHash)
 
   let newValidatorsCount = await checkValidatorsLength(doc, machine0)
 
