@@ -163,7 +163,7 @@ program
   )
   .option('-relay, --relay', 'Relay transaction to shadow node')
   .option('-rpc, --rpc-test', 'Run the rpc test command')
-  .option('-fga, --fund-ganache-accounts', 'Add funds to ganache accounts')
+  .option('-fga, --fund-ganache-accounts', 'Add funds to the ganache accounts')
   .version(pkg.version)
 
 export async function cli() {

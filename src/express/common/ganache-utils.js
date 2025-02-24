@@ -25,15 +25,15 @@ export async function fundGanacheAccounts(doc) {
   }
 
   if (borProdChainIds.includes(doc.borChainId)) {
-    console.log('📍Fund ganache accounts only works for devnet')
-    console.log('📍Skipping in case of mainnet, mumbai or amoy')
+    console.log('📍Funding ganache accounts only works for devnets')
+    console.log('📍Skipping in case of mainnet or amoy')
     return
   }
   doc.devnetBorHosts.length > 0
     ? (machine0 = doc.devnetBorHosts[0])
     : (machine0 = doc.devnetErigonHosts[0])
 
-  console.log('📍Transferring funds from ganache account[0] to others...')
+  console.log('📍Transferring 10 ETH from ganache account[0] to others...')
   const src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/devnet/signer-dump.json`
   const dest = './signer-dump.json'
   await runScpCommand(src, dest, maxRetries)
