@@ -13,6 +13,7 @@ import (
 	"math/big"
 	"math/rand"
 	"net/http"
+	"os"
 	testcontract "rpc-tests/contracts"
 	"strconv"
 	"strings"
@@ -311,15 +312,16 @@ func main() {
 
 	if len(failedTestCases) > 0 {
 		fmt.Println("Failed Tests Cases:")
-	}
-	for _, failedTestCase := range failedTestCases {
-		fmt.Printf("\tkey: %s | err:%s\n", failedTestCase.Key, failedTestCase.Err)
-		if *logReqRes {
-			request, _ := json.Marshal(failedTestCase.Req)
-			response, _ := json.Marshal(failedTestCase.Res)
-			fmt.Printf("\t\treq:%s\n", string(request))
-			fmt.Printf("\t\tres:%s\n", string(response))
+		for _, failedTestCase := range failedTestCases {
+			fmt.Printf("\tkey: %s | err:%s\n", failedTestCase.Key, failedTestCase.Err)
+			if *logReqRes {
+				request, _ := json.Marshal(failedTestCase.Req)
+				response, _ := json.Marshal(failedTestCase.Res)
+				fmt.Printf("\t\treq:%s\n", string(request))
+				fmt.Printf("\t\tres:%s\n", string(response))
+			}
 		}
+		os.Exit(1)
 	}
 }
 
