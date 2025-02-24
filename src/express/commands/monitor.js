@@ -87,8 +87,8 @@ async function getStateSyncTxList(ip, startTime, endTime) {
   if (responseJson.error) {
     return undefined
   } else {
-    if (responseJson.record) {
-      return responseJson.record
+    if (responseJson.event_records) {
+      return responseJson.event_records
     }
   }
 
@@ -150,7 +150,7 @@ export async function monitor(exitWhenDone) {
 
   // noinspection InfiniteLoopJS
   while (true) {
-    await timer(1000)
+    await timer(5000)
     console.log()
 
     const checkpointCount = await checkCheckpoint(machine0)

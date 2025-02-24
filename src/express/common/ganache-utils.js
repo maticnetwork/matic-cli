@@ -25,7 +25,7 @@ export async function fundGanacheAccounts(doc) {
   }
 
   if (borProdChainIds.includes(doc.borChainId)) {
-    console.log('📍Funding ganache accounts only works for the devnet')
+    console.log('📍Funding ganache accounts only works for devnets')
     console.log('📍Skipping in case of mainnet or amoy')
     return
   }

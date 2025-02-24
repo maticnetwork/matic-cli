@@ -296,6 +296,12 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 - `../../bin/express-cli.js --fund-ganache-accounts`
   - Transfers 10 ETH to all the ganache accounts.
 
+Note: To allow `express-cli` to clone private repos, make sure the git configs in the `.env` file looks like the following (example for `BOR_REPO`):
+
+```shell
+# BOR_REPO="https://<username>:<token>@github.com/maticnetwork/bor.git" # example of private repo URL
+```
+
 ## `Milestone tests`
 
 The `express-cli` can also be used to perform few simulation based tests for the upcoming milestone feature. Please refer to the steps and requirements mentioned over [here](./docs/milestones.md) for running the tests.
@@ -380,15 +386,13 @@ Please, make sure to install the following software/packages on the VMs.
   xcode-select --install
   ```
 
-````
-
 - Go 1.18+ (_host_ and _remotes_)
 
- ```zsh
- curl -O https://raw.githubusercontent.com/maticnetwork/node-ansible/master/go-install.sh
- bash go-install.sh --remove
- bash go-install.sh
-````
+  ```zsh
+  curl -O https://raw.githubusercontent.com/maticnetwork/node-ansible/master/go-install.sh
+  bash go-install.sh --remove
+  bash go-install.sh
+  ```
 
 - Rabbitmq (_host_ and _remotes_)
 

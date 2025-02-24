@@ -52,5 +52,3 @@ devnetBorFlags:
 
 borDockerBuildContext: https://github.com/maticnetwork/bor.git#raneet10/heimdallv2-changes
 heimdallDockerBuildContext: https://github.com/0xPolygon/heimdall-v2.git#develop
-
-mnemonic: 'clock radar mass judge dismiss just intact mind resemble fringe diary casino'
