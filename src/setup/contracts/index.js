@@ -15,7 +15,7 @@ export class Contracts {
     this.repositoryUrl =
       options.repositoryUrl || 'https://github.com/0xPolygon/pos-contracts.git'
     this.repositoryBranch =
-      options.repositoryBranch || 'arya/matic-cli/pos-1869'
+      options.repositoryBranch || 'anvil-pos'
   }
 
   get name() {
@@ -59,9 +59,9 @@ export class Contracts {
   compileTasks() {
     return [
       {
-        title: 'Checkout arya/matic-cli/pos-1869',
+        title: 'Checkout anvil-pos',
         task: () =>
-          execa('git', ['checkout', 'arya/matic-cli/pos-1869'], {
+          execa('git', ['checkout', 'anvil-pos'], {
             cwd: this.repositoryDir,
             stdio: getRemoteStdio()
           })

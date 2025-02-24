@@ -7,7 +7,7 @@ borBranch: develop
 heimdallRepo: https://github.com/maticnetwork/heimdall.git
 heimdallBranch: develop
 contractsRepo: https://github.com/0xPolygon/pos-contracts.git 
-contractsBranch: arya/matic-cli/pos-1869
+contractsBranch: anvil-pos
 genesisContractsRepo: https://github.com/maticnetwork/genesis-contracts.git
 genesisContractsBranch: master
 sprintSize: 64
