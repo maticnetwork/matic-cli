@@ -58,14 +58,6 @@ export class Contracts {
   compileTasks() {
     return [
       {
-        title: 'Checkout pos-contracts branch',
-        task: () =>
-          execa('git', ['checkout', 'anvil-pos'], {
-            cwd: this.repositoryDir,
-            stdio: getRemoteStdio()
-          })
-      },
-      {
         title: 'Install dependencies for matic contracts',
         task: () =>
           execa('npm', ['install', '--omit=dev'], {
