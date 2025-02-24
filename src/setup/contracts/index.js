@@ -14,8 +14,7 @@ export class Contracts {
     this.repositoryName = 'pos-contracts'
     this.repositoryUrl =
       options.repositoryUrl || 'https://github.com/0xPolygon/pos-contracts.git'
-    this.repositoryBranch =
-      options.repositoryBranch || 'anvil-pos'
+    this.repositoryBranch = options.repositoryBranch || 'anvil-pos'
   }
 
   get name() {
@@ -59,14 +58,6 @@ export class Contracts {
   compileTasks() {
     return [
       {
-        title: 'Checkout anvil-pos',
-        task: () =>
-          execa('git', ['checkout', 'anvil-pos'], {
-            cwd: this.repositoryDir,
-            stdio: getRemoteStdio()
-          })
-      },
-      {
         title: 'Install dependencies for matic contracts',
         task: () =>
           execa('npm', ['install', '--omit=dev'], {
@@ -93,7 +84,7 @@ export class Contracts {
           )
       },
       {
-        title: 'Generate interfaces',
+        title: 'Generate contracts interfaces',
         task: () =>
           execa('npm', ['run', 'generate:interfaces'], {
             env: {

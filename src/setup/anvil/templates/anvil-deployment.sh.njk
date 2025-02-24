@@ -10,14 +10,12 @@ export MNEMONIC={{ obj.config.primaryAccount.privateKey }}
 export HEIMDALL_ID={{ obj.config.heimdallChainId }}
 
 export DIR={{ obj.contracts.repositoryDir }}
-echo "$DIR"
 
 export SERVER_PORT={{ obj.serverPort }}
 
 # cd matic contracts repo
 cd {{ obj.contracts.repositoryDir }}
 
-export ETHERSCANAPIKEY={{ obj.config.etherscanAPIKey }}
 echo "DEPLOYER_PRIVATE_KEY=$PRIVATE_KEY" >> .env
 echo "HEIMDALL_ID='$HEIMDALL_ID'" >> .env
 
@@ -29,5 +27,4 @@ forge script scripts/deployment-scripts/deployContracts.s.sol:DeploymentScript -
 forge script scripts/deployment-scripts/drainStakeManager.s.sol:DrainStakeManagerDeployment --rpc-url http://localhost:$SERVER_PORT --private-key $PRIVATE_KEY --broadcast
 
 forge script scripts/deployment-scripts/initializeState.s.sol:InitializeStateScript --rpc-url http://localhost:$SERVER_PORT --private-key $PRIVATE_KEY --broadcast
-
 
