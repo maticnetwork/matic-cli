@@ -823,12 +823,12 @@ export class Devnet {
               ], { stdio: getRemoteStdio() })
 
               // NOTE: Target location would vary depending on bor/heimdall version. Currently the setup works with bor and heimdall v0.3.x
-              // await execa('ssh', [
-              //  '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
-              //  '-i', '~/cert.pem',
-              //                  `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
-              //                  'sudo mv ~/anvil.service /lib/systemd/system/'
-              // ], { stdio: getRemoteStdio() })
+              await execa('ssh', [
+                '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
+                '-i', '~/cert.pem',
+                                `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
+                                'sudo mv ~/anvil.service /lib/systemd/system/'
+              ], { stdio: getRemoteStdio() })
             }
             await execa('ssh', [
               '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null',
@@ -1394,14 +1394,6 @@ export class Devnet {
         // set genesis addresses
         this.config.genesisAddresses = genesisAddresses
 
-        // setup accounts from signer dump data (based on number of validators)
-        // this.config.accounts = this.signerDumpData
-        //  .slice(0, this.config.numOfBorValidators)
-        //  .map((s) => {
-        //    //return getAccountFromPrivateKey(s.priv_key)
-        //      const account = getAccountFromPrivateKey(s.priv_key);
-        //      return { ...account, pub_key: s.pub_key };
-        //  })
         this.config.accounts = this.signerDumpData
           .slice(0, this.config.numOfBorValidators)
           .map((s) => {
@@ -1416,7 +1408,6 @@ export class Devnet {
           const erigonAccounts = this.signerDumpData
             .slice(this.config.numOfBorValidators, this.config.numOfBorValidators + this.config.numOfErigonValidators)
             .map((s) => {
-              // return getAccountFromPrivateKey(s.priv_key)
               const account = getAccountFromPrivateKey(s.priv_key)
               return { ...account, pub_key: s.pub_key }
             })

@@ -82,7 +82,7 @@ export async function sendStakedEvent(validatorID) {
   console.log('📍 Sending Matic Tokens to validators account')
   let command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "transfer(address,uint256)" ${validatorAccount} 100000000000000000000 --rpc-url http://localhost:9545 --private-key ${signerDump[0].priv_key}`
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
-  
+
   console.log('Waiting 12 secs for token transaction to be processed')
   await timer(12000)
 
