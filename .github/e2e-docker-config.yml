@@ -1,29 +1,48 @@
-defaultStake: 10000
-defaultFee: 2000
-borChainId: 15001
-heimdallChainId: heimdall-15001
+# Repositories
+borRepo: https://github.com/maticnetwork/bor.git
+borBranch: raneet10/heimdallv2-changes
+
 heimdallRepo: https://github.com/0xPolygon/heimdall-v2.git
+heimdallBranch: develop
+
 contractsRepo: https://github.com/maticnetwork/contracts.git
 contractsBranch: mardizzone/node-16
+
+genesisContractsRepo: https://github.com/maticnetwork/genesis-contracts.git
 genesisContractsBranch: master
-sprintSize:
-  - '64'
-blockNumber:
-  - '0'
-blockTime:
-  - '2'
+
+# Defaults
+devnetType: docker
+defaultStake: 10000
+defaultFee: 2000
+
+# L1
+ethURL: http://localhost:9545
+ethHostUser: ubuntu
+
+# Heimdall
+heimdallChainId: heimdall-15005
+heimdallDockerBuildContext: https://github.com/0xPolygon/heimdall-v2.git#develop
+
+# Bor
+borChainId: 15005
+borDockerBuildContext: https://github.com/maticnetwork/bor.git#raneet10/heimdallv2-changes
+
+blockTime: '2'
+blockNumber: '0'
+
+sprintSize: '64'
+sprintSizeBlockNumber: '0'
+
+# Bor
 numOfBorValidators: 3
 numOfBorSentries: 0
 numOfBorArchiveNodes: 0
+
+devnetBorUsers: ubuntu,ubuntu,ubuntu
+devnetBorFlags: config,config,config
+
+# Erigon
 numOfErigonValidators: 0
 numOfErigonSentries: 0
 numOfErigonArchiveNodes: 0
-ethURL: http://localhost:9545
-ethHostUser: ubuntu
-devnetType: docker
-borDockerBuildContext: 'https://github.com/maticnetwork/bor.git#raneet10/heimdallv2-changes'
-heimdallDockerBuildContext: 'https://github.com/0xPolygon/heimdall-v2.git#develop'
-sprintSizeBlockNumber:
-  - '0'
-devnetBorFlags: config,config,config
-mnemonic: 'clock radar mass judge dismiss just intact mind resemble fringe diary casino'
