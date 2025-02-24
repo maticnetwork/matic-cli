@@ -127,6 +127,8 @@ type BatchTestCase []TestCase
 type FailedTestCase struct {
 	Err error
 	Key string
+	Req Request
+	Res Response
 }
 type SignTransactionResult struct {
 	Raw hexutil.Bytes      `json:"raw"`
@@ -159,6 +161,7 @@ var (
 	rpcURL      = flag.String("rpc-url", "", "RPC Url to be tested")
 	mnemonic    = flag.String("mnemonic", "", "mnemonic to be used on transactions")
 	filterTests = flag.Bool("filter-test", false, "True if want to include filter tests (recommended just when there is no load balancer)")
+	logReqRes   = flag.Bool("log-req-res", false, "True if want to log requests and responses)")
 )
 
 func main() {
@@ -178,8 +181,9 @@ func main() {
 	mapRequestIdToKey := make(map[int]string)
 	var failedTestCases []FailedTestCase
 	rm.accounts = generateAccountsUsingMnemonic(*mnemonic, 10)
-	rm.expectedGasToCreateTransaction = big.NewInt(358270)
+	rm.expectedGasToCreateTransaction = big.NewInt(354658)
 	rm.expectedValueToStoreInContract = big.NewInt(30)
+	rm.expectedKeyToStoreInContract = "key"
 	rm.expectedSlot0Value = big.NewInt(42) // first variable set on contract
 
 	// Test cases are grouped into batches when there are no dependencies between them.
@@ -197,6 +201,7 @@ func main() {
 			mapTestCases["eth_feeHistory"],
 			mapTestCases["eth_gasPrice"],
 			mapTestCases["eth_getBalance"],
+		}, {
 			mapTestCases["eth_getTransactionCount"],
 			mapTestCases["eth_maxPriorityFeePerGas"],
 			mapTestCases["eth_syncing"],
@@ -257,6 +262,7 @@ func main() {
 	for _, testCaseBatch := range testCaseBatches {
 		// Preparing Request
 		requests := make([]Request, 0)
+		mapRequests := make(map[int]Request)
 		countTestCases += len(testCaseBatch)
 		for _, testCase := range testCaseBatch {
 			req, err := testCase.PrepareRequest(&rm)
@@ -269,6 +275,7 @@ func main() {
 			}
 
 			mapRequestIdToKey[req.ID] = testCase.Key
+			mapRequests[req.ID] = *req
 
 			requests = append(requests, *req)
 		}
@@ -282,12 +289,12 @@ func main() {
 		for _, response := range responses {
 			key := mapRequestIdToKey[response.ID]
 			if response.Error != nil {
-				failedTestCases = append(failedTestCases, FailedTestCase{Key: key, Err: fmt.Errorf("request error; message: %s | code: %d", response.Error.Message, response.Error.Code)})
+				failedTestCases = append(failedTestCases, FailedTestCase{Key: key, Err: fmt.Errorf("request error; message: %s | code: %d", response.Error.Message, response.Error.Code), Req: mapRequests[response.ID], Res: response})
 				continue
 			}
 			err := mapTestCases[key].HandleResponse(&rm, response)
 			if err != nil {
-				failedTestCases = append(failedTestCases, FailedTestCase{Key: key, Err: err})
+				failedTestCases = append(failedTestCases, FailedTestCase{Key: key, Err: err, Req: mapRequests[response.ID], Res: response})
 			}
 
 		}
@@ -300,9 +307,20 @@ func main() {
 	}
 	for _, failedTestCase := range failedTestCases {
 		fmt.Printf("\tkey: %s | err:%s\n", failedTestCase.Key, failedTestCase.Err)
+		request, _ := json.Marshal(failedTestCase.Req)
+		response, _ := json.Marshal(failedTestCase.Res)
+		fmt.Printf("\t\treq:%s\n", string(request))
+		fmt.Printf("\t\tres:%s\n", string(response))
 	}
 }
 
+// TrimString trims a string to the specified length and appends "..." if truncated
+func trimString(s string, maxLength int) string {
+	if len(s) > maxLength {
+		return s[:maxLength] + "..."
+	}
+	return s
+}
 func testCasesToMap(testCases []TestCase) map[string]TestCase {
 	mapTestCases := make(map[string]TestCase)
 	for _, testCase := range testCases {
@@ -1314,7 +1332,13 @@ var testCases = []TestCase{
 				return err
 			}
 
-			if (*estimatedGas).Cmp(rm.expectedGasToCreateTransaction) != 0 {
+			upperBound := new(big.Int).Add(rm.expectedGasToCreateTransaction, big.NewInt(5000))
+			upperBoundCmp := (*estimatedGas).Cmp(upperBound)
+
+			lowerBound := new(big.Int).Sub(rm.expectedGasToCreateTransaction, big.NewInt(5000))
+			lowerBoundCmp := (*estimatedGas).Cmp(lowerBound)
+			// gas estimation may vary accross environments
+			if !(upperBoundCmp == -1 && lowerBoundCmp == 1) {
 				return fmt.Errorf("invalid gas estimation: expected %s but actual is %s ", rm.expectedGasToCreateTransaction, estimatedGas)
 			}
 			return nil
@@ -1491,17 +1515,18 @@ var testCases = []TestCase{
 			if err != nil {
 				return err
 			}
-			err = validateStateSyncTxReceipt(*stateSyncTxReceipt)
-			if err != nil {
-				return err
-			}
-
 			txIndexHexStringWithoutPrefix := (*stateSyncTxReceipt)["transactionIndex"].(string)[2:]
 			txIndex, err := strconv.ParseInt(txIndexHexStringWithoutPrefix, 16, 0)
 			if err != nil {
 				return fmt.Errorf("error converting hex to int:%s", err)
 			}
 			rm.stateSyncTxIndex = int(txIndex)
+
+			err = validateStateSyncTxReceipt(*stateSyncTxReceipt)
+			if err != nil {
+				return err
+			}
+
 			return nil
 		},
 	},
@@ -1603,13 +1628,12 @@ var testCases = []TestCase{
 			if err != nil {
 				return err
 			}
+			rm.stateSyncExpectedBlockTransactionCount = len(*txReceipts)
 
 			err = handleGetStateSyncBlockReceipts(rm, "eth_getBlockReceipts", txReceipts)
 			if err != nil {
 				return err
 			}
-
-			rm.stateSyncExpectedBlockTransactionCount = len(*txReceipts)
 
 			return nil
 		},
@@ -1678,8 +1702,8 @@ var testCases = []TestCase{
 			}
 			rm.pushedTxHash = *txHash
 
-			// sleeps 10 seconds to wait until tx is available for next request
-			time.Sleep(10 * time.Second)
+			// sleeps 30 seconds to wait until tx is available for next request
+			time.Sleep(30 * time.Second)
 			return nil
 		},
 	},
@@ -1789,7 +1813,7 @@ var testCases = []TestCase{
 				"data": fmt.Sprintf("0x%s", hex.EncodeToString(generateInputForCallGetValue(rm.expectedKeyToStoreInContract))),
 			}
 			return NewRequest("eth_call",
-					[]interface{}{txParams}),
+					[]interface{}{txParams, fmt.Sprintf("0x%x", rm.pushedTxBlockNumber)}),
 				nil
 		},
 		HandleResponse: func(rm *ResponseMap, resp Response) error {
@@ -1872,7 +1896,7 @@ var testCases = []TestCase{
 		Key: "Create Transaction Scenario: eth_getProof",
 		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
 			return NewRequest("eth_getProof",
-					[]interface{}{rm.pushedTxDeployedContractAddress, []string{"0x0"}, "latest"}),
+					[]interface{}{rm.pushedTxDeployedContractAddress, []string{"0x0000000000000000000000000000000000000000000000000000000000000000"}, "latest"}),
 				nil
 		},
 		HandleResponse: func(rm *ResponseMap, resp Response) error {

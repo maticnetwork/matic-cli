@@ -492,7 +492,7 @@ Note: in case of docker setup, we have provided [some additional scripts](src/se
 Adjust the [remote configs](configs/devnet/remote-setup-config.yaml) and run
 
 ```bash
-../bin/matic-cli.js setup devnet --config ../configs/devnet/remote-setup-config.yaml
+../bin/matic-cli.js setup devnet --config ../configs/devnet/remote-setup-config.yaml | tee setup.log
 ```
 
 Alternatively, this step can be executed interactively with
