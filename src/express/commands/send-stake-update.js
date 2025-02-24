@@ -99,32 +99,12 @@ export async function sendStakeUpdateEvent(validatorID) {
   // Adding 100 MATIC stake
   let command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "transfer(address,uint256)" ${validatorAccount} 100000000000000000000 --rpc-url http://localhost:9545 --private-key ${signerDump[0].priv_key}`
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
-  console.log('done!')
 
   command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "approve(address,uint256)" ${StakeManagerProxyAddress} 100000000000000000000 --rpc-url http://localhost:9545 --private-key ${pkey}`
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
-  console.log('done!')
 
   command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${StakeManagerProxyAddress} "restakePOL(uint256,uint256,bool)" ${validatorID} 100000000000000000000 false --rpc-url http://localhost:9545 --private-key ${pkey}`
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
-  console.log('done!')
-
-  // tx = stakeManagerContract.methods.restake(
-  //  validatorID,
-  //  rootChainWeb3.utils.toWei('100'),
-  //  false
-  // )
-  // signedTx = await getSignedTx(
-  //  rootChainWeb3,
-  //  StakeManagerProxyAddress,
-  //  tx,
-  //  validatorAccount,
-  //  pkey
-  // )
-  // const Receipt = await rootChainWeb3.eth.sendSignedTransaction(
-  //  signedTx.rawTransaction
-  // )
-  // console.log('Restake Receipt txHash:  ' + Receipt.transactionHash)
 
   let newValidatorPower = await getValidatorPower(doc, machine0, validatorID)
 

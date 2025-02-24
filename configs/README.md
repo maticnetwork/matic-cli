@@ -78,7 +78,7 @@ borBranch: c5569e4da9ebe0ce4e63aec571966c71234f7cfc # todo change to develop onc
 heimdallBranch: develop
 
 # Branch of contract to use. Repository: https://github.com/0xPolygon/pos-contracts
-contractsBranch: arya/matic-cli/pos-1869 # todo change to master once contracts team merges the PR
+contractsBranch: anvil-pos # todo change to master once contracts team merges the PR
 
 # Branch of contract to use. Repository: https://github.com/maticnetwork/genesis-contracts
 genesisContractsBranch: mardizzone/node-upgrade # todo change to master once contracts team merges the PR
