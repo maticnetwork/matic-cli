@@ -74,7 +74,7 @@ jobs:
           sed -i 's,gcp-key,matic-cli-ci-key,' .env
           sed -i 's,/absolute/path/to/your/,/home/runner/work/matic-cli/matic-cli/matic-cli/gcp/,' .env
           sed -i 's,YOUR_PROJECT_ID,prj-polygonlabs-pos-v1-dev,' .env
-          sed -i "s,mardizzone/heimdallv2-ganache,$GITHUB_HEAD_REF," .env
+          sed -i "s,hv2-ganache,$GITHUB_HEAD_REF," .env
 
       - name: Get GitHub action runner IP
         id: ip
