@@ -170,10 +170,12 @@ func main() {
 	flag.Parse()
 	if *mnemonic == "" && *privKey == "" {
 		fmt.Println("Must provide either mnemonic or privKey")
+		os.Exit(1)
 		return
 	}
 	if *rpcURL == "" {
 		fmt.Println("Invalid rpcURL flag")
+		os.Exit(1)
 		return
 	}
 
