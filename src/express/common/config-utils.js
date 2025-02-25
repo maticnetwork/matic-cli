@@ -511,7 +511,6 @@ function setCommonConfigs(doc) {
   }
 
   setConfigValue('borChainId', borChainId, doc)
-  setConfigValue('etherscanAPIKey', process.env.ETHERSCAN_API_KEY, doc)
   setConfigValue('mnemonic', process.env.MNEMONIC, doc)
   setConfigValue('heimdallChainId', heimdallChainId, doc)
   setConfigList('sprintSize', process.env.SPRINT_SIZE, doc)

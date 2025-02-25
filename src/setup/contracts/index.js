@@ -13,9 +13,8 @@ export class Contracts {
 
     this.repositoryName = 'pos-contracts'
     this.repositoryUrl =
-      options.repositoryUrl || 'https://github.com/0xPolygon/pos-contracts'
-    this.repositoryBranch =
-      options.repositoryBranch || 'arya/matic-cli/pos-1869'
+      options.repositoryUrl || 'https://github.com/0xPolygon/pos-contracts.git'
+    this.repositoryBranch = options.repositoryBranch || 'anvil-pos'
   }
 
   get name() {
@@ -44,7 +43,7 @@ export class Contracts {
   cloneRepositoryTasks() {
     return [
       {
-        title: 'Clone PoS contracts repository',
+        title: 'Clone matic contracts repository',
         task: () =>
           cloneRepository(
             this.repositoryName,
@@ -85,7 +84,7 @@ export class Contracts {
           )
       },
       {
-        title: 'Generate interfaces',
+        title: 'Generate contracts interfaces',
         task: () =>
           execa('npm', ['run', 'generate:interfaces'], {
             env: {
@@ -106,13 +105,6 @@ export class Contracts {
             },
             stdio: getRemoteStdio()
           })
-      },
-      {
-        title: 'Checking contract addresses file',
-        task: () =>
-          console.log(
-            `localContractAddressPath: ${this.localContractAddressesPath}, contractPath: ${this.contractAddressesPath}`
-          )
       }
     ]
   }

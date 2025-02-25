@@ -47,7 +47,7 @@ numOfNonValidators: 0
 devnetType: remote
 
 # URL to Ethereum RPC
-ethURL: http://localhost:9545
+ethURL: http://anvil:9545
 
 # Remote user for Ethereum RPC. Only effective when devnetType is `remote`.
 ethHostUser: ubuntu
@@ -78,8 +78,8 @@ borBranch: raneet10/heimdallv2-changes
 # Branch of Heimdall to use. Repository: https://github.com/0xPolygon/heimdall-v2
 heimdallBranch: develop
 
-# Branch of contract to use. Repository: https://github.com/maticnetwork/contracts
-contractsBranch: arya/matic-cli/pos-1869
+# Branch of contract to use. Repository: https://github.com/0xPolygon/pos-contracts
+contractsBranch: anvil-pos # todo change to master once contracts team merges the PR
 
 # Branch of contract to use. Repository: https://github.com/maticnetwork/genesis-contracts
 genesisContractsBranch: master

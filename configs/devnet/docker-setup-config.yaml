@@ -6,7 +6,7 @@ heimdallRepo: https://github.com/0xPolygon/heimdall-v2.git
 heimdallBranch: develop
 
 contractsRepo: https://github.com/0xPolygon/pos-contracts.git
-contractsBranch: arya/matic-cli/pos-1869
+contractsBranch: anvil-pos
 
 genesisContractsRepo: https://github.com/maticnetwork/genesis-contracts.git
 genesisContractsBranch: master
@@ -17,11 +17,11 @@ defaultStake: 10000
 defaultFee: 2000
 
 # L1
-ethURL: http://localhost:9545
+ethURL: http://anvil:9545 # use localhost for local deployments
 ethHostUser: ubuntu
 
-# Anvil
-mnemonic: 'clock radar mass judge dismiss just intact mind resemble fringe diary casino'
+# Misc
+mnemonic: "clock radar mass judge dismiss just intact mind resemble fringe diary casino"
 
 # Heimdall
 heimdallChainId: heimdall-15005
@@ -38,12 +38,12 @@ sprintSize: '64'
 sprintSizeBlockNumber: '0'
 
 # Bor
-numOfBorValidators: 1
+numOfBorValidators: 3
 numOfBorSentries: 0
 numOfBorArchiveNodes: 0
 
-devnetBorUsers: ubuntu
-devnetBorFlags: config
+devnetBorUsers: ubuntu,ubuntu,ubuntu
+devnetBorFlags: config,config,config
 
 # Erigon
 numOfErigonValidators: 0

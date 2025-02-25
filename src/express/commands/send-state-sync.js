@@ -48,6 +48,7 @@ export async function sendStateSyncTx() {
   const MaticToken = contractAddresses.root.tokens.MaticToken
 
   console.log('📍Sending StateSync Tx')
+
   const command = `export PATH="$HOME/.foundry/bin:$PATH" && cd ~/matic-cli/devnet/code/pos-contracts && forge script scripts/matic-cli-scripts/Deposit.s.sol:MaticDeposit --rpc-url http://localhost:9545 --private-key ${signerDump[0].priv_key} --broadcast --sig "run(address,address,uint256)" ${signerDump[0].address} ${MaticToken} 100000000000000000000`
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
 

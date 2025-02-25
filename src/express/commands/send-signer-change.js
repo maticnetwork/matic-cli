@@ -83,7 +83,6 @@ export async function sendSignerChangeEvent(validatorID) {
   console.log('📍 Changing Signer.....')
   const command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${StakeManagerProxyAddress} "updateSigner(uint256,bytes)" ${validatorID} ${newAccPubKey} --rpc-url http://localhost:9545 --private-key ${pkey}`
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
-  console.log('done!')
 
   let newSigner = await getValidatorSigner(doc, machine0, validatorID)
 

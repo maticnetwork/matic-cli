@@ -294,7 +294,7 @@ The `express-cli` also comes with additional utility commands, listed below. Som
   - Relay transactions from testnet or mainnet to shadow node running in the devnet.
 
 - `../../bin/express-cli.js --fund-anvil-accounts`
-  - Transfers 10 ETH to all the anvil accounts.
+  - Transfers 10 eth to all the anvil accounts.
 
 Note: to allow `express-cli` to clone private repos, make sure the git configs in the `.env` file looks like the following (example for `BOR_REPO`)
 
@@ -349,7 +349,7 @@ Please, make sure to install the following software/packages on the VMs.
 
   ```bash
   curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash \
-    && source /home/ubuntu/.bashrc \
+    && source ~/.bashrc \
     && nvm install 18.19.0 \
     && node --version
   ```
@@ -363,7 +363,7 @@ Please, make sure to install the following software/packages on the VMs.
 - Python 2 (only _host_)
 
   ```bash
-  sudo apt install python2 --yes && alias python="/usr/bin/python2"
+  sudo apt install python3 --yes && alias python="/usr/bin/python3"
   ```
 
 - Solc v0.5.16 (only _host_)
@@ -375,10 +375,8 @@ Please, make sure to install the following software/packages on the VMs.
 - Anvil CLI (only _host_)
 
   ```bash
-    curl -L https://foundry.paradigm.xyz | bash && export PATH="$HOME/.foundry/bin:$PATH" >> ~/.bashrc && source ~/.bashrc && foundryup
+   curl -L https://foundry.paradigm.xyz | bash && export PATH="$HOME/.foundry/bin:$PATH" >> ~/.bashrc && source ~/.bashrc && foundryup
   ```
-
-````
 
 #### **MacOS**
 
@@ -386,7 +384,7 @@ Please, make sure to install the following software/packages on the VMs.
 
   ```zsh
   xcode-select --install
-````
+  ```
 
 - Go 1.18+ (_host_ and _remotes_)
 
@@ -436,7 +434,7 @@ Please, make sure to install the following software/packages on the VMs.
 - Anvil CLI (only _host_)
 
   ```zsh
-    curl -L https://foundry.paradigm.xyz | bash && export PATH="$HOME/.foundry/bin:$PATH" >> ~/.bashrc && source ~/.bashrc && foundryup
+  curl -L https://foundry.paradigm.xyz | bash && export PATH="$HOME/.foundry/bin:$PATH" >> ~/.bashrc && source ~/.bashrc && foundryup
   ```
 
 ### Usage

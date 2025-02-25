@@ -17,17 +17,7 @@ export class Anvil {
   constructor(config, options = {}) {
     this.config = config
     this.mnemonic = config.mnemonic
-
-    if (!this.mnemonic) {
-      console.error(
-        '❌ Error: MNEMONIC is not set. Please set it in the configuration file or environment variables.'
-      )
-      process.exit(1)
-    }
-
     this.deployerAccount = createAccountsFromMnemonics(this.mnemonic, 1)
-    console.log(`Deployer's account: ${this.deployerAccount[0].adress}`)
-
     this.deployerPrivateKey = this.deployerAccount[0].privateKey
 
     this.dbName = options.dbName || 'anvil-db'
@@ -93,8 +83,6 @@ export class Anvil {
             server = execa(
               'anvil',
               [
-                '--host',
-                '0.0.0.0',
                 '--port',
                 `${this.serverPort}`,
                 '--balance',
@@ -103,6 +91,8 @@ export class Anvil {
                 '1000000000000',
                 '--gas-price',
                 '1',
+                '--accounts',
+                '10',
                 '--mnemonic',
                 `${this.mnemonic}`,
                 '--code-size-limit',
