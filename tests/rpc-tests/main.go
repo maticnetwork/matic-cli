@@ -215,7 +215,6 @@ func main() {
 			mapTestCases["eth_getTransactionCount"],
 			mapTestCases["eth_maxPriorityFeePerGas"],
 			mapTestCases["eth_syncing"],
-			mapTestCases["force_Failure"],
 		},
 		{
 			mapTestCases["bor_getAuthor (by number)"],
@@ -988,16 +987,6 @@ func prepareEstimateGasRequest(from Account, input []byte) map[string]interface{
 }
 
 var testCases = []TestCase{
-	{
-		Key: "force_Failure",
-		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
-			return NewRequest("eth_chainId", []interface{}{}), nil
-		},
-		HandleResponse: func(rm *ResponseMap, resp Response) error {
-			return fmt.Errorf("This is a forced error, just to test. What you are reading is the error message")
-		},
-	},
-
 	{
 		Key: "eth_chainId",
 		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
