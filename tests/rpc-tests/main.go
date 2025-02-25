@@ -215,6 +215,7 @@ func main() {
 			mapTestCases["eth_getTransactionCount"],
 			mapTestCases["eth_maxPriorityFeePerGas"],
 			mapTestCases["eth_syncing"],
+			mapTestCases["force_Failure"],
 		},
 		{
 			mapTestCases["bor_getAuthor (by number)"],
@@ -320,14 +321,16 @@ func main() {
 	fmt.Println("════════════════════════════════════════")
 
 	if len(failedTestCases) > 0 {
-		fmt.Println("Failed Tests Cases:")
+		fmt.Printf("\n\n")
+		fmt.Println("❌ Failed Test Cases:")
 		for _, failedTestCase := range failedTestCases {
-			fmt.Printf("\tkey: %s | err:%s\n", failedTestCase.Key, failedTestCase.Err)
+			fmt.Printf("\n  🔎 Test Case Key: %s\n", failedTestCase.Key)
+			fmt.Printf("      🚫 Error: %s\n", failedTestCase.Err)
 			if *logReqRes {
 				request, _ := json.Marshal(failedTestCase.Req)
 				response, _ := json.Marshal(failedTestCase.Res)
-				fmt.Printf("\t\treq:%s\n", string(request))
-				fmt.Printf("\t\tres:%s\n", string(response))
+				fmt.Printf("      📤 Request: %s\n", string(request))
+				fmt.Printf("      📥 Response: %s\n", string(response))
 			}
 		}
 		os.Exit(1)
