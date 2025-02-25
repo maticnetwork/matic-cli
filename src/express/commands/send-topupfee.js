@@ -59,8 +59,6 @@ export async function sendTopUpFeeEvent(validatorID) {
   const StakeManagerProxyAddress = contractAddresses.root.StakeManagerProxy
 
   const MaticTokenAddr = contractAddresses.root.tokens.MaticToken
-  console.log('address')
-  console.log(MaticTokenAddr)
 
   const signerDump = JSON.parse(
     fs.readFileSync(`${process.cwd()}/signer-dump.json`, 'utf8')
