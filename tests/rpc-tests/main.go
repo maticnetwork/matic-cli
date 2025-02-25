@@ -310,7 +310,14 @@ func main() {
 		}
 	}
 
-	fmt.Printf("All Tests Executed | Success: (%d/%d) | Duration: %s\n", countTestCases-len(failedTestCases), countTestCases, time.Since(timeStart))
+	passedTests := countTestCases - len(failedTestCases)
+	duration := time.Since(timeStart)
+
+	fmt.Println("════════════════════════════════════════")
+	fmt.Println("🚀  All Tests Executed!")
+	fmt.Printf("✅  Success: %d/%d tests passed\n", passedTests, countTestCases)
+	fmt.Printf("⌛  Duration: %s\n", duration)
+	fmt.Println("════════════════════════════════════════")
 
 	if len(failedTestCases) > 0 {
 		fmt.Println("Failed Tests Cases:")
