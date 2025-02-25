@@ -335,17 +335,17 @@ export class Devnet {
           )
 
           // TODO: Uncomment when finalized for docker setup
-          if (this.config.network) {
-            const chain = this.config.network
-            for (let i = 0; i < this.totalBorNodes; i++) {
-              fileReplacer(this.borGenesisFilePath(i))
-                .replace(
-                  /NODE_DIR\/genesis.json/gi,
-                   `${chain}`
-                )
-                .save()
-            }
-          }
+          // if (this.config.network) {
+          //  const chain = this.config.network
+          //  for (let i = 0; i < this.totalBorNodes; i++) {
+          //    fileReplacer(this.borGenesisFilePath(i))
+          //      .replace(
+          //        /NODE_DIR\/genesis.json/gi,
+          //         `${chain}`
+          //      )
+          //      .save()
+          //  }
+          // }
           // process template files
           await processTemplateFiles(this.config.targetDirectory, {
             obj: this,
