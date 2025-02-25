@@ -207,7 +207,7 @@ jobs:
           SCRIPT_ADDRESS=$(jq -r '.[0].address' signer-dump.json)
           SCRIPT_PRIVATE_KEY=$(jq -r '.[0].priv_key' signer-dump.json)
           cd ../code/pos-contracts
-          forge script scripts/matic-cli-scripts/Deposit.s.sol:MaticDeposit --rpc-url http://localhost:9545 --private-key $SCRIPT_PRIVATE_KEY --broadcast --sig "run(address,address,uint256)" $SCRIPT_ADDRESS $CONTRACT_ADDRESS 100000000000000000000
+          forge script scripts/matic-cli-scripts/Deposit.s.sol:MaticDeposit --legacy --rpc-url http://localhost:9545 --private-key $SCRIPT_PRIVATE_KEY --broadcast --sig "run(address,address,uint256)" $SCRIPT_ADDRESS $CONTRACT_ADDRESS 100000000000000000000
           cd ../../../..
           timeout 120m bash matic-cli/.github/integration-tests/smoke_test.sh
 
