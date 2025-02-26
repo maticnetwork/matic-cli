@@ -192,7 +192,7 @@ jobs:
       - name: Launch devnet
         run: |
           cd matic-cli/devnet
-          bash docker_devnet.sh
+          bash ../util-scripts/docker/devnet_setup.sh
           cd -
           timeout 2m bash matic-cli/.github/integration-tests/bor_health.sh
 
