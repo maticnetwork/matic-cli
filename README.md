@@ -450,7 +450,7 @@ cd \
 
 #### Local dockerized network
 
-Install the required software on your machine (see [Requirements](#requirements-1)).  
+Install the required software on your machine (see [Requirements](#requirements-1)).
 
 Adjust the [docker configs](configs/devnet/docker-setup-config.yaml) based on your setup, and run
 
