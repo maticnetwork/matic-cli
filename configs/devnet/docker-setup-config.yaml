@@ -39,11 +39,11 @@ sprintSizeBlockNumber: '0'
 
 # Bor
 numOfBorValidators: 3
-numOfBorSentries: 0
+numOfBorSentries: 1
 numOfBorArchiveNodes: 0
 
-devnetBorUsers: ubuntu,ubuntu,ubuntu
-devnetBorFlags: config,config,config
+devnetBorUsers: ubuntu,ubuntu,ubuntu,ubuntu
+devnetBorFlags: config,config,config,config
 
 # Erigon
 numOfErigonValidators: 0
