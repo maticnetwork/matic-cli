@@ -155,7 +155,7 @@ export async function monitor(exitWhenDone) {
 
     const checkpointCount = await checkCheckpoint(machine0)
     if (checkpointCount > 0) {
-      console.log('📍Checkpoint found on Heimdall ✅; Count: ', checkpointCount)
+      console.log('📍Checkpoint found on Heimdall ✅; Count:', checkpointCount)
     } else {
       console.log('📍Awaiting Checkpoint on Heimdall 🚌')
     }
@@ -166,7 +166,7 @@ export async function monitor(exitWhenDone) {
     )
     if (checkpointCountFromRootChain > 0) {
       console.log(
-        '📍Checkpoint found on Root chain ✅; Count: ',
+        '📍Checkpoint found on Root chain ✅; Count:',
         checkpointCountFromRootChain
       )
     } else {
@@ -192,9 +192,9 @@ export async function monitor(exitWhenDone) {
         const lastStateSyncTxHash =
           stateSyncTxList[lastStateSyncTxID - 1].tx_hash
         console.log(
-          '📍StateSyncs found on Heimdall ✅; Count: ',
+          '📍StateSyncs found on Heimdall ✅; Count:',
           lastStateSyncTxID,
-          ' ; Last Tx Hash: ',
+          '; Last Tx Hash:',
           lastStateSyncTxHash
         )
       }
@@ -204,7 +204,7 @@ export async function monitor(exitWhenDone) {
 
     const lastStateIDFromBor = await lastStateIdFromBor(machine0)
     if (lastStateIDFromBor) {
-      console.log('📍LastStateId on Bor: ', lastStateIDFromBor)
+      console.log('📍LastStateId on Bor:', lastStateIDFromBor)
     } else {
       console.log('📍Unable to fetch LastStateId')
     }
