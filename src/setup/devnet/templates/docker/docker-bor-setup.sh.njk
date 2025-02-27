@@ -11,7 +11,7 @@ for i in {0..{{ obj.totalNodes - 1 }}}
 do
   NODE_DIR=/var/lib/bor
   DATA_DIR=/var/lib/bor/data
-  docker compose run --rm --entrypoint bash bor$i -c "
+  docker compose run --rm --remove-orphans --entrypoint bash bor$i -c "
 mkdir -p $DATA_DIR/bor;
 cp $NODE_DIR/nodekey $DATA_DIR/bor/;
 cp $NODE_DIR/static-nodes.json $DATA_DIR/bor/;
