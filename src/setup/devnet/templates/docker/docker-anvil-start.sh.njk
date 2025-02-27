@@ -3,5 +3,6 @@
 set -x
 
 DATA_DIR=anvil-db
+export MNEMONIC="{{ obj.config.mnemonic }}"
 
-docker compose run -d --service-ports --name anvil anvil --state /data/$DATA_DIR --balance 1000000000000000 --gas-limit 1000000000000 --gas-price 1 --code-size-limit 10000000000 --port 9545 --host 0.0.0.0 --verbosity --block-time 1 --mnemonic "clock radar mass judge dismiss just intact mind resemble fringe diary casino"
+docker compose run -d --service-ports --name anvil anvil --block-time 1 --state /data/$DATA_DIR --accounts 10 --gas-limit 1000000000000 --gas-price 1 --code-size-limit 10000000000 --port 9545 --host 0.0.0.0 --verbosity --mnemonic "$MNEMONIC"
