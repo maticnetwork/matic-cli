@@ -527,6 +527,10 @@ Stop all services, remove the `matic-cli/devnet` folder, and you can start the p
 
 #### Notes
 
+Install the required software on your machine (see [Requirements](#requirements-1)).
+
+Adjust the [docker configs](configs/devnet/docker-setup-config.yaml) based on your setup, and run
+
 1. The anvil URL hostname will be used for anvil `http://<host-machine-ip>:9545`
 2. Make sure that the _host_ machine has access to remote machines for transferring the data
    To persist ssh key for remote access, please run:

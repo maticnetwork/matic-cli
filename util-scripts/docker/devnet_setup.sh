@@ -14,7 +14,7 @@ bash docker-bor-setup.sh || { echo "Failed to setup Bor"; exit 1; }
 # Start Bor
 bash docker-bor-start-all.sh || { echo "Failed to start Bor"; exit 1; }
 
-sleep 5m
+sleep 2m
 
 # Deploy Bor to Anvil
 bash anvil-deployment-bor.sh || { echo "Failed to deploy Bor to Anvil"; exit 1; }
