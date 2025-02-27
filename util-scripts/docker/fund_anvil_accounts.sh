@@ -14,7 +14,7 @@ for ((i = 1; i < signersLength; i++)); do
   to_address=$(echo "$signersDump" | jq -r ".[$i].address")
   from_address=$(echo "$signersDump" | jq -r ".[0].address")
   from_priv_key=$(echo "$signersDump" | jq -r ".[0].priv_key")
-  txReceipt=$(cast send --rpc-url $rootChainWeb3 --private-key $from_priv_key $to_address --value 10ether 2>&1)
+  txReceipt=$(export PATH="$HOME/.foundry/bin:$PATH" && cast send --rpc-url $rootChainWeb3 --private-key $from_priv_key $to_address --value 10ether)
   txHash=$(echo "$txReceipt" | grep -oE '0x[a-fA-F0-9]{64}' | head -n 1)
   echo "Funds transferred from $from_address to $to_address with txHash: $txHash"
 done
