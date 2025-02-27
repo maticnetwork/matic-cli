@@ -12,7 +12,7 @@ ADDRESS=${ADDRESSES[$INDEX]};
 NODE_DIR=/var/lib/bor
 DATA_DIR=/var/lib/bor/data
 
-docker compose run --remove-orphans --service-ports -d --name bor$INDEX --entrypoint bash bor$INDEX -c "
+docker compose run --service-ports -d --name bor$INDEX --entrypoint bash bor$INDEX -c "
 touch /logs/bor.log
 bor server \
   --config $NODE_DIR/config.toml \
@@ -43,5 +43,5 @@ bor server \
   --password $NODE_DIR/password.txt \
   --allow-insecure-unlock \
   --mine > /logs/bor.log 2>&1 &
-less -R +F /logs/bor.log
+tail -f /logs/bor.log
 "
