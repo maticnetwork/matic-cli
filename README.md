@@ -471,16 +471,16 @@ Once the setup is done, use the aggregated script for local docker deployment
 bash ../util-scripts/docker/devnet_setup.sh
 ```
 
-Then, fund the accounts in anvil
-
-```bash
-bash ../util-scripts/docker/fund_anvil_accounts.sh
-```
-
 To verify the deployment, run the smoke test to ensure everything is working properly. The script usually takes around 6mins to complete.
 
 ```bash
 bash ../util-scripts/docker/smoke_test.sh
+```
+
+To add funds to the signer's account, note that this step is optional. All existing signers already have sufficient funds.
+
+```bash
+bash ../util-scripts/docker/fund_anvil_accounts.sh
 ```
 
 Logs will be stored under `logs/` folder
