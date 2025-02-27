@@ -525,7 +525,7 @@ Stop all services, remove the `matic-cli/devnet` folder, and you can start the p
 
 #### Notes
 
-Install the required software on your machine (see [Requirements](#requirements-1)).  
+Install the required software on your machine (see [Requirements](#requirements-1)).
 
 Adjust the [docker configs](configs/devnet/docker-setup-config.yaml) based on your setup, and run
 
