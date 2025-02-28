@@ -12,8 +12,6 @@ while true
 do
 
     balance=$(docker exec bor0 bash -c "bor attach /var/lib/bor/data/bor.ipc -exec 'Math.round(web3.fromWei(eth.getBalance(eth.accounts[0])))'")
-    echo "checkpointFound : $checkpointFound"
-    echo "stateSyncFound : $stateSyncFound"
 
     if ! [[ "$balance" =~ ^[0-9]+$ ]]; then
         echo "Something is wrong! Can't find the balance of first account in bor network."

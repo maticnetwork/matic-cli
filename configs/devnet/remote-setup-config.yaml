@@ -1,28 +1,39 @@
+devnetType: remote
 defaultStake: 10000
 defaultFee: 2000
+
 borChainId: 15005
-heimdallChainId: heimdall-4052
+heimdallChainId: heimdall-15005
+
 borRepo: https://github.com/maticnetwork/bor.git
 borBranch: raneet10/heimdallv2-changes
+
 heimdallRepo: https://github.com/0xPolygon/heimdall-v2.git
 heimdallBranch: develop
+
 contractsRepo: https://github.com/0xPolygon/pos-contracts.git
-contractsBranch: arya/matic-cli/pos-1869
+contractsBranch: anvil-pos
+
 genesisContractsRepo: https://github.com/maticnetwork/genesis-contracts.git
 genesisContractsBranch: master
-sprintSize: 64
-sprintSizeBlockNumber: 0
-blockNumber: '0'
+
 blockTime: '2'
+blockNumber: '0'
+
+sprintSize: '64'
+sprintSizeBlockNumber: '0'
+
 numOfBorValidators: 1
 numOfBorSentries: 1
 numOfBorArchiveNodes: 0
-numOfErigonValidators: 1
-numOfErigonSentries: 1
+
+numOfErigonValidators: 0
+numOfErigonSentries: 0
 numOfErigonArchiveNodes: 0
+
 ethURL: http://ec2-xx-xxx-xxx-xx.eu-west-1.compute.amazonaws.com:9545
 ethHostUser: ubuntu
-devnetType: remote
+
 devnetBorHosts:
   - ec2-xx-xxx-xxx-xx.eu-west-1.compute.amazonaws.com
   - ec2-yy-yyy-yyy-yy.eu-west-1.compute.amazonaws.com
@@ -38,6 +49,8 @@ devnetHeimdallUsers:
 devnetBorFlags:
   - config
   - config
+
 borDockerBuildContext: https://github.com/maticnetwork/bor.git#develop
 heimdallDockerBuildContext: https://github.com/0xPolygon/heimdall-v2.git#develop
+
 mnemonic: 'clock radar mass judge dismiss just intact mind resemble fringe diary casino'

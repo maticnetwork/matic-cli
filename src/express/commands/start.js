@@ -432,7 +432,6 @@ async function runRemoteSetupWithMaticCLI(ips, devnetId) {
   await runSshCommand(ip, command, maxRetries)
 
   if (!process.env.NETWORK) {
-    // write an anvil script ;
     console.log('📍Deploying contracts for bor on machine ' + ip + ' ...')
     await timer(60000)
     command = 'cd ~/matic-cli/devnet && bash anvil-deployment-bor.sh'

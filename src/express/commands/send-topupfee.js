@@ -59,8 +59,6 @@ export async function sendTopUpFeeEvent(validatorID) {
   const StakeManagerProxyAddress = contractAddresses.root.StakeManagerProxy
 
   const MaticTokenAddr = contractAddresses.root.tokens.MaticToken
-  console.log('address')
-  console.log(MaticTokenAddr)
 
   const signerDump = JSON.parse(
     fs.readFileSync(`${process.cwd()}/signer-dump.json`, 'utf8')
@@ -69,29 +67,27 @@ export async function sendTopUpFeeEvent(validatorID) {
   const validatorAccount = signerDump[validatorID - 1].address
   console.log(signerDump[validatorID - 1].address)
 
-  console.log('📍 Sending MATIC-TOKENS to validators account')
+  console.log('📍 Sending Matic Tokens to validators account')
   let command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "transfer(address,uint256)" ${validatorAccount} 100000000000000000000 --rpc-url http://localhost:9545 --private-key ${signerDump[0].priv_key}`
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
-  console.log('done!')
 
+  console.log('Waiting 12 secs for token transaction to be processed')
   await timer(12000)
 
   command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "approve(address,uint256)" ${StakeManagerProxyAddress} 100000000000000000000 --rpc-url http://localhost:9545 --private-key ${pkey}`
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
-  console.log('done!')
 
   const oldValidatorBalance = await getValidatorBalance(
     doc,
     machine0,
     validatorAccount
   )
-  console.log('Waiting 20 sec...')
+  console.log('Waiting 20 secs for Matic Token Approval')
   await timer(20000)
 
   console.log('Old Validator Balance:  ' + oldValidatorBalance)
   command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${StakeManagerProxyAddress} "topUpForFee(address,uint256)" ${validatorAccount} 10000000000000000000 --rpc-url http://localhost:9545 --private-key ${pkey}`
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
-  console.log('done!')
 
   let newValidatorBalance = await getValidatorBalance(
     doc,

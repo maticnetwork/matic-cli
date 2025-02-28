@@ -67,21 +67,15 @@ export async function sendUnstakeInitEvent(validatorID) {
 
   const command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${StakeManagerProxyAddress} "unstakePOL(uint256)" ${validatorID} --rpc-url http://localhost:9545 --private-key ${pkey}`
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
-  console.log('done!')
 
   const oldValidatorsCount = await checkValidatorsLength(doc, machine0)
   console.log('oldValidatorsCount : ', oldValidatorsCount)
 
-  // const Receipt = await rootChainWeb3.eth.sendSignedTransaction(
-  //  signedTx.rawTransaction
-  // )
-  // console.log('Unstake Receipt', Receipt.transactionHash)
-
   let newValidatorsCount = await checkValidatorsLength(doc, machine0)
 
   while (parseInt(newValidatorsCount) !== parseInt(oldValidatorsCount) - 1) {
-    console.log('Waiting 3 secs for validator to be removed')
-    await timer(3000) // waiting 3 secs
+    console.log('Waiting 5 secs for validator to be removed')
+    await timer(5000)
     newValidatorsCount = await checkValidatorsLength(doc, machine0)
     console.log('newValidatorsCount : ', newValidatorsCount)
   }

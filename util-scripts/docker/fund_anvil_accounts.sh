@@ -2,7 +2,7 @@
 
 host='localhost'
 
-echo "Transferring 1 ETH from anvil account[0] to all others..."
+echo "Transferring 10 ETH from anvil account[0] to all others..."
 
 signersFile="../devnet/devnet/signer-dump.json"
 signersDump=$(jq . $signersFile)
@@ -13,7 +13,8 @@ rootChainWeb3="http://${host}:9545"
 for ((i = 1; i < signersLength; i++)); do
   to_address=$(echo "$signersDump" | jq -r ".[$i].address")
   from_address=$(echo "$signersDump" | jq -r ".[0].address")
-  txReceipt=$(curl $rootChainWeb3 -X POST --data '{"jsonrpc":"2.0","method":"eth_sendTransaction","params":[{"to":"'"$to_address"'","from":"'"$from_address"'","value":"0xDE0B6B3A7640000"}],"id":1}' -H "Content-Type: application/json")
-  txHash=$(echo "$txReceipt" | jq -r '.result')
+  from_priv_key=$(echo "$signersDump" | jq -r ".[0].priv_key")
+  txReceipt=$(export PATH="$HOME/.foundry/bin:$PATH" && cast send --rpc-url $rootChainWeb3 --private-key $from_priv_key $to_address --value 10ether)
+  txHash=$(echo "$txReceipt" | grep -oE '0x[a-fA-F0-9]{64}' | head -n 1)
   echo "Funds transferred from $from_address to $to_address with txHash: $txHash"
 done

@@ -10,15 +10,12 @@ export MNEMONIC={{ obj.config.primaryAccount.privateKey }}
 export HEIMDALL_ID={{ obj.config.heimdallChainId }}
 
 export DIR={{ obj.contracts.repositoryDir }}
-echo "$DIR"
 
 export SERVER_PORT={{ obj.serverPort }}
 
 # cd matic contracts repo
 cd {{ obj.contracts.repositoryDir }}
 
-
 export PATH="$HOME/.foundry/bin:$PATH"
 
-
-forge script scripts/deployment-scripts/syncChildStateToRoot.s.sol:SyncChildStateToRootScript --rpc-url http://localhost:$SERVER_PORT --private-key $PRIVATE_KEY --broadcast
+forge script scripts/deployment-scripts/syncChildStateToRoot.s.sol:SyncChildStateToRootScript --legacy --rpc-url http://localhost:$SERVER_PORT --private-key $PRIVATE_KEY --broadcast

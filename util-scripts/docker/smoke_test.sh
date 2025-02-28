@@ -3,9 +3,14 @@ set -e
 
 echo "Starting the smoke test for the local docker devnet..."
 
-cd ./code/contracts
+cd ./devnet
+SCRIPT_ADDRESS=$(jq -r '.[0].address' signer-dump.json)
+SCRIPT_PRIVATE_KEY=$(jq -r '.[0].priv_key' signer-dump.json)
+cd ../code/pos-contracts
+CONTRACT_ADDRESS=$(jq -r .root.tokens.MaticToken contractAddresses.json)
 echo "Executing a deposit..."
-npm run truffle exec scripts/deposit.js -- --network development $(jq -r .root.tokens.MaticToken contractAddresses.json) 100000000000000000000
+export PATH="$HOME/.foundry/bin:$PATH"
+forge script scripts/matic-cli-scripts/Deposit.s.sol:MaticDeposit --legacy --rpc-url http://localhost:9545 --private-key $SCRIPT_PRIVATE_KEY --broadcast --sig "run(address,address,uint256)" $SCRIPT_ADDRESS $CONTRACT_ADDRESS 100000000000000000000
 echo "Deposit executed successfully! StateSync will kick in soon..."
 
 echo ""
@@ -36,7 +41,7 @@ do
         fi
     fi
 
-    checkpointID=$(curl -sL http://localhost:1317/checkpoints/latest | jq .result.id)
+    checkpointID=$(curl -sL http://localhost:1317/checkpoints/latest | jq .checkpoint.id)
 
     if [ "$checkpointID" != "null" ]; then
         if [ "$checkpointFound" != "true" ]; then

@@ -163,7 +163,7 @@ program
   )
   .option('-relay, --relay', 'Relay transaction to shadow node')
   .option('-rpc, --rpc-test', 'Run the rpc test command')
-  .option('-fga, --fund-anvil-accounts', 'Add funds to anvil accounts')
+  .option('-fga, --fund-anvil-accounts', 'Add funds to the anvil accounts')
   .version(pkg.version)
 
 export async function cli() {

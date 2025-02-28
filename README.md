@@ -349,7 +349,7 @@ Please, make sure to install the following software/packages on the VMs.
 
   ```bash
   curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash \
-    && source /home/ubuntu/.bashrc \
+    && source ~/.bashrc \
     && nvm install 18.19.0 \
     && node --version
   ```
@@ -363,7 +363,7 @@ Please, make sure to install the following software/packages on the VMs.
 - Python 2 (only _host_)
 
   ```bash
-  sudo apt install python2 --yes && alias python="/usr/bin/python2"
+  sudo apt install python3 --yes && alias python="/usr/bin/python3"
   ```
 
 - Solc v0.5.16 (only _host_)
@@ -375,10 +375,8 @@ Please, make sure to install the following software/packages on the VMs.
 - Anvil CLI (only _host_)
 
   ```bash
-    curl -L https://foundry.paradigm.xyz | bash && export PATH="$HOME/.foundry/bin:$PATH" >> ~/.bashrc && source ~/.bashrc && foundryup
+   curl -L https://foundry.paradigm.xyz | bash && export PATH="$HOME/.foundry/bin:$PATH" >> ~/.bashrc && source ~/.bashrc && foundryup
   ```
-
-````
 
 #### **MacOS**
 
@@ -386,7 +384,7 @@ Please, make sure to install the following software/packages on the VMs.
 
   ```zsh
   xcode-select --install
-````
+  ```
 
 - Go 1.18+ (_host_ and _remotes_)
 
@@ -436,7 +434,7 @@ Please, make sure to install the following software/packages on the VMs.
 - Anvil CLI (only _host_)
 
   ```zsh
-    curl -L https://foundry.paradigm.xyz | bash && export PATH="$HOME/.foundry/bin:$PATH" >> ~/.bashrc && source ~/.bashrc && foundryup
+  curl -L https://foundry.paradigm.xyz | bash && export PATH="$HOME/.foundry/bin:$PATH" >> ~/.bashrc && source ~/.bashrc && foundryup
   ```
 
 ### Usage
@@ -451,6 +449,8 @@ cd \
 ```
 
 #### Local dockerized network
+
+Install the required software on your machine (see [Requirements](#requirements-1)).
 
 Adjust the [docker configs](configs/devnet/docker-setup-config.yaml) based on your setup, and run
 
@@ -473,16 +473,17 @@ Once the setup is done, use the aggregated script for local docker deployment
 bash ../util-scripts/docker/devnet_setup.sh
 ```
 
-Then, fund the accounts in anvil
-
-```bash
-bash ../util-scripts/docker/fund_anvil_accounts.sh
-```
-
 To verify the deployment, run the smoke test to ensure everything is working properly. The script usually takes around 6mins to complete.
 
 ```bash
 bash ../util-scripts/docker/smoke_test.sh
+```
+
+To add funds to the signer's account you can execute the following script.  
+This step is optional, as all existing signers already have sufficient funds.
+
+```bash
+bash ../util-scripts/docker/fund_anvil_accounts.sh
 ```
 
 Logs will be stored under `logs/` folder
@@ -526,6 +527,10 @@ In this case, the stack is already running, you would just need to deploy/sync s
 Stop all services, remove the `matic-cli/devnet` folder, and you can start the process once again
 
 #### Notes
+
+Install the required software on your machine (see [Requirements](#requirements-1)).
+
+Adjust the [docker configs](configs/devnet/docker-setup-config.yaml) based on your setup, and run
 
 1. The anvil URL hostname will be used for anvil `http://<host-machine-ip>:9545`
 2. Make sure that the _host_ machine has access to remote machines for transferring the data

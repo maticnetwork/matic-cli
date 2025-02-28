@@ -206,6 +206,12 @@ async function startServices(doc) {
       command = 'sudo systemctl start anvil.service'
       await runSshCommand(ip, command, maxRetries)
 
+      console.log(
+        '📍Deploying main net contracts dependencies on machine ' + ip + ' ...'
+      )
+      command = 'cd ~/matic-cli/devnet && bash anvil-deploy-dependencies.sh'
+      await runSshCommand(ip, command, maxRetries)
+
       console.log('📍Deploying main net contracts on machine ' + ip + ' ...')
       command = 'cd ~/matic-cli/devnet && bash anvil-deployment.sh'
       await runSshCommand(ip, command, maxRetries)
