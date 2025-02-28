@@ -13,7 +13,7 @@ export class Contracts {
 
     this.repositoryName = 'pos-contracts'
     this.repositoryUrl =
-      options.repositoryUrl || 'https://github.com/0xPolygon/pos-contracts.git'
+      options.repositoryUrl || 'https://github.com/0xPolygon/pos-contracts'
     this.repositoryBranch = options.repositoryBranch || 'anvil-pos'
   }
 
