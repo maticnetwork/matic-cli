@@ -456,14 +456,17 @@ export async function start() {
 
   await validateConfigs(cloud)
 
-  shell.exec(
-    `cp ../../configs/devnet/${devnetType}-setup-config.yaml ../../deployments/devnet-${devnetId}`
+  shell.cp(
+    '../../configs/devnet/${devnetType}-setup-config.yaml',
+    `../../deployments/devnet-${devnetId}`
   )
-  shell.exec(
-    `cp ../../configs/devnet/openmetrics-conf.yaml ../../deployments/devnet-${devnetId}`
+  shell.cp(
+    '../../configs/devnet/openmetrics-conf.yaml',
+    `../../deployments/devnet-${devnetId}`
   )
-  shell.exec(
-    `cp ../../configs/devnet/otel-config-dd.yaml ../../deployments/devnet-${devnetId}`
+  shell.cp(
+    '../../configs/devnet/otel-config-dd.yaml',
+    `../../deployments/devnet-${devnetId}`
   )
 
   if (devnetType === 'docker') {
