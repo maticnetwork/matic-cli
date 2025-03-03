@@ -13,9 +13,7 @@ export async function terraformInit(cloud) {
 
   shell.exec(`mkdir -p ./deployments/devnet-${nextDevnetId}`)
   shell.cp(`./.env ./deployments/devnet-${nextDevnetId}/.env`)
-  shell.cp(
-    `./secret.tfvars ./deployments/devnet-${nextDevnetId}/secret.tfvars`
-  )
+  shell.cp(`./secret.tfvars ./deployments/devnet-${nextDevnetId}/secret.tfvars`)
   shell.cp(
     `./terraform/${cloud}/main.tf ./deployments/devnet-${nextDevnetId}/main.tf`
   )
