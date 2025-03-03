@@ -12,18 +12,18 @@ export async function terraformInit(cloud) {
     : findMaxDevnetId() + 1
 
   shell.exec(`mkdir -p ./deployments/devnet-${nextDevnetId}`)
-  shell.exec(`cp ./.env ./deployments/devnet-${nextDevnetId}/.env`)
-  shell.exec(
-    `cp ./secret.tfvars ./deployments/devnet-${nextDevnetId}/secret.tfvars`
+  shell.cp(`./.env ./deployments/devnet-${nextDevnetId}/.env`)
+  shell.cp(
+    `./secret.tfvars ./deployments/devnet-${nextDevnetId}/secret.tfvars`
   )
-  shell.exec(
-    `cp ./terraform/${cloud}/main.tf ./deployments/devnet-${nextDevnetId}/main.tf`
+  shell.cp(
+    `./terraform/${cloud}/main.tf ./deployments/devnet-${nextDevnetId}/main.tf`
   )
-  shell.exec(
-    `cp ./terraform/variables/common_vars.tf ./deployments/devnet-${nextDevnetId}/common_vars.tf`
+  shell.cp(
+    `./terraform/variables/common_vars.tf ./deployments/devnet-${nextDevnetId}/common_vars.tf`
   )
-  shell.exec(
-    `cp ./terraform/variables/${cloud}_vars.tf ./deployments/devnet-${nextDevnetId}/${cloud}_vars.tf`
+  shell.cp(
+    `./terraform/variables/${cloud}_vars.tf ./deployments/devnet-${nextDevnetId}/${cloud}_vars.tf`
   )
 
   dotenv.config({
