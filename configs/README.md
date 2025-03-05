@@ -47,7 +47,7 @@ numOfNonValidators: 0
 devnetType: remote
 
 # URL to Ethereum RPC
-ethURL: http://ganache:9545
+ethURL: http://anvil:9545
 
 # Remote user for Ethereum RPC. Only effective when devnetType is `remote`.
 ethHostUser: ubuntu
@@ -56,7 +56,6 @@ ethHostUser: ubuntu
 devnetBorHosts:
   - 172.20.1.100
   - 172.20.1.101
-
 # IPs of hosts where heimdall will run. Only effective when devnetType is `remote`. It's recommended to run bor and heimdall on same VMs, hence devnetBorHosts===devnetHeimdallHosts
 devnetHeimdallHosts:
   - 172.20.1.100
@@ -78,8 +77,8 @@ borBranch: c5569e4da9ebe0ce4e63aec571966c71234f7cfc # todo change to develop onc
 # Branch of Heimdall to use. Repository: https://github.com/maticnetwork/heimdall
 heimdallBranch: develop
 
-# Branch of contract to use. Repository: https://github.com/maticnetwork/contracts
-contractsBranch: mardizzone/node-upgrade # todo change to master once contracts team merges the PR
+# Branch of contract to use. Repository: https://github.com/0xPolygon/pos-contracts
+contractsBranch: anvil-pos # todo change to master once contracts team merges the PR
 
 # Branch of contract to use. Repository: https://github.com/maticnetwork/genesis-contracts
 genesisContractsBranch: mardizzone/node-upgrade # todo change to master once contracts team merges the PR

@@ -3,17 +3,13 @@ import { loadDevnetConfig } from '../common/config-utils.js'
 import { maxRetries, runScpCommand } from './remote-worker.js'
 import Web3 from 'web3'
 import dotenv from 'dotenv'
+import { createAccountsFromMnemonics } from '../../lib/utils.js'
 
 const EthAmount = '10'
 
 const borProdChainIds = [137, 8001, 8002] // mainnet, mumbai, amoy
 
-// Since we might reset and restart ganache multiple times during the setup,
-// and  considered that ganache is no longer maintained, plus
-// it is affected by this issue https://github.com/trufflesuite/ganache/issues/4404
-// we implemented this workaround waiting for a migration to hardhat
-// (see internal issue https://polygon.atlassian.net/browse/POS-1869)
-export async function fundGanacheAccounts(doc) {
+export async function fundAnvilAccounts(doc) {
   let machine0
   const devnetType =
     process.env.TF_VAR_DOCKERIZED === 'yes' ? 'docker' : 'remote'
@@ -26,7 +22,7 @@ export async function fundGanacheAccounts(doc) {
   }
 
   if (borProdChainIds.includes(doc.borChainId)) {
-    console.log('📍Fund ganache accounts only works for devnet')
+    console.log('📍Fund anvil accounts only works for devnet')
     console.log('📍Skipping in case of mainnet, mumbai or amoy')
     return
   }
@@ -35,7 +31,8 @@ export async function fundGanacheAccounts(doc) {
     ? (machine0 = doc.devnetBorHosts[0])
     : (machine0 = doc.devnetErigonHosts[0])
 
-  console.log('📍Transferring funds from ganache account[0] to others...')
+  console.log('📍Transferring funds from anvil account[0] to others...')
+
   const src = `${doc.ethHostUser}@${machine0}:~/matic-cli/devnet/devnet/signer-dump.json`
   const dest = './signer-dump.json'
   await runScpCommand(src, dest, maxRetries)
@@ -46,15 +43,27 @@ export async function fundGanacheAccounts(doc) {
 
   const rootChainWeb3 = new Web3(`http://${machine0}:9545`)
 
-  for (let i = 1; i < signerDump.length; i++) {
+  const accounts = createAccountsFromMnemonics(process.env.MNEMONIC, 3)
+  const anvilAccount = accounts[1]
+
+  const account = rootChainWeb3.eth.accounts.privateKeyToAccount(
+    anvilAccount.privateKey
+  )
+  rootChainWeb3.eth.accounts.wallet.add(account)
+
+  // Set default account
+  rootChainWeb3.eth.defaultAccount = account.address
+
+  for (let i = 0; i < signerDump.length; i++) {
     const txReceipt = await rootChainWeb3.eth.sendTransaction({
       to: signerDump[i].address,
-      from: signerDump[0].address,
+      from: account.address,
+      gas: 21000,
       value: rootChainWeb3.utils.toWei(EthAmount, 'ether')
     })
     console.log(
       '📍Funds transferred from ' +
-        signerDump[0].address +
+        account.address +
         ' to ' +
         signerDump[i].address +
         ' with txHash ' +

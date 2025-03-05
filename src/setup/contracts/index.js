@@ -11,10 +11,10 @@ export class Contracts {
   constructor(config, options = {}) {
     this.config = config
 
-    this.repositoryName = 'contracts'
+    this.repositoryName = 'pos-contracts'
     this.repositoryUrl =
-      options.repositoryUrl || 'https://github.com/maticnetwork/contracts'
-    this.repositoryBranch = options.repositoryBranch || 'master'
+      options.repositoryUrl || 'https://github.com/0xPolygon/pos-contracts'
+    this.repositoryBranch = options.repositoryBranch || 'anvil-pos'
   }
 
   get name() {
@@ -84,10 +84,25 @@ export class Contracts {
           )
       },
       {
+        title: 'Generate contracts interfaces',
+        task: () =>
+          execa('npm', ['run', 'generate:interfaces'], {
+            env: {
+              ...process.env,
+              PATH: `${process.env.HOME}/.foundry/bin:${process.env.PATH}`
+            },
+            cwd: this.repositoryDir,
+            stdio: getRemoteStdio()
+          })
+      },
+      {
         title: 'Compile matic contracts',
         task: () =>
-          execa('npm', ['run', 'truffle:compile'], {
-            cwd: this.repositoryDir,
+          execa('forge', ['build'], {
+            env: {
+              ...process.env,
+              PATH: `${process.env.HOME}/.foundry/bin:${process.env.PATH}`
+            },
             stdio: getRemoteStdio()
           })
       }

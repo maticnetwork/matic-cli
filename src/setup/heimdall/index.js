@@ -15,7 +15,7 @@ import {
   processTemplateFiles
 } from '../../lib/utils.js'
 import { getDefaultBranch } from '../helper.js'
-import { Ganache } from '../ganache/index.js'
+import { Anvil } from '../anvil/index.js'
 import { getRemoteStdio } from '../../express/common/remote-worker.js'
 
 export class Heimdall {
@@ -200,7 +200,7 @@ export class Heimdall {
             fileReplacer(this.heimdallGenesisFilePath)
               .replace(
                 /"matic_token_address":[ ]*".*"/gi,
-                `"matic_token_address": "${rootContracts.tokens.TestToken}"`
+                `"matic_token_address": "${rootContracts.tokens.MaticToken}"`
               )
               .replace(
                 /"staking_manager_address":[ ]*".*"/gi,
@@ -347,7 +347,7 @@ export class Heimdall {
 }
 
 async function setupHeimdall(config) {
-  const ganache = new Ganache(config, {
+  const anvil = new Anvil(config, {
     contractsBranch: config.contractsBranch
   })
   const heimdall = new Heimdall(config, {
@@ -360,9 +360,9 @@ async function setupHeimdall(config) {
   const tasks = new Listr(
     [
       {
-        title: ganache.taskTitle,
+        title: anvil.taskTitle,
         task: () => {
-          return ganache.getTasks()
+          return anvil.getTasks()
         }
       },
       {
@@ -382,7 +382,7 @@ async function setupHeimdall(config) {
 
   // print details
   await config.print()
-  await ganache.print()
+  await anvil.print()
   await heimdall.print()
 
   return true

@@ -9,8 +9,13 @@ export MNEMONIC={{ obj.config.primaryAccount.privateKey }}
 # export heimdall id
 export HEIMDALL_ID={{ obj.config.heimdallChainId }}
 
+export DIR={{ obj.contracts.repositoryDir }}
+
 # cd matic contracts repo
 cd {{ obj.contracts.repositoryDir }}
 
-# root contracts are deployed on base chain
-npm run truffle:migrate:dev -- --reset --to 4 --compile-none
+
+export PATH="$HOME/.foundry/bin:$PATH"
+
+forge script --legacy scripts/deployment-scripts/childContractDeployment.s.sol:ChildContractDeploymentScript --rpc-url http://localhost:8545 --private-key $PRIVATE_KEY --broadcast
+

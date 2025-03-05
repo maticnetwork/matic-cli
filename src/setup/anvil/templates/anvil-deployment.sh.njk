@@ -1,0 +1,30 @@
+#!/usr/bin/env sh
+
+set -x
+
+# private key to deploy contracts
+export PRIVATE_KEY={{ obj.config.primaryAccount.privateKey }}
+export MNEMONIC={{ obj.config.primaryAccount.privateKey }}
+
+# export heimdall id
+export HEIMDALL_ID={{ obj.config.heimdallChainId }}
+
+export DIR={{ obj.contracts.repositoryDir }}
+
+export SERVER_PORT={{ obj.serverPort }}
+
+# cd matic contracts repo
+cd {{ obj.contracts.repositoryDir }}
+
+echo "DEPLOYER_PRIVATE_KEY=$PRIVATE_KEY" >> .env
+echo "HEIMDALL_ID='$HEIMDALL_ID'" >> .env
+
+export PATH="$HOME/.foundry/bin:$PATH"
+
+# bor contracts are deployed on child chain
+forge script scripts/deployment-scripts/deployContracts.s.sol:DeploymentScript --rpc-url http://localhost:$SERVER_PORT --private-key $PRIVATE_KEY --broadcast
+
+forge script scripts/deployment-scripts/drainStakeManager.s.sol:DrainStakeManagerDeployment --rpc-url http://localhost:$SERVER_PORT --private-key $PRIVATE_KEY --broadcast
+
+forge script scripts/deployment-scripts/initializeState.s.sol:InitializeStateScript --rpc-url http://localhost:$SERVER_PORT --private-key $PRIVATE_KEY --broadcast
+
