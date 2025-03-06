@@ -1,6 +1,6 @@
 #!/bin/bash
 
-host='localhost'
+host="localhost"
 
 echo "Transferring 10 ETH from anvil account[0] to all others..."
 
@@ -16,5 +16,5 @@ for ((i = 1; i < signersLength; i++)); do
   from_priv_key=$(echo "$signersDump" | jq -r ".[0].priv_key")
   txReceipt=$(cast send --rpc-url $rootChainWeb3 --private-key $from_priv_key $to_address --value 10ether 2>&1)
   txHash=$(echo "$txReceipt" | grep -oE '0x[a-fA-F0-9]{64}' | head -n 1)
-  echo "Funds transferred from $from_address to $to_address with txHash: $txHash"
+  echo "Funds transferred from $from_address to $to_address with txHash $txHash"
 done

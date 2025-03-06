@@ -1,8 +1,7 @@
 #!/bin/bash
 set -e
 
-while true
-do
+while true; do
     peers=$(docker exec bor0 bash -c "bor attach /var/lib/bor/data/bor.ipc -exec 'admin.peers'")
     block=$(docker exec bor0 bash -c "bor attach /var/lib/bor/data/bor.ipc -exec 'eth.blockNumber'")
 
@@ -11,5 +10,5 @@ do
     fi
 done
 
-echo "$peers"
-echo "$block"
+echo "Peers: $peers"
+echo "Block number: $block"
