@@ -20,7 +20,6 @@ import fs from 'fs'
 
 import shell from 'shelljs'
 import dotenv from 'dotenv'
-import { fundAnvilAccounts } from '../common/anvil-utils.js'
 
 async function terraformApply(devnetId) {
   console.log('📍Executing terraform apply...')
@@ -502,6 +501,4 @@ export async function start() {
       'utf8'
     )
   )
-
-  await fundAnvilAccounts(doc)
 }

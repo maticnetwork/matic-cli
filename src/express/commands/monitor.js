@@ -100,7 +100,7 @@ async function getStateSyncTxList(ip, startTime, endTime) {
 async function lastStateIdFromBor(ip) {
   const web3 = new Web3(`http://${ip}:8545`)
 
-  const StateReceiverContract = await new web3.eth.Contract(
+  const StateReceiverContract = new web3.eth.Contract(
     lastStateIdABI,
     stateReceiverAddress
   )
@@ -110,7 +110,7 @@ async function lastStateIdFromBor(ip) {
 async function getLatestCheckpointFromRootChain(ip, rootChainProxyAddress) {
   const web3 = new Web3(`http://${ip}:9545`)
 
-  const RootChainContract = await new web3.eth.Contract(
+  const RootChainContract = new web3.eth.Contract(
     currentHeaderBlockABI,
     rootChainProxyAddress
   )
@@ -152,15 +152,12 @@ export async function monitor(exitWhenDone) {
 
   // noinspection InfiniteLoopJS
   while (true) {
-    await timer(1000)
+    await timer(5000)
     console.log()
 
     const checkpointCount = await checkCheckpoint(machine0)
     if (checkpointCount > 0) {
-      console.log(
-        '📍Checkpoint found on Heimdall ✅ ; Count: ',
-        checkpointCount
-      )
+      console.log('📍Checkpoint found on Heimdall ✅; Count:', checkpointCount)
     } else {
       console.log('📍Awaiting Checkpoint on Heimdall 🚌')
     }
@@ -171,7 +168,7 @@ export async function monitor(exitWhenDone) {
     )
     if (checkpointCountFromRootChain > 0) {
       console.log(
-        '📍Checkpoint found on Root chain ✅ ; Count: ',
+        '📍Checkpoint found on Root chain ✅; Count:',
         checkpointCountFromRootChain
       )
     } else {
@@ -180,7 +177,7 @@ export async function monitor(exitWhenDone) {
 
     const firstStateSyncTx = await checkStateSyncTx(machine0, 1)
     let stateSyncTxList
-    let lastStateID
+    let lastStateSyncTxID
     if (firstStateSyncTx) {
       const timeOfFirstStateSyncTx = firstStateSyncTx.record_time
       const firstEpochTime = parseInt(
@@ -193,12 +190,13 @@ export async function monitor(exitWhenDone) {
         currentEpochTime
       )
       if (stateSyncTxList) {
-        lastStateID = stateSyncTxList.length
-        const lastStateSyncTxHash = stateSyncTxList[lastStateID - 1].tx_hash
+        lastStateSyncTxID = stateSyncTxList.length
+        const lastStateSyncTxHash =
+          stateSyncTxList[lastStateSyncTxID - 1].tx_hash
         console.log(
-          '📍StateSyncs found on Heimdall ✅ ; Count: ',
-          lastStateID,
-          ' ; Last Tx Hash: ',
+          '📍StateSyncs found on Heimdall ✅; Count:',
+          lastStateSyncTxID,
+          '; Last Tx Hash:',
           lastStateSyncTxHash
         )
       }
@@ -206,19 +204,19 @@ export async function monitor(exitWhenDone) {
       console.log('📍Awaiting StateSync 🚌')
     }
 
-    const lastStateId = await lastStateIdFromBor(machine0)
-    if (lastStateId) {
-      console.log('📍LastStateId on Bor: ', lastStateId)
+    const lastStateIDFromBor = await lastStateIdFromBor(machine0)
+    if (lastStateIDFromBor) {
+      console.log('📍LastStateId on Bor:', lastStateIDFromBor)
     } else {
-      console.log('📍Unable to fetch LastStateId ')
+      console.log('📍Unable to fetch LastStateId')
     }
 
     if (
       exitWhenDone === true &&
-      lastStateId &&
-      lastStateID > 0 &&
+      checkpointCount > 0 &&
       checkpointCountFromRootChain > 0 &&
-      checkpointCount > 0
+      lastStateSyncTxID > 0 &&
+      lastStateIDFromBor > 0
     ) {
       console.log('📍All checks executed successfully')
       process.exit(0)
