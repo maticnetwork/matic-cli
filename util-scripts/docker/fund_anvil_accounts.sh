@@ -1,6 +1,6 @@
 #!/bin/bash
 
-host='localhost'
+host="localhost"
 
 echo "Transferring 10 ETH from anvil account[0] to all others..."
 
