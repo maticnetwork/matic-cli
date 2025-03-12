@@ -180,12 +180,30 @@ async function installHostSpecificPackages(ip) {
   console.log('📍Installing svm...')
   command = '$HOME/.cargo/bin/cargo install svm-rs'
   await runSshCommand(ip, command, maxRetries)
+
+  command = `echo 'export PATH="$HOME/.cargo/bin:$PATH"' | sudo tee -a /etc/profile && source /etc/profile`
+  await runSshCommand(ip, command, maxRetries)
+  command = `echo 'export PATH="$HOME/.cargo/bin:$PATH"' | sudo tee -a /etc/bash.bashrc && source /etc/bash.bashrc`
+  await runSshCommand(ip, command, maxRetries)
+  command = `echo 'PATH="$HOME/.cargo/bin:$PATH"' | sudo tee -a /etc/environment && source /etc/environment`
+  await runSshCommand(ip, command, maxRetries)
+
   console.log('📍Installing required solc versions...')
   command = '$HOME/.cargo/bin/svm install 0.5.17'
   await runSshCommand(ip, command, maxRetries)
   command = '$HOME/.cargo/bin/svm install 0.6.12'
   await runSshCommand(ip, command, maxRetries)
   command = `echo 'alias svm="$HOME/.cargo/bin/svm"' >> ~/.bashrc && source ~/.bashrc`
+  await runSshCommand(ip, command, maxRetries)
+  command = `sudo ln -s "$HOME/.cargo/bin/svm" /usr/local/bin/svm`
+  await runSshCommand(ip, command, maxRetries)
+  command = `sudo ln -s "$HOME/.cargo/bin/cargo" /usr/local/bin/cargo`
+  await runSshCommand(ip, command, maxRetries)
+  command = `echo 'alias svm="$HOME/.cargo/bin/svm"' | sudo tee -a /etc/profile && source /etc/profile`
+  await runSshCommand(ip, command, maxRetries)
+  command = `echo 'alias svm="$HOME/.cargo/bin/svm"' | sudo tee -a /etc/bash.bashrc && source /etc/bash.bashrc`
+  await runSshCommand(ip, command, maxRetries)
+  command = `echo 'PATH="$HOME/.cargo/bin:$PATH"' | sudo tee -a /etc/environment && source /etc/environment`
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Installing python3...')
