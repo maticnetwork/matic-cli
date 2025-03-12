@@ -377,7 +377,6 @@ Please, make sure to install the following software/packages on the VMs.
 - Solc v0.5.17 and 0.6.12 (only _host_)
 
   ```bash
-  sudo snap install solc
   svm install 0.5.17
   svm install 0.6.12
   ```
@@ -442,7 +441,6 @@ Please, make sure to install the following software/packages on the VMs.
 - Solc v0.5.17 and 0.6.12 (only _host_)
 
   ```zsh
-  brew install solc
   svm install 0.5.17
   svm install 0.6.12
   ```

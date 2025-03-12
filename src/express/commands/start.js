@@ -171,10 +171,6 @@ async function installHostSpecificPackages(ip) {
                         nvm install 18.19.0`
   await runSshCommand(ip, command, maxRetries)
 
-  console.log('📍Installing solc...')
-  command = 'sudo snap install solc'
-  await runSshCommand(ip, command, maxRetries)
-
   console.log('📍Installing cargo...')
   command = `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && 
               . "$HOME/.cargo/env" && 

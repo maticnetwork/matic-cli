@@ -111,6 +111,13 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install svm
+        run: |
+          cargo install svm-rs
+          svm install 0.5.17
+          svm install 0.6.12
+
       - name: Install npm dependencies
         working-directory: matic-cli
         run: npm install --prefer-offline --no-audit --progress=false
