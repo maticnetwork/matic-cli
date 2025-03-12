@@ -195,13 +195,13 @@ async function installHostSpecificPackages(ip) {
   await runSshCommand(ip, command, maxRetries)
   command = `echo 'alias svm="$HOME/.cargo/bin/svm"' >> ~/.bashrc && source ~/.bashrc`
   await runSshCommand(ip, command, maxRetries)
-  command = `sudo ln -s "$HOME/.cargo/bin/svm" /usr/local/bin/svm`
+  command = `sudo ln -sf ~/.cargo/bin/svm /usr/local/bin/svm`
   await runSshCommand(ip, command, maxRetries)
-  command = `sudo ln -s "$HOME/.cargo/bin/cargo" /usr/local/bin/cargo`
+  command = `sudo ln -sf ~/.cargo/bin/cargo /usr/local/bin/cargo`
   await runSshCommand(ip, command, maxRetries)
-  command = `echo 'alias svm="$HOME/.cargo/bin/svm"' | sudo tee -a /etc/profile && source /etc/profile`
+  command = `echo 'alias svm=~/.cargo/bin/svm' | sudo tee -a /etc/profile && source /etc/profile`
   await runSshCommand(ip, command, maxRetries)
-  command = `echo 'alias svm="$HOME/.cargo/bin/svm"' | sudo tee -a /etc/bash.bashrc && source /etc/bash.bashrc`
+  command = `echo 'alias svm=~/.cargo/bin/svm' | sudo tee -a /etc/bash.bashrc && source /etc/bash.bashrc`
   await runSshCommand(ip, command, maxRetries)
   command = `echo 'PATH="$HOME/.cargo/bin:$PATH"' | sudo tee -a /etc/environment && source /etc/environment`
   await runSshCommand(ip, command, maxRetries)
