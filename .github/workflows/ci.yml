@@ -178,6 +178,13 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      - uses: dtolnay/rust-toolchain@nightly
+      - name: Install svm
+        run: |
+          cargo install svm-rs
+          svm install 0.5.17
+          svm install 0.6.12
+
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
 
