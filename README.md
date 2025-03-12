@@ -367,6 +367,7 @@ Please, make sure to install the following software/packages on the VMs.
   ```
 
 - svm (only _host_)
+
   ```bash
   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
   cargo install svm-rs
@@ -431,6 +432,7 @@ Please, make sure to install the following software/packages on the VMs.
   ```
 
 - svm (only _host_)
+
   ```zsh
   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
   cargo install svm-rs
