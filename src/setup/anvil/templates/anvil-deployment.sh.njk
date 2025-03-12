@@ -16,8 +16,8 @@ export SERVER_PORT={{ obj.serverPort }}
 # cd matic contracts repo
 cd {{ obj.contracts.repositoryDir }}
 
-echo "DEPLOYER_PRIVATE_KEY=$PRIVATE_KEY" >> .env
-echo "HEIMDALL_ID='$HEIMDALL_ID'" >> .env
+echo "DEPLOYER_PRIVATE_KEY=$PRIVATE_KEY" >>.env
+echo "HEIMDALL_ID='$HEIMDALL_ID'" >>.env
 
 export PATH="$HOME/.foundry/bin:$PATH"
 

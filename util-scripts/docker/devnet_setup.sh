@@ -16,10 +16,10 @@ bash docker-bor-start-all.sh || { echo "Failed to start Bor"; exit 1; }
 
 sleep 2m
 
-# Deploy Bor to Anvil
-bash anvil-deployment-bor.sh || { echo "Failed to deploy Bor to Anvil"; exit 1; }
+# Deploy contracts on Bor
+bash anvil-deployment-bor.sh || { echo "Failed to deploy contracts on Bor"; exit 1; }
 
-# Sync Anvil deployment
-bash anvil-deployment-sync.sh || { echo "Failed to sync Anvil deployment"; exit 1; }
+# Sync Bor contracts deployment
+bash anvil-deployment-sync.sh || { echo "Failed to sync Bor contracts deployment"; exit 1; }
 
 echo "Devnet setup complete."
