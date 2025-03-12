@@ -171,10 +171,6 @@ async function installHostSpecificPackages(ip) {
                         nvm install 18.19.0`
   await runSshCommand(ip, command, maxRetries)
 
-  console.log('📍Installing solc...')
-  command = 'sudo snap install solc'
-  await runSshCommand(ip, command, maxRetries)
-
   console.log('📍Installing cargo...')
   command = `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && 
               . "$HOME/.cargo/env" && 
@@ -190,21 +186,29 @@ async function installHostSpecificPackages(ip) {
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Installing required solc versions...')
-  command = '$HOME/.cargo/bin/svm install 0.5.17'
+  command = `$HOME/.cargo/bin/svm install 0.5.17 || echo 'solc 0.5.17 already installed on current machine'`
   await runSshCommand(ip, command, maxRetries)
-  command = '$HOME/.cargo/bin/svm install 0.6.12'
+  command = `$HOME/.cargo/bin/svm install 0.6.12 || echo 'solc 0.6.12 already installed on current machine'`
   await runSshCommand(ip, command, maxRetries)
 
-  console.log('📍Creating symlink for cargo and svm...')
+  console.log('📍Creating symlink for cargo, svm and solc...')
   command = `echo 'alias svm="$HOME/.cargo/bin/svm"' >> ~/.bashrc && source ~/.bashrc`
   await runSshCommand(ip, command, maxRetries)
   command = `sudo ln -sf ~/.cargo/bin/svm /usr/local/bin/svm`
+  await runSshCommand(ip, command, maxRetries)
+  command = `echo 'alias svm="$HOME/.cargo/bin/solc"' >> ~/.bashrc && source ~/.bashrc`
+  await runSshCommand(ip, command, maxRetries)
+  command = `sudo ln -sf ~/.cargo/bin/solc /usr/local/bin/svm`
   await runSshCommand(ip, command, maxRetries)
   command = `sudo ln -sf ~/.cargo/bin/cargo /usr/local/bin/cargo`
   await runSshCommand(ip, command, maxRetries)
   command = `echo 'alias svm=~/.cargo/bin/svm' | sudo tee -a /etc/profile && source /etc/profile`
   await runSshCommand(ip, command, maxRetries)
   command = `echo 'alias svm=~/.cargo/bin/svm' | sudo tee -a /etc/bash.bashrc && source /etc/bash.bashrc`
+  await runSshCommand(ip, command, maxRetries)
+  command = `echo 'alias solc=~/.cargo/bin/solc' | sudo tee -a /etc/profile && source /etc/profile`
+  await runSshCommand(ip, command, maxRetries)
+  command = `echo 'alias solc=~/.cargo/bin/solc' | sudo tee -a /etc/bash.bashrc && source /etc/bash.bashrc`
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Installing python3...')
