@@ -176,6 +176,7 @@ jobs:
           sudo apt update
           sudo apt install build-essential
           curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+          sudo snap install solc
           sudo apt install python3 jq curl
           sudo ln -sf /usr/bin/python3 /usr/bin/python
 
