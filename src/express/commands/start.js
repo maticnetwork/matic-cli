@@ -175,8 +175,25 @@ async function installHostSpecificPackages(ip) {
   command = 'sudo snap install solc'
   await runSshCommand(ip, command, maxRetries)
 
-  console.log('📍Installing python2...')
-  command = 'sudo apt install python2 -y && alias python="/usr/bin/python2"'
+  console.log('📍Installing cargo...')
+  command = `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && 
+              . "$HOME/.cargo/env" && 
+              export PATH="$HOME/.cargo/bin/cargo:$PATH" >> ~/.bashrc && 
+              source ~/.bashrc`
+  await runSshCommand(ip, command, maxRetries)
+  console.log('📍Installing svm...')
+  command = '$HOME/.cargo/bin/cargo install svm-rs'
+  await runSshCommand(ip, command, maxRetries)
+  console.log('📍Installing required solc versions...')
+  command = '$HOME/.cargo/bin/svm install 0.5.17'
+  await runSshCommand(ip, command, maxRetries)
+  command = '$HOME/.cargo/bin/svm install 0.6.12'
+  await runSshCommand(ip, command, maxRetries)
+  command = `echo 'alias svm="$HOME/.cargo/bin/svm"' >> ~/.bashrc && source ~/.bashrc`
+  await runSshCommand(ip, command, maxRetries)
+
+  console.log('📍Installing python3...')
+  command = 'sudo apt install python3 -y && alias python="/usr/bin/python3"'
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Installing nodejs and npm...')
