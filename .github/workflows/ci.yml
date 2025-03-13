@@ -111,12 +111,18 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - uses: dtolnay/rust-toolchain@stable
-      - name: Install svm
+      - name: Install solc-select
         run: |
-          cargo install svm-rs
-          svm install 0.5.17
-          svm install 0.6.12
+          sudo apt update
+          sudo apt install python3 python3-pip -y
+          sudo ln -sf /usr/bin/python3 /usr/bin/python
+          pip install solc-select
+      - name: Install Solidity Version
+        run: |
+          solc-select install 0.5.17
+          solc-select install 0.6.12
+          solc-select use 0.5.17
+          solc --version
 
       - name: Install npm dependencies
         working-directory: matic-cli
