@@ -11,6 +11,7 @@ cd ../code/pos-contracts
 CONTRACT_ADDRESS=$(jq -r .root.tokens.MaticToken contractAddresses.json)
 
 echo "Executing a deposit..."
+export PATH="$HOME/.foundry/bin:$PATH"
 forge script scripts/matic-cli-scripts/Deposit.s.sol:MaticDeposit --rpc-url http://localhost:9545 --private-key $SCRIPT_PRIVATE_KEY --broadcast --sig "run(address,address,uint256)" $SCRIPT_ADDRESS $CONTRACT_ADDRESS 100000000000000000000
 echo "Deposit executed successfully! StateSync will kick in soon..."
 
