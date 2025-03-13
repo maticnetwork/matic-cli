@@ -363,22 +363,16 @@ Please, make sure to install the following software/packages on the VMs.
 - Python 3 (only _host_)
 
   ```bash
-  sudo apt install python3 --yes && alias python="/usr/bin/python3"
-  ```
-
-- svm (only _host_)
-
-  ```bash
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-  cargo install svm-rs
-  svm --version
+  sudo apt install python3 python3-pip --yes && alias python="/usr/bin/python3"
   ```
 
 - Solc v0.5.17 and 0.6.12 (only _host_)
 
   ```bash
-  svm install 0.5.17
-  svm install 0.6.12
+  sudo pip install solc-select
+  solc-select install 0.5.17
+  solc-select install 0.6.12
+  solc-select use 0.5.17
   ```
 
 - Anvil CLI (only _host_)
@@ -428,21 +422,17 @@ Please, make sure to install the following software/packages on the VMs.
   pyenv install 3.13.2
   pyenv global 3.13.2
   python --version
-  ```
-
-- svm (only _host_)
-
-  ```zsh
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-  cargo install svm-rs
-  svm --version
+  pyenv exec python -m ensurepip --default-pip
+  python -m pip install --upgrade pip
   ```
 
 - Solc v0.5.17 and 0.6.12 (only _host_)
 
   ```zsh
-  svm install 0.5.17
-  svm install 0.6.12
+  pip install solc-select 
+  solc-select install 0.5.17
+  solc-select install 0.6.12
+  solc-select use 0.5.17
   ```
 
 - Anvil CLI (only _host_)
