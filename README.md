@@ -360,16 +360,19 @@ Please, make sure to install the following software/packages on the VMs.
   sudo apt update --yes && sudo apt install --yes npm
   ```
 
-- Python 2 (only _host_)
+- Python 3 (only _host_)
 
   ```bash
-  sudo apt install python3 --yes && alias python="/usr/bin/python3"
+  sudo apt install python3 python3-pip --yes && alias python="/usr/bin/python3"
   ```
 
-- Solc v0.5.16 (only _host_)
+- Solc v0.5.17 and 0.6.12 (only _host_)
 
   ```bash
-  sudo snap install solc
+  sudo pip install solc-select
+  solc-select install 0.5.17
+  solc-select install 0.6.12
+  solc-select use 0.5.17
   ```
 
 - Anvil CLI (only _host_)
@@ -412,23 +415,24 @@ Please, make sure to install the following software/packages on the VMs.
   && node --version
   ```
 
-- Python 2 (only _host_)
+- Python 3 (only _host_)
 
   ```zsh
   brew install pyenv
-  pyenv install 2.7.18
-  pyenv global 2.7.18
-  python --version
+  pyenv install 3.13.2
+  pyenv global 3.13.2
+  python3 --version
+  pyenv exec python3 -m ensurepip --default-pip
+  python -m pip install --upgrade pip
   ```
 
-- Solc v0.5.16 (only _host_)
+- Solc v0.5.17 and 0.6.12 (only _host_)
 
   ```zsh
-  brew tap ethereum/ethereum
-  brew install solc-select
+  pip3 install solc-select
   solc-select install 0.5.17
+  solc-select install 0.6.12
   solc-select use 0.5.17
-  solc --version
   ```
 
 - Anvil CLI (only _host_)
