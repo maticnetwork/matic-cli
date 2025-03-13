@@ -430,8 +430,8 @@ Please, make sure to install the following software/packages on the VMs.
 
   ```zsh
   pip install solc-select
-  svm install 0.5.17
-  svm install 0.6.12
+  solc-select install 0.5.17
+  solc-select install 0.6.12
   solc-select use 0.5.17
   ```
 
