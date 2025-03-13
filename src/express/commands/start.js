@@ -172,7 +172,8 @@ async function installHostSpecificPackages(ip) {
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Installing python3...')
-  command = 'sudo apt install python3 python3-pip -y && alias python="/usr/bin/python3"'
+  command =
+    'sudo apt install python3 python3-pip -y && alias python="/usr/bin/python3"'
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Installing solc-select...')
@@ -180,7 +181,8 @@ async function installHostSpecificPackages(ip) {
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Installing solc versions...')
-  command = 'solc-select install 0.5.17 && solc-select install 0.6.12 && solc-select use 0.5.17'
+  command =
+    'solc-select install 0.5.17 && solc-select install 0.6.12 && solc-select use 0.5.17'
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Installing nodejs and npm...')

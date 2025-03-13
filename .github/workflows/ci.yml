@@ -153,7 +153,6 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-22.04] # list of os: https://github.com/actions/virtual-environments
-        solc_version: [ "0.5.17", "0.6.12" ]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -186,8 +185,9 @@ jobs:
 
       - name: Install Solidity Version
         run: |
-          solc-select install ${{ matrix.solc_version }}
-          solc-select use ${{ matrix.solc_version }}
+          solc-select install 0.5.17
+          solc-select install 0.6.12
+          solc-select use 0.5.17
           solc --version
 
       - name: Install Foundry

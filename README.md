@@ -429,7 +429,7 @@ Please, make sure to install the following software/packages on the VMs.
 - Solc v0.5.17 and 0.6.12 (only _host_)
 
   ```zsh
-  pip install solc-select 
+  pip install solc-select
   solc-select install 0.5.17
   solc-select install 0.6.12
   solc-select use 0.5.17
