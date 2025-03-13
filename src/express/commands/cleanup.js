@@ -6,7 +6,6 @@ import {
 import { maxRetries, runSshCommand } from '../common/remote-worker.js'
 import { timer } from '../common/time-utils.js'
 import dotenv from 'dotenv'
-import { fundAnvilAccounts } from '../common/anvil-utils.js'
 
 export async function cleanup() {
   dotenv.config({ path: `${process.cwd()}/.env` })
@@ -16,7 +15,6 @@ export async function cleanup() {
   await cleanupServices(doc)
   await startServices(doc)
   await deployBorContractsAndStateSync(doc)
-  await fundAnvilAccounts(doc)
 }
 
 export async function stopServices(doc) {
