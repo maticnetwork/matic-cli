@@ -13,6 +13,7 @@ import (
 	"math/big"
 	"math/rand"
 	"net/http"
+	"os"
 	testcontract "rpc-tests/contracts"
 	"strconv"
 	"strings"
@@ -53,10 +54,9 @@ type ResponseMap struct {
 	chainId                                *big.Int
 	mostRecentBlockNumber                  *big.Int
 	mostRecentBlockHash                    common.Hash
-	mostRecentBlockTotalDifficulty         *big.Int
 	mostRecentBlockParentHash              common.Hash
 	currentProposerAddress                 common.Address
-	accounts                               Accounts
+	account                                Account
 	gasPrice                               *big.Int
 	stateSyncTxHash                        common.Hash
 	stateSyncBlockNumber                   *big.Int
@@ -160,18 +160,21 @@ type accountResult struct {
 var (
 	rpcURL      = flag.String("rpc-url", "", "RPC Url to be tested")
 	mnemonic    = flag.String("mnemonic", "", "mnemonic to be used on transactions")
+	privKey     = flag.String("priv-key", "", "privKey to be used on transactions")
 	filterTests = flag.Bool("filter-test", false, "True if want to include filter tests (recommended just when there is no load balancer)")
 	logReqRes   = flag.Bool("log-req-res", false, "True if want to log requests and responses)")
 )
 
 func main() {
 	flag.Parse()
-	if *mnemonic == "" {
-		fmt.Println("Invalid mnemonic flag")
+	if *mnemonic == "" && *privKey == "" {
+		fmt.Println("Must provide either mnemonic or privKey")
+		os.Exit(1)
 		return
 	}
 	if *rpcURL == "" {
 		fmt.Println("Invalid rpcURL flag")
+		os.Exit(1)
 		return
 	}
 
@@ -180,7 +183,13 @@ func main() {
 	rm := ResponseMap{}
 	mapRequestIdToKey := make(map[int]string)
 	var failedTestCases []FailedTestCase
-	rm.accounts = generateAccountsUsingMnemonic(*mnemonic, 10)
+	if *mnemonic != "" {
+		rm.account = generateAccountsUsingMnemonic(*mnemonic, 1)[0]
+	} else {
+		acc, _ := generateAccountUsingPrivKey(*privKey)
+		rm.account = *acc
+	}
+
 	rm.expectedGasToCreateTransaction = big.NewInt(354658)
 	rm.expectedValueToStoreInContract = big.NewInt(30)
 	rm.expectedKeyToStoreInContract = "key"
@@ -300,17 +309,29 @@ func main() {
 		}
 	}
 
-	fmt.Printf("All Tests Executed | Success: (%d/%d) | Duration: %s\n", countTestCases-len(failedTestCases), countTestCases, time.Since(timeStart))
+	passedTests := countTestCases - len(failedTestCases)
+	duration := time.Since(timeStart)
+
+	fmt.Println("════════════════════════════════════════")
+	fmt.Println("🚀  All Tests Executed!")
+	fmt.Printf("✅  Success: %d/%d tests passed\n", passedTests, countTestCases)
+	fmt.Printf("⌛  Duration: %s\n", duration)
+	fmt.Println("════════════════════════════════════════")
 
 	if len(failedTestCases) > 0 {
-		fmt.Println("Failed Tests Cases:")
-	}
-	for _, failedTestCase := range failedTestCases {
-		fmt.Printf("\tkey: %s | err:%s\n", failedTestCase.Key, failedTestCase.Err)
-		request, _ := json.Marshal(failedTestCase.Req)
-		response, _ := json.Marshal(failedTestCase.Res)
-		fmt.Printf("\t\treq:%s\n", string(request))
-		fmt.Printf("\t\tres:%s\n", string(response))
+		fmt.Printf("\n\n")
+		fmt.Println("❌ Failed Test Cases:")
+		for _, failedTestCase := range failedTestCases {
+			fmt.Printf("\n  🔎 Test Case Key: %s\n", failedTestCase.Key)
+			fmt.Printf("      🚫 Error: %s\n", failedTestCase.Err)
+			if *logReqRes {
+				request, _ := json.Marshal(failedTestCase.Req)
+				response, _ := json.Marshal(failedTestCase.Res)
+				fmt.Printf("      📤 Request: %s\n", string(request))
+				fmt.Printf("      📥 Response: %s\n", string(response))
+			}
+		}
+		os.Exit(1)
 	}
 }
 
@@ -398,7 +419,7 @@ func generateAccountsUsingMnemonic(MNEMONIC string, N int) (accounts Accounts) {
 		log.Fatal(err)
 	}
 
-	for i := 1; i <= N; i++ {
+	for i := 0; i <= N; i++ {
 		var derivPath = "m/44'/60'/0'/0/" + strconv.Itoa(i)
 		path := hdwallet.MustParseDerivationPath(derivPath)
 		account, err := wallet.Derive(path, false)
@@ -413,6 +434,32 @@ func generateAccountsUsingMnemonic(MNEMONIC string, N int) (accounts Accounts) {
 		accounts = append(accounts, Account{key: privKey, addr: account.Address})
 	}
 	return accounts
+}
+
+// generateAccountUsingPrivKey creates an Account from a hex-encoded private key string.
+func generateAccountUsingPrivKey(hexKey string) (*Account, error) {
+	if strings.HasPrefix(hexKey, "0x") || strings.HasPrefix(hexKey, "0X") {
+		hexKey = hexKey[2:]
+	}
+
+	privateKey, err := crypto.HexToECDSA(hexKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert hex to ECDSA private key: %w", err)
+	}
+
+	publicKey := privateKey.Public()
+	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
+	if !ok {
+		return nil, errors.New("cannot assert type: publicKey is not of type *ecdsa.PublicKey")
+	}
+
+	address := crypto.PubkeyToAddress(*publicKeyECDSA)
+
+	return &Account{
+		key:   privateKey,
+		addr:  address,
+		nonce: big.NewInt(0),
+	}, nil
 }
 
 func hexStringToBigInt(hexString string) (*big.Int, error) {
@@ -438,7 +485,7 @@ func validateBlock(block map[string]interface{}) error {
 	// Validate specific required fields
 	requiredFields := []string{
 		"baseFeePerGas", "difficulty", "gasLimit", "gasUsed",
-		"hash", "number", "timestamp", "parentHash", "totalDifficulty", "miner",
+		"hash", "number", "timestamp", "parentHash", "miner",
 	}
 
 	for _, field := range requiredFields {
@@ -463,16 +510,6 @@ func validateBlock(block map[string]interface{}) error {
 		blockTime := value.Int64()
 		if blockTime < currentTime-3600 || blockTime > currentTime+3600 {
 			return fmt.Errorf("timestamp is too far from current time: %d", blockTime)
-		}
-		return nil
-	}); err != nil {
-		return err
-	}
-
-	// Validate "totalDifficulty" (must be greater than zero)
-	if err := validateHexBigInt(block["totalDifficulty"], "totalDifficulty", func(value *big.Int) error {
-		if value.Cmp(big.NewInt(0)) <= 0 {
-			return errors.New("totalDifficulty must be greater than zero")
 		}
 		return nil
 	}); err != nil {
@@ -533,8 +570,7 @@ func validateHeader(header map[string]interface{}) error {
 		"baseFeePerGas", "difficulty", "extraData", "gasLimit",
 		"gasUsed", "hash", "logsBloom", "miner", "mixHash",
 		"nonce", "number", "parentHash", "receiptsRoot",
-		"sha3Uncles", "stateRoot", "timestamp", "totalDifficulty",
-		"transactionsRoot",
+		"sha3Uncles", "stateRoot", "timestamp", "transactionsRoot",
 	}
 
 	for _, field := range requiredFields {
@@ -979,7 +1015,7 @@ var testCases = []TestCase{
 	{
 		Key: "eth_getTransactionCount",
 		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
-			return NewRequest("eth_getTransactionCount", []interface{}{rm.accounts[0].addr, "latest"}), nil
+			return NewRequest("eth_getTransactionCount", []interface{}{rm.account.addr, "latest"}), nil
 		},
 		HandleResponse: func(rm *ResponseMap, resp Response) error {
 			parsed, err := parseResponse[string](resp.Result)
@@ -992,7 +1028,7 @@ var testCases = []TestCase{
 			}
 
 			// set nonce for accounts[0]
-			rm.accounts[0].nonce = intValue
+			rm.account.nonce = intValue
 			return nil
 		},
 	},
@@ -1056,10 +1092,8 @@ var testCases = []TestCase{
 			}
 			blockHash, _ := (*block)["hash"].(string)
 			parentHash, _ := (*block)["parentHash"].(string)
-			totalDifficulty, _ := (*block)["totalDifficulty"].(string)
 			rm.mostRecentBlockHash = common.HexToHash(blockHash)
 			rm.mostRecentBlockParentHash = common.HexToHash(parentHash)
-			rm.mostRecentBlockTotalDifficulty, _ = hexStringToBigInt(totalDifficulty)
 			return nil
 		},
 	},
@@ -1077,11 +1111,6 @@ var testCases = []TestCase{
 			err = validateBlock(*block)
 			if err != nil {
 				return err
-			}
-			totalDifficultyHex, _ := (*block)["totalDifficulty"].(string)
-			totalDifficulty, _ := hexStringToBigInt(totalDifficultyHex)
-			if rm.mostRecentBlockTotalDifficulty.Cmp(totalDifficulty) <= 0 {
-				return fmt.Errorf("parent block must always have less total difficulty than child block")
 			}
 			return nil
 		},
@@ -1123,7 +1152,7 @@ var testCases = []TestCase{
 	{
 		Key: "eth_getBalance",
 		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
-			return NewRequest("eth_getBalance", []interface{}{rm.accounts[0].addr, "latest"}), nil
+			return NewRequest("eth_getBalance", []interface{}{rm.account.addr, "latest"}), nil
 		},
 		HandleResponse: func(rm *ResponseMap, resp Response) error {
 			parsed, err := parseResponse[string](resp.Result)
@@ -1319,7 +1348,7 @@ var testCases = []TestCase{
 	{
 		Key: "Create Transaction Scenario: eth_estimateGas",
 		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
-			txParams := prepareEstimateGasRequest(rm.accounts[0], generateInputForDeployTestContract(rm.expectedKeyToStoreInContract, rm.expectedValueToStoreInContract))
+			txParams := prepareEstimateGasRequest(rm.account, generateInputForDeployTestContract(rm.expectedKeyToStoreInContract, rm.expectedValueToStoreInContract))
 			return NewRequest("eth_estimateGas", []interface{}{txParams}), nil
 		},
 		HandleResponse: func(rm *ResponseMap, resp Response) error {
@@ -1446,7 +1475,7 @@ var testCases = []TestCase{
 	{
 		Key: "Create Transaction Scenario: eth_fillTransaction",
 		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
-			txParams := prepareEstimateGasRequest(rm.accounts[0], generateInputForDeployTestContract(rm.expectedKeyToStoreInContract, rm.expectedValueToStoreInContract))
+			txParams := prepareEstimateGasRequest(rm.account, generateInputForDeployTestContract(rm.expectedKeyToStoreInContract, rm.expectedValueToStoreInContract))
 			return NewRequest("eth_fillTransaction", []interface{}{txParams}), nil
 		},
 		HandleResponse: func(rm *ResponseMap, resp Response) error {
@@ -1457,8 +1486,8 @@ var testCases = []TestCase{
 			if transactionResult.Tx.ChainId().Cmp(rm.chainId) != 0 {
 				return fmt.Errorf("invalid chainid: expect %d received %d", rm.chainId, transactionResult.Tx.ChainId())
 			}
-			if transactionResult.Tx.Nonce() != rm.accounts[0].nonce.Uint64() {
-				return fmt.Errorf("invalid nonce: expect %d received %d", rm.accounts[0].nonce.Uint64(), transactionResult.Tx.Nonce())
+			if transactionResult.Tx.Nonce() != rm.account.nonce.Uint64() {
+				return fmt.Errorf("invalid nonce: expect %d received %d", rm.account.nonce.Uint64(), transactionResult.Tx.Nonce())
 			}
 
 			return nil
@@ -1474,6 +1503,9 @@ var testCases = []TestCase{
 			address := common.HexToAddress("0x0000000000000000000000000000000000001001")
 
 			fromBlock := new(big.Int).Sub(rm.mostRecentBlockNumber, big.NewInt(30000))
+			if fromBlock.Cmp(big.NewInt(0)) == -1 {
+				fromBlock = big.NewInt(0)
+			}
 			// Create the filter object
 			filter := map[string]interface{}{
 				"address":   address.Hex(),
@@ -1686,11 +1718,11 @@ var testCases = []TestCase{
 		Key: "Create Transaction Scenario: eth_sendRawTransaction",
 		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
 			rm.expectedRawTx = generateRawTransaction(
-				rm.accounts[0].nonce.Uint64(),
+				rm.account.nonce.Uint64(),
 				rm.expectedGasToCreateTransaction.Uint64(),
 				rm.gasPrice,
 				generateInputForDeployTestContract(rm.expectedKeyToStoreInContract, rm.expectedValueToStoreInContract),
-				rm.accounts[0].key, rm.chainId)
+				rm.account.key, rm.chainId)
 			return NewRequest("eth_sendRawTransaction",
 					[]interface{}{rm.expectedRawTx}),
 				nil
@@ -1711,7 +1743,7 @@ var testCases = []TestCase{
 		Key: "Create Transaction Scenario: eth_createAccessList",
 		PrepareRequest: func(rm *ResponseMap) (*Request, error) {
 			return NewRequest("eth_createAccessList",
-					[]interface{}{prepareEstimateGasRequest(rm.accounts[0], generateInputForDeployTestContract(rm.expectedKeyToStoreInContract, rm.expectedValueToStoreInContract))}),
+					[]interface{}{prepareEstimateGasRequest(rm.account, generateInputForDeployTestContract(rm.expectedKeyToStoreInContract, rm.expectedValueToStoreInContract))}),
 				nil
 		},
 		HandleResponse: func(rm *ResponseMap, resp Response) error {

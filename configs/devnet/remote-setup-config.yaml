@@ -6,8 +6,8 @@ borRepo: https://github.com/maticnetwork/bor.git
 borBranch: develop
 heimdallRepo: https://github.com/maticnetwork/heimdall.git
 heimdallBranch: develop
-contractsRepo: https://github.com/0xPolygon/pos-contracts.git 
-contractsBranch: anvil-pos
+contractsRepo: https://github.com/leovct/pos-contracts.git  
+contractsBranch: fix/update-child-chain-and-state-sender-with-same-values
 genesisContractsRepo: https://github.com/maticnetwork/genesis-contracts.git
 genesisContractsBranch: master
 sprintSize: 64
