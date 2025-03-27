@@ -43,7 +43,7 @@ export class Contracts {
   cloneRepositoryTasks() {
     return [
       {
-        title: 'Clone matic contracts repository',
+        title: `Clone matic contracts repository ${this.repositoryUrl}`,
         task: () =>
           cloneRepository(
             this.repositoryName,
