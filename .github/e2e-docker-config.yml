@@ -2,7 +2,7 @@ defaultStake: 10000
 defaultFee: 2000
 borChainId: 15001
 heimdallChainId: heimdall-15001
-contractsBranch: anvil-pos
+contractsBranch: fix/update-child-chain-and-state-sender-with-same-values
 genesisContractsBranch: master
 sprintSize:
   - '64'
