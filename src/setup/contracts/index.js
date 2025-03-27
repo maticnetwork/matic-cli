@@ -13,8 +13,8 @@ export class Contracts {
 
     this.repositoryName = 'pos-contracts'
     this.repositoryUrl =
-      options.repositoryUrl || 'https://github.com/0xPolygon/pos-contracts'
-    this.repositoryBranch = options.repositoryBranch || 'anvil-pos'
+      options.repositoryUrl || 'https://github.com/leovct/pos-contracts'
+    this.repositoryBranch = options.repositoryBranch || 'fix/update-child-chain-and-state-sender-with-same-values'
   }
 
   get name() {
