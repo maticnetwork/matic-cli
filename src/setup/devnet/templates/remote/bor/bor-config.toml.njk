@@ -1,6 +1,6 @@
 chain = "/var/lib/bor/genesis.json"
 # identity = "MyIdentity"
-verbosity = 3
+verbosity = 5
 log-level = ""
 vmdebug = false
 datadir = "/var/lib/bor/data"
@@ -36,7 +36,8 @@ devfakeauthor = false
   nodekeyhex = ""
   txarrivalwait = "500ms"
   [p2p.discovery]
-    v5disc = false
+    v4disc = true
+    v5disc = true
     bootnodes = []
     bootnodesv4 = []
     bootnodesv5 = []
@@ -45,9 +46,9 @@ devfakeauthor = false
     dns = []
 
 [heimdall]
-  url = "http://localhost:1317"
+  # url = "http://localhost:1317"
   "bor.without" = false
-  grpc-address = ""
+  grpc-address = "localhost:9090"
   "bor.runheimdall" = false
   "bor.runheimdallargs" = ""
   "bor.useheimdallapp" = false
