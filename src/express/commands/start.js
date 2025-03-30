@@ -160,16 +160,6 @@ async function installCommonPackages(ip) {
   command =
     'curl -sSL "https://github.com/fullstorydev/grpcurl/releases/download/v1.8.7/grpcurl_1.8.7_linux_x86_64.tar.gz" | sudo tar -xz -C /usr/local/bin'
   await runSshCommand(ip, command, maxRetries)
-}
-
-async function installHostSpecificPackages(ip) {
-  console.log('📍Installing nvm...')
-  let command = `curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash &&
-                        export NVM_DIR="$HOME/.nvm"
-                        [ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
-                        [ -s "$NVM_DIR/bash_completion" ] && \\. "$NVM_DIR/bash_completion" &&
-                        nvm install 18.19.0`
-  await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Installing python3...')
   command =
@@ -183,6 +173,20 @@ async function installHostSpecificPackages(ip) {
   console.log('📍Installing solc versions...')
   command =
     'solc-select install 0.5.17 && solc-select install 0.6.12 && solc-select use 0.5.17'
+  await runSshCommand(ip, command, maxRetries)
+
+  console.log('📍Installing tomlq...')
+  command = 'sudo pip3 install tomlq && export PATH="$HOME/.local/bin:$PATH"'
+  await runSshCommand(ip, command, maxRetries)
+}
+
+async function installHostSpecificPackages(ip) {
+  console.log('📍Installing nvm...')
+  let command = `curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash &&
+                        export NVM_DIR="$HOME/.nvm"
+                        [ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"
+                        [ -s "$NVM_DIR/bash_completion" ] && \\. "$NVM_DIR/bash_completion" &&
+                        nvm install 18.19.0`
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Installing nodejs and npm...')
