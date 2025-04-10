@@ -232,7 +232,7 @@ jobs:
         with:
           name: logs_${{ github.run_id }}
           path: |
-            /logs
+            matic-cli/devnet/logs
 
       - name: Package code and chain data
         if: always()
