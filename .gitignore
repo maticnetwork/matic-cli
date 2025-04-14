@@ -19,3 +19,5 @@ signer-dump.json
 
 .dccache
 .vscode
+
+util-scripts/migration/*

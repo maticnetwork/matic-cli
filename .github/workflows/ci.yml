@@ -225,13 +225,17 @@ jobs:
           cd ../../../..
           timeout 60m bash matic-cli/.github/integration-tests/smoke_test.sh
 
+      - name: Resolve absolute path for logs
+        id: pathfix
+        run: |
+          echo "ABS_LOG_PATH=$(realpath matic-cli/devnet/logs)" >> $GITHUB_ENV
+
       - name: Upload logs
         if: always()
-        uses: actions/upload-artifact@v4.4.0
+        uses: PaloAltoNetworks/upload-secure-artifact@main
         with:
           name: logs_${{ github.run_id }}
-          path: |
-            matic-cli/devnet/logs
+          path: ${{ env.ABS_LOG_PATH }}
 
       - name: Package code and chain data
         if: always()
@@ -245,7 +249,7 @@ jobs:
 
       - name: Upload code and chain data
         if: always()
-        uses: actions/upload-artifact@v4.4.0
+        uses: PaloAltoNetworks/upload-secure-artifact@main
         with:
           name: code_${{ github.run_id }}
           path: code.tar.gz
