@@ -65,13 +65,13 @@ export async function sendTopUpFeeEvent(validatorID) {
   )
   const pkey = signerDump[validatorID - 1].priv_key
   const validatorAccount = signerDump[validatorID - 1].address
-  console.log(signerDump[validatorID - 1].address)
+  console.log(validatorAccount)
 
-  console.log('📍 Sending Matic Tokens to validators account')
+  console.log('📍Sending Matic Tokens to validators account')
   let command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "transfer(address,uint256)" ${validatorAccount} 100000000000000000000 --rpc-url http://localhost:9545 --private-key ${signerDump[0].priv_key}`
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
 
-  console.log('Waiting 12 secs for token transaction to be processed')
+  console.log('📍Waiting 12 secs for token transaction to be processed')
   await timer(12000)
 
   command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "approve(address,uint256)" ${StakeManagerProxyAddress} 100000000000000000000 --rpc-url http://localhost:9545 --private-key ${pkey}`
@@ -85,7 +85,7 @@ export async function sendTopUpFeeEvent(validatorID) {
   console.log('Waiting 20 secs for Matic Token Approval')
   await timer(20000)
 
-  console.log('Old Validator Balance:  ' + oldValidatorBalance)
+  console.log('Old Validator Balance:' + oldValidatorBalance)
   command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${StakeManagerProxyAddress} "topUpForFee(address,uint256)" ${validatorAccount} 10000000000000000000 --rpc-url http://localhost:9545 --private-key ${pkey}`
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
 
@@ -96,20 +96,32 @@ export async function sendTopUpFeeEvent(validatorID) {
   )
 
   while (parseInt(newValidatorBalance) <= parseInt(oldValidatorBalance)) {
-    console.log('Waiting 3 secs for topupfee')
-    await timer(3000) // waiting 3 secs
+    console.log('Waiting 5 secs for topupfee')
+    await timer(5000)
     newValidatorBalance = await getValidatorBalance(
       doc,
       machine0,
       validatorAccount
     )
-    console.log('newValidatorBalance : ', newValidatorBalance)
+    console.log('newValidatorBalance:', newValidatorBalance)
   }
 
   console.log('✅ Topup Done')
   console.log(
     '✅ TopUpFee event Sent from Rootchain and Received and processed on Heimdall'
   )
+
+  // --- Withdraw Fee Logic ---
+  // Here we execute the withdraw fee command using the Heimdalld CLI after the topup is done.
+  const withdrawAmount = '100000000000000000000'
+  const proposer = validatorAccount
+  console.log('Initiating fee withdrawal with proposer:', proposer, 'and amount:', withdrawAmount)
+
+  const withdrawCommand = `heimdalld tx topup withdraw-fee ${proposer} ${withdrawAmount} --home /var/lib/heimdall`
+  const withdrawOutput = await runSshCommandWithReturn(`${doc.ethHostUser}@${machine0}`, withdrawCommand, maxRetries)
+  console.log('Withdraw fee output:', withdrawOutput)
+
+  console.log('✅ Withdraw Done')
 }
 
 async function getValidatorBalance(doc, machine0, valAddr) {
