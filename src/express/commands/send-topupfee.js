@@ -115,7 +115,7 @@ export async function sendTopUpFeeEvent(validatorID) {
   // NOTE: This might fail if the private key is already imported into the keyring.
   const base64Key = await runSshCommandWithReturn(
     `${doc.ethHostUser}@${machine0}`,
-    'jq -r \'.priv_key.value\' /var/lib/heimdall/config/priv_validator_key.json',
+    "jq -r '.priv_key.value' /var/lib/heimdall/config/priv_validator_key.json",
     maxRetries
   )
 
@@ -136,7 +136,7 @@ export async function sendTopUpFeeEvent(validatorID) {
   // --- Withdraw Fee Logic ---
   const chainId = await runSshCommandWithReturn(
     `${doc.ethHostUser}@${machine0}`,
-    'jq -r \'.chain_id\' /var/lib/heimdall/config/genesis.json',
+    "jq -r '.chain_id' /var/lib/heimdall/config/genesis.json",
     maxRetries
   )
   console.log('Chain ID:', chainId.trim())
@@ -156,7 +156,9 @@ export async function sendTopUpFeeEvent(validatorID) {
     --chain-id ${chainId.trim()} \
     --home /var/lib/heimdall \
     -y
-  `.trim().replace(/\s+/g, ' ')
+  `
+    .trim()
+    .replace(/\s+/g, ' ')
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, withdrawCmd, maxRetries)
   console.log('✅ Withdraw transaction submitted')
 
