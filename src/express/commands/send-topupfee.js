@@ -71,8 +71,8 @@ export async function sendTopUpFeeEvent(validatorID) {
   let command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "transfer(address,uint256)" ${validatorAccount} 100000000000000000000 --rpc-url http://localhost:9545 --private-key ${signerDump[0].priv_key}`
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
 
-  console.log('📍Waiting 12 secs for token transaction to be processed')
-  await timer(12000)
+  console.log('📍Waiting 5 secs for token transaction to be processed')
+  await timer(5000)
 
   command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${MaticTokenAddr} "approve(address,uint256)" ${StakeManagerProxyAddress} 100000000000000000000 --rpc-url http://localhost:9545 --private-key ${pkey}`
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, command, maxRetries)
@@ -82,8 +82,8 @@ export async function sendTopUpFeeEvent(validatorID) {
     machine0,
     validatorAccount
   )
-  console.log('Waiting 20 secs for Matic Token Approval')
-  await timer(20000)
+  console.log('Waiting 5 secs for Matic Token Approval')
+  await timer(5000)
 
   console.log('Old Validator Balance:' + oldValidatorBalance)
   command = `export PATH="$HOME/.foundry/bin:$PATH" && cast send ${StakeManagerProxyAddress} "topUpForFee(address,uint256)" ${validatorAccount} 10000000000000000000 --rpc-url http://localhost:9545 --private-key ${pkey}`
@@ -111,17 +111,72 @@ export async function sendTopUpFeeEvent(validatorID) {
     '✅ TopUpFee event Sent from Rootchain and Received and processed on Heimdall'
   )
 
+  // --- Import validator private key into keyring ---
+  // NOTE: This might fail if the private key is already imported into the keyring.
+  const base64Key = await runSshCommandWithReturn(
+    `${doc.ethHostUser}@${machine0}`,
+    'jq -r \'.priv_key.value\' /var/lib/heimdall/config/priv_validator_key.json',
+    maxRetries
+  )
+
+  const hexKey = await runSshCommandWithReturn(
+    `${doc.ethHostUser}@${machine0}`,
+    `echo "${base64Key.trim()}" | base64 -d | xxd -p -c 256`,
+    maxRetries
+  )
+
+  console.log('📍Importing validator private key into Heimdall keyring')
+  await runSshCommand(
+    `${doc.ethHostUser}@${machine0}`,
+    `printf $'test-test\\ntest-test\\n' | heimdalld keys import-hex test ${hexKey.trim()} --home /var/lib/heimdall`,
+    maxRetries
+  )
+  console.log('✅ Validator private key imported into keyring')
+
   // --- Withdraw Fee Logic ---
-  // Here we execute the withdraw fee command using the Heimdalld CLI after the topup is done.
+  const chainId = await runSshCommandWithReturn(
+    `${doc.ethHostUser}@${machine0}`,
+    'jq -r \'.chain_id\' /var/lib/heimdall/config/genesis.json',
+    maxRetries
+  )
+  console.log('Chain ID:', chainId.trim())
+
+  const balanceBeforeWithdraw = await getValidatorBalance(
+    doc,
+    machine0,
+    validatorAccount
+  )
+  console.log('Balance before withdraw:', balanceBeforeWithdraw)
+
   const withdrawAmount = '100000000000000000000'
-  const proposer = validatorAccount
-  console.log('Initiating fee withdrawal with proposer:', proposer, 'and amount:', withdrawAmount)
+  console.log('📍Withdrawing fee:', withdrawAmount)
+  const withdrawCmd = `
+    printf 'test-test\\n' | heimdalld tx topup withdraw-fee ${validatorAccount} ${withdrawAmount} \
+    --from test \
+    --chain-id ${chainId.trim()} \
+    --home /var/lib/heimdall \
+    -y
+  `.trim().replace(/\s+/g, ' ')
+  await runSshCommand(`${doc.ethHostUser}@${machine0}`, withdrawCmd, maxRetries)
+  console.log('✅ Withdraw transaction submitted')
 
-  const withdrawCommand = `heimdalld tx topup withdraw-fee ${proposer} ${withdrawAmount} --home /var/lib/heimdall`
-  const withdrawOutput = await runSshCommandWithReturn(`${doc.ethHostUser}@${machine0}`, withdrawCommand, maxRetries)
-  console.log('Withdraw fee output:', withdrawOutput)
+  let balanceAfterWithdraw = await getValidatorBalance(
+    doc,
+    machine0,
+    validatorAccount
+  )
 
-  console.log('✅ Withdraw Done')
+  while (BigInt(balanceAfterWithdraw) >= BigInt(balanceBeforeWithdraw)) {
+    console.log('Waiting 5 secs for withdrawal to process')
+    await timer(5000)
+    balanceAfterWithdraw = await getValidatorBalance(
+      doc,
+      machine0,
+      validatorAccount
+    )
+    console.log('Balance after withdraw:', balanceAfterWithdraw)
+  }
+  console.log('✅ Withdraw successful')
 }
 
 async function getValidatorBalance(doc, machine0, valAddr) {
