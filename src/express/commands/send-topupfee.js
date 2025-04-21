@@ -126,12 +126,19 @@ export async function sendTopUpFeeEvent(validatorID) {
   )
 
   console.log('📍Importing validator private key into Heimdall keyring')
-  await runSshCommand(
-    `${doc.ethHostUser}@${machine0}`,
-    `printf $'test-test\\ntest-test\\n' | heimdalld keys import-hex test ${hexKey.trim()} --home /var/lib/heimdall`,
-    maxRetries
-  )
-  console.log('✅ Validator private key imported into keyring')
+  try {
+    await runSshCommand(
+      `${doc.ethHostUser}@${machine0}`,
+      `printf $'test-test\\ntest-test\\n' | heimdalld keys import-hex test ${hexKey.trim()} --home /var/lib/heimdall`,
+      maxRetries
+    )
+    console.log('✅ Validator private key imported into keyring')
+  } catch (err) {
+    console.error(
+      '❌ Error importing validator private key or it already exists:',
+      err.message
+    )
+  }
 
   // --- Withdraw Fee Logic ---
   const chainId = await runSshCommandWithReturn(

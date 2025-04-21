@@ -42,6 +42,7 @@ import { relay } from './express/commands/relay.js'
 import { keypairAdd } from './express/commands/keypair-add.js'
 import { keypairDestroy } from './express/commands/keypair-destroy.js'
 import { constants } from './express/common/constants.js'
+import { sendGovTestsCommand } from './express/commands/gov-tests.js'
 
 import pkg from '../package.json' assert { type: 'json' }
 import { fundAnvilAccounts } from './express/common/anvil-utils.js'
@@ -164,6 +165,10 @@ program
   .option('-relay, --relay', 'Relay transaction to shadow node')
   .option('-rpc, --rpc-test', 'Run the rpc test command')
   .option('-fga, --fund-anvil-accounts', 'Add funds to the anvil accounts')
+  .option(
+    '-gov, --send-gov-tests [validatorID]',
+    'Run gov module tests for Heimdall'
+  )
   .version(pkg.version)
 
 export async function cli() {
@@ -654,5 +659,14 @@ export async function cli() {
       process.exit(1)
     }
     await fundAnvilAccounts()
+  } else if (options.sendGovTests) {
+    console.log('📍Command --send-gov-tests [validatorID]')
+    if (!checkDir(false)) {
+      console.log(
+        '❌ The command is not called from the appropriate devnet directory!'
+      )
+      process.exit(1)
+    }
+    await sendGovTestsCommand(options.sendGovTests)
   }
 }
