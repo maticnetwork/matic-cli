@@ -313,6 +313,7 @@ export class Devnet {
                 /"state_sender_address":[ ]*".*"/gi,
                 `"state_sender_address": "${rootContracts.StateSender}"`
               )
+              .replace(/"voting_period"\s*:\s*".*"/g, '"voting_period": "60s"')
               .save()
           }
         },
@@ -425,6 +426,7 @@ export class Devnet {
                 /"state_sender_address":[ ]*".*"/gi,
                 `"state_sender_address": "${rootContracts.StateSender}"`
               )
+              .replace(/"voting_period"\s*:\s*".*"/g, '"voting_period": "60s"')
               .save()
           }
         },
@@ -1313,6 +1315,7 @@ export class Devnet {
                 /"bor_chain_id"[ ]*:[ ]*".*"/gi,
                 `"bor_chain_id": "${this.config.borChainId}"`
               )
+              .replace(/"voting_period"\s*:\s*".*"/g, '"voting_period": "60s"')
               .save()
           }
         }
