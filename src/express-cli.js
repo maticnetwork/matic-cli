@@ -667,6 +667,6 @@ export async function cli() {
       )
       process.exit(1)
     }
-    await sendGovTestsCommand(options.sendGovTests)
+    await sendGovTestsCommand()
   }
 }

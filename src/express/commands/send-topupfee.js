@@ -6,7 +6,8 @@ import {
   runScpCommand,
   runSshCommand,
   runSshCommandWithReturn,
-  maxRetries
+  maxRetries,
+  runSshCommandWithoutExit
 } from '../common/remote-worker.js'
 
 import dotenv from 'dotenv'
@@ -127,7 +128,7 @@ export async function sendTopUpFeeEvent(validatorID) {
 
   console.log('📍Importing validator private key into Heimdall keyring')
   try {
-    await runSshCommand(
+    await runSshCommandWithoutExit(
       `${doc.ethHostUser}@${machine0}`,
       `printf $'test-test\\ntest-test\\n' | heimdalld keys import-hex test ${hexKey.trim()} --home /var/lib/heimdall`,
       maxRetries
