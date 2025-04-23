@@ -314,6 +314,7 @@ export class Devnet {
                 `"state_sender_address": "${rootContracts.StateSender}"`
               )
               .replace(/"voting_period"\s*:\s*".*"/g, '"voting_period": "60s"')
+              .replace(/"expedited_voting_period"\s*:\s*".*"/g, '"expedited_voting_period": "50s"')
               .save()
           }
         },
@@ -427,6 +428,7 @@ export class Devnet {
                 `"state_sender_address": "${rootContracts.StateSender}"`
               )
               .replace(/"voting_period"\s*:\s*".*"/g, '"voting_period": "60s"')
+              .replace(/"expedited_voting_period"\s*:\s*".*"/g, '"expedited_voting_period": "50s"')
               .save()
           }
         },
@@ -1316,6 +1318,7 @@ export class Devnet {
                 `"bor_chain_id": "${this.config.borChainId}"`
               )
               .replace(/"voting_period"\s*:\s*".*"/g, '"voting_period": "60s"')
+              .replace(/"expedited_voting_period"\s*:\s*".*"/g, '"expedited_voting_period": "50s"')
               .save()
           }
         }
