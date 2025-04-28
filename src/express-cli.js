@@ -165,10 +165,7 @@ program
   .option('-relay, --relay', 'Relay transaction to shadow node')
   .option('-rpc, --rpc-test', 'Run the rpc test command')
   .option('-fga, --fund-anvil-accounts', 'Add funds to the anvil accounts')
-  .option(
-    '-gov, --send-gov-tests [validatorID]',
-    'Run gov module tests for Heimdall'
-  )
+  .option('-gov, --send-gov-tests', 'Run gov module tests for Heimdall')
   .version(pkg.version)
 
 export async function cli() {
@@ -660,7 +657,7 @@ export async function cli() {
     }
     await fundAnvilAccounts()
   } else if (options.sendGovTests) {
-    console.log('📍Command --send-gov-tests [validatorID]')
+    console.log('📍Command --send-gov-tests')
     if (!checkDir(false)) {
       console.log(
         '❌ The command is not called from the appropriate devnet directory!'
