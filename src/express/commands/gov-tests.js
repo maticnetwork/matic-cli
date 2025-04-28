@@ -79,7 +79,7 @@ export async function sendGovTestsCommand() {
   }`
   let proposalJson = `{
     "metadata": "ipfs://test",
-    "deposit": "1000000000000000000pol",
+    "deposit": "100000000000000000000pol",
     "title": "Test",
     "summary": "This is a test proposal.",
     "expedited": false
@@ -108,20 +108,20 @@ export async function sendGovTestsCommand() {
   )
   console.log('Chain ID:', chainId.trim())
 
+  console.log('📍 PROPOSAL_STATUS_PASSED Testcase')
+
   // Check proposal count before submission
   let beforeCount = await getProposalCount(doc, machine0)
   console.log('🔍 Proposals before submission:', beforeCount)
 
-  console.log('📍 PROPOSAL_STATUS_PASSED Testcase')
-
-  let submitProposalCommand = `printf 'test-test\\n' | heimdalld tx gov submit-proposal draft_proposal.json --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
+  const submitProposalCommand = `printf 'test-test\\n' | heimdalld tx gov submit-proposal draft_proposal.json --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
   await runSshCommand(
     `${doc.ethHostUser}@${machine0}`,
     submitProposalCommand,
     maxRetries
   )
 
-  await timer(5000)
+  await timer(2000)
 
   // Check proposal count after submission
   let afterCount = await getProposalCount(doc, machine0)
@@ -134,14 +134,17 @@ export async function sendGovTestsCommand() {
   }
 
   console.log(
-    `📍Depositing 101 POL to proposal #${afterCount} on host ${machine0}…`
+    `📍Depositing 200 POL to proposal #${afterCount} on host ${machine0}…`
   )
-  const depositCommand = `printf 'test-test\\n' | heimdalld tx gov deposit ${afterCount} 101000000000000000000pol --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
+  const depositCommand = `printf 'test-test\\n' | heimdalld tx gov deposit ${afterCount} 200000000000000000000pol --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
+
   await runSshCommand(
     `${doc.ethHostUser}@${machine0}`,
     depositCommand,
     maxRetries
   )
+
+  await timer(2000)
 
   console.log(
     `📍 Casting YES vote on proposal #${afterCount} from each validator…`
@@ -152,7 +155,7 @@ export async function sendGovTestsCommand() {
     console.log(`✅ Vote command executed on host ${machine}`)
   }
 
-  await timer(60 * 1000) // Wait for 1 minute
+  await timer(60000) // Wait for 1 minute
   console.log('📍Checking proposal status…')
 
   // Check proposal status
@@ -173,7 +176,7 @@ export async function sendGovTestsCommand() {
     maxRetries
   )
 
-  await timer(5000)
+  await timer(2000)
 
   // Check proposal count after submission
   afterCount = await getProposalCount(doc, machine0)
@@ -186,13 +189,15 @@ export async function sendGovTestsCommand() {
   }
 
   console.log(
-    `📍Depositing 101 POL to proposal #${afterCount} on host ${machine0}…`
+    `📍Depositing 200 POL to proposal #${afterCount} on host ${machine0}…`
   )
   await runSshCommand(
     `${doc.ethHostUser}@${machine0}`,
     depositCommand,
     maxRetries
   )
+
+  await timer(2000)
 
   console.log(
     `📍 Casting NO vote on proposal #${afterCount} from each validator…`
@@ -203,7 +208,7 @@ export async function sendGovTestsCommand() {
     console.log(`✅ Vote command executed on host ${machine}`)
   }
 
-  await timer(60 * 1000) // Wait for 1 minute
+  await timer(60000) // Wait for 1 minute
   console.log('📍Checking proposal status…')
 
   // Check proposal status
@@ -292,14 +297,13 @@ export async function sendGovTestsCommand() {
   beforeCount = await getProposalCount(doc, machine0)
   console.log('🔍 Proposals before submission:', beforeCount)
 
-  submitProposalCommand = `printf 'test-test\\n' | heimdalld tx gov submit-proposal draft_proposal.json --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
   await runSshCommand(
     `${doc.ethHostUser}@${machine0}`,
     submitProposalCommand,
     maxRetries
   )
 
-  await timer(5000)
+  await timer(2000)
 
   // Check proposal count after submission
   afterCount = await getProposalCount(doc, machine0)
@@ -312,7 +316,7 @@ export async function sendGovTestsCommand() {
   }
 
   console.log(
-    `📍Depositing 101 POL to proposal #${afterCount} on host ${machine0}…`
+    `📍Depositing 200 POL to proposal #${afterCount} on host ${machine0}…`
   )
 
   await runSshCommand(
@@ -320,6 +324,8 @@ export async function sendGovTestsCommand() {
     depositCommand,
     maxRetries
   )
+
+  await timer(2000)
 
   console.log(
     `📍 Casting YES vote on proposal #${afterCount} from each validator…`
@@ -330,7 +336,7 @@ export async function sendGovTestsCommand() {
     console.log(`✅ Vote command executed on host ${machine}`)
   }
 
-  await timer(60 * 1000) // Wait for 1 minute
+  await timer(60000) // Wait for 1 minute
   console.log('📍Checking proposal status…')
 
   // Check proposal status
