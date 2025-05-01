@@ -133,18 +133,17 @@ export async function sendGovTestsCommand() {
     console.log('❌ Proposal submission failed')
   }
 
-  console.log(
-    `📍Depositing 200 POL to proposal #${afterCount} on host ${machine0}…`
-  )
-  const depositCommand = `printf 'test-test\\n' | heimdalld tx gov deposit ${afterCount} 200000000000000000000pol --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
-
-  await runSshCommand(
-    `${doc.ethHostUser}@${machine0}`,
-    depositCommand,
-    maxRetries
-  )
-
-  await timer(2000)
+  console.log(`📍Depositing 200 POL to proposal #${afterCount}`)
+  let depositCommand = `printf 'test-test\\n' | heimdalld tx gov deposit ${afterCount} 200000000000000000000pol --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
+  for (const machine of doc.devnetBorHosts) {
+    await runSshCommand(
+      `${doc.ethHostUser}@${machine}`,
+      depositCommand,
+      maxRetries
+    )
+    console.log(`✅ Deposit command executed on host ${machine}`)
+    await timer(2000)
+  }
 
   console.log(
     `📍 Casting YES vote on proposal #${afterCount} from each validator…`
@@ -153,6 +152,7 @@ export async function sendGovTestsCommand() {
     const voteCommand = `printf 'test-test\\n' | heimdalld tx gov vote ${afterCount} yes --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
     runSshCommand(`${doc.ethHostUser}@${machine}`, voteCommand, maxRetries)
     console.log(`✅ Vote command executed on host ${machine}`)
+    await timer(2000)
   }
 
   await timer(60000) // Wait for 1 minute
@@ -188,16 +188,17 @@ export async function sendGovTestsCommand() {
     console.log('❌ Proposal submission failed')
   }
 
-  console.log(
-    `📍Depositing 200 POL to proposal #${afterCount} on host ${machine0}…`
-  )
-  await runSshCommand(
-    `${doc.ethHostUser}@${machine0}`,
-    depositCommand,
-    maxRetries
-  )
-
-  await timer(2000)
+  console.log(`📍Depositing 200 POL to proposal #${afterCount}`)
+  depositCommand = `printf 'test-test\\n' | heimdalld tx gov deposit ${afterCount} 200000000000000000000pol --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
+  for (const machine of doc.devnetBorHosts) {
+    await runSshCommand(
+      `${doc.ethHostUser}@${machine}`,
+      depositCommand,
+      maxRetries
+    )
+    console.log(`✅ Deposit command executed on host ${machine}`)
+    await timer(2000)
+  }
 
   console.log(
     `📍 Casting NO vote on proposal #${afterCount} from each validator…`
@@ -206,6 +207,7 @@ export async function sendGovTestsCommand() {
     const voteCommand = `printf 'test-test\\n' | heimdalld tx gov vote ${afterCount} no --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
     runSshCommand(`${doc.ethHostUser}@${machine}`, voteCommand, maxRetries)
     console.log(`✅ Vote command executed on host ${machine}`)
+    await timer(2000)
   }
 
   await timer(60000) // Wait for 1 minute
@@ -225,9 +227,9 @@ export async function sendGovTestsCommand() {
 
   // JSON content for gov.MsgUpdateParams proposal
   metadataJson = `{
-    "title": "Change voting period",
+    "title": "Change voting period.",
     "authors": [
-      "Test"
+      "Test Author"
     ],
     "summary": "Change voting period.",
     "details": "Change voting period.",
@@ -248,7 +250,7 @@ export async function sendGovTestsCommand() {
             }
           ],
           "max_deposit_period": "172800s", 
-          "voting_period": "86400s", 
+          "voting_period": "75s", 
           "quorum": "0.334000000000000000",
           "threshold": "0.500000000000000000",
           "veto_threshold": "0.334000000000000000",
@@ -272,8 +274,8 @@ export async function sendGovTestsCommand() {
     ],
     "metadata": "ipfs://CID",
     "deposit": "1000000000000000000pol",
-    "title": "Change voting period",
-    "summary": "Change voting period",
+    "title": "Change voting period to 75 secs.",
+    "summary": "Change voting period to 75 secs.",
     "expedited": false
   }`
 
@@ -315,17 +317,17 @@ export async function sendGovTestsCommand() {
     console.log('❌ Proposal submission failed')
   }
 
-  console.log(
-    `📍Depositing 200 POL to proposal #${afterCount} on host ${machine0}…`
-  )
-
-  await runSshCommand(
-    `${doc.ethHostUser}@${machine0}`,
-    depositCommand,
-    maxRetries
-  )
-
-  await timer(2000)
+  console.log(`📍Depositing 200 POL to proposal #${afterCount}`)
+  depositCommand = `printf 'test-test\\n' | heimdalld tx gov deposit ${afterCount} 200000000000000000000pol --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
+  for (const machine of doc.devnetBorHosts) {
+    await runSshCommand(
+      `${doc.ethHostUser}@${machine}`,
+      depositCommand,
+      maxRetries
+    )
+    console.log(`✅ Deposit command executed on host ${machine}`)
+    await timer(2000)
+  }
 
   console.log(
     `📍 Casting YES vote on proposal #${afterCount} from each validator…`
@@ -334,6 +336,7 @@ export async function sendGovTestsCommand() {
     const voteCommand = `printf 'test-test\\n' | heimdalld tx gov vote ${afterCount} yes --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
     runSshCommand(`${doc.ethHostUser}@${machine}`, voteCommand, maxRetries)
     console.log(`✅ Vote command executed on host ${machine}`)
+    await timer(2000)
   }
 
   await timer(60000) // Wait for 1 minute
@@ -349,18 +352,18 @@ export async function sendGovTestsCommand() {
 
   console.log('✅ gov.MsgUpdateParam Testcase passed')
 
-  console.log('📍Verifying if voting_period has been updated to 86400s...')
+  console.log('📍Verifying if voting_period has been updated to 75s...')
 
   const isVotingPeriodUpdated = await verifyVotingPeriodUpdate(doc, machine0)
 
   if (isVotingPeriodUpdated) {
-    console.log('✅ voting_period successfully updated to 86400s')
+    console.log('✅ voting_period successfully updated to 75s')
   } else {
     console.error('❌ voting_period update failed or mismatch detected')
   }
 }
 
-async function getProposalCount(doc, machine) {
+export async function getProposalCount(doc, machine) {
   const cmd = 'curl -s localhost:1317/cosmos/gov/v1/proposals'
   const out = await runSshCommandWithReturn(
     `${doc.ethHostUser}@${machine}`,
@@ -371,7 +374,7 @@ async function getProposalCount(doc, machine) {
   return outObj.pagination.total
 }
 
-async function getProposalStatus(doc, machine, proposalId) {
+export async function getProposalStatus(doc, machine, proposalId) {
   const cmd = `curl -s localhost:1317/cosmos/gov/v1/proposals/${proposalId}`
   const out = await runSshCommandWithReturn(
     `${doc.ethHostUser}@${machine}`,
@@ -395,7 +398,7 @@ async function verifyVotingPeriodUpdate(doc, machine) {
 
     console.log(`🔍 Current voting_period from chain: ${currentVotingPeriod}`)
 
-    return currentVotingPeriod === '86400s'
+    return currentVotingPeriod === '75s'
   } catch (error) {
     console.error('❌ Error verifying voting_period:', error.message)
     return false
