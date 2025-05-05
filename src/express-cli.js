@@ -44,9 +44,11 @@ import { keypairDestroy } from './express/commands/keypair-destroy.js'
 import { constants } from './express/common/constants.js'
 import { sendAuthAndBankTestsCommand } from './express/commands/auth-bank-tests.js'
 import { sendGovTestsCommand } from './express/commands/gov-tests.js'
-
-import pkg from '../package.json' with { type: 'json' }
 import { fundAnvilAccounts } from './express/common/anvil-utils.js'
+
+const pkg = await import('../package.json', {
+  assert: { type: 'json' }
+}).then((module) => module.default)
 
 function checkCloudProvider(provider, _) {
   const supportedClouds = [constants.cloud.AWS, constants.cloud.GCP]
