@@ -45,7 +45,7 @@ import { constants } from './express/common/constants.js'
 import { sendAuthAndBankTestsCommand } from './express/commands/auth-bank-tests.js'
 import { sendGovTestsCommand } from './express/commands/gov-tests.js'
 
-import pkg from '../package.json' assert { type: 'json' }
+import pkg from '../package.json' with { type: 'json' }
 import { fundAnvilAccounts } from './express/common/anvil-utils.js'
 
 function checkCloudProvider(provider, _) {

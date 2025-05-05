@@ -232,6 +232,7 @@ jobs:
 
       - name: Upload logs
         if: always()
+        continue-on-error: true
         uses: PaloAltoNetworks/upload-secure-artifact@main
         with:
           name: logs_${{ github.run_id }}
@@ -249,6 +250,7 @@ jobs:
 
       - name: Upload code and chain data
         if: always()
+        continue-on-error: true
         uses: PaloAltoNetworks/upload-secure-artifact@main
         with:
           name: code_${{ github.run_id }}

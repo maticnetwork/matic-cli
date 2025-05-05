@@ -1,7 +1,7 @@
 import { program } from 'commander'
 import setupPrograms from './setup/index.js'
 
-import pkg from '../package.json' assert { type: 'json' }
+import pkg from '../package.json' with { type: 'json' }
 
 const setupCmd = program
   .version(pkg.version)
