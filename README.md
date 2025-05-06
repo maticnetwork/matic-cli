@@ -226,6 +226,10 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
   - Runs end-to-end tests for gov module of Heimdall.
 
+- `../../bin/express-cli.js --send-auth-bank-tests`
+
+  - Runs end-to-end tests for auth and bank module of Heimdall.
+
 - ` ../../bin/express-cli.js --monitor [exit]`
 
   - Monitors the reception of state-syncs and checkpoints to make sure the whole network is in a healthy state.
