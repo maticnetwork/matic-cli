@@ -222,6 +222,14 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
   - Create a `UnstakeInit` transaction on the remote network and removes the validator from validator-set. `validatorID` can be used to specify the validator to be removed. If not specified, the first validator will be removed.
 
+- `../../bin/express-cli.js --send-gov-tests`
+
+  - Runs end-to-end tests for gov module of Heimdall.
+
+- `../../bin/express-cli.js --send-auth-bank-tests`
+
+  - Runs end-to-end tests for auth and bank module of Heimdall.
+
 - ` ../../bin/express-cli.js --monitor [exit]`
 
   - Monitors the reception of state-syncs and checkpoints to make sure the whole network is in a healthy state.
