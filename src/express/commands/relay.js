@@ -92,7 +92,7 @@ export async function relay() {
   const polygonProviderUrl =
     process.env.NETWORK === 'mainnet'
       ? 'https://polygon-rpc.com'
-      : 'https://rpc-mumbai.maticvigil.com'
+      : 'https://rpc-amoy.polygon.technology'
 
   const relayTasks = providers.map(async (p, i) => {
     await relayTxs(p, providerToNodeIp.get(p), polygonProviderUrl, i)

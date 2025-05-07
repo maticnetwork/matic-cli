@@ -280,7 +280,7 @@ The `express-cli` also comes with additional utility commands, listed below. Som
 
 - `../../bin/express-cli.js --shadow-fork [blockNumber]`
 
-  - Run (mumbai/mainnet) nodes in shadow mode. Please note that there might be an offset of ~3-4 blocks from [block] number
+  - Run (mumbai/amoy/mainnet) nodes in shadow mode. Please note that there might be an offset of ~3-4 blocks from [block] number
     specified when restarting the (shadow) node. Currently only works with remote setup (no docker support).
 
 - `../../bin/express-cli.js --rpc-test`
