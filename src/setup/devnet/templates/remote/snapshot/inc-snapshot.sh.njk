@@ -1,8 +1,8 @@
 #!/bin/bash
 
 function validate_network() {
-  if [[ "$1" != "mainnet" && "$1" != "mumbai" ]]; then
-    echo "Invalid network input. Please enter 'mainnet' or 'mumbai'."
+  if [[ "$1" != "mainnet" && "$1" != "mumbai" && "$1" != "amoy" ]]; then
+    echo "Invalid network input. Please enter 'mainnet' , 'mumbai' or 'amoy'."
     exit 1
   fi
 }
@@ -15,14 +15,14 @@ function validate_client() {
 }
 
 # ask user for network and client type
-read -p "PoSV1 Network (mainnet/mumbai): " network_input
+read -p "PoSV1 Network (mainnet/mumbai/amoy): " network_input
 validate_network "$network_input"
 read -p "Client Type (heimdall/bor): " client_input
 validate_client "$client_input"
 read -p "Directory to Download/Extract: " extract_dir_input
 
 # set default values if user input is blank
-network=${network_input:-mumbai}
+network=${network_input:-amoy}
 client=${client_input:-heimdall}
 extract_dir=${extract_dir_input:-"${client}_extract"}
 

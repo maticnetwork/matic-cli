@@ -480,6 +480,9 @@ function setCommonConfigs(doc) {
     } else if (process.env.NETWORK === 'mumbai') {
       borChainId = 80001
       heimdallChainId = 'heimdall-80001'
+    } else if (process.env.NETWORK === 'amoy') {
+      borChainId = 80002
+      heimdallChainId = 'heimdall-80002'
     }
   } else if (!process.env.BOR_CHAIN_ID && !process.env.HEIMDALL_CHAIN_ID) {
     borChainId = Math.floor(Math.random() * 10000 + 1000)
