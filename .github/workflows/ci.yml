@@ -138,6 +138,12 @@ jobs:
           timeout 5m ../../bin/express-cli.js --send-topupfee-event 1
           timeout 15m ../../bin/express-cli.js --send-unstakeinit-event 1
 
+      - name: Run e2e module tests for Heimdall
+        working-directory: matic-cli/deployments/devnet-1
+        run: |
+          timeout 5m ../../bin/express-cli.js --send-gov-tests
+          timeout 5m ../../bin/express-cli.js --send-auth-bank-tests
+
       - name: Destroy devnet
         if: always()
         working-directory: matic-cli/deployments/devnet-1

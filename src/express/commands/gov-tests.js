@@ -223,6 +223,96 @@ export async function sendGovTestsCommand() {
 
   console.log('✅ PROPOSAL_STATUS_REJECTED Testcase passed')
 
+  console.log('📍 EXPEDITED_PROPOSAL Testcase')
+
+  // JSON content for expedited text proposal
+  metadataJson = `{
+    "title": "Expedited Test",
+    "authors": [
+      "Test Author"
+    ],
+    "summary": "This is an expedited test proposal.",
+    "details": "This is an expedited test proposal.",
+    "proposal_forum_url": "https://forum.polygon.technology/expedited-test",
+    "vote_option_context": "Expedited deposit: 500 POL"
+  }`
+  proposalJson = `{
+    "metadata": "ipfs://test-expedited",
+    "deposit": "100000000000000000000pol",
+    "title": "Expedited Test",
+    "summary": "This is an expedited test proposal.",
+    "expedited": true
+  }`
+
+  console.log('📍Writing expedited draft_metadata.json on host:', machine0)
+  await runSshCommand(
+    `${doc.ethHostUser}@${machine0}`,
+    `echo '${metadataJson}' > ~/expedited_metadata.json`,
+    maxRetries
+  )
+  console.log(`✅ expedited_metadata.json saved on host ${machine0}`)
+
+  console.log('📍Writing expedited draft_proposal.json on host:', machine0)
+  await runSshCommand(
+    `${doc.ethHostUser}@${machine0}`,
+    `echo '${proposalJson}' > ~/expedited_proposal.json`,
+    maxRetries
+  )
+  console.log(`✅ expedited_proposal.json saved on host ${machine0}`)
+
+  // Check proposal count before submission
+  beforeCount = await getProposalCount(doc, machine0)
+  console.log('🔍 Proposals before expedited submission:', beforeCount)
+
+  const submitExpedited = `printf 'test-test\\n' | heimdalld tx gov submit-proposal expedited_proposal.json --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
+  await runSshCommand(
+    `${doc.ethHostUser}@${machine0}`,
+    submitExpedited,
+    maxRetries
+  )
+
+  await timer(2000)
+
+  // Check proposal count after submission
+  afterCount = await getProposalCount(doc, machine0)
+  console.log('🔍 Proposals after expedited submission:', afterCount)
+
+  if (afterCount > beforeCount) {
+    console.log('✅ Expedited proposal submitted successfully')
+  } else {
+    console.log('❌ Expedited proposal submission failed')
+  }
+
+  console.log(`📍Depositing 500 POL to expedited proposal #${afterCount}`)
+  const expeditedDeposit = `printf 'test-test\\n' | heimdalld tx gov deposit ${afterCount} 500000000000000000000pol --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
+  for (const machine of doc.devnetBorHosts) {
+    await runSshCommand(
+      `${doc.ethHostUser}@${machine}`,
+      expeditedDeposit,
+      maxRetries
+    )
+    console.log(`✅ Expedited deposit executed on host ${machine}`)
+    await timer(2000)
+  }
+
+  console.log(`📍Casting YES vote on expedited proposal #${afterCount}`)
+  for (const machine of doc.devnetBorHosts) {
+    const voteCmd = `printf 'test-test\\n' | heimdalld tx gov vote ${afterCount} yes --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
+    await runSshCommand(`${doc.ethHostUser}@${machine}`, voteCmd, maxRetries)
+    console.log(`✅ Vote on expedited proposal executed on host ${machine}`)
+    await timer(2000)
+  }
+
+  await timer(50000) // Wait for 1 minute
+  console.log('📍Checking expedited proposal status…')
+
+  status = await getProposalStatus(doc, machine0, afterCount)
+  if (status === 'PROPOSAL_STATUS_PASSED') {
+    console.log('✅ Expedited proposal passed successfully')
+  } else {
+    console.error(`❌ Expedited proposal status: ${status}`)
+  }
+
   console.log('📍 gov.MsgUpdateParam Testcase')
 
   // JSON content for gov.MsgUpdateParams proposal
