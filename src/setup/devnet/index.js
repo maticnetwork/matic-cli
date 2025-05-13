@@ -1284,7 +1284,7 @@ export class Devnet {
               })
 
               await execa(`${heimdall.heimdalldCmd}`, [
-                'init', `--chain=${this.config.network}`, `--home=${this.heimdallDir(i)}`
+                'init', `--chain-id=${this.config.network}`, `--home=${this.heimdallDir(i)}`
               ], { stdio: getRemoteStdio(), cwd: this.config.targetDirectory })
             }
           }
