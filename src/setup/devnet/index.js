@@ -1309,11 +1309,11 @@ export class Devnet {
               .replace(/heimdall([^:]+):/gi, (d, index) => {
                 return `${this.config.devnetHeimdallHosts[index]}:`
               })
-              // .replace(/moniker.+=.+/gi, `moniker = "heimdall${i}"`)
-              // .replace(
-              //   /laddr[ ]*=[ ]*"tcp:\/\/127\.0\.0\.1:26657"/gi,
-              //   'laddr = "tcp://0.0.0.0:26657"'
-              // )
+              .replace(/moniker.+=.+/gi, `moniker = "heimdall${i}"`)
+              .replace(
+                /laddr[ ]*=[ ]*"tcp:\/\/127\.0\.0\.1:26657"/gi,
+                'laddr = "tcp://0.0.0.0:26657"'
+              )
               .save()
 
             if (this.config.network) {
