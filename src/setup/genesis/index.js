@@ -21,7 +21,7 @@ export class Genesis {
 
     this.repositoryName = this.name
     this.repositoryBranch =
-      options.repositoryBranch || 'mardizzone/node-upgrade'
+      options.repositoryBranch || 'master'
     this.repositoryUrl =
       options.repositoryUrl ||
       'https://github.com/maticnetwork/genesis-contracts'
