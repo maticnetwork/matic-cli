@@ -247,7 +247,7 @@ export class Devnet {
     return [
       enodeTask,
       {
-        title: 'Process Heimdall configs',
+        title: 'Process Heimdall app configs',
         task: async () => {
           // set heimdall
           for (let i = 0; i < this.totalBorNodes; i++) {
@@ -279,6 +279,20 @@ export class Devnet {
               .replace(
                 /checkpoint_poll_interval[ ]*=[ ]*".*"/gi,
                 'checkpoint_poll_interval = "1m0s"'
+              )
+              .save()
+          }
+        }
+      },
+      {
+        title: 'Process Heimdall configs',
+        task: async () => {
+          // set heimdall
+          for (let i = 0; i < this.totalBorNodes; i++) {
+            fileReplacer(this.heimdallConfigFilePath(i))
+              .replace(
+                /laddr[ ]*=[ ]*"tcp:\/\/127\.0\.0\.1:26657"/gi,
+                'laddr = "tcp://0.0.0.0:26657"'
               )
               .save()
           }
@@ -1296,6 +1310,10 @@ export class Devnet {
                 return `${this.config.devnetHeimdallHosts[index]}:`
               })
               .replace(/moniker.+=.+/gi, `moniker = "heimdall${i}"`)
+              .replace(
+                /laddr[ ]*=[ ]*"tcp:\/\/127\.0\.0\.1:26657"/gi,
+                'laddr = "tcp://0.0.0.0:26657"'
+              )
               .save()
 
             if (this.config.network) {
