@@ -211,6 +211,7 @@ jobs:
           cd -
           bash anvil-deployment-bor.sh
           bash anvil-deployment-sync.sh
+          echo ">>> TEST <<<"
 
       - name: Run smoke tests
         run: |
