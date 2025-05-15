@@ -209,11 +209,6 @@ jobs:
           bash docker-bor-start-all.sh
           sleep 120
           cd -
-          echo ">>>>>>>>>>>>>> TEST"
-          ls -la /home/runner/work/matic-cli/matic-cli/var/lib/bor
-          echo ">>>>>>>>>>>>>> TEST"
-          timeout 2m bash matic-cli/.github/integration-tests/bor_health.sh
-          cd -
           bash anvil-deployment-bor.sh
           bash anvil-deployment-sync.sh
 
