@@ -14,7 +14,9 @@ import {
 import dotenv from 'dotenv'
 import fs from 'fs-extra'
 
-import ERC20ABI from '../../abi/ERC20ABI.json' assert { type: 'json' }
+const ERC20ABI = await import('../../abi/ERC20ABI.json', {
+  assert: { type: 'json' }
+}).then((module) => module.default)
 
 export async function sendStakeUpdateEvent(validatorID) {
   dotenv.config({ path: `${process.cwd()}/.env` })
