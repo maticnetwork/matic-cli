@@ -152,7 +152,7 @@ jobs:
     if: (github.event.action != 'closed' || github.event.pull_request.merged == true)
     strategy:
       matrix:
-        os: [ubuntu-22.04] # list of os: https://github.com/actions/virtual-environments
+        os: [ubuntu-22.04]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -182,6 +182,7 @@ jobs:
           sudo apt install python3 python3-pip -y
           sudo ln -sf /usr/bin/python3 /usr/bin/python
           pip install solc-select
+
       - name: Install Solidity Version
         run: |
           solc-select install 0.5.17
@@ -200,18 +201,19 @@ jobs:
           cd devnet
           ../bin/matic-cli.js setup devnet -c ../../matic-cli/.github/e2e-docker-config.yml
 
-      - name: Launch devnet
+      - name: Launch devnet and check Bor health
         run: |
-          cd matic-cli/devnet
-          bash docker-anvil-start.sh
-          bash docker-heimdall-start-all.sh
-          bash docker-bor-setup.sh
-          bash docker-bor-start-all.sh
-          sleep 120
-          cd -
-          bash anvil-deployment-bor.sh
-          bash anvil-deployment-sync.sh
-          echo ">>> TEST <<<"
+          bash matic-cli/devnet/docker-anvil-start.sh
+          bash matic-cli/devnet/docker-heimdall-start-all.sh
+          bash matic-cli/devnet/docker-bor-setup.sh
+          bash matic-cli/devnet/docker-bor-start-all.sh
+
+          echo "Waiting for Bor IPC socket and health check..."
+          chmod +x matic-cli/.github/integration-tests/bor_health.sh
+          bash matic-cli/.github/integration-tests/bor_health.sh
+
+          bash matic-cli/devnet/anvil-deployment-bor.sh
+          bash matic-cli/devnet/anvil-deployment-sync.sh
 
       - name: Run smoke tests
         run: |
@@ -240,9 +242,7 @@ jobs:
       - name: Package code and chain data
         if: always()
         run: |
-          cd matic-cli/devnet
-          docker compose down --remove-orphans
-          cd -
+          docker compose -f matic-cli/devnet/docker-compose.yml down --remove-orphans
           mkdir -p ${{ github.run_id }}/matic-cli
           sudo mv matic-cli/devnet ${{ github.run_id }}/matic-cli
           sudo tar --warning=no-file-changed --exclude='.git' -czf code.tar.gz ${{ github.run_id }}
