@@ -28,7 +28,7 @@ export class Bor {
     this.config = config
 
     this.repositoryName = 'bor'
-    this.repositoryBranch = options.repositoryBranch || 'develop'
+    this.repositoryBranch = options.repositoryBranch || 'heimdall-v2'
     this.repositoryUrl =
       options.repositoryUrl || 'https://github.com/maticnetwork/bor'
 

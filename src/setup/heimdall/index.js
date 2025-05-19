@@ -87,6 +87,10 @@ export class Heimdall {
     return path.join(this.heimdallConfigDir, 'app.toml')
   }
 
+  get heimdallConfigFilePath() {
+    return path.join(this.heimdallConfigDir, 'config.toml')
+  }
+
   get heimdallValidatorKeyFilePath() {
     return path.join(this.heimdallConfigDir, this.validatorKeyFile)
   }
@@ -307,7 +311,7 @@ export class Heimdall {
           }
         },
         {
-          title: 'Process heimdall config file',
+          title: 'Process heimdall app config file',
           task: () => {
             fileReplacer(this.heimdallAppConfigFilePath)
               .replace(
@@ -325,6 +329,17 @@ export class Heimdall {
               .replace(
                 /bor_grpc_url[ ]*=[ ]*".*"/gi,
                 'bor_grpc_url = "localhost:3131"'
+              )
+              .save()
+          }
+        },
+        {
+          title: 'Process heimdall config file',
+          task: () => {
+            fileReplacer(this.heimdallConfigFilePath)
+              .replace(
+                /laddr[ ]*=[ ]*"tcp:\/\/127\.0\.0\.1:26657"/gi,
+                'laddr = "tcp://0.0.0.0:26657"'
               )
               .save()
           }
