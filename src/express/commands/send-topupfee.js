@@ -158,6 +158,8 @@ export async function sendTopUpFeeEvent(validatorID) {
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, withdrawCmd, maxRetries)
   console.log('✅ Withdraw transaction submitted')
 
+  await timer(5000)
+
   let balanceAfterWithdraw = await fetchBalance(
     doc.ethHostUser,
     machine0,
@@ -172,7 +174,7 @@ export async function sendTopUpFeeEvent(validatorID) {
       machine0,
       validatorAccount
     )
-    console.log('Balance after withdraw:', balanceAfterWithdraw)
   }
+  console.log('Balance after withdraw:', balanceAfterWithdraw)
   console.log('✅ Withdraw successful')
 }
