@@ -3,10 +3,17 @@ import { timer } from '../common/time-utils.js'
 import {
   runSshCommand,
   runSshCommandWithReturn,
-  runSshCommandWithoutExit,
   maxRetries
 } from '../common/remote-worker.js'
 import { getProposalCount, getProposalStatus } from './gov-tests.js'
+import {
+  updateAuthParamsMetadata,
+  updateAuthParamsProposal
+} from '../common/proposals.js'
+import {
+  importValidatorKeysOnHost,
+  fetchBalance
+} from '../common/heimdall-utils.js'
 import dotenv from 'dotenv'
 
 export async function sendAuthAndBankTestsCommand() {
@@ -28,84 +35,26 @@ export async function sendAuthAndBankTestsCommand() {
     process.exit(1)
   }
 
-  for (const machine of doc.devnetBorHosts) {
-    console.log(`📍Processing host: ${machine}`)
-    try {
-      // Fetch base64-encoded private key
-      const base64Key = await runSshCommandWithReturn(
-        `${doc.ethHostUser}@${machine}`,
-        "jq -r '.priv_key.value' /var/lib/heimdall/config/priv_validator_key.json",
-        maxRetries
-      )
-
-      // Convert to hex
-      const hexKey = await runSshCommandWithReturn(
-        `${doc.ethHostUser}@${machine}`,
-        `echo "${base64Key.trim()}" | base64 -d | xxd -p -c 256`,
-        maxRetries
-      )
-
-      console.log('📍Importing validator private key into Heimdall keyring')
-      // Import into keyring using the validatorID as the key name
-      try {
-        await runSshCommandWithoutExit(
-          `${doc.ethHostUser}@${machine}`,
-          `printf $'test-test\\ntest-test\\n' | heimdalld keys import-hex test ${hexKey.trim()} --home /var/lib/heimdall`,
-          maxRetries
-        )
-        console.log(`✅ Validator private key imported on host ${machine}`)
-      } catch (err) {
-        console.log(
-          `❌ Error importing private key on host ${machine} (might already exist)`
-        )
-      }
-    } catch (err) {
-      console.error(
-        `❌ Error importing private key on host ${machine} (might already exist):`,
-        err.message
-      )
+  if (Array.isArray(doc.devnetBorHosts) && doc.devnetBorHosts.length > 0) {
+    for (const machine of doc.devnetBorHosts) {
+      await importValidatorKeysOnHost(machine, doc.ethHostUser)
     }
   }
 
-  // JSON content for auth.MsgUpdateParams proposal
-  const metadataJson = `{
-    "title": "Test Proposal.",
-    "authors": [
-      "Test Author"
-    ],
-    "summary": "Test Proposal",
-    "details": "Test Proposal",
-    "proposal_forum_url": "https://forum.polygon.technology/test",
-    "vote_option_context": "This is a test proposal to change the auth params."
-  }`
-
-  const proposalJson = `{
-    "messages": [
-      {
-        "@type": "/cosmos.auth.v1beta1.MsgUpdateParams",
-        "authority": "0x7b5fe22b5446f7c62ea27b8bd71cef94e03f3df2",
-        "params": {
-          "max_memo_characters": "512",
-          "tx_sig_limit": "1",
-          "tx_size_cost_per_byte": "20",
-          "sig_verify_cost_ed25519": "600",
-          "sig_verify_cost_secp256k1": "1100",
-          "max_tx_gas": "10000000",
-          "tx_fees": "10000000000000000"
-        }
-      }
-    ],
-    "metadata": "ipfs://test",
-    "deposit": "1000000000000000000pol",
-    "title": "Change auth params.",
-    "summary": "Change auth params.",
-    "expedited": false
-  }`
+  if (
+    Array.isArray(doc.devnetErigonHosts) &&
+    doc.devnetErigonHosts.length > 0
+  ) {
+    for (const machine of doc.devnetErigonHosts) {
+      await importValidatorKeysOnHost(machine, doc.ethHostUser)
+    }
+  }
+  console.log('📍Validator keys imported on all hosts')
 
   console.log('📍Writing draft_metadata.json on primary host:', machine0)
   await runSshCommand(
     `${doc.ethHostUser}@${machine0}`,
-    `echo '${metadataJson}' > ~/draft_metadata.json`,
+    `echo '${updateAuthParamsMetadata}' > ~/draft_metadata.json`,
     maxRetries
   )
   console.log(`✅ draft_metadata.json saved on host ${machine0}`)
@@ -113,7 +62,7 @@ export async function sendAuthAndBankTestsCommand() {
   console.log('📍Writing draft_proposal.json on primary host:', machine0)
   await runSshCommand(
     `${doc.ethHostUser}@${machine0}`,
-    `echo '${proposalJson}' > ~/draft_proposal.json`,
+    `echo '${updateAuthParamsProposal}' > ~/draft_proposal.json`,
     maxRetries
   )
   console.log(`✅ draft_proposal.json saved on host ${machine0}`)
@@ -124,6 +73,30 @@ export async function sendAuthAndBankTestsCommand() {
     maxRetries
   )
   console.log('Chain ID:', chainId.trim())
+
+  console.log('📍 Fetching auth params BEFORE proposal submission')
+  const beforeParams = await getAuthParams(doc, machine0)
+  const afterParams = {
+    max_memo_characters: '512',
+    tx_sig_limit: '1',
+    tx_size_cost_per_byte: '20',
+    sig_verify_cost_ed25519: '600',
+    sig_verify_cost_secp256k1: '1100',
+    max_tx_gas: '10000000',
+    tx_fees: '10000000000000000'
+  }
+
+  const allMatchBefore = Object.entries(afterParams).every(
+    ([k, v]) => String(beforeParams[k]) === v
+  )
+
+  if (allMatchBefore) {
+    throw new Error(
+      '🚨 Auth params already match the expected values BEFORE proposal – aborting'
+    )
+  } else {
+    console.log('✅ Auth params differ BEFORE update, as expected')
+  }
 
   // Check proposal count before submission
   const beforeCount = await getProposalCount(doc, machine0)
@@ -165,7 +138,11 @@ export async function sendAuthAndBankTestsCommand() {
   )
   for (const machine of doc.devnetBorHosts) {
     const voteCommand = `printf 'test-test\\n' | heimdalld tx gov vote ${afterCount} yes --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
-    runSshCommand(`${doc.ethHostUser}@${machine}`, voteCommand, maxRetries)
+    await runSshCommand(
+      `${doc.ethHostUser}@${machine}`,
+      voteCommand,
+      maxRetries
+    )
     console.log(`✅ Vote command executed on host ${machine}`)
     await timer(2000)
   }
@@ -208,15 +185,11 @@ export async function sendAuthAndBankTestsCommand() {
   console.log(`✅ Sent ${sendAmount} from test to random`)
   await timer(2000)
 
-  // Query balance via REST
-  const balanceOut = await runSshCommandWithReturn(
-    `${doc.ethHostUser}@${machine0}`,
-    `curl -s localhost:1317/cosmos/bank/v1beta1/balances/${randomAddress.trim()}`,
-    maxRetries
+  const balance = await fetchBalance(
+    doc.ethHostUser,
+    machine0,
+    randomAddress.trim()
   )
-
-  const balance = JSON.parse(balanceOut).balances[0].amount
-  console.log('🔍 Balance of new address:', balance)
 
   if (balance === sendAmount.replace('pol', '')) {
     console.log('✅ Bank send test passed')

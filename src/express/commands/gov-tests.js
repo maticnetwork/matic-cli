@@ -3,9 +3,17 @@ import { timer } from '../common/time-utils.js'
 import {
   runSshCommand,
   runSshCommandWithReturn,
-  runSshCommandWithoutExit,
   maxRetries
 } from '../common/remote-worker.js'
+import {
+  testMetadata,
+  testProposal,
+  expeditedMetadata,
+  expeditedProposal,
+  updateGovParamsMetadata,
+  updateGovParamsProposal
+} from '../common/proposals.js'
+import { importValidatorKeysOnHost } from '../common/heimdall-utils.js'
 import dotenv from 'dotenv'
 
 export async function sendGovTestsCommand() {
@@ -27,68 +35,26 @@ export async function sendGovTestsCommand() {
     process.exit(1)
   }
 
-  for (const machine of doc.devnetBorHosts) {
-    console.log(`📍Processing host: ${machine}`)
-    try {
-      // Fetch base64-encoded private key
-      const base64Key = await runSshCommandWithReturn(
-        `${doc.ethHostUser}@${machine}`,
-        "jq -r '.priv_key.value' /var/lib/heimdall/config/priv_validator_key.json",
-        maxRetries
-      )
-
-      // Convert to hex
-      const hexKey = await runSshCommandWithReturn(
-        `${doc.ethHostUser}@${machine}`,
-        `echo "${base64Key.trim()}" | base64 -d | xxd -p -c 256`,
-        maxRetries
-      )
-
-      console.log('📍Importing validator private key into Heimdall keyring')
-      // Import into keyring using the validatorID as the key name
-      try {
-        await runSshCommandWithoutExit(
-          `${doc.ethHostUser}@${machine}`,
-          `printf $'test-test\\ntest-test\\n' | heimdalld keys import-hex test ${hexKey.trim()} --home /var/lib/heimdall`,
-          maxRetries
-        )
-        console.log(`✅ Validator private key imported on host ${machine}`)
-      } catch (err) {
-        console.log(
-          `❌ Error importing private key on host ${machine} (might already exist)`
-        )
-      }
-    } catch (err) {
-      console.error(
-        `❌ Error importing private key on host ${machine} (might already exist):`,
-        err.message
-      )
+  if (Array.isArray(doc.devnetBorHosts) && doc.devnetBorHosts.length > 0) {
+    for (const machine of doc.devnetBorHosts) {
+      await importValidatorKeysOnHost(machine, doc.ethHostUser)
     }
   }
 
-  // JSON content for text proposals
-  let metadataJson = `{
-    "title": "Test",
-    "authors": [
-      "Test Author"
-    ],
-    "summary": "This is a test proposal.",
-    "details": "This is a test proposal.",
-    "proposal_forum_url": "https://forum.polygon.technology/test",
-    "vote_option_context": "This is a test proposal."
-  }`
-  let proposalJson = `{
-    "metadata": "ipfs://test",
-    "deposit": "100000000000000000000pol",
-    "title": "Test",
-    "summary": "This is a test proposal.",
-    "expedited": false
-  }`
+  if (
+    Array.isArray(doc.devnetErigonHosts) &&
+    doc.devnetErigonHosts.length > 0
+  ) {
+    for (const machine of doc.devnetErigonHosts) {
+      await importValidatorKeysOnHost(machine, doc.ethHostUser)
+    }
+  }
+  console.log('📍Validator keys imported on all hosts')
 
   console.log('📍Writing draft_metadata.json on primary host:', machine0)
   await runSshCommand(
     `${doc.ethHostUser}@${machine0}`,
-    `echo '${metadataJson}' > ~/draft_metadata.json`,
+    `echo '${testMetadata}' > ~/draft_metadata.json`,
     maxRetries
   )
   console.log(`✅ draft_metadata.json saved on host ${machine0}`)
@@ -96,7 +62,7 @@ export async function sendGovTestsCommand() {
   console.log('📍Writing draft_proposal.json on primary host:', machine0)
   await runSshCommand(
     `${doc.ethHostUser}@${machine0}`,
-    `echo '${proposalJson}' > ~/draft_proposal.json`,
+    `echo '${testProposal}' > ~/draft_proposal.json`,
     maxRetries
   )
   console.log(`✅ draft_proposal.json saved on host ${machine0}`)
@@ -150,7 +116,11 @@ export async function sendGovTestsCommand() {
   )
   for (const machine of doc.devnetBorHosts) {
     const voteCommand = `printf 'test-test\\n' | heimdalld tx gov vote ${afterCount} yes --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
-    runSshCommand(`${doc.ethHostUser}@${machine}`, voteCommand, maxRetries)
+    await runSshCommand(
+      `${doc.ethHostUser}@${machine}`,
+      voteCommand,
+      maxRetries
+    )
     console.log(`✅ Vote command executed on host ${machine}`)
     await timer(2000)
   }
@@ -205,7 +175,11 @@ export async function sendGovTestsCommand() {
   )
   for (const machine of doc.devnetBorHosts) {
     const voteCommand = `printf 'test-test\\n' | heimdalld tx gov vote ${afterCount} no --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
-    runSshCommand(`${doc.ethHostUser}@${machine}`, voteCommand, maxRetries)
+    await runSshCommand(
+      `${doc.ethHostUser}@${machine}`,
+      voteCommand,
+      maxRetries
+    )
     console.log(`✅ Vote command executed on host ${machine}`)
     await timer(2000)
   }
@@ -225,29 +199,10 @@ export async function sendGovTestsCommand() {
 
   console.log('📍 EXPEDITED_PROPOSAL Testcase')
 
-  // JSON content for expedited text proposal
-  metadataJson = `{
-    "title": "Expedited Test",
-    "authors": [
-      "Test Author"
-    ],
-    "summary": "This is an expedited test proposal.",
-    "details": "This is an expedited test proposal.",
-    "proposal_forum_url": "https://forum.polygon.technology/expedited-test",
-    "vote_option_context": "Expedited deposit: 500 POL"
-  }`
-  proposalJson = `{
-    "metadata": "ipfs://test-expedited",
-    "deposit": "100000000000000000000pol",
-    "title": "Expedited Test",
-    "summary": "This is an expedited test proposal.",
-    "expedited": true
-  }`
-
   console.log('📍Writing expedited draft_metadata.json on host:', machine0)
   await runSshCommand(
     `${doc.ethHostUser}@${machine0}`,
-    `echo '${metadataJson}' > ~/expedited_metadata.json`,
+    `echo '${expeditedMetadata}' > ~/expedited_metadata.json`,
     maxRetries
   )
   console.log(`✅ expedited_metadata.json saved on host ${machine0}`)
@@ -255,7 +210,7 @@ export async function sendGovTestsCommand() {
   console.log('📍Writing expedited draft_proposal.json on host:', machine0)
   await runSshCommand(
     `${doc.ethHostUser}@${machine0}`,
-    `echo '${proposalJson}' > ~/expedited_proposal.json`,
+    `echo '${expeditedProposal}' > ~/expedited_proposal.json`,
     maxRetries
   )
   console.log(`✅ expedited_proposal.json saved on host ${machine0}`)
@@ -315,64 +270,10 @@ export async function sendGovTestsCommand() {
 
   console.log('📍 gov.MsgUpdateParam Testcase')
 
-  // JSON content for gov.MsgUpdateParams proposal
-  metadataJson = `{
-    "title": "Change voting period.",
-    "authors": [
-      "Test Author"
-    ],
-    "summary": "Change voting period.",
-    "details": "Change voting period.",
-    "proposal_forum_url": "https://forum.polygon.technology/test",
-    "vote_option_context": "This is a test proposal to change the voting period."
-  }`
-
-  proposalJson = `{
-    "messages": [
-      {
-        "@type": "/cosmos.gov.v1.MsgUpdateParams",
-        "authority": "0x7b5fe22b5446f7c62ea27b8bd71cef94e03f3df2",
-        "params": {
-          "min_deposit": [
-            {
-              "amount": "100000000000000000000",
-              "denom": "pol"
-            }
-          ],
-          "max_deposit_period": "172800s", 
-          "voting_period": "75s", 
-          "quorum": "0.334000000000000000",
-          "threshold": "0.500000000000000000",
-          "veto_threshold": "0.334000000000000000",
-          "min_initial_deposit_ratio": "0.000000000000000000",
-          "proposal_cancel_ratio": "0.500000000000000000",
-          "proposal_cancel_dest": "",
-          "expedited_voting_period": "50s",
-          "expedited_threshold": "0.667000000000000000",
-          "expedited_min_deposit": [
-            {
-              "amount": "500000000000000000000",
-              "denom": "pol"
-            }
-          ],
-          "burn_vote_quorum": false,
-          "burn_proposal_deposit_prevote": false,
-          "burn_vote_veto": true,
-          "min_deposit_ratio": "0.010000000000000000"
-        }
-      }
-    ],
-    "metadata": "ipfs://CID",
-    "deposit": "1000000000000000000pol",
-    "title": "Change voting period to 75 secs.",
-    "summary": "Change voting period to 75 secs.",
-    "expedited": false
-  }`
-
   console.log('📍Writing draft_metadata.json on primary host:', machine0)
   await runSshCommand(
     `${doc.ethHostUser}@${machine0}`,
-    `echo '${metadataJson}' > ~/draft_metadata.json`,
+    `echo '${updateGovParamsMetadata}' > ~/draft_metadata.json`,
     maxRetries
   )
   console.log(`✅ draft_metadata.json saved on host ${machine0}`)
@@ -380,7 +281,7 @@ export async function sendGovTestsCommand() {
   console.log('📍Writing draft_proposal.json on primary host:', machine0)
   await runSshCommand(
     `${doc.ethHostUser}@${machine0}`,
-    `echo '${proposalJson}' > ~/draft_proposal.json`,
+    `echo '${updateGovParamsProposal}' > ~/draft_proposal.json`,
     maxRetries
   )
   console.log(`✅ draft_proposal.json saved on host ${machine0}`)
@@ -424,7 +325,11 @@ export async function sendGovTestsCommand() {
   )
   for (const machine of doc.devnetBorHosts) {
     const voteCommand = `printf 'test-test\\n' | heimdalld tx gov vote ${afterCount} yes --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
-    runSshCommand(`${doc.ethHostUser}@${machine}`, voteCommand, maxRetries)
+    await runSshCommand(
+      `${doc.ethHostUser}@${machine}`,
+      voteCommand,
+      maxRetries
+    )
     console.log(`✅ Vote command executed on host ${machine}`)
     await timer(2000)
   }
