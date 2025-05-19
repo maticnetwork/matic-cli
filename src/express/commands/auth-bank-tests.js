@@ -109,7 +109,7 @@ export async function sendAuthAndBankTestsCommand() {
     maxRetries
   )
 
-  await timer(2000)
+  await timer(30000)
 
   // Check proposal count after submission
   const afterCount = await getProposalCount(doc, machine0)
@@ -130,7 +130,7 @@ export async function sendAuthAndBankTestsCommand() {
       maxRetries
     )
     console.log(`✅ Deposit command executed on host ${machine}`)
-    await timer(2000)
+    await timer(5000)
   }
 
   console.log(
@@ -144,7 +144,7 @@ export async function sendAuthAndBankTestsCommand() {
       maxRetries
     )
     console.log(`✅ Vote command executed on host ${machine}`)
-    await timer(2000)
+    await timer(5000)
   }
 
   await timer(75000) // Wait for 75 secs
@@ -183,7 +183,7 @@ export async function sendAuthAndBankTestsCommand() {
   )
 
   console.log(`✅ Sent ${sendAmount} from test to random`)
-  await timer(2000)
+  await timer(25000)
 
   const balance = await fetchBalance(
     doc.ethHostUser,
