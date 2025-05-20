@@ -1045,6 +1045,21 @@ export class Devnet {
                 '-i',
                 '~/cert.pem',
                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                'sudo ln -sf ~/go/bin/heimdallcli /usr/bin/heimdallcli'
+              ],
+              { stdio: getRemoteStdio() }
+            )
+
+            await execa(
+              'ssh',
+              [
+                '-o',
+                'StrictHostKeyChecking=no',
+                '-o',
+                'UserKnownHostsFile=/dev/null',
+                '-i',
+                '~/cert.pem',
+                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
                 'sudo systemctl start heimdalld.service'
               ],
               { stdio: getRemoteStdio() }
@@ -1210,6 +1225,21 @@ export class Devnet {
                 '~/cert.pem',
                 `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
                 'sudo ln -sf ~/go/bin/heimdalld /usr/bin/heimdalld'
+              ],
+              { stdio: getRemoteStdio() }
+            )
+
+            await execa(
+              'ssh',
+              [
+                '-o',
+                'StrictHostKeyChecking=no',
+                '-o',
+                'UserKnownHostsFile=/dev/null',
+                '-i',
+                '~/cert.pem',
+                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                'sudo ln -sf ~/go/bin/heimdallcli /usr/bin/heimdallcli'
               ],
               { stdio: getRemoteStdio() }
             )
