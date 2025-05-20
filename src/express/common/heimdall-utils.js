@@ -4,9 +4,6 @@ import {
   maxRetries
 } from './remote-worker.js'
 
-/**
- * Import the heimdall validator key on the provided host.
- */
 export async function importValidatorKeysOnHost(host, user) {
   console.log(`📍Processing host: ${host}`)
   try {

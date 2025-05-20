@@ -33,6 +33,16 @@ export async function sendTopUpFeeEvent(validatorID) {
     )
     process.exit(1)
   }
+
+  // Only use validator nodes for validator actions.
+  const borValidatorCount =
+    doc.numOfBorValidators ||
+    Number(process.env.TF_VAR_BOR_VALIDATOR_COUNT) ||
+    0
+  const borValidatorHosts = Array.isArray(doc.devnetBorHosts)
+    ? doc.devnetBorHosts.slice(0, borValidatorCount)
+    : []
+
   if (doc.numOfBorValidators > 0) {
     machine0 = doc.devnetBorHosts[0]
     console.log('📍Monitoring the first node', doc.devnetBorHosts[0])
@@ -97,7 +107,7 @@ export async function sendTopUpFeeEvent(validatorID) {
     validatorAccount
   )
 
-  while (parseInt(newValidatorBalance) <= parseInt(oldValidatorBalance)) {
+  while (BigInt(newValidatorBalance) <= BigInt(oldValidatorBalance)) {
     console.log('Waiting 5 secs for topupfee')
     await timer(5000)
     newValidatorBalance = await fetchBalance(
@@ -113,17 +123,9 @@ export async function sendTopUpFeeEvent(validatorID) {
     '✅ TopUpFee event Sent from Rootchain and Received and processed on Heimdall'
   )
 
-  if (Array.isArray(doc.devnetBorHosts) && doc.devnetBorHosts.length > 0) {
-    for (const machine of doc.devnetBorHosts) {
-      await importValidatorKeysOnHost(machine, doc.ethHostUser)
-    }
-  }
-
-  if (
-    Array.isArray(doc.devnetErigonHosts) &&
-    doc.devnetErigonHosts.length > 0
-  ) {
-    for (const machine of doc.devnetErigonHosts) {
+  machine0 = borValidatorHosts[0]
+  if (Array.isArray(borValidatorHosts) && borValidatorHosts.length > 0) {
+    for (const machine of borValidatorHosts) {
       await importValidatorKeysOnHost(machine, doc.ethHostUser)
     }
   }
@@ -137,14 +139,12 @@ export async function sendTopUpFeeEvent(validatorID) {
   )
   console.log('Chain ID:', chainId.trim())
 
-  const balanceBeforeWithdraw = await fetchBalance(
-    doc.ethHostUser,
-    machine0,
-    validatorAccount
+  const balanceBeforeWithdraw = BigInt(
+    await fetchBalance(doc.ethHostUser, machine0, validatorAccount)
   )
   console.log('Balance before withdraw:', balanceBeforeWithdraw)
 
-  const withdrawAmount = '100000000000000000000'
+  const withdrawAmount = '1000000000000000000'
   console.log('📍Withdrawing fee:', withdrawAmount)
   const withdrawCmd = `
     printf 'test-test\\n' | heimdalld tx topup withdraw-fee ${validatorAccount} ${withdrawAmount} \
@@ -158,22 +158,18 @@ export async function sendTopUpFeeEvent(validatorID) {
   await runSshCommand(`${doc.ethHostUser}@${machine0}`, withdrawCmd, maxRetries)
   console.log('✅ Withdraw transaction submitted')
 
-  await timer(5000)
-
-  let balanceAfterWithdraw = await fetchBalance(
-    doc.ethHostUser,
-    machine0,
-    validatorAccount
+  let balanceAfterWithdraw = BigInt(
+    await fetchBalance(doc.ethHostUser, machine0, validatorAccount)
   )
-
-  while (BigInt(balanceAfterWithdraw) >= BigInt(balanceBeforeWithdraw)) {
-    console.log('Waiting 5 secs for withdrawal to process')
+  while (balanceAfterWithdraw >= balanceBeforeWithdraw) {
+    console.log('Waiting 5 secs for topupfee')
     await timer(5000)
     balanceAfterWithdraw = await fetchBalance(
       doc.ethHostUser,
       machine0,
       validatorAccount
     )
+    console.log('balanceAfterWithdraw:', balanceAfterWithdraw)
   }
   console.log('Balance after withdraw:', balanceAfterWithdraw)
   console.log('✅ Withdraw successful')

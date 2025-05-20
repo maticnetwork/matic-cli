@@ -24,32 +24,32 @@ export async function sendAuthAndBankTestsCommand() {
   const doc = await loadDevnetConfig(devnetType)
   let machine0
 
-  if (doc.numOfBorValidators > 0) {
-    machine0 = doc.devnetBorHosts[0]
-    console.log('📍Monitoring the first node', doc.devnetBorHosts[0])
-  } else if (devnetType === 'remote') {
-    machine0 = doc.devnetErigonHosts[0]
-    console.log('📍Monitoring the first node', doc.devnetErigonHosts[0])
+  // Only use validator nodes for validator actions.
+  const borValidatorCount =
+    doc.numOfBorValidators ||
+    Number(process.env.TF_VAR_BOR_VALIDATOR_COUNT) ||
+    0
+  const borValidatorHosts = Array.isArray(doc.devnetBorHosts)
+    ? doc.devnetBorHosts.slice(0, borValidatorCount)
+    : []
+
+  if (borValidatorCount > 0 && borValidatorHosts.length > 0) {
+    machine0 = borValidatorHosts[0]
+    console.log('📍Monitoring the first bor validator node', machine0)
   } else {
-    console.log('📍No nodes to monitor, please check your configs! Exiting...')
+    console.log(
+      '📍No validator nodes to monitor, please check your configs! Exiting...'
+    )
     process.exit(1)
   }
 
-  if (Array.isArray(doc.devnetBorHosts) && doc.devnetBorHosts.length > 0) {
-    for (const machine of doc.devnetBorHosts) {
+  // Import validator keys only on validator nodes
+  if (Array.isArray(borValidatorHosts) && borValidatorHosts.length > 0) {
+    for (const machine of borValidatorHosts) {
       await importValidatorKeysOnHost(machine, doc.ethHostUser)
     }
   }
-
-  if (
-    Array.isArray(doc.devnetErigonHosts) &&
-    doc.devnetErigonHosts.length > 0
-  ) {
-    for (const machine of doc.devnetErigonHosts) {
-      await importValidatorKeysOnHost(machine, doc.ethHostUser)
-    }
-  }
-  console.log('📍Validator keys imported on all hosts')
+  console.log('📍Validator keys imported on all validator hosts')
 
   console.log('📍Writing draft_metadata.json on primary host:', machine0)
   await runSshCommand(
@@ -92,7 +92,7 @@ export async function sendAuthAndBankTestsCommand() {
 
   if (allMatchBefore) {
     throw new Error(
-      '🚨 Auth params already match the expected values BEFORE proposal – aborting'
+      '🚨 Auth params already match the expected values BEFORE proposal aborting'
     )
   } else {
     console.log('✅ Auth params differ BEFORE update, as expected')
@@ -109,7 +109,7 @@ export async function sendAuthAndBankTestsCommand() {
     maxRetries
   )
 
-  await timer(30000)
+  await timer(10000)
 
   // Check proposal count after submission
   const afterCount = await getProposalCount(doc, machine0)
@@ -123,27 +123,27 @@ export async function sendAuthAndBankTestsCommand() {
 
   console.log(`📍Depositing 200 POL to proposal #${afterCount}`)
   const depositCommand = `printf 'test-test\\n' | heimdalld tx gov deposit ${afterCount} 200000000000000000000pol --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
-  for (const machine of doc.devnetBorHosts) {
+  for (const machine of borValidatorHosts) {
     await runSshCommand(
       `${doc.ethHostUser}@${machine}`,
       depositCommand,
       maxRetries
     )
-    console.log(`✅ Deposit command executed on host ${machine}`)
+    console.log(`✅ Deposit command executed on validator host ${machine}`)
     await timer(5000)
   }
 
   console.log(
     `📍 Casting YES vote on proposal #${afterCount} from each validator…`
   )
-  for (const machine of doc.devnetBorHosts) {
+  for (const machine of borValidatorHosts) {
     const voteCommand = `printf 'test-test\\n' | heimdalld tx gov vote ${afterCount} yes --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
     await runSshCommand(
       `${doc.ethHostUser}@${machine}`,
       voteCommand,
       maxRetries
     )
-    console.log(`✅ Vote command executed on host ${machine}`)
+    console.log(`✅ Vote command executed on validator host ${machine}`)
     await timer(5000)
   }
 
@@ -183,7 +183,7 @@ export async function sendAuthAndBankTestsCommand() {
   )
 
   console.log(`✅ Sent ${sendAmount} from test to random`)
-  await timer(25000)
+  await timer(10000)
 
   const balance = await fetchBalance(
     doc.ethHostUser,

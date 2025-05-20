@@ -24,32 +24,32 @@ export async function sendGovTestsCommand() {
   const doc = await loadDevnetConfig(devnetType)
   let machine0
 
-  if (doc.numOfBorValidators > 0) {
-    machine0 = doc.devnetBorHosts[0]
-    console.log('📍Monitoring the first node', doc.devnetBorHosts[0])
-  } else if (devnetType === 'remote') {
-    machine0 = doc.devnetErigonHosts[0]
-    console.log('📍Monitoring the first node', doc.devnetErigonHosts[0])
+  // Only use validator nodes for validator actions.
+  const borValidatorCount =
+    doc.numOfBorValidators ||
+    Number(process.env.TF_VAR_BOR_VALIDATOR_COUNT) ||
+    0
+  const borValidatorHosts = Array.isArray(doc.devnetBorHosts)
+    ? doc.devnetBorHosts.slice(0, borValidatorCount)
+    : []
+
+  if (borValidatorCount > 0 && borValidatorHosts.length > 0) {
+    machine0 = borValidatorHosts[0]
+    console.log('📍Monitoring the first bor validator node', machine0)
   } else {
-    console.log('📍No nodes to monitor, please check your configs! Exiting...')
+    console.log(
+      '📍No validator nodes to monitor, please check your configs! Exiting...'
+    )
     process.exit(1)
   }
 
-  if (Array.isArray(doc.devnetBorHosts) && doc.devnetBorHosts.length > 0) {
-    for (const machine of doc.devnetBorHosts) {
+  // Import validator keys only on validator nodes
+  if (Array.isArray(borValidatorHosts) && borValidatorHosts.length > 0) {
+    for (const machine of borValidatorHosts) {
       await importValidatorKeysOnHost(machine, doc.ethHostUser)
     }
   }
-
-  if (
-    Array.isArray(doc.devnetErigonHosts) &&
-    doc.devnetErigonHosts.length > 0
-  ) {
-    for (const machine of doc.devnetErigonHosts) {
-      await importValidatorKeysOnHost(machine, doc.ethHostUser)
-    }
-  }
-  console.log('📍Validator keys imported on all hosts')
+  console.log('📍Validator keys imported on all validator hosts')
 
   console.log('📍Writing draft_metadata.json on primary host:', machine0)
   await runSshCommand(
@@ -87,7 +87,7 @@ export async function sendGovTestsCommand() {
     maxRetries
   )
 
-  await timer(2000)
+  await timer(5000)
 
   // Check proposal count after submission
   let afterCount = await getProposalCount(doc, machine0)
@@ -101,20 +101,20 @@ export async function sendGovTestsCommand() {
 
   console.log(`📍Depositing 200 POL to proposal #${afterCount}`)
   let depositCommand = `printf 'test-test\\n' | heimdalld tx gov deposit ${afterCount} 200000000000000000000pol --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
-  for (const machine of doc.devnetBorHosts) {
+  for (const machine of borValidatorHosts) {
     await runSshCommand(
       `${doc.ethHostUser}@${machine}`,
       depositCommand,
       maxRetries
     )
     console.log(`✅ Deposit command executed on host ${machine}`)
-    await timer(2000)
+    await timer(3000)
   }
 
   console.log(
     `📍 Casting YES vote on proposal #${afterCount} from each validator…`
   )
-  for (const machine of doc.devnetBorHosts) {
+  for (const machine of borValidatorHosts) {
     const voteCommand = `printf 'test-test\\n' | heimdalld tx gov vote ${afterCount} yes --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
     await runSshCommand(
       `${doc.ethHostUser}@${machine}`,
@@ -122,7 +122,7 @@ export async function sendGovTestsCommand() {
       maxRetries
     )
     console.log(`✅ Vote command executed on host ${machine}`)
-    await timer(2000)
+    await timer(3000)
   }
 
   await timer(60000) // Wait for 1 minute
@@ -146,7 +146,7 @@ export async function sendGovTestsCommand() {
     maxRetries
   )
 
-  await timer(2000)
+  await timer(5000)
 
   // Check proposal count after submission
   afterCount = await getProposalCount(doc, machine0)
@@ -160,20 +160,20 @@ export async function sendGovTestsCommand() {
 
   console.log(`📍Depositing 200 POL to proposal #${afterCount}`)
   depositCommand = `printf 'test-test\\n' | heimdalld tx gov deposit ${afterCount} 200000000000000000000pol --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
-  for (const machine of doc.devnetBorHosts) {
+  for (const machine of borValidatorHosts) {
     await runSshCommand(
       `${doc.ethHostUser}@${machine}`,
       depositCommand,
       maxRetries
     )
     console.log(`✅ Deposit command executed on host ${machine}`)
-    await timer(2000)
+    await timer(3000)
   }
 
   console.log(
     `📍 Casting NO vote on proposal #${afterCount} from each validator…`
   )
-  for (const machine of doc.devnetBorHosts) {
+  for (const machine of borValidatorHosts) {
     const voteCommand = `printf 'test-test\\n' | heimdalld tx gov vote ${afterCount} no --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
     await runSshCommand(
       `${doc.ethHostUser}@${machine}`,
@@ -181,7 +181,7 @@ export async function sendGovTestsCommand() {
       maxRetries
     )
     console.log(`✅ Vote command executed on host ${machine}`)
-    await timer(2000)
+    await timer(3000)
   }
 
   await timer(60000) // Wait for 1 minute
@@ -226,7 +226,7 @@ export async function sendGovTestsCommand() {
     maxRetries
   )
 
-  await timer(2000)
+  await timer(5000)
 
   // Check proposal count after submission
   afterCount = await getProposalCount(doc, machine0)
@@ -240,25 +240,25 @@ export async function sendGovTestsCommand() {
 
   console.log(`📍Depositing 500 POL to expedited proposal #${afterCount}`)
   const expeditedDeposit = `printf 'test-test\\n' | heimdalld tx gov deposit ${afterCount} 500000000000000000000pol --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
-  for (const machine of doc.devnetBorHosts) {
+  for (const machine of borValidatorHosts) {
     await runSshCommand(
       `${doc.ethHostUser}@${machine}`,
       expeditedDeposit,
       maxRetries
     )
     console.log(`✅ Expedited deposit executed on host ${machine}`)
-    await timer(2000)
+    await timer(3000)
   }
 
   console.log(`📍Casting YES vote on expedited proposal #${afterCount}`)
-  for (const machine of doc.devnetBorHosts) {
+  for (const machine of borValidatorHosts) {
     const voteCmd = `printf 'test-test\\n' | heimdalld tx gov vote ${afterCount} yes --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
     await runSshCommand(`${doc.ethHostUser}@${machine}`, voteCmd, maxRetries)
     console.log(`✅ Vote on expedited proposal executed on host ${machine}`)
     await timer(2000)
   }
 
-  await timer(50000) // Wait for 1 minute
+  await timer(60000) // Wait for 1 minute
   console.log('📍Checking expedited proposal status…')
 
   status = await getProposalStatus(doc, machine0, afterCount)
@@ -296,7 +296,7 @@ export async function sendGovTestsCommand() {
     maxRetries
   )
 
-  await timer(2000)
+  await timer(5000)
 
   // Check proposal count after submission
   afterCount = await getProposalCount(doc, machine0)
@@ -310,20 +310,20 @@ export async function sendGovTestsCommand() {
 
   console.log(`📍Depositing 200 POL to proposal #${afterCount}`)
   depositCommand = `printf 'test-test\\n' | heimdalld tx gov deposit ${afterCount} 200000000000000000000pol --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
-  for (const machine of doc.devnetBorHosts) {
+  for (const machine of borValidatorHosts) {
     await runSshCommand(
       `${doc.ethHostUser}@${machine}`,
       depositCommand,
       maxRetries
     )
     console.log(`✅ Deposit command executed on host ${machine}`)
-    await timer(2000)
+    await timer(3000)
   }
 
   console.log(
     `📍 Casting YES vote on proposal #${afterCount} from each validator…`
   )
-  for (const machine of doc.devnetBorHosts) {
+  for (const machine of borValidatorHosts) {
     const voteCommand = `printf 'test-test\\n' | heimdalld tx gov vote ${afterCount} yes --from test --home /var/lib/heimdall/ --chain-id ${chainId.trim()} -y`
     await runSshCommand(
       `${doc.ethHostUser}@${machine}`,
