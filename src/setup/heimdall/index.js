@@ -192,6 +192,11 @@ export class Heimdall {
                 /"user":[ ]*".*"/gi,
                 `"user": "${this.config.primaryAccount.address}"`
               )
+              .replace(/"voting_period"\s*:\s*".*"/g, '"voting_period": "60s"')
+              .replace(
+                /"expedited_voting_period"\s*:\s*".*"/g,
+                '"expedited_voting_period": "50s"'
+              )
               .save()
           }
         },
