@@ -190,10 +190,10 @@ async function installHostSpecificPackages(ip) {
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Creating symlink for npm and node...')
-  command = `sudo cp ~/.nvm/versions/node/v18.19.0/bin/node /usr/bin/node &&
-                  sudo cp ~/.nvm/versions/node/v18.19.0/bin/npm /usr/bin/npm &&
-                  sudo cp ~/.nvm/versions/node/v18.19.0/bin/npx /usr/bin/npx &&
-                  sudo chmod +x /usr/bin/{node,npm,npx}`
+  command = `sudo ln -sf ~/.nvm/versions/node/v18.19.0/bin/npm /usr/bin/npm &&
+                    sudo ln -sf ~/.nvm/versions/node/v18.19.0/bin/node /usr/bin/node &&
+                    sudo ln -sf ~/.nvm/versions/node/v18.19.0/bin/npx /usr/bin/npx`
+
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Installing anvil...')
