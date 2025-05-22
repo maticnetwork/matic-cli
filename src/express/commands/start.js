@@ -148,8 +148,8 @@ async function installCommonPackages(ip) {
                          source ~/.bashrc`
   await runSshCommand(ip, command, maxRetries)
 
-  console.log('📍Creating symlink for go...')
-  command = 'sudo ln -sf ~/.go/bin/go /usr/local/bin/go'
+  console.log('📍Making go available globally...')
+  command = 'sudo cp ~/.go/bin/go /usr/local/bin/go && sudo chmod +x /usr/local/bin/go'
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Installing rabbitmq...')
@@ -190,9 +190,10 @@ async function installHostSpecificPackages(ip) {
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Creating symlink for npm and node...')
-  command = `sudo ln -sf ~/.nvm/versions/node/v18.19.0/bin/npm /usr/bin/npm &&
-                    sudo ln -sf ~/.nvm/versions/node/v18.19.0/bin/node /usr/bin/node &&
-                    sudo ln -sf ~/.nvm/versions/node/v18.19.0/bin/npx /usr/bin/npx`
+  command = `sudo cp ~/.nvm/versions/node/v18.19.0/bin/node /usr/bin/node &&
+                  sudo cp ~/.nvm/versions/node/v18.19.0/bin/npm /usr/bin/npm &&
+                  sudo cp ~/.nvm/versions/node/v18.19.0/bin/npx /usr/bin/npx &&
+                  sudo chmod +x /usr/bin/{node,npm,npx}`
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Installing anvil...')
