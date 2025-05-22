@@ -148,8 +148,8 @@ async function installCommonPackages(ip) {
                          source ~/.bashrc`
   await runSshCommand(ip, command, maxRetries)
 
-  console.log('📍Making go available globally...')
-  command = 'sudo cp ~/.go/bin/go /usr/local/bin/go && sudo chmod +x /usr/local/bin/go'
+  console.log('📍Creating symlink for go...')
+  command = 'sudo ln -sf ~/.go/bin/go /usr/local/bin/go'
   await runSshCommand(ip, command, maxRetries)
 
   console.log('📍Installing rabbitmq...')
