@@ -114,7 +114,7 @@ export async function sendStakedEvent(validatorID) {
 }
 
 export async function checkValidatorsLength(doc, machine0) {
-  const command = 'curl localhost:1317/stake/validator-set'
+  const command = 'curl localhost:1317/stake/validators-set'
   const out = await runSshCommandWithReturn(
     `${doc.ethHostUser}@${machine0}`,
     command,
