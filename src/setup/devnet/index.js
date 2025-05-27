@@ -1062,7 +1062,7 @@ export class Devnet {
                 '-i',
                 '~/cert.pem',
                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                'sudo cp ~/go/bin/heimdallcli /usr/bin/heimdallcli && sudo chmod +x /usr/bin/heimdallcli'              ],
+                'sudo cp ~/go/bin/heimdallcli /usr/bin/heimdallcli && sudo chmod +x /usr/bin/heimdallcli'],
               { stdio: getRemoteStdio() }
             )
 
@@ -1240,7 +1240,7 @@ export class Devnet {
                 '-i',
                 '~/cert.pem',
                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                'sudo cp ~/go/bin/bor /usr/bin/bor && sudo chmod +x /usr/bin/bor'              ],
+                'sudo cp ~/go/bin/bor /usr/bin/bor && sudo chmod +x /usr/bin/bor'],
               { stdio: getRemoteStdio() }
             )
 
