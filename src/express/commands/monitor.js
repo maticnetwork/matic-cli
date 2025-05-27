@@ -60,13 +60,13 @@ async function checkCheckpoint(ip) {
 }
 
 export async function checkLatestMilestone(ip) {
-  const url = `http://${ip}:1317/milestone/latest`
+  const url = `http://${ip}:1317/milestones/latest`
   const response = await fetch(url)
   return await response.json()
 }
 
 async function checkStateSyncTx(ip, id) {
-  const url = `http://${ip}:1317/clerk/event-record/${id}`
+  const url = `http://${ip}:1317/clerk/event-records/${id}`
   const response = await fetch(url)
   const responseJson = await response.json()
   if (responseJson.error) {
@@ -81,7 +81,7 @@ async function checkStateSyncTx(ip, id) {
 }
 
 async function getStateSyncTxList(ip, startTime, endTime) {
-  const url = `http://${ip}:1317/clerk/event-record/list?from-time=${startTime}&to-time=${endTime}&page=1&limit=200`
+  const url = `http://${ip}:1317/clerk/event-records/list?from-time=${startTime}&to-time=${endTime}&page=1&limit=200`
   const response = await fetch(url)
   const responseJson = await response.json()
   if (responseJson.error) {

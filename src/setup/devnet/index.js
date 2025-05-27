@@ -904,7 +904,7 @@ export class Devnet {
                 'UserKnownHostsFile=/dev/null',
                 '-i',
                 '~/cert.pem',
-                `${this.config.targetDirectory}/code/heimdall/build/heimdalld`,
+                `${this.config.targetDirectory}/code/heimdall-v2/build/heimdalld`,
                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}:~/go/bin/heimdalld`
               ],
               { stdio: getRemoteStdio() }
@@ -1062,7 +1062,7 @@ export class Devnet {
                 '-i',
                 '~/cert.pem',
                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                'sudo cp ~/go/bin/heimdallcli /usr/bin/heimdallcli && sudo chmod +x /usr/bin/heimdallcli'              ],
+                'sudo cp ~/go/bin/heimdallcli /usr/bin/heimdallcli && sudo chmod +x /usr/bin/heimdallcli'],
               { stdio: getRemoteStdio() }
             )
 
@@ -1132,7 +1132,7 @@ export class Devnet {
                 'UserKnownHostsFile=/dev/null',
                 '-i',
                 '~/cert.pem',
-                `${this.config.targetDirectory}/code/heimdall/build/heimdalld`,
+                `${this.config.targetDirectory}/code/heimdall-v2/build/heimdalld`,
                 `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}:~/go/bin/heimdalld`
               ],
               { stdio: getRemoteStdio() }
@@ -1240,7 +1240,7 @@ export class Devnet {
                 '-i',
                 '~/cert.pem',
                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                'sudo cp ~/go/bin/bor /usr/bin/bor && sudo chmod +x /usr/bin/bor'              ],
+                'sudo cp ~/go/bin/bor /usr/bin/bor && sudo chmod +x /usr/bin/bor'],
               { stdio: getRemoteStdio() }
             )
 
