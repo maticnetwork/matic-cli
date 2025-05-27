@@ -1032,7 +1032,7 @@ export class Devnet {
                 '-i',
                 '~/cert.pem',
                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                'sudo ln -sf ~/go/bin/heimdalld /usr/bin/heimdalld'
+                'sudo cp ~/go/bin/heimdalld /usr/bin/heimdalld && sudo chmod +x /usr/bin/heimdalld'
               ],
               { stdio: getRemoteStdio() }
             )
@@ -1047,8 +1047,22 @@ export class Devnet {
                 '-i',
                 '~/cert.pem',
                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                'sudo ln -sf ~/go/bin/heimdallcli /usr/bin/heimdallcli'
+                'sudo cp ~/go/bin/bor /usr/bin/bor && sudo chmod +x /usr/bin/bor'
               ],
+              { stdio: getRemoteStdio() }
+            )
+
+            await execa(
+              'ssh',
+              [
+                '-o',
+                'StrictHostKeyChecking=no',
+                '-o',
+                'UserKnownHostsFile=/dev/null',
+                '-i',
+                '~/cert.pem',
+                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                'sudo cp ~/go/bin/heimdallcli /usr/bin/heimdallcli && sudo chmod +x /usr/bin/heimdallcli'              ],
               { stdio: getRemoteStdio() }
             )
 
@@ -1211,7 +1225,7 @@ export class Devnet {
                 '-i',
                 '~/cert.pem',
                 `${this.config.devnetErigonUsers[i]}@${this.config.devnetErigonHosts[i]}`,
-                'sudo ln -sf ~/go/bin/heimdalld /usr/bin/heimdalld'
+                'sudo cp ~/go/bin/heimdalld /usr/bin/heimdalld && sudo chmod +x /usr/bin/heimdalld'
               ],
               { stdio: getRemoteStdio() }
             )
@@ -1226,7 +1240,21 @@ export class Devnet {
                 '-i',
                 '~/cert.pem',
                 `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
-                'sudo ln -sf ~/go/bin/heimdallcli /usr/bin/heimdallcli'
+                'sudo cp ~/go/bin/bor /usr/bin/bor && sudo chmod +x /usr/bin/bor'              ],
+              { stdio: getRemoteStdio() }
+            )
+
+            await execa(
+              'ssh',
+              [
+                '-o',
+                'StrictHostKeyChecking=no',
+                '-o',
+                'UserKnownHostsFile=/dev/null',
+                '-i',
+                '~/cert.pem',
+                `${this.config.devnetBorUsers[i]}@${this.config.devnetBorHosts[i]}`,
+                'sudo cp ~/go/bin/heimdallcli /usr/bin/heimdallcli && sudo chmod +x /usr/bin/heimdallcli'
               ],
               { stdio: getRemoteStdio() }
             )
