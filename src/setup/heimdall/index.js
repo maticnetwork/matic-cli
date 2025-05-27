@@ -32,11 +32,11 @@ export class Heimdall {
   }
 
   get name() {
-    return 'heimdall'
+    return 'heimdall-v2'
   }
 
   get taskTitle() {
-    return 'Setup heimdall'
+    return 'Setup heimdall-v2'
   }
 
   get validatorKeyFile() {
@@ -72,7 +72,7 @@ export class Heimdall {
   }
 
   get heimdallDataDir() {
-    return path.join(this.config.dataDir, this.name)
+    return path.join(this.config.dataDir, 'heimdall-v2')
   }
 
   get heimdallConfigDir() {

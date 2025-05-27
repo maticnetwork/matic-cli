@@ -130,7 +130,7 @@ export async function pullAndRestartHeimdall(doc, ip, i, isPull) {
       await runSshCommand(ip, command, maxRetries)
     } else {
       console.log('📍Cloning heimdall repo...')
-      command = `cd ~ && git clone ${heimdallRepo} || (cd ~/heimdall; git fetch)`
+      command = `cd ~ && git clone ${heimdallRepo} || (cd ~/heimdall-v2; git fetch)`
       await runSshCommand(ip, command, maxRetries)
 
       console.log(
@@ -142,7 +142,7 @@ export async function pullAndRestartHeimdall(doc, ip, i, isPull) {
       await runSshCommand(ip, command, maxRetries)
 
       console.log('📍Installing heimdall...')
-      command = 'cd ~/heimdall && make install'
+      command = 'cd ~/heimdall-v2 && make install'
       await runSshCommand(ip, command, maxRetries)
     }
   }
