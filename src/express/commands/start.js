@@ -1,19 +1,36 @@
 // noinspection JSCheckFunctionSignatures,JSUnresolvedFunction,JSUnresolvedVariable
 
+/*
+TODO FIX
+📍Stopping bor (if present) on machine ubuntu@35.234.155.248 ...
+Warning: Permanently added '34.39.108.113' (ED25519) to the list of known hosts.
+Warning: Permanently added '35.230.132.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '35.230.149.13' (ED25519) to the list of known hosts.
+Warning: Permanently added '35.234.155.248' (ED25519) to the list of known hosts.
+undefined@34.39.108.113: Permission denied (publickey).
+undefined@35.230.132.30: Permission denied (publickey).
+Warning: Permanently added '34.39.108.113' (ED25519) to the list of known hosts.
+anvil not running on current machine...
+Failed to stop anvil.service: Unit anvil.service not loaded.
+📍Stopping heimdall (if present) on machine ubuntu@35.230.149.13 ...
+bor not running on current machine...
+Failed to stop bor.service: Unit bor.service not loaded.
+📍Stopping erigon (if present) on machine ubuntu@35.234.155.248 ...
+Warning: Permanently added '35.230.132.30' (ED25519) to the list of known hosts.
+undefined@34.39.108.113: Permission denied (publickey).
+ */
+
 import {
-  validateConfigs,
   editMaticCliDockerYAMLConfig,
   editMaticCliRemoteYAMLConfig,
-  getDevnetId,
+  getDevnetId, getLastSuccessfulStep,
+  setBorAndErigonHosts,
+  setLastSuccessfulStep,
   splitAndGetHostIp,
   splitToArray,
-  setBorAndErigonHosts
+  validateConfigs
 } from '../common/config-utils.js'
-import {
-  maxRetries,
-  runScpCommand,
-  runSshCommand
-} from '../common/remote-worker.js'
+import { maxRetries, runScpCommand, runSshCommand } from '../common/remote-worker.js'
 import { timer } from '../common/time-utils.js'
 import yaml from 'js-yaml'
 import fs from 'fs'
@@ -74,8 +91,8 @@ async function installRequiredSoftwareOnRemoteMachines(
     i === 0
       ? (user = `${doc.ethHostUser}`)
       : i >= borUsers.length
-      ? (user = `${erigonUsers[i - borUsers.length]}`)
-      : (user = `${borUsers[i]}`)
+        ? (user = `${erigonUsers[i - borUsers.length]}`)
+        : (user = `${borUsers[i]}`)
     ip = `${user}@${ipsArray[i]}`
     nodeIps.push(ip)
     /* eslint-disable */
@@ -283,8 +300,8 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType, devnetId) {
     i === 0
       ? (user = `${doc.ethHostUser}`)
       : i >= borUsers.length
-      ? (user = `${erigonUsers[i - borUsers.length]}`)
-      : (user = `${borUsers[i]}`)
+        ? (user = `${erigonUsers[i - borUsers.length]}`)
+        : (user = `${borUsers[i]}`)
     ip = `${user}@${ipsArray[i]}`
     nodeIps.push(ip)
     /* eslint-disable */
@@ -302,22 +319,22 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType, devnetId) {
 
       console.log('📍Stopping anvil (if present) on machine ' + ip + ' ...')
       command =
-        "sudo systemctl stop anvil.service || echo 'anvil not running on current machine...'"
+        'sudo systemctl stop anvil.service || echo \'anvil not running on current machine...\''
       await runSshCommand(ip, command, maxRetries)
     }
     console.log('📍Stopping heimdall (if present) on machine ' + ip + ' ...')
     let command =
-      "sudo systemctl stop heimdalld.service || echo 'heimdall not running on current machine...'"
+      'sudo systemctl stop heimdalld.service || echo \'heimdall not running on current machine...\''
     await runSshCommand(ip, command, maxRetries)
 
     console.log('📍Stopping bor (if present) on machine ' + ip + ' ...')
     command =
-      "sudo systemctl stop bor.service || echo 'bor not running on current machine...'"
+      'sudo systemctl stop bor.service || echo \'bor not running on current machine...\''
     await runSshCommand(ip, command, maxRetries)
 
     console.log('📍Stopping erigon (if present) on machine ' + ip + ' ...')
     command =
-      "sudo systemctl stop erigon.service || echo 'erigon not running on current machine...'"
+      'sudo systemctl stop erigon.service || echo \'erigon not running on current machine...\''
     await runSshCommand(ip, command, maxRetries)
 
     console.log(
@@ -328,8 +345,8 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType, devnetId) {
 
     console.log(
       '📍Removing /var/lib/heimdall folder (if present) on machine ' +
-        ip +
-        ' ...'
+      ip +
+      ' ...'
     )
     command = 'sudo rm -rf /var/lib/heimdall'
     await runSshCommand(ip, command, maxRetries)
@@ -346,7 +363,7 @@ async function eventuallyCleanupPreviousDevnet(ips, devnetType, devnetId) {
   await Promise.all(cleanupTasks)
 }
 
-async function runDockerSetupWithMaticCLI(ips, devnetId) {
+async function runDockerSetupWithMaticCLI(ips, devnetId, step) {
   const doc = await yaml.load(
     fs.readFileSync(
       `../../deployments/devnet-${devnetId}/docker-setup-config.yaml`,
@@ -356,53 +373,80 @@ async function runDockerSetupWithMaticCLI(ips, devnetId) {
   const ipsArray = splitToArray(ips)
   const ip = `${doc.ethHostUser}@${ipsArray[0]}`
 
-  console.log('📍Creating devnet and removing default configs...')
-  let command =
-    'cd ~/matic-cli && mkdir -p devnet && rm configs/devnet/docker-setup-config.yaml'
-  await runSshCommand(ip, command, maxRetries)
+  if (step === 3) {
+    console.log('📍Creating devnet and removing default configs...')
+    let command =
+      'cd ~/matic-cli && mkdir -p devnet && rm configs/devnet/docker-setup-config.yaml'
+    await runSshCommand(ip, command, maxRetries)
+    await setLastSuccessfulStep(doc, step++, 'docker', devnetId)
+  }
 
-  console.log('📍Copying docker matic-cli configurations...')
-  const src = `../../deployments/devnet-${devnetId}/docker-setup-config.yaml`
-  const dest = `${doc.ethHostUser}@${ipsArray[0]}:~/matic-cli/configs/devnet/docker-setup-config.yaml`
-  await runScpCommand(src, dest, maxRetries)
+  if (step === 4) {
+    console.log('📍Copying docker matic-cli configurations...')
+    const src = `../../deployments/devnet-${devnetId}/docker-setup-config.yaml`
+    const dest = `${doc.ethHostUser}@${ipsArray[0]}:~/matic-cli/configs/devnet/docker-setup-config.yaml`
+    await runScpCommand(src, dest, maxRetries)
+    await setLastSuccessfulStep(doc, step++, 'docker', devnetId)
+  }
 
-  console.log('📍Executing docker setup with matic-cli...')
-  command =
-    'cd ~/matic-cli/devnet && ../bin/matic-cli.js setup devnet -c ../configs/devnet/docker-setup-config.yaml'
-  await runSshCommand(ip, command, maxRetries)
+  if (step === 5) {
+    console.log('📍Executing docker setup with matic-cli...')
+    let command =
+      'cd ~/matic-cli/devnet && ../bin/matic-cli.js setup devnet -c ../configs/devnet/docker-setup-config.yaml'
+    await runSshCommand(ip, command, maxRetries)
+    await setLastSuccessfulStep(doc, step++, 'docker', devnetId)
+  }
 
-  console.log('📍Starting anvil...')
-  command = 'cd ~/matic-cli/devnet && bash docker-anvil-start.sh'
-  await runSshCommand(ip, command, maxRetries)
+  if (step === 6) {
+    console.log('📍Starting anvil...')
+    let command = 'cd ~/matic-cli/devnet && bash docker-anvil-start.sh'
+    await runSshCommand(ip, command, maxRetries)
+    await setLastSuccessfulStep(doc, step++, 'docker', devnetId)
+  }
 
-  console.log('📍Starting heimdall...')
-  command = 'cd ~/matic-cli/devnet && bash docker-heimdall-start-all.sh'
-  await runSshCommand(ip, command, maxRetries)
+  if (step === 7) {
+    console.log('📍Starting heimdall...')
+    let command = 'cd ~/matic-cli/devnet && bash docker-heimdall-start-all.sh'
+    await runSshCommand(ip, command, maxRetries)
+    await setLastSuccessfulStep(doc, step++, 'docker', devnetId)
+  }
 
-  console.log('📍Setting up bor...')
-  command = 'cd ~/matic-cli/devnet && bash docker-bor-setup.sh'
-  await runSshCommand(ip, command, maxRetries)
+  if (step === 8) {
+    console.log('📍Setting up bor...')
+    let command = 'cd ~/matic-cli/devnet && bash docker-bor-setup.sh'
+    await runSshCommand(ip, command, maxRetries)
+    await setLastSuccessfulStep(doc, step++, 'docker', devnetId)
+  }
 
-  console.log('📍Starting bor...')
-  command = 'cd ~/matic-cli/devnet && bash docker-bor-start-all.sh'
-  await runSshCommand(ip, command, maxRetries)
+  if (step === 9) {
+    console.log('📍Starting bor...')
+    let command = 'cd ~/matic-cli/devnet && bash docker-bor-start-all.sh'
+    await runSshCommand(ip, command, maxRetries)
+    await setLastSuccessfulStep(doc, step++, 'docker', devnetId)
+  }
 
   if (!process.env.NETWORK) {
-    await timer(60000)
-    console.log('📍Deploying contracts for bor...')
-    command = 'cd ~/matic-cli/devnet && bash anvil-deployment-bor.sh'
-    await runSshCommand(ip, command, maxRetries)
+    if (step === 10) {
+      await timer(60000)
+      console.log('📍Deploying contracts for bor...')
+      let command = 'cd ~/matic-cli/devnet && bash anvil-deployment-bor.sh'
+      await runSshCommand(ip, command, maxRetries)
+      await setLastSuccessfulStep(doc, step++, 'docker', devnetId)
+    }
 
-    await timer(60000)
-    console.log('📍Deploying state-sync contracts...')
-    command = 'cd ~/matic-cli/devnet && bash anvil-deployment-sync.sh'
-    await runSshCommand(ip, command, maxRetries)
+    if (step === 11) {
+      await timer(60000)
+      console.log('📍Deploying state-sync contracts...')
+      let command = 'cd ~/matic-cli/devnet && bash anvil-deployment-sync.sh'
+      await runSshCommand(ip, command, maxRetries)
+      await setLastSuccessfulStep(doc, step++, 'docker', devnetId)
+    }
   }
 
   await timer(60000)
   console.log('📍Executing bor ipc tests...')
   console.log('📍1. Fetching admin.peers...')
-  command =
+  let command =
     'cd ~/matic-cli/devnet && docker exec bor0 bash -c "bor attach /var/lib/bor/data/bor.ipc -exec \'admin.peers\'"'
   await runSshCommand(ip, command, maxRetries)
   console.log('📍2. Fetching eth.blockNumber...')
@@ -412,7 +456,7 @@ async function runDockerSetupWithMaticCLI(ips, devnetId) {
   console.log('📍bor ipc tests executed...')
 }
 
-async function runRemoteSetupWithMaticCLI(ips, devnetId) {
+async function runRemoteSetupWithMaticCLI(ips, devnetId, step) {
   const doc = await yaml.load(
     fs.readFileSync(
       `../../deployments/devnet-${devnetId}/remote-setup-config.yaml`,
@@ -422,31 +466,46 @@ async function runRemoteSetupWithMaticCLI(ips, devnetId) {
   const ipsArray = splitToArray(ips)
   const ip = `${doc.ethHostUser}@${ipsArray[0]}`
 
-  console.log('📍Creating devnet and removing default configs...')
-  let command =
-    'cd ~/matic-cli && mkdir -p devnet && rm configs/devnet/remote-setup-config.yaml'
-  await runSshCommand(ip, command, maxRetries)
+  if (step === 3) {
+    console.log('📍Creating devnet and removing default configs...')
+    let command =
+      'cd ~/matic-cli && mkdir -p devnet && rm configs/devnet/remote-setup-config.yaml'
+    await runSshCommand(ip, command, maxRetries)
+    await setLastSuccessfulStep(doc, step++, 'remote', devnetId)
+  }
 
-  console.log('📍Copying remote matic-cli configurations...')
-  const src = `../../deployments/devnet-${devnetId}/remote-setup-config.yaml`
-  const dest = `${doc.ethHostUser}@${ipsArray[0]}:~/matic-cli/configs/devnet/remote-setup-config.yaml`
-  await runScpCommand(src, dest, maxRetries)
+  if (step === 4) {
+    console.log('📍Copying remote matic-cli configurations...')
+    const src = `../../deployments/devnet-${devnetId}/remote-setup-config.yaml`
+    const dest = `${doc.ethHostUser}@${ipsArray[0]}:~/matic-cli/configs/devnet/remote-setup-config.yaml`
+    await runScpCommand(src, dest, maxRetries)
+    await setLastSuccessfulStep(doc, step++, 'remote', devnetId)
+  }
 
-  console.log('📍Executing remote setup with matic-cli...')
-  command =
-    'cd ~/matic-cli/devnet && ../bin/matic-cli.js setup devnet -c ../configs/devnet/remote-setup-config.yaml'
-  await runSshCommand(ip, command, maxRetries)
+  if (step === 5) {
+    console.log('📍Executing remote setup with matic-cli...')
+    let command =
+      'cd ~/matic-cli/devnet && ../bin/matic-cli.js setup devnet -c ../configs/devnet/remote-setup-config.yaml'
+    await runSshCommand(ip, command, maxRetries)
+    await setLastSuccessfulStep(doc, step++, 'remote', devnetId)
+  }
 
   if (!process.env.NETWORK) {
-    console.log('📍Deploying contracts for bor on machine ' + ip + ' ...')
-    await timer(60000)
-    command = 'cd ~/matic-cli/devnet && bash anvil-deployment-bor.sh'
-    await runSshCommand(ip, command, maxRetries)
+    if (step === 6) {
+      console.log('📍Deploying contracts for bor on machine ' + ip + ' ...')
+      await timer(60000)
+      let command = 'cd ~/matic-cli/devnet && bash anvil-deployment-bor.sh'
+      await runSshCommand(ip, command, maxRetries)
+      await setLastSuccessfulStep(doc, step++, 'remote', devnetId)
+    }
 
-    console.log('📍Deploying state-sync contracts on machine ' + ip + ' ...')
-    await timer(60000)
-    command = 'cd ~/matic-cli/devnet && bash anvil-deployment-sync.sh'
-    await runSshCommand(ip, command, maxRetries)
+    if (step === 7) {
+      console.log('📍Deploying state-sync contracts on machine ' + ip + ' ...')
+      await timer(60000)
+      let command = 'cd ~/matic-cli/devnet && bash anvil-deployment-sync.sh'
+      await runSshCommand(ip, command, maxRetries)
+      await setLastSuccessfulStep(doc, step++, 'remote', devnetId)
+    }
   }
 }
 
@@ -472,34 +531,59 @@ export async function start() {
 
   await validateConfigs(cloud)
 
-  shell.exec(
-    `cp ../../configs/devnet/${devnetType}-setup-config.yaml ../../deployments/devnet-${devnetId}`
+  if (!fs.existsSync(`../../deployments/devnet-${devnetId}/${devnetType}-setup-config.yaml`)) {
+    shell.exec(`cp ../../configs/devnet/${devnetType}-setup-config.yaml ../../deployments/devnet-${devnetId}`
+    )
+  }
+  if (!fs.existsSync(`../../deployments/devnet-${devnetId}/openmetrics-conf.yaml`)) {
+    shell.exec(
+      `cp ../../configs/devnet/openmetrics-conf.yaml ../../deployments/devnet-${devnetId}`
+    )
+  }
+  if (!fs.existsSync(`../../deployments/devnet-${devnetId}/otel-config-dd.yaml`)) {
+    shell.exec(
+      `cp ../../configs/devnet/otel-config-dd.yaml ../../deployments/devnet-${devnetId}`
+    )
+  }
+
+  const doc = await yaml.load(
+    fs.readFileSync(
+      `../../deployments/devnet-${devnetId}/${devnetType}-setup-config.yaml`,
+      'utf8'
+    )
   )
-  shell.exec(
-    `cp ../../configs/devnet/openmetrics-conf.yaml ../../deployments/devnet-${devnetId}`
-  )
-  shell.exec(
-    `cp ../../configs/devnet/otel-config-dd.yaml ../../deployments/devnet-${devnetId}`
-  )
+
+  let step = await getLastSuccessfulStep(doc)
 
   if (devnetType === 'docker') {
     await editMaticCliDockerYAMLConfig()
   } else {
     await editMaticCliRemoteYAMLConfig()
-  }
 
-  console.log('📍Waiting 30s for the VMs to initialize...')
-  await timer(30000)
+    console.log('📍Waiting 30s for the VMs to initialize...')
+    await timer(30000)
 
-  await installRequiredSoftwareOnRemoteMachines(dnsIps, devnetType, devnetId)
+    if (step === 0) {
+      await installRequiredSoftwareOnRemoteMachines(dnsIps, devnetType, devnetId)
+      await setLastSuccessfulStep(doc, step++, devnetType, devnetId)
+    }
 
-  await prepareMaticCLI(dnsIps, devnetType, devnetId)
+    if (step === 1) {
+      await prepareMaticCLI(dnsIps, devnetType, devnetId)
+      await setLastSuccessfulStep(doc, step++, devnetType, devnetId)
+    }
 
-  await eventuallyCleanupPreviousDevnet(dnsIps, devnetType, devnetId)
+    if (step === 2) {
+      await eventuallyCleanupPreviousDevnet(dnsIps, devnetType, devnetId)
+      await setLastSuccessfulStep(doc, step++, devnetType, devnetId)
+    }
 
-  if (devnetType === 'docker') {
-    await runDockerSetupWithMaticCLI(dnsIps, devnetId)
-  } else {
-    await runRemoteSetupWithMaticCLI(dnsIps, devnetId)
+    if (devnetType === 'docker') {
+      await runDockerSetupWithMaticCLI(dnsIps, devnetId, step)
+    } else {
+      await runRemoteSetupWithMaticCLI(dnsIps, devnetId, step)
+    }
+
+    await setLastSuccessfulStep(doc, 0, devnetType, devnetId)
   }
 }

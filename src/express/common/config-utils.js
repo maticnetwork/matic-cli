@@ -645,7 +645,7 @@ function setCommonConfigs(doc) {
   }
 }
 
-function setConfigValue(key, value, doc) {
+export function setConfigValue(key, value, doc) {
   if (value !== undefined) {
     doc[key] = value
   }
@@ -879,4 +879,14 @@ export async function validateConfigs(cloud) {
   validateUsersAndHosts()
   validateBlockParams()
   validateGitConfigs()
+}
+
+export async function getLastSuccessfulStep(doc) {
+  return Number(doc.step) || Number(0)
+}
+
+export function setLastSuccessfulStep(doc, step, devnetType, devnetId) {
+  const path = `${process.cwd()}/../../deployments/devnet-${devnetId}/${devnetType}-setup-config.yaml`
+  doc.step = step
+  fs.writeFileSync(path, yaml.dump(doc), 'utf8')
 }

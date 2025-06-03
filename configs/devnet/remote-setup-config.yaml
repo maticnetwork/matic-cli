@@ -6,7 +6,7 @@ borRepo: https://github.com/maticnetwork/bor.git
 borBranch: develop
 heimdallRepo: https://github.com/maticnetwork/heimdall.git
 heimdallBranch: develop
-contractsRepo: https://github.com/0xPolygon/pos-contracts.git 
+contractsRepo: https://github.com/0xPolygon/pos-contracts.git
 contractsBranch: anvil-pos
 genesisContractsRepo: https://github.com/maticnetwork/genesis-contracts.git
 genesisContractsBranch: master
@@ -40,3 +40,4 @@ devnetBorFlags:
   - config
 borDockerBuildContext: https://github.com/maticnetwork/bor.git#develop
 heimdallDockerBuildContext: https://github.com/maticnetwork/heimdall.git#develop
+step: 0
