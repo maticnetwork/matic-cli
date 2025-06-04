@@ -61,7 +61,10 @@ program
     'Initiate the terraform setup to specified cloud',
     checkCloudProvider
   )
-  .option('-s, --start', 'Start the setup')
+  .option(
+    '-s, --start [force]',
+    'Start the setup. If `force` is specified, it will force the start of the setup from scratch, avoiding considering the lastSuccessfulStep executed'
+  )
   .option('-d, --destroy', 'Destroy the setup')
   .option(
     '-uall, --update-all [index]',
@@ -195,7 +198,11 @@ export async function cli() {
       '⛔ If you are targeting an already existing devnet, this command will only work if all bor ipc sessions have been manually closed...'
     )
     await timer(3000)
-    await start()
+    if (options.start === 'force') {
+      await start(true)
+    } else {
+      await start(false)
+    }
   } else if (options.destroy) {
     console.log('📍Command --destroy ')
     if (!checkDir(false)) {

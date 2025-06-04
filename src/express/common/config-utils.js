@@ -7,13 +7,19 @@ import { constants } from './constants.js'
 import shell from 'shelljs'
 
 const validStr = makeValidator((x) => {
-  if (x !== undefined && x !== null && x !== '') return x
-  else throw new Error(x + 'is not valid, please check your configs!')
+  if (x !== undefined && x !== null && x !== '') {
+    return x
+  } else {
+    throw new Error(x + 'is not valid, please check your configs!')
+  }
 })
 
 const validBorChainId = makeValidator((x) => {
-  if (x !== undefined && x !== null && (x.match(/^$/g) || x > 0)) return x
-  else throw new Error(x + 'is not valid, please check your configs!')
+  if (x !== undefined && x !== null && (x.match(/^$/g) || x > 0)) {
+    return x
+  } else {
+    throw new Error(x + 'is not valid, please check your configs!')
+  }
 })
 
 const validHeimdallChainId = makeValidator((x) => {
@@ -23,19 +29,25 @@ const validHeimdallChainId = makeValidator((x) => {
     (x.match(/^$|heimdall-\d+$/g) || x > 0)
   ) {
     return x
-  } else throw new Error(x + 'is not valid, please check your configs!')
+  } else {
+    throw new Error(x + 'is not valid, please check your configs!')
+  }
 })
 
 const validAmiStr = makeValidator((x) => {
   if (x !== undefined && x !== null && x !== '' && x.startsWith('ami-')) {
     return x
-  } else throw new Error(x + 'is not valid, please check your configs!')
+  } else {
+    throw new Error(x + 'is not valid, please check your configs!')
+  }
 })
 
 const validGCPVmImageStr = makeValidator((x) => {
   if (x !== undefined && x !== null && x !== '' && x.startsWith('ubuntu-')) {
     return x
-  } else throw new Error(x + 'is not valid, please check your configs!')
+  } else {
+    throw new Error(x + 'is not valid, please check your configs!')
+  }
 })
 
 const validZone = makeValidator((x) => {
@@ -46,14 +58,18 @@ const validZone = makeValidator((x) => {
     x.startsWith(process.env.TF_VAR_GCP_REGION + '-')
   ) {
     return x
-  } else throw new Error(x + 'is not valid, please check your configs!')
+  } else {
+    throw new Error(x + 'is not valid, please check your configs!')
+  }
 })
 
 const validCertPathStr = makeValidator((x) => {
   if (x !== undefined && x !== null && x !== '' && !x.startsWith('~')) {
     console.log('Done Checking path..')
     return x
-  } else throw new Error(x + 'is not valid, please check your configs!')
+  } else {
+    throw new Error(x + 'is not valid, please check your configs!')
+  }
 })
 
 function validateEnvVars(cloud) {
@@ -760,36 +776,38 @@ export async function loadDevnetConfig(devnetType) {
   )
 }
 
-export async function editMaticCliRemoteYAMLConfig() {
-  console.log('📍Editing matic-cli remote YAML configs...')
+export async function editMaticCliRemoteYAMLConfig(step) {
+  if (step < 1) {
+    console.log('📍Editing matic-cli remote YAML configs...')
 
-  const doc = await yaml.load(
-    fs.readFileSync(`${process.cwd()}/remote-setup-config.yaml`, 'utf8'),
-    undefined
-  )
+    const doc = await yaml.load(
+      fs.readFileSync(`${process.cwd()}/remote-setup-config.yaml`, 'utf8'),
+      undefined
+    )
 
-  setCommonConfigs(doc)
-  setConfigValue('devnetType', 'remote', doc)
-  if (process.env.CLOUD === constants.cloud.AWS) {
-    setConfigValue('devnetRegion', process.env.TF_VAR_AWS_REGION, doc)
-  } else if (process.env.CLOUD === constants.cloud.GCP) {
-    setConfigValue('devnetRegion', process.env.TF_VAR_GCP_REGION, doc)
-  } else {
-    console.log(`❌ Unsupported cloud provider ${process.env.CLOUD}`)
-    process.exit(1)
-  }
-  setConfigValue('cloud', process.env.CLOUD, doc)
-
-  fs.writeFile(
-    `${process.cwd()}/remote-setup-config.yaml`,
-    yaml.dump(doc),
-    (err) => {
-      if (err) {
-        console.log('❌ Error while writing remote YAML configs: \n', err)
-        process.exit(1)
-      }
+    setCommonConfigs(doc)
+    setConfigValue('devnetType', 'remote', doc)
+    if (process.env.CLOUD === constants.cloud.AWS) {
+      setConfigValue('devnetRegion', process.env.TF_VAR_AWS_REGION, doc)
+    } else if (process.env.CLOUD === constants.cloud.GCP) {
+      setConfigValue('devnetRegion', process.env.TF_VAR_GCP_REGION, doc)
+    } else {
+      console.log(`❌ Unsupported cloud provider ${process.env.CLOUD}`)
+      process.exit(1)
     }
-  )
+    setConfigValue('cloud', process.env.CLOUD, doc)
+
+    fs.writeFile(
+      `${process.cwd()}/remote-setup-config.yaml`,
+      yaml.dump(doc),
+      (err) => {
+        if (err) {
+          console.log('❌ Error while writing remote YAML configs: \n', err)
+          process.exit(1)
+        }
+      }
+    )
+  }
 }
 
 export function setBorAndErigonHosts(dnsIps) {
@@ -846,29 +864,31 @@ export function returnTotalBorNodes(doc) {
   )
 }
 
-export async function editMaticCliDockerYAMLConfig() {
-  console.log('📍Editing matic-cli docker YAML configs...')
+export async function editMaticCliDockerYAMLConfig(step) {
+  if (step < 1) {
+    console.log('📍Editing matic-cli docker YAML configs...')
 
-  const doc = await yaml.load(
-    fs.readFileSync(`${process.cwd()}/docker-setup-config.yaml`, 'utf8'),
-    undefined
-  )
+    const doc = await yaml.load(
+      fs.readFileSync(`${process.cwd()}/docker-setup-config.yaml`, 'utf8'),
+      undefined
+    )
 
-  setCommonConfigs(doc)
-  setEthHostUser('ubuntu', doc)
-  setConfigValue('devnetType', 'docker', doc)
-  setEthURL('anvil', doc)
+    setCommonConfigs(doc)
+    setEthHostUser('ubuntu', doc)
+    setConfigValue('devnetType', 'docker', doc)
+    setEthURL('anvil', doc)
 
-  fs.writeFile(
-    `${process.cwd()}/docker-setup-config.yaml`,
-    yaml.dump(doc),
-    (err) => {
-      if (err) {
-        console.log('❌ Error while writing docker YAML configs: \n', err)
-        process.exit(1)
+    fs.writeFile(
+      `${process.cwd()}/docker-setup-config.yaml`,
+      yaml.dump(doc),
+      (err) => {
+        if (err) {
+          console.log('❌ Error while writing docker YAML configs: \n', err)
+          process.exit(1)
+        }
       }
-    }
-  )
+    )
+  }
 }
 
 export async function validateConfigs(cloud) {
@@ -887,6 +907,8 @@ export async function getLastSuccessfulStep(doc) {
 
 export function setLastSuccessfulStep(doc, step, devnetType, devnetId) {
   const path = `${process.cwd()}/../../deployments/devnet-${devnetId}/${devnetType}-setup-config.yaml`
-  doc.step = step
-  fs.writeFileSync(path, yaml.dump(doc), 'utf8')
+  const config = yaml.load(fs.readFileSync(path, 'utf8'))
+  // Only update the step
+  config.step = step
+  fs.writeFileSync(path, yaml.dump(config), 'utf8')
 }
