@@ -54,7 +54,6 @@ type ResponseMap struct {
 	chainId                                *big.Int
 	mostRecentBlockNumber                  *big.Int
 	mostRecentBlockHash                    common.Hash
-	mostRecentBlockTotalDifficulty         *big.Int
 	mostRecentBlockParentHash              common.Hash
 	currentProposerAddress                 common.Address
 	account                                Account
@@ -336,13 +335,6 @@ func main() {
 	}
 }
 
-// TrimString trims a string to the specified length and appends "..." if truncated
-func trimString(s string, maxLength int) string {
-	if len(s) > maxLength {
-		return s[:maxLength] + "..."
-	}
-	return s
-}
 func testCasesToMap(testCases []TestCase) map[string]TestCase {
 	mapTestCases := make(map[string]TestCase)
 	for _, testCase := range testCases {
@@ -486,7 +478,7 @@ func validateBlock(block map[string]interface{}) error {
 	// Validate specific required fields
 	requiredFields := []string{
 		"baseFeePerGas", "difficulty", "gasLimit", "gasUsed",
-		"hash", "number", "timestamp", "parentHash", "totalDifficulty", "miner",
+		"hash", "number", "timestamp", "parentHash", "miner",
 	}
 
 	for _, field := range requiredFields {
@@ -511,16 +503,6 @@ func validateBlock(block map[string]interface{}) error {
 		blockTime := value.Int64()
 		if blockTime < currentTime-3600 || blockTime > currentTime+3600 {
 			return fmt.Errorf("timestamp is too far from current time: %d", blockTime)
-		}
-		return nil
-	}); err != nil {
-		return err
-	}
-
-	// Validate "totalDifficulty" (must be greater than zero)
-	if err := validateHexBigInt(block["totalDifficulty"], "totalDifficulty", func(value *big.Int) error {
-		if value.Cmp(big.NewInt(0)) <= 0 {
-			return errors.New("totalDifficulty must be greater than zero")
 		}
 		return nil
 	}); err != nil {
@@ -581,8 +563,7 @@ func validateHeader(header map[string]interface{}) error {
 		"baseFeePerGas", "difficulty", "extraData", "gasLimit",
 		"gasUsed", "hash", "logsBloom", "miner", "mixHash",
 		"nonce", "number", "parentHash", "receiptsRoot",
-		"sha3Uncles", "stateRoot", "timestamp", "totalDifficulty",
-		"transactionsRoot",
+		"sha3Uncles", "stateRoot", "timestamp", "transactionsRoot",
 	}
 
 	for _, field := range requiredFields {
@@ -1104,10 +1085,8 @@ var testCases = []TestCase{
 			}
 			blockHash, _ := (*block)["hash"].(string)
 			parentHash, _ := (*block)["parentHash"].(string)
-			totalDifficulty, _ := (*block)["totalDifficulty"].(string)
 			rm.mostRecentBlockHash = common.HexToHash(blockHash)
 			rm.mostRecentBlockParentHash = common.HexToHash(parentHash)
-			rm.mostRecentBlockTotalDifficulty, _ = hexStringToBigInt(totalDifficulty)
 			return nil
 		},
 	},
@@ -1125,11 +1104,6 @@ var testCases = []TestCase{
 			err = validateBlock(*block)
 			if err != nil {
 				return err
-			}
-			totalDifficultyHex, _ := (*block)["totalDifficulty"].(string)
-			totalDifficulty, _ := hexStringToBigInt(totalDifficultyHex)
-			if rm.mostRecentBlockTotalDifficulty.Cmp(totalDifficulty) <= 0 {
-				return fmt.Errorf("parent block must always have less total difficulty than child block")
 			}
 			return nil
 		},
