@@ -314,8 +314,8 @@ function validateUsersAndHosts() {
     if (
       borUsers &&
       (borUsers.length !== borHosts.length ||
-        borUsers.length !== borValCount + borSenCount + borArchiveCount ||
-        borHosts.length !== borValCount + borSenCount + borArchiveCount)
+        borUsers.length !== borValCount + borSenCount + borArchiveCount + erigonSenCount + erigonValCount + erigonArchiveCount ||
+        borHosts.length !== borValCount + borSenCount + borArchiveCount + erigonSenCount + erigonValCount + erigonArchiveCount)
     ) {
       console.log(
         '❌ DEVNET_BOR_USERS or DEVNET_BOR_HOSTS lengths are not equal to the nodes count ' +
