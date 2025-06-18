@@ -6,7 +6,7 @@ borChainId: 15005
 heimdallChainId: heimdall-15005
 
 borRepo: https://github.com/maticnetwork/bor.git
-borBranch: heimdall-v2
+borBranch: develop
 
 heimdallRepo: https://github.com/0xPolygon/heimdall-v2.git
 heimdallBranch: develop

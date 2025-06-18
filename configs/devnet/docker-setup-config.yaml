@@ -1,6 +1,6 @@
 # Repositories
 borRepo: https://github.com/maticnetwork/bor.git
-borBranch: heimdall-v2
+borBranch: develop
 
 heimdallRepo: https://github.com/0xPolygon/heimdall-v2.git
 heimdallBranch: develop
@@ -29,7 +29,7 @@ heimdallDockerBuildContext: https://github.com/0xPolygon/heimdall-v2.git#develop
 
 # Bor
 borChainId: 15005
-borDockerBuildContext: https://github.com/maticnetwork/bor.git#heimdall-v2
+borDockerBuildContext: https://github.com/maticnetwork/bor.git#develop
 
 blockTime: '2'
 blockNumber: '0'
