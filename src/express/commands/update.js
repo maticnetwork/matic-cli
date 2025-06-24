@@ -126,7 +126,7 @@ export async function pullAndRestartHeimdall(doc, ip, i, isPull) {
       await runSshCommand(ip, command, maxRetries)
 
       console.log('📍Installing heimdall...')
-      command = 'cd ~/matic-cli/devnet/code/heimdall-v2 && make install'
+      command = 'cd ~/matic-cli/devnet/code/heimdall-v2 && make build'
       await runSshCommand(ip, command, maxRetries)
     } else {
       console.log('📍Cloning heimdall repo...')
@@ -138,11 +138,11 @@ export async function pullAndRestartHeimdall(doc, ip, i, isPull) {
           heimdallBranch +
           ' ...'
       )
-      command = `cd ~/heimdall && git fetch && git checkout ${heimdallBranch} && git pull origin ${heimdallBranch} `
+      command = `cd ~/heimdall-v2 && git fetch && git checkout ${heimdallBranch} && git pull origin ${heimdallBranch} `
       await runSshCommand(ip, command, maxRetries)
 
       console.log('📍Installing heimdall...')
-      command = 'cd ~/heimdall-v2 && make install'
+      command = 'cd ~/heimdall-v2 && make build'
       await runSshCommand(ip, command, maxRetries)
     }
   }
