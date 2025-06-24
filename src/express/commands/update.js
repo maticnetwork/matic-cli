@@ -128,6 +128,14 @@ export async function pullAndRestartHeimdall(doc, ip, i, isPull) {
       console.log('📍Installing heimdall...')
       command = 'cd ~/matic-cli/devnet/code/heimdall-v2 && make build'
       await runSshCommand(ip, command, maxRetries)
+
+      console.log('📍Moving new heimdall binary...')
+      command = 'sudo cp ~/matic-cli/devnet/code/heimdall-v2/build/heimdalld /usr/bin/ || echo "new heimdalld binary could not be copied"'
+      await runSshCommand(ip, command, maxRetries)
+
+      console.log('📍Moving new heimdall binary...')
+      command = 'sudo cp ~/matic-cli/devnet/code/heimdall-v2/build/heimdalld ~/go/bin/ || echo "new heimdalld binary could not be copied"'
+      await runSshCommand(ip, command, maxRetries)
     } else {
       console.log('📍Cloning heimdall repo...')
       command = `cd ~ && git clone ${heimdallRepo} || (cd ~/heimdall-v2; git fetch)`
@@ -143,6 +151,14 @@ export async function pullAndRestartHeimdall(doc, ip, i, isPull) {
 
       console.log('📍Installing heimdall...')
       command = 'cd ~/heimdall-v2 && make build'
+      await runSshCommand(ip, command, maxRetries)
+
+      console.log('📍Moving new heimdall binary...')
+      command = 'sudo cp ~/heimdall-v2/build/heimdalld /usr/bin/ || echo "new heimdalld binary could not be copied"'
+      await runSshCommand(ip, command, maxRetries)
+
+      console.log('📍Moving new heimdall binary...')
+      command = 'sudo cp ~/heimdall-v2/build/heimdalld ~/go/bin/ || echo "new heimdalld binary could not be copied"'
       await runSshCommand(ip, command, maxRetries)
     }
   }
