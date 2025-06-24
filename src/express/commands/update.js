@@ -30,6 +30,14 @@ export async function pullAndRestartBor(ip, i, isPull) {
       console.log('📍Installing bor...')
       command = 'cd ~/matic-cli/devnet/code/bor && make bor'
       await runSshCommand(ip, command, maxRetries)
+
+      console.log('📍Moving new bor binary...')
+      command = 'sudo cp ~/matic-cli/devnet/code/bor/build/bin/bor /usr/bin/ || echo "new bor binary could not be copied"'
+      await runSshCommand(ip, command, maxRetries)
+
+      console.log('📍Moving new heimdall binary...')
+      command = 'sudo cp ~/matic-cli/devnet/code/bor/build/bin/bor ~/go/bin/ || echo "new bor binary could not be copied"'
+      await runSshCommand(ip, command, maxRetries)
     } else {
       console.log('📍Cloning bor repo...')
       command = `cd ~ && git clone ${borRepo} || (cd ~/bor; git fetch)`
@@ -43,6 +51,14 @@ export async function pullAndRestartBor(ip, i, isPull) {
 
       console.log('📍Installing bor...')
       command = 'cd ~/bor && make bor'
+      await runSshCommand(ip, command, maxRetries)
+
+      console.log('📍Moving new bor binary...')
+      command = 'sudo cp ~/bor/build/bin/bor /usr/bin/ || echo "new bor binary could not be copied"'
+      await runSshCommand(ip, command, maxRetries)
+
+      console.log('📍Moving new heimdall binary...')
+      command = 'sudo cp ~/bor/build/bin/bor ~/go/bin/ || echo "new bor binary could not be copied"'
       await runSshCommand(ip, command, maxRetries)
     }
   }
