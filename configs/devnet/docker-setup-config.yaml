@@ -3,7 +3,7 @@ borRepo: https://github.com/maticnetwork/bor.git
 borBranch: v2.2.3-beta
 
 heimdallRepo: https://github.com/0xPolygon/heimdall-v2.git
-heimdallBranch: krishang/record-count
+heimdallBranch: develop
 
 contractsRepo: https://github.com/0xPolygon/pos-contracts.git
 contractsBranch: anvil-pos
@@ -25,7 +25,7 @@ mnemonic: 'clock radar mass judge dismiss just intact mind resemble fringe diary
 
 # Heimdall
 heimdallChainId: heimdall-15005
-heimdallDockerBuildContext: https://github.com/0xPolygon/heimdall-v2.git#krishang/record-count
+heimdallDockerBuildContext: https://github.com/0xPolygon/heimdall-v2.git#develop
 
 # Bor
 borChainId: 15005

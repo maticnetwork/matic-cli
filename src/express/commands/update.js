@@ -32,11 +32,13 @@ export async function pullAndRestartBor(ip, i, isPull) {
       await runSshCommand(ip, command, maxRetries)
 
       console.log('📍Moving new bor binary...')
-      command = 'sudo cp ~/matic-cli/devnet/code/bor/build/bin/bor /usr/bin/ || echo "new bor binary could not be copied"'
+      command =
+        'sudo cp ~/matic-cli/devnet/code/bor/build/bin/bor /usr/bin/ || echo "new bor binary could not be copied"'
       await runSshCommand(ip, command, maxRetries)
 
       console.log('📍Moving new heimdall binary...')
-      command = 'sudo cp ~/matic-cli/devnet/code/bor/build/bin/bor ~/go/bin/ || echo "new bor binary could not be copied"'
+      command =
+        'sudo cp ~/matic-cli/devnet/code/bor/build/bin/bor ~/go/bin/ || echo "new bor binary could not be copied"'
       await runSshCommand(ip, command, maxRetries)
     } else {
       console.log('📍Cloning bor repo...')
@@ -54,11 +56,13 @@ export async function pullAndRestartBor(ip, i, isPull) {
       await runSshCommand(ip, command, maxRetries)
 
       console.log('📍Moving new bor binary...')
-      command = 'sudo cp ~/bor/build/bin/bor /usr/bin/ || echo "new bor binary could not be copied"'
+      command =
+        'sudo cp ~/bor/build/bin/bor /usr/bin/ || echo "new bor binary could not be copied"'
       await runSshCommand(ip, command, maxRetries)
 
       console.log('📍Moving new heimdall binary...')
-      command = 'sudo cp ~/bor/build/bin/bor ~/go/bin/ || echo "new bor binary could not be copied"'
+      command =
+        'sudo cp ~/bor/build/bin/bor ~/go/bin/ || echo "new bor binary could not be copied"'
       await runSshCommand(ip, command, maxRetries)
     }
   }
@@ -146,11 +150,13 @@ export async function pullAndRestartHeimdall(doc, ip, i, isPull) {
       await runSshCommand(ip, command, maxRetries)
 
       console.log('📍Moving new heimdall binary...')
-      command = 'sudo cp ~/matic-cli/devnet/code/heimdall-v2/build/heimdalld /usr/bin/ || echo "new heimdalld binary could not be copied"'
+      command =
+        'sudo cp ~/matic-cli/devnet/code/heimdall-v2/build/heimdalld /usr/bin/ || echo "new heimdalld binary could not be copied"'
       await runSshCommand(ip, command, maxRetries)
 
       console.log('📍Moving new heimdall binary...')
-      command = 'sudo cp ~/matic-cli/devnet/code/heimdall-v2/build/heimdalld ~/go/bin/ || echo "new heimdalld binary could not be copied"'
+      command =
+        'sudo cp ~/matic-cli/devnet/code/heimdall-v2/build/heimdalld ~/go/bin/ || echo "new heimdalld binary could not be copied"'
       await runSshCommand(ip, command, maxRetries)
     } else {
       console.log('📍Cloning heimdall repo...')
@@ -170,11 +176,13 @@ export async function pullAndRestartHeimdall(doc, ip, i, isPull) {
       await runSshCommand(ip, command, maxRetries)
 
       console.log('📍Moving new heimdall binary...')
-      command = 'sudo cp ~/heimdall-v2/build/heimdalld /usr/bin/ || echo "new heimdalld binary could not be copied"'
+      command =
+        'sudo cp ~/heimdall-v2/build/heimdalld /usr/bin/ || echo "new heimdalld binary could not be copied"'
       await runSshCommand(ip, command, maxRetries)
 
       console.log('📍Moving new heimdall binary...')
-      command = 'sudo cp ~/heimdall-v2/build/heimdalld ~/go/bin/ || echo "new heimdalld binary could not be copied"'
+      command =
+        'sudo cp ~/heimdall-v2/build/heimdalld ~/go/bin/ || echo "new heimdalld binary could not be copied"'
       await runSshCommand(ip, command, maxRetries)
     }
   }
