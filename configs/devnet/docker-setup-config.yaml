@@ -21,7 +21,7 @@ ethURL: http://anvil:9545 # use localhost for local deployments
 ethHostUser: ubuntu
 
 # Misc
-mnemonic: "clock radar mass judge dismiss just intact mind resemble fringe diary casino"
+mnemonic: 'clock radar mass judge dismiss just intact mind resemble fringe diary casino'
 
 # Heimdall
 heimdallChainId: heimdall-15005
@@ -34,7 +34,7 @@ borDockerBuildContext: https://github.com/maticnetwork/bor.git#develop
 blockTime: '2'
 blockNumber: '0'
 
-sprintSize: '64'
+sprintSize: '16'
 sprintSizeBlockNumber: '0'
 
 # Bor
