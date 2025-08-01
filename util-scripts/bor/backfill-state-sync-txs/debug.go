@@ -46,8 +46,8 @@ func DebugEncodeBorTxLookupEntry(hashString string) {
 func DebugDeleteKey(dataPath string, key string) {
 	key = key[2:]
 
-	// Path to Pebble database (chaindata) under the geth data directory
-	dbPath := filepath.Join(dataPath, "geth", "chaindata")
+	// Path to Pebble database (chaindata) under the data directory
+	dbPath := filepath.Join(dataPath)
 	db, err := pebble.Open(dbPath, &pebble.Options{})
 	if err != nil {
 		log.Fatalf("Failed to open Pebble DB at %s: %v", dbPath, err)
@@ -72,12 +72,12 @@ func DebugDeleteKey(dataPath string, key string) {
 	fmt.Printf("Successfully deleted the key\n")
 }
 
-// DebugReadKey reads a key from the geth offline Pebble database.
+// DebugReadKey reads a key from the offline Pebble database.
 func DebugReadKey(dataPath string, key string) {
 	key = key[2:]
 
-	// Path to Pebble database (chaindata) under the geth data directory
-	dbPath := filepath.Join(dataPath, "geth", "chaindata")
+	// Path to Pebble database (chaindata) under the data directory
+	dbPath := filepath.Join(dataPath)
 	db, err := pebble.Open(dbPath, &pebble.Options{})
 	if err != nil {
 		log.Fatalf("Failed to open Pebble DB at %s: %v", dbPath, err)
@@ -108,7 +108,7 @@ func DebugWriteKey(dataPath string, key string, value string) {
 	key = key[2:]
 	value = value[2:]
 
-	// Path to Pebble database (chaindata) under the geth data directory
+	// Path to Pebble database (chaindata) under the data directory
 	dbPath := filepath.Join(dataPath)
 	db, err := pebble.Open(dbPath, &pebble.Options{})
 	if err != nil {
