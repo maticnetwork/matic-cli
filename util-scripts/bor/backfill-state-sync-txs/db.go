@@ -28,6 +28,7 @@ func WriteMissingStateSyncTransactions(dataPath string, txFile string) {
 		fmt.Errorf("failed to unmarshal JSON: %w", err)
 	}
 
+	fmt.Printf("Found %d instructions to write on db", len(instructions))
 	for _, instruction := range instructions {
 		DebugWriteKey(dataPath, instruction.Key, instruction.Value)
 	}
