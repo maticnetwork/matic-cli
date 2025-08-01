@@ -9,8 +9,13 @@ import (
 	"math/big"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
+
+	"context"
+
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/rpc"
 
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -59,7 +64,7 @@ type PolygonScanResponse struct {
 }
 
 type Tx struct {
-	BlockNumber string
+	BlockNumber uint64
 	BlockHash   string
 	Hash        string
 }
@@ -96,35 +101,38 @@ type WriteInstruction struct {
 var psCount int
 var missingTxs int
 
-func getStateSyncTxns(start, end int, polygonScanApi string) []Tx {
+func getStateSyncTxns(start, end int, remoteRPCUrl string) []Tx {
 	var txs []Tx
-	requestURL := polygonScanApi + "&module=account&action=txlist&address=0x0000000000000000000000000000000000000000" + "&startblock=" + strconv.Itoa(start) + "&endblock=" + strconv.Itoa(end) + "&sort=asc"
-	fmt.Println("Fetching data from ", requestURL)
-
-	resp, err := http.Get(requestURL)
+	ctx := context.Background()
+	// Connect to the RPC server
+	client, err := rpc.DialContext(ctx, remoteRPCUrl)
 	if err != nil {
-		fmt.Println("PS: No response from request")
+		fmt.Errorf("failed to connect to RPC %s: %w", remoteRPCUrl, err)
+		return nil
 	}
-	defer resp.Body.Close()
+	defer client.Close()
 
-	body, err := io.ReadAll(resp.Body) // response body is []byte
+	// Build filter object for eth_getLogs
+	filter := map[string]interface{}{
+		"fromBlock": hexutil.Uint64(start),
+		"toBlock":   hexutil.Uint64(end),
+		"address":   common.HexToAddress("0x0000000000000000000000000000000000001001"),
+		"topics":    [][]common.Hash{{common.HexToHash("0x5a22725590b0a51c923940223f7458512164b1113359a735e86e7f27f44791ee")}},
+	}
 
-	var result PolygonScanResponse
-	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
-		fmt.Println("PS: Can not unmarshal JSON:")
-		fmt.Println(body)
-		fmt.Print("\n")
+	// Call eth_getLogs
+	var logs []types.Log
+	if err := client.CallContext(ctx, &logs, "eth_getLogs", filter); err != nil {
+		fmt.Errorf("failed to get logs: %w", err)
+		return nil
 	}
 
 	// fmt.Println(PrettyPrint(result))
 
-	fmt.Println("Got records: ", len(result.Result)/2)
-	for i, rec := range result.Result {
-
-		if result.Result[i].From == "0x0000000000000000000000000000000000000000" && result.Result[i].To == "0x0000000000000000000000000000000000000000" {
-			txs = append(txs, Tx{BlockNumber: rec.BlockNumber, Hash: rec.Hash, BlockHash: rec.BlockHash})
-			psCount += 1
-		}
+	fmt.Println("Got records: ", len(logs))
+	for _, log := range logs {
+		txs = append(txs, Tx{BlockNumber: log.BlockNumber, Hash: log.TxHash.Hex(), BlockHash: log.BlockHash.Hex()})
+		psCount += 1
 	}
 	return txs
 }
@@ -134,7 +142,7 @@ func PrettyPrint(i interface{}) string {
 	return string(s)
 }
 
-func FindAllStateSyncTransactions(startBlock, endBlock, interval uint64, polygonScanApi, remoteRPCUrl, outputFile string) {
+func FindAllStateSyncTransactions(startBlock, endBlock, interval uint64, remoteRPCUrl, outputFile string) {
 	var txs []Tx
 	var writeInstructions []WriteInstruction
 	var file, err = os.OpenFile(outputFile, os.O_RDWR|os.O_CREATE, 0755)
@@ -145,16 +153,12 @@ func FindAllStateSyncTransactions(startBlock, endBlock, interval uint64, polygon
 	count := 0
 	for startBlock < endBlock {
 		nextBlockNo := startBlock + interval // 25000
-		txs = getStateSyncTxns(int(startBlock), int(nextBlockNo), polygonScanApi)
+		txs = getStateSyncTxns(int(startBlock), int(nextBlockNo), remoteRPCUrl)
 		for _, tx := range txs {
 			lookupKey := DebugEncodeBorTxLookupEntry(tx.Hash)
-			blockNumber, err := strconv.ParseUint(tx.BlockNumber, 10, 64)
-			if err != nil {
-				log.Fatalf("decimal parse error: %v", err)
-			}
-			lookupValue := fmt.Sprintf("0x%s", common.Bytes2Hex(big.NewInt(0).SetUint64(blockNumber).Bytes()))
+			lookupValue := fmt.Sprintf("0x%s", common.Bytes2Hex(big.NewInt(0).SetUint64(tx.BlockNumber).Bytes()))
 
-			receiptKey := DebugEncodeBorReceiptKey(blockNumber, tx.BlockHash)
+			receiptKey := DebugEncodeBorReceiptKey(tx.BlockNumber, tx.BlockHash)
 			receiptValue := DebugEncodeBorReceiptValue(tx.Hash, remoteRPCUrl)
 
 			writeInstructions = append(writeInstructions, WriteInstruction{Key: lookupKey, Value: lookupValue})
