@@ -8,7 +8,7 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Println("Expected a subcommand: 'find-missing-state-sync-tx', 'write-missing-state-sync-tx', 'debug-delete-key', 'debug-read-key', 'debug-encode-bor-receipt-key', or 'debug-encode-bor-tx-lookup-entry'.")
+		fmt.Println("Expected a subcommand: 'find-missing-state-sync-tx', 'write-missing-state-sync-tx', 'debug-delete-key', 'debug-read-key', 'debug-write-key','debug-encode-bor-receipt-key', or 'debug-encode-bor-tx-lookup-entry'.")
 		os.Exit(1)
 	}
 
