@@ -27,7 +27,7 @@ func main() {
 			findCmd.Usage()
 			os.Exit(1)
 		}
-		FindAllStateSyncTransactions(*startBlock, *endBlock, *interval, *remoteRPC, *polygonScanApi, *outputFile)
+		FindAllStateSyncTransactions(*startBlock, *endBlock, *interval, *polygonScanApi, *remoteRPC, *outputFile)
 
 	case "write-missing-state-sync-tx":
 		writeCmd := flag.NewFlagSet("write-missing-state-sync-tx", flag.ExitOnError)
