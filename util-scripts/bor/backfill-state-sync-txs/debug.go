@@ -47,7 +47,7 @@ func DebugDeleteKey(dataPath string, key string) {
 	key = key[2:]
 
 	// Path to Pebble database (chaindata) under the data directory
-	dbPath := filepath.Join(dataPath)
+	dbPath := filepath.Join(dataPath, "bor", "chaindata")
 	db, err := pebble.Open(dbPath, &pebble.Options{})
 	if err != nil {
 		log.Fatalf("Failed to open Pebble DB at %s: %v", dbPath, err)
@@ -77,7 +77,7 @@ func DebugReadKey(dataPath string, key string) {
 	key = key[2:]
 
 	// Path to Pebble database (chaindata) under the data directory
-	dbPath := filepath.Join(dataPath)
+	dbPath := filepath.Join(dataPath, "bor", "chaindata")
 	db, err := pebble.Open(dbPath, &pebble.Options{})
 	if err != nil {
 		log.Fatalf("Failed to open Pebble DB at %s: %v", dbPath, err)
@@ -109,7 +109,7 @@ func DebugWriteKey(dataPath string, key string, value string) {
 	value = value[2:]
 
 	// Path to Pebble database (chaindata) under the data directory
-	dbPath := filepath.Join(dataPath)
+	dbPath := filepath.Join(dataPath, "bor", "chaindata")
 	db, err := pebble.Open(dbPath, &pebble.Options{})
 	if err != nil {
 		log.Fatalf("Failed to open Pebble DB at %s: %v", dbPath, err)
