@@ -109,7 +109,7 @@ func DebugWriteKey(dataPath string, key string, value string) {
 	value = value[2:]
 
 	// Path to Pebble database (chaindata) under the geth data directory
-	dbPath := filepath.Join(dataPath, "geth", "chaindata")
+	dbPath := filepath.Join(dataPath)
 	db, err := pebble.Open(dbPath, &pebble.Options{})
 	if err != nil {
 		log.Fatalf("Failed to open Pebble DB at %s: %v", dbPath, err)
