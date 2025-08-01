@@ -8,25 +8,26 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Println("Expected a subcommand: 'find-missing-state-sync-tx', 'write-missing-state-sync-tx', 'debug-delete-key', 'debug-read-key', 'debug-write-key','debug-encode-bor-receipt-key', or 'debug-encode-bor-tx-lookup-entry'.")
+		fmt.Println("Expected a subcommand: 'find-all-state-sync-tx', 'write-missing-state-sync-tx', 'debug-delete-key', 'debug-read-key', 'debug-write-key','debug-encode-bor-receipt-key', or 'debug-encode-bor-tx-lookup-entry'.")
 		os.Exit(1)
 	}
 
 	switch os.Args[1] {
-	case "find-missing-state-sync-tx":
-		findCmd := flag.NewFlagSet("find-missing-state-sync-tx", flag.ExitOnError)
+	case "find-all-state-sync-tx":
+		findCmd := flag.NewFlagSet("find-all-state-sync-tx", flag.ExitOnError)
 		startBlock := findCmd.Uint64("start-block", 0, "Start block number")
 		endBlock := findCmd.Uint64("end-block", 0, "End block number")
-		localRPC := findCmd.String("local-node-rpc", "", "Local node RPC URL")
-		sourceRPC := findCmd.String("source-of-truth-rpc", "", "Source-of-truth RPC URL")
+		interval := findCmd.Uint64("interval", 0, "Block Interval for PS queries")
+		remoteRPC := findCmd.String("remote-rpc", "", "Source-of-truth RPC URL")
+		polygonScanApi := findCmd.String("polygon-scan-api", "", "Polygon Scan API with apiKey and chainId set")
 		outputFile := findCmd.String("output-file", "", "Path to output file")
 		findCmd.Parse(os.Args[2:])
 
-		if *localRPC == "" || *sourceRPC == "" || *outputFile == "" {
+		if *remoteRPC == "" || *outputFile == "" {
 			findCmd.Usage()
 			os.Exit(1)
 		}
-		FindMissingStateSyncTransactions(*startBlock, *endBlock, *localRPC, *sourceRPC, *outputFile)
+		FindAllStateSyncTransactions(*startBlock, *endBlock, *interval, *remoteRPC, *polygonScanApi, *outputFile)
 
 	case "write-missing-state-sync-tx":
 		writeCmd := flag.NewFlagSet("write-missing-state-sync-tx", flag.ExitOnError)

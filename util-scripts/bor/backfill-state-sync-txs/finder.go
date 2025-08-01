@@ -5,10 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
+	"math/big"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
 /*
@@ -56,6 +60,7 @@ type PolygonScanResponse struct {
 
 type Tx struct {
 	BlockNumber string
+	BlockHash   string
 	Hash        string
 }
 
@@ -83,13 +88,16 @@ type TxResponseResult struct {
 	S                string `json:"s"`
 }
 
+type WriteInstruction struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
 var psCount int
 var missingTxs int
 
 func getStateSyncTxns(start, end int, polygonScanApi string) []Tx {
 	var txs []Tx
-	// `https://api.etherscan.io/v2/api?chainid=137&module=account&action=txlist&address=0x0000000000000000000000000000000000000000&&apikey=YourApiKeyToken
-
 	requestURL := polygonScanApi + "&startblock=" + strconv.Itoa(start) + "&endblock=" + strconv.Itoa(end) + "&sort=asc"
 	fmt.Println("Fetching data from ", requestURL)
 
@@ -114,7 +122,7 @@ func getStateSyncTxns(start, end int, polygonScanApi string) []Tx {
 	for i, rec := range result.Result {
 
 		if result.Result[i].From == "0x0000000000000000000000000000000000000000" && result.Result[i].To == "0x0000000000000000000000000000000000000000" {
-			txs = append(txs, Tx{BlockNumber: rec.BlockNumber, Hash: rec.Hash})
+			txs = append(txs, Tx{BlockNumber: rec.BlockNumber, Hash: rec.Hash, BlockHash: rec.BlockHash})
 			psCount += 1
 		}
 	}
@@ -126,27 +134,32 @@ func PrettyPrint(i interface{}) string {
 	return string(s)
 }
 
-func FindMissingStateSyncTransactions(startBlock, endBlock uint64, localRPC, polygonScanApi, outputFile string) {
+func FindAllStateSyncTransactions(startBlock, endBlock, interval uint64, polygonScanApi, remoteRPCUrl, outputFile string) {
 	var txs []Tx
-	currTime := time.Now().Format("2006-01-02T15:04:05")
-	path := "missing_ss_txs" + currTime + ".json"
-	var file, err = os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0755)
-
-	path2 := "total_ss_txs" + currTime + ".json"
-	var file2, _ = os.OpenFile(path2, os.O_RDWR|os.O_CREATE, 0755)
+	var writeInstructions []WriteInstruction
+	var file, err = os.OpenFile(outputFile, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
 		return
 	}
 
 	count := 0
 	for startBlock < endBlock {
-		nextBlockNo := startBlock + 25000
+		nextBlockNo := startBlock + interval // 25000
 		txs = getStateSyncTxns(int(startBlock), int(nextBlockNo), polygonScanApi)
 		for _, tx := range txs {
-			marshalled, _ := json.Marshal(tx)
-			file2.WriteString(string(marshalled))
+			lookupKey := DebugEncodeBorTxLookupEntry(tx.Hash)
+			blockNumber, err := strconv.ParseUint(tx.BlockNumber, 10, 64)
+			if err != nil {
+				log.Fatalf("decimal parse error: %v", err)
+			}
+			lookupValue := fmt.Sprintf("0x%s", common.Bytes2Hex(big.NewInt(0).SetUint64(blockNumber).Bytes()))
+
+			receiptKey := DebugEncodeBorReceiptKey(blockNumber, tx.BlockHash)
+			receiptValue := DebugEncodeBorReceiptValue(tx.Hash, remoteRPCUrl)
+
+			writeInstructions = append(writeInstructions, WriteInstruction{Key: lookupKey, Value: lookupValue})
+			writeInstructions = append(writeInstructions, WriteInstruction{Key: receiptKey, Value: receiptValue})
 		}
-		checkTxs(txs, file, localRPC)
 		startBlock = nextBlockNo
 		if count%5 == 0 {
 			time.Sleep(1 * time.Second)
@@ -154,10 +167,15 @@ func FindMissingStateSyncTransactions(startBlock, endBlock uint64, localRPC, pol
 		count += 1
 	}
 	fmt.Println("Total no of records from PS: ", psCount)
-	fmt.Println("Total no of missing txs in Bor: ", missingTxs)
+
 	fmt.Println()
+
+	b, err := json.MarshalIndent(writeInstructions, "", "    ")
+	if err != nil {
+		log.Fatalf("json.MarshalIndent failed: %v", err)
+	}
+	file.WriteString(string(b))
 	defer file.Close()
-	defer file2.Close()
 
 }
 

@@ -30,28 +30,33 @@ const (
 )
 
 // DebugEncodeBorReceiptKey encodes a bor receipt key for debugging (empty implementation)
-func DebugEncodeBorReceiptKey(number uint64, hashString string) {
-	hashString = hashString[2:]
-	hash := common.HexToHash(hashString)
+func DebugEncodeBorReceiptKey(number uint64, blockHashString string) string {
+	blockHashString = blockHashString[2:]
+	hash := common.HexToHash(blockHashString)
 	enc := make([]byte, 8)
 	binary.BigEndian.PutUint64(enc, number)
 
 	bytesKey := append(append(borReceiptPrefix, enc...), hash.Bytes()...)
-	fmt.Printf("0x%s\n", common.Bytes2Hex(bytesKey))
+	output := fmt.Sprintf("0x%s", common.Bytes2Hex(bytesKey))
+	fmt.Println(output)
+	return output
 
 }
 
 // DebugEncodeBorTxLookupEntry encodes a bor transaction lookup entry for debugging (empty implementation)
-func DebugEncodeBorTxLookupEntry(hashString string) {
+func DebugEncodeBorTxLookupEntry(hashString string) string {
 	hashString = hashString[2:]
 
 	hash := common.HexToHash(hashString)
 	bytesKey := append(borTxLookupPrefix, hash.Bytes()...)
-	fmt.Printf("0x%s\n", common.Bytes2Hex(bytesKey))
+
+	output := fmt.Sprintf("0x%s", common.Bytes2Hex(bytesKey))
+	fmt.Println(output)
+	return output
 }
 
 // DebugEncodeBorReceiptValue queries the TX receipt by hash and hex encode it encodes the recept to byte value to be stored on db
-func DebugEncodeBorReceiptValue(hashString string, remoteRPCUrl string) {
+func DebugEncodeBorReceiptValue(hashString string, remoteRPCUrl string) string {
 	hashString = hashString[2:]
 	txHash := common.HexToHash(hashString)
 
@@ -60,7 +65,7 @@ func DebugEncodeBorReceiptValue(hashString string, remoteRPCUrl string) {
 	client, err := rpc.DialContext(ctx, remoteRPCUrl)
 	if err != nil {
 		fmt.Printf("failed to connect to RPC %s: %w\n", remoteRPCUrl, err)
-		return
+		return ""
 	}
 	defer client.Close()
 
@@ -71,7 +76,7 @@ func DebugEncodeBorReceiptValue(hashString string, remoteRPCUrl string) {
 	err = client.CallContext(ctx, &receiptJustLogs, "eth_getTransactionReceipt", txHash)
 	if err != nil {
 		fmt.Printf("failed to get receipt for %s: %w\n", txHash, err)
-		return
+		return ""
 	}
 	fmt.Printf("%d\n\n", len(receiptJustLogs.Logs))
 
@@ -83,7 +88,9 @@ func DebugEncodeBorReceiptValue(hashString string, remoteRPCUrl string) {
 		fmt.Printf("Failed to encode bor receipt", "err", err)
 	}
 
-	fmt.Printf("\n\nEncoded Bor Receipt:\n0x%s\n", common.Bytes2Hex(bytes))
+	output := fmt.Sprintf("0x%s", common.Bytes2Hex(bytes))
+	fmt.Printf("\n\nEncoded Bor Receipt:\n\n%s\n", output)
+	return output
 }
 
 // DebugDeleteKey deletes a key in the data store for debugging (empty implementation)
