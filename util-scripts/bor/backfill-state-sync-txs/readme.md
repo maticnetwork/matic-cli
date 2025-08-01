@@ -21,3 +21,5 @@ Input
 ```
 ./bin/backfill-state-sync-txs debug-encode-bor-tx-lookup-entry --hash 0xc048ab4888a7d0c044b85e3371b775efbeb7a7b9d93a1d229ee1b039150c3289
 ```
+
+6. debug-encode-bor-receipt-value

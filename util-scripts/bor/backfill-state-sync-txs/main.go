@@ -100,6 +100,18 @@ func main() {
 		}
 		DebugEncodeBorTxLookupEntry(*hash)
 
+	case "debug-encode-bor-receipt-value":
+		receiptValueCmd := flag.NewFlagSet("debug-encode-bor-receipt-value", flag.ExitOnError)
+		hash := receiptValueCmd.String("hash", "", "Transaction hash")
+		remoteRPC := receiptValueCmd.String("remote-rpc", "", "RPC Server")
+		receiptValueCmd.Parse(os.Args[2:])
+
+		if *hash == "" {
+			receiptValueCmd.Usage()
+			os.Exit(1)
+		}
+		DebugEncodeBorReceiptValue(*hash, *remoteRPC)
+
 	default:
 		fmt.Printf("Unknown subcommand: %s\n", os.Args[1])
 		os.Exit(1)

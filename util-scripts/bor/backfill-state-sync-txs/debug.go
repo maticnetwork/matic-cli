@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
@@ -9,7 +10,14 @@ import (
 
 	"github.com/cockroachdb/pebble"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/ethereum/go-ethereum/rpc"
 )
+
+type ReceiptJustLogs struct {
+	Logs []*types.Log `json:"logs"              gencodec:"required"`
+}
 
 var (
 	borTxLookupPrefix = []byte(borTxLookupPrefixStr)
@@ -40,6 +48,42 @@ func DebugEncodeBorTxLookupEntry(hashString string) {
 	hash := common.HexToHash(hashString)
 	bytesKey := append(borTxLookupPrefix, hash.Bytes()...)
 	fmt.Printf("0x%s\n", common.Bytes2Hex(bytesKey))
+}
+
+// DebugEncodeBorReceiptValue queries the TX receipt by hash and hex encode it encodes the recept to byte value to be stored on db
+func DebugEncodeBorReceiptValue(hashString string, remoteRPCUrl string) {
+	hashString = hashString[2:]
+	txHash := common.HexToHash(hashString)
+
+	ctx := context.Background()
+	// Connect to the RPC server
+	client, err := rpc.DialContext(ctx, remoteRPCUrl)
+	if err != nil {
+		fmt.Printf("failed to connect to RPC %s: %w\n", remoteRPCUrl, err)
+		return
+	}
+	defer client.Close()
+
+	// Prepare the variable to hold the parsed receipt
+	var receiptJustLogs *ReceiptJustLogs
+
+	// Call eth_getTransactionReceipt and unmarshal into the Receipt struct
+	err = client.CallContext(ctx, &receiptJustLogs, "eth_getTransactionReceipt", txHash)
+	if err != nil {
+		fmt.Printf("failed to get receipt for %s: %w\n", txHash, err)
+		return
+	}
+	fmt.Printf("%d\n\n", len(receiptJustLogs.Logs))
+
+	bytes, err := rlp.EncodeToBytes(&types.ReceiptForStorage{
+		Status: types.ReceiptStatusSuccessful, // make receipt status successful
+		Logs:   receiptJustLogs.Logs,
+	})
+	if err != nil {
+		fmt.Printf("Failed to encode bor receipt", "err", err)
+	}
+
+	fmt.Printf("\n\nEncoded Bor Receipt:\n0x%s\n", common.Bytes2Hex(bytes))
 }
 
 // DebugDeleteKey deletes a key in the data store for debugging (empty implementation)
