@@ -98,7 +98,7 @@ var missingTxs int
 
 func getStateSyncTxns(start, end int, polygonScanApi string) []Tx {
 	var txs []Tx
-	requestURL := polygonScanApi + "&startblock=" + strconv.Itoa(start) + "&endblock=" + strconv.Itoa(end) + "&sort=asc"
+	requestURL := polygonScanApi + "&module=account&action=txlist&address=0x0000000000000000000000000000000000000000" + "&startblock=" + strconv.Itoa(start) + "&endblock=" + strconv.Itoa(end) + "&sort=asc"
 	fmt.Println("Fetching data from ", requestURL)
 
 	resp, err := http.Get(requestURL)
