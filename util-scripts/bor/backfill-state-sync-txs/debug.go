@@ -155,9 +155,7 @@ func DebugReadKey(dataPath string, key string) {
 	fmt.Printf("\n\nValue found on key:\n0x%x\n", value)
 }
 
-func DebugWriteKey(dataPath string, key string, value string) {
-	key = key[2:]
-	value = value[2:]
+func DebugWriteKey(dataPath string, writeInstructions []WriteInstruction) {
 
 	// Path to Pebble database (chaindata) under the data directory
 	dbPath := filepath.Join(dataPath, "bor", "chaindata")
@@ -167,30 +165,43 @@ func DebugWriteKey(dataPath string, key string, value string) {
 	}
 	defer db.Close()
 
-	// Decode hex-encoded key
-	keyBytes, err := hex.DecodeString(key)
-	if err != nil {
-		log.Fatalf("Invalid hex key %s: %v", key, err)
-	}
+	batch := db.NewBatch()
+	for _, instruction := range writeInstructions {
+		key := instruction.Key
+		value := instruction.Value
 
-	// Decode hex-encoded key
-	valueBytes, err := hex.DecodeString(value)
-	if err != nil {
-		log.Fatalf("Invalid hex value %s: %v", key, err)
-	}
+		key = key[2:]
+		value = value[2:]
 
-	// Read value
-	err = Put(db, keyBytes, valueBytes)
-	if err != nil {
-		if err == pebble.ErrNotFound {
-			fmt.Printf("Key %s not found in database\n", key)
-			return
+		// Decode hex-encoded key
+		keyBytes, err := hex.DecodeString(key)
+		if err != nil {
+			log.Fatalf("Invalid hex key %s: %v", key, err)
 		}
-		log.Fatalf("Error reading key %s: %v", key, err)
+
+		// Decode hex-encoded key
+		valueBytes, err := hex.DecodeString(value)
+		if err != nil {
+			log.Fatalf("Invalid hex value %s: %v", key, err)
+		}
+
+		// Read value
+		err = PutBatch(batch, keyBytes, valueBytes)
+		if err != nil {
+			if err == pebble.ErrNotFound {
+				fmt.Printf("Key %s not found in database\n", key)
+				return
+			}
+			log.Fatalf("Error reading key %s: %v", key, err)
+		}
+	}
+
+	if err := WriteBatch(batch); err != nil {
+		log.Fatalf("Error writing keys: %v", err)
 	}
 
 	// Print value in hex
-	fmt.Printf("Successfully write the key\n")
+	fmt.Printf("Successfully write the keys\n")
 }
 
 func Get(db *pebble.DB, key []byte) ([]byte, error) {
@@ -210,6 +221,14 @@ func Get(db *pebble.DB, key []byte) ([]byte, error) {
 // Put inserts the given value into the key-value store.
 func Put(db *pebble.DB, key []byte, value []byte) error {
 	return db.Set(key, value, pebble.Sync)
+}
+
+func PutBatch(batch *pebble.Batch, key []byte, value []byte) error {
+	return batch.Set(key, value, nil)
+}
+
+func WriteBatch(batch *pebble.Batch) error {
+	return batch.Commit(pebble.Sync)
 }
 
 // Delete removes the key from the key-value store.

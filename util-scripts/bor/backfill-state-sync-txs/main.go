@@ -75,7 +75,7 @@ func main() {
 			writeCmd.Usage()
 			os.Exit(1)
 		}
-		DebugWriteKey(*dataPath, *key, *value)
+		DebugWriteKey(*dataPath, []WriteInstruction{{Key: *key, Value: *value}})
 
 	case "debug-encode-bor-receipt-key":
 		recCmd := flag.NewFlagSet("debug-encode-bor-receipt-key", flag.ExitOnError)
