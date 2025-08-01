@@ -19,7 +19,7 @@ func main() {
 		endBlock := findCmd.Uint64("end-block", 0, "End block number")
 		interval := findCmd.Uint64("interval", 0, "Block Interval for PS queries")
 		remoteRPC := findCmd.String("remote-rpc", "", "Source-of-truth RPC URL")
-		polygonScanApi := findCmd.String("polygon-scan-api", "", "Polygon Scan API with apiKey and chainId set")
+		polygonScanApi := findCmd.String("polygon-scan-api", "", "Polygon Scan API with apiKey and chainId set") // https://api.etherscan.io/v2/api?chainid=137&apikey=YourApiKeyToken
 		outputFile := findCmd.String("output-file", "", "Path to output file")
 		findCmd.Parse(os.Args[2:])
 
