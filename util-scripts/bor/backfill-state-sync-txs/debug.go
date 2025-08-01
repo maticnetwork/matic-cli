@@ -139,7 +139,7 @@ func DebugWriteKey(dataPath string, key string, value string) {
 	}
 
 	// Print value in hex
-	fmt.Printf("Successfully write the key\n", value)
+	fmt.Printf("Successfully write the key\n")
 }
 
 func Get(db *pebble.DB, key []byte) ([]byte, error) {
