@@ -101,7 +101,7 @@ func DebugReadKey(dataPath string, key string) {
 	}
 
 	// Print value in hex
-	fmt.Printf("%x\n", value)
+	fmt.Printf("\n\nValue found on key:\n0x%x\n", value)
 }
 
 func DebugWriteKey(dataPath string, key string, value string) {
